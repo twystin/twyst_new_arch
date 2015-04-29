@@ -52,11 +52,11 @@ module.exports = function(app) {
       return next();
   });
 
-  passport.use(new LocalStrategy(Merchant.authenticate()));
+  passport.use('merchant', new LocalStrategy(Merchant.authenticate()));
   passport.serializeUser(Merchant.serializeUser());
   passport.deserializeUser(Merchant.deserializeUser());
 
-  passport.use(new LocalStrategy(Customer.authenticate()));
+  passport.use('customer', new LocalStrategy(Customer.authenticate()));
   passport.serializeUser(Customer.serializeUser());
   passport.deserializeUser(Customer.deserializeUser());
 

@@ -79,7 +79,8 @@ var Customer = new Schema({
     {
       event_type: String,
       outlet: String,
-      event_date: Date
+      event_date: Date,
+      source: String
     }
   ],
   points: Number,

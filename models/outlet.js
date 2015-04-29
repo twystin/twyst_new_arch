@@ -88,6 +88,7 @@ var OutletSchema = new Schema({
     {
       status: {type: String},
       program: {type: String},
+      tier: {type: String},
       event_clause: {type: String}, //or, and
       events: [
         {
@@ -100,6 +101,7 @@ var OutletSchema = new Schema({
       ],
       reward: {
         title: {type: String},
+        terms: {type: String},
         detail: {type: String},
         expiry: {type: String},
         reward_meta: {} // the structured rewards
@@ -115,7 +117,14 @@ var OutletSchema = new Schema({
   jobs: [
     {
       job_name: {type: String},
-      job_parameters: {} // depends on the job, leaving it open
+      job_parameters: {}, // depends on the job, leaving it open
+      reward: {
+        title: {type: String},
+        terms: {type: String},
+        detail: {type: String},
+        expiry: {type: String},
+        reward_meta: {} // the structured rewards
+      }
     }
   ],
   menu: {
