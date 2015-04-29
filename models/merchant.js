@@ -3,6 +3,9 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var passportLocalMongoose = require('passport-local-mongoose');
 
+require('./outlet');
+var Outlet =  mongoose.model('Outlet');
+
 var Merchant = new Schema({
   name: String,
   email: String,
@@ -10,7 +13,8 @@ var Merchant = new Schema({
   contact: String,
   company: String,
   address: String,
-  phone: String
+  phone: String,
+  outlets:[{type: Schema.ObjectId, ref:'Outlet'}],
 });
 
 Merchant.plugin(passportLocalMongoose);

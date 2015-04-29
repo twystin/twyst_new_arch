@@ -3,7 +3,6 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 require('./outlet');
 var Outlet = mongoose.model('Outlet');
-var passportLocalMongoose = require('passport-local-mongoose');
 
 var Customer = new Schema({
   phone: String,
@@ -87,5 +86,4 @@ var Customer = new Schema({
   created_at: Date
 });
 
-Customer.plugin(passportLocalMongoose);
 module.exports = mongoose.model('Customer', Customer);

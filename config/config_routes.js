@@ -9,10 +9,10 @@ module.exports = function(app) {
   }, passport.authenticate('merchant'), MerchantCtrl.login);
 
   var CustomerCtrl =
-  require('../controllers/customer');
-  app.post('/api/v1/auth/customer', function(req,res,next) {
+  require('../controllers/account');
+  app.post('/api/v1/auth/account', function(req,res,next) {
     next();
-  }, passport.authenticate('customer'),
+  }, passport.authenticate('account'),
   CustomerCtrl.login);
 
 };

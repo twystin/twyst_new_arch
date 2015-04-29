@@ -16,7 +16,7 @@ var express = require('express'),
 
 
 var Merchant = require('../models/merchant');
-var Customer = require('../models/customer');
+var Account = require('../models/account');
 
 var settings = require('./settings');
 var env_config = settings.values.config[settings.values.env];
@@ -52,13 +52,15 @@ module.exports = function(app) {
       return next();
   });
 
+  // Merchant login
   passport.use('merchant', new LocalStrategy(Merchant.authenticate()));
   passport.serializeUser(Merchant.serializeUser());
   passport.deserializeUser(Merchant.deserializeUser());
 
-  passport.use('customer', new LocalStrategy(Customer.authenticate()));
-  passport.serializeUser(Customer.serializeUser());
-  passport.deserializeUser(Customer.deserializeUser());
+  // User login
+  passport.use('account', new LocalStrategy(Account.authenticate()));
+  passport.serializeUser(Account.serializeUser());
+  passport.deserializeUser(Account.deserializeUser());
 
   app.use(errorhandler({
       dumpExceptions: true,
