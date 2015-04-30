@@ -42,7 +42,7 @@ module.exports = function(app) {
 
   app.use(passport.initialize());
   app.use(passport.session());
-  app.use(express.static(__dirname + '../twystWeb/dist'));
+  app.use(express.static(__dirname + '/../www/'));
 
   // app.use(favicon(__dirname + '/../../Twyst-Web-Apps/common/images/favicon/twyst.ico'));
   app.all("/api/*", function(req, res, next) {
