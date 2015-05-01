@@ -73,7 +73,7 @@ var Customer = new Schema({
       }
     ]
   },
-  friends: [type: Schema.ObjectId, ref:'Customer'],
+  friends: [],
   events: [
     {
       event_type: String,
