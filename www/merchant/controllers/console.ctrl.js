@@ -1,17 +1,19 @@
-twystMerchant.controller('ConsoleCtrl', function($scope, $log, $mdToast, $rootScope, $state, $mdDialog, Restangular, $cookies, resUser, authenticated) {
+twystMerchant.controller('ConsoleCtrl', function($scope, $timeout, $log, $mdToast, $rootScope, $state, $mdDialog, Restangular, $cookies, resUser, authenticated) {
   // Template for the outlet
-  $scope.user = resUser.data.data;
-  $scope.username = $scope.user.email;
+  $timeout(function() {
+    $scope.user = (resUser && resUser.data && resUser.data.data) || null;
+    $scope.username = ($scope.user && $scope.user.email) || " ";
+  });
 
-  if (!authenticated) {
-    $state.go('home');
-  } else {
+  // Function to show toasts
+  function showToast(message) {
     $scope.toastPosition = {
       bottom: false,
       top: true,
       left: false,
       right: true
     };
+
     $scope.getToastPosition = function() {
       return Object.keys($scope.toastPosition)
         .filter(function(pos) {
@@ -22,10 +24,17 @@ twystMerchant.controller('ConsoleCtrl', function($scope, $log, $mdToast, $rootSc
 
     $mdToast.show(
       $mdToast.simple()
-      .content('Logged in successfully!')
+      .content(message)
       .position($scope.getToastPosition())
       .hideDelay(3000)
     );
+  }
+
+  if (!authenticated) {
+    showToast("Please sign-in to continue!");
+    $state.go('home');
+  } else {
+    showToast('Logged in successfully!');
   }
 
   $scope.is_a = ['desserts', 'restaurant','biryani','chinese','conntinental','north_indian','fast_food','burgers','pizza','wraps','pub','beer','bakery','cake','cafe','bistro','takeaway','other'];
@@ -136,8 +145,6 @@ twystMerchant.controller('ConsoleCtrl', function($scope, $log, $mdToast, $rootSc
       $scope.$watch('selectedIndex', function(current, old){
         previous = selected;
         selected = sections[current];
-        if ( old && (old != current)) $log.debug('Goodbye ' + previous.title + '!');
-        if ( current )                $log.debug('Hello ' + selected.title + '!');
       });
       $scope.addTab = function (title, view) {
         view = view || title + " Content View";
