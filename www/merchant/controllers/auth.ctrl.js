@@ -21,6 +21,12 @@ twystMerchant.controller('AuthCtrl', function($scope, $rootScope, $state, $mdDia
     }
   };
 
+  $scope.sign_out = function() {
+    delete $cookies.token;
+    delete $cookies.expiry;
+    $state.go('home');
+  };
+
   // Method to sign the user in.
   $scope.signin = function() {
     Restangular.all('accounts').login($scope.loginuser).then(function(info) {
