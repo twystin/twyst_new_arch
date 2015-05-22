@@ -1,5 +1,7 @@
 'use strict';
+/*jslint mocha: true */
 /*jslint node: true */
+/*jslint expr: true*/
 
 var should = require('chai').should();
 var supertest = require('supertest');
@@ -20,6 +22,22 @@ describe('Auth Tests', function() {
           res.body.response.should.be.true;
           // console.log(res.body.data.);
           res.body.data.token.should.be.a('string');
+          if (err) return done(err);
+          done();
+        });
+    });
+  });
+});
+
+describe('User Tests', function() {
+  describe("Get user", function() {
+    it('Get the logged in user', function(done) {
+      api
+        .get('/api/v4/user?token=iK4_BM7HW6vOOirrQjCBHWUtrSxbZQkd')
+        .end(function(err, res) {
+          console.log(res.body);
+          res.status.should.equal(200);
+          res.body.response.should.be.true;
           if (err) return done(err);
           done();
         });

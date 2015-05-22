@@ -50,7 +50,10 @@ config(function($stateProvider, $urlRouterProvider, $mdThemingProvider, Restangu
     RestangularProvider.addElementTransformer('accounts', true, function(account) {
       account.addRestangularMethod('login', 'post', 'login');
       return account;
-
+    });
+    RestangularProvider.addElementTransformer('users', true, function(user) {
+      user.addRestangularMethod('me', 'get', 'me');
+      return user;
     });
   })();
 })

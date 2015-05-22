@@ -1,7 +1,6 @@
 'use strict';
 /*jslint node: true */
 
-var AuthHelper = require('../common/auth.hlpr.js');
 var HttpHelper = require('../common/http.hlpr.js');
 var _ = require('underscore');
 var mongoose = require('mongoose');

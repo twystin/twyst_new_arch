@@ -92,13 +92,21 @@ twystMerchant.controller('ConsoleCtrl', function($scope, $log, $mdToast, $rootSc
       .join(' ');
   };
 
-  $scope.username = "Foofoo";
   $mdToast.show(
     $mdToast.simple()
     .content('Logged in successfully!')
     .position($scope.getToastPosition())
     .hideDelay(3000)
   );
+
+  Restangular.all('users').get('0').then(function(success) {
+    $scope.user = success.data.data;
+    $scope.username = $scope.user.email;
+
+    console.log(success);
+  }, function(err) {
+    console.log(err);
+  });
 
   var baseOutlets = Restangular.all('outlets');
 

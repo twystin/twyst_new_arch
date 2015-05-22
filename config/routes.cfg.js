@@ -20,4 +20,8 @@ module.exports = function(app) {
     app.post('/api/v4/outlets', mustBe.authorized('outlet.create', OutletCtrl.new));
   })();
 
+  (function UserRoutes() {
+    var UserCtrl = require('../controllers/user.ctrl');
+    app.get('/api/v4/users/:id', UserCtrl.get);
+  })();
 };
