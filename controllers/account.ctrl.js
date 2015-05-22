@@ -5,7 +5,6 @@ var keygen = require('keygenerator');
 var mongoose = require('mongoose');
 require('../models/auth_token.mdl.js');
 var AuthToken = mongoose.model('AuthToken');
-
 var HttpHelper = require('../common/http.hlpr.js');
 
 // Log the user in and generate an auth token which will be needed in every API call to authenticate the user
