@@ -17,7 +17,7 @@ module.exports = function(app) {
 
   (function OutletRoutes() {
     var OutletCtrl = require('../controllers/outlet.ctrl');
-    app.post('/api/v4/outlets', mustBe.authenticated( mustBe.authorized("view thing", OutletCtrl.new)));
+    app.post('/api/v4/outlets', mustBe.authorized("view thing", OutletCtrl.new));
   })();
 
 };
