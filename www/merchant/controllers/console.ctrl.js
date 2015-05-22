@@ -1,5 +1,33 @@
-twystMerchant.controller('ConsoleCtrl', function($scope, $log, $mdToast, $rootScope, $state, $mdDialog, Restangular, $cookies) {
+twystMerchant.controller('ConsoleCtrl', function($scope, $log, $mdToast, $rootScope, $state, $mdDialog, Restangular, $cookies, resUser, authenticated) {
   // Template for the outlet
+  $scope.user = resUser.data.data;
+  $scope.username = $scope.user.email;
+
+  if (!authenticated) {
+    $state.go('home');
+  } else {
+    $scope.toastPosition = {
+      bottom: false,
+      top: true,
+      left: false,
+      right: true
+    };
+    $scope.getToastPosition = function() {
+      return Object.keys($scope.toastPosition)
+        .filter(function(pos) {
+          return $scope.toastPosition[pos];
+        })
+        .join(' ');
+    };
+
+    $mdToast.show(
+      $mdToast.simple()
+      .content('Logged in successfully!')
+      .position($scope.getToastPosition())
+      .hideDelay(3000)
+    );
+  }
+
   $scope.is_a = ['desserts', 'restaurant','biryani','chinese','conntinental','north_indian','fast_food','burgers','pizza','wraps','pub','beer','bakery','cake','cafe','bistro','takeaway','other'];
   $scope.outlet = {
       publicUrl: null,
@@ -78,35 +106,6 @@ twystMerchant.controller('ConsoleCtrl', function($scope, $log, $mdToast, $rootSc
     points: 0
   };
 
-  $scope.toastPosition = {
-    bottom: false,
-    top: true,
-    left: false,
-    right: true
-  };
-  $scope.getToastPosition = function() {
-    return Object.keys($scope.toastPosition)
-      .filter(function(pos) {
-        return $scope.toastPosition[pos];
-      })
-      .join(' ');
-  };
-
-  $mdToast.show(
-    $mdToast.simple()
-    .content('Logged in successfully!')
-    .position($scope.getToastPosition())
-    .hideDelay(3000)
-  );
-
-  Restangular.all('users').get('0').then(function(success) {
-    $scope.user = success.data.data;
-    $scope.username = $scope.user.email;
-
-    console.log(success);
-  }, function(err) {
-    console.log(err);
-  });
 
   var baseOutlets = Restangular.all('outlets');
 

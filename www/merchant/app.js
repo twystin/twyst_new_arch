@@ -19,6 +19,19 @@ config(function($stateProvider, $urlRouterProvider, $mdThemingProvider, Restangu
         url: '/console',
         views: {
           "content": {
+            resolve: {
+              resUser: function(Restangular) {
+                // GET 0 means get me!
+                return Restangular.all('users').get('0')
+              },
+              authenticated: function($cookies) {
+                if ($cookies.token) {
+                  return true;
+                } else {
+                  return false;
+                }
+              }
+            },
             controller: "ConsoleCtrl",
             templateUrl: "partials/console/console.html"
           },
@@ -50,10 +63,6 @@ config(function($stateProvider, $urlRouterProvider, $mdThemingProvider, Restangu
     RestangularProvider.addElementTransformer('accounts', true, function(account) {
       account.addRestangularMethod('login', 'post', 'login');
       return account;
-    });
-    RestangularProvider.addElementTransformer('users', true, function(user) {
-      user.addRestangularMethod('me', 'get', 'me');
-      return user;
     });
   })();
 })
