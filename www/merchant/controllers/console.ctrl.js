@@ -103,9 +103,11 @@ twystMerchant.controller('ConsoleCtrl', function($scope, $log, $mdToast, $rootSc
   var baseOutlets = Restangular.all('outlets');
 
   $scope.save = function() {
-    baseOutlets.post($scope.outlet);
-    console.log($cookies.token);
-    console.log("SAVED CALLED");
+    baseOutlets.post($scope.outlet).then(function(success) {
+      console.log(success);
+    }, function(err){
+      console.log(err);
+    });
   };
 
   // For the tags

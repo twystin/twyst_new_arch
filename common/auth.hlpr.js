@@ -9,8 +9,12 @@ var AuthToken = mongoose.model('AuthToken');
 
 module.exports.validate_token = function(t) {
   var deferred = Q.defer();
-  AuthToken.findOne({'token': t}, function(err, t) {
-    deferred.resolve(t);
+  AuthToken.findOne({'token': t}, function(err, token) {
+    if(token) {
+      deferred.resolve(token);
+    } else {
+      deferred.reject(null);
+    }
   });
   return deferred.promise;
 };

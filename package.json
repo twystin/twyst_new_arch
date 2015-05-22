@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "q": "latest",
     "adm-zip": "~0.4.4",
     "async": "latest",
     "aws-sdk": "~1.13.0",
@@ -28,6 +27,7 @@
     "morgan": "latest",
     "mstring": "^0.1.2",
     "multer": "^0.1.0",
+    "mustbe": "^0.3.1",
     "node-gcm": "~0.9.8",
     "node-schedule": "^0.1.13",
     "node-uuid": "^1.4.1",
@@ -36,6 +36,7 @@
     "passport-facebook": "latest",
     "passport-local": "latest",
     "passport-local-mongoose": "latest",
+    "q": "latest",
     "qrpng": "~0.1.1",
     "restler": "^3.2.2",
     "serve-favicon": "latest",

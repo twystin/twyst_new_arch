@@ -26,6 +26,10 @@ var session_store = new MongoStore({
   clear_interval: env_config.clear_interval
 });
 
+var mustBe = require("mustbe");
+var mustBeConfig = require("./mustbe.cfg");
+mustBe.configure(mustBeConfig);
+
 module.exports = function(app) {
   app.use(compression());
   app.use(morgan('dev'));

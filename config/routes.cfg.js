@@ -1,6 +1,8 @@
 'use strict';
 /*jslint node: true */
 
+var mustBe = require("mustbe").routeHelpers();
+
 var mongoose = require('mongoose');
 var passport = require('passport');
 module.exports = function(app) {
@@ -15,7 +17,7 @@ module.exports = function(app) {
 
   (function OutletRoutes() {
     var OutletCtrl = require('../controllers/outlet.ctrl');
-    app.post('/api/v4/outlets', OutletCtrl.new);
+    app.post('/api/v4/outlets', mustBe.authorized("view thing", OutletCtrl.new));
   })();
 
 };
