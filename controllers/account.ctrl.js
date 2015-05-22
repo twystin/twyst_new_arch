@@ -3,6 +3,8 @@
 
 var keygen = require('keygenerator');
 var mongoose = require('mongoose');
+var moment = require('moment');
+
 require('../models/auth_token.mdl.js');
 var AuthToken = mongoose.model('AuthToken');
 var HttpHelper = require('../common/http.hlpr.js');
@@ -12,7 +14,7 @@ module.exports.login = function(req, res) {
   var token = keygen.session_id();
   var auth_token = new AuthToken({
     token: token,
-    expiry: new Date(),
+    expiry: moment().add(7, 'days'),
     account: req.user._id,
     user: req.user.user
   });
@@ -21,7 +23,7 @@ module.exports.login = function(req, res) {
     HttpHelper.response({
       response: res,
       error: err,
-      success_data: token,
+      success_data: auth_token,
       success_message: "Successfully logged in the user.",
       error_data: err,
       error_message: "Could not save the OAuth token. Try again."

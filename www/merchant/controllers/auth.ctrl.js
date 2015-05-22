@@ -18,7 +18,8 @@ twystMerchant.controller('AuthCtrl', function($scope, $rootScope, $state, $mdDia
     Restangular.all('accounts').login($scope.loginuser).then(function(info) {
       console.log(info);
       if (info.response) {
-        $cookies['token'] = info.data;
+        $cookies['token'] = info.data.token;
+        $cookies['expiry'] = info.data.expiry;
         $state.go('console');
       } else {
         console.log("Some fuck up happened");

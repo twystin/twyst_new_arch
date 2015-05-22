@@ -8,7 +8,6 @@ var mongoose = require('mongoose');
 var Outlet = mongoose.model('Outlet');
 
 module.exports.new = function(req, res) {
-  console.log("COME HERE");
   var created_outlet = {};
   created_outlet = _.extend(created_outlet, req.body);
   var outlet = new Outlet(created_outlet);

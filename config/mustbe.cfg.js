@@ -1,11 +1,13 @@
-var mustBe = require("mustbe");
+var mustBe = require('mustbe');
+var AuthHelper = require('../common/auth.hlpr');
+
 module.exports = function(config) {
 
-  config.userIdentity(function(id){
+  config.userIdentity(function(id) {
 
     // determine if this user is authenticated or not
-    id.isAuthenticated(function(user, cb){
-      // note that the "user" in this case, is the user
+    id.isAuthenticated(function(user, cb) {
+      // note that the 'user' in this case, is the user
       // that was supplied by the routeHelpers.getUser function
       var isAuthenticated = false;
       if (user) {
@@ -30,18 +32,20 @@ module.exports = function(config) {
     // what do we do when the user is not authorized?
     rh.notAuthorized(function(req, res, next) {
       res.status(200).send({
-        "status": false,
-        "message": "not authorized"
+        'status': false,
+        'message': 'Not authorized'
       });
     });
   });
 
   config.activities(function(activities) {
     // configure an activity with an authorization check
-    activities.can("view thing", function(identity, params, cb) {
-      // identity.isAuthenticated();
-      console.log("IDENTITY" + JSON.stringify(identity));
-      cb(null, '1');
+    activities.can('outlet.create', function(identity, params, cb) {
+      AuthHelper.have_permission(identity.user, 'outlet.create').then(function(data) {
+        cb(null, data);
+      }, function(err) {
+        cb(null);
+      });
     });
   });
 

@@ -7,6 +7,7 @@ require('./outlet.mdl');
 var Outlet = mongoose.model('Outlet');
 
 var User = new Schema({
+  activities: [],
   contact_person: String,
   company_name: String,
   job_title: String,
