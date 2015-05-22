@@ -1,6 +1,6 @@
 <div layout="column" layout-fill>
   <div ng-include="'./partials/home/home.header.html'"></div>
-  <md-content>
+  <md-content ng-init="signed_in()">
     <div layout="row">
       <div flex offset="50">
         <md-card>

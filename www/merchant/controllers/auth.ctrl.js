@@ -13,6 +13,14 @@ twystMerchant.controller('AuthCtrl', function($scope, $rootScope, $state, $mdDia
       });
   };
 
+  $scope.signed_in = function() {
+    if ($cookies.token && $cookies.expiry) {
+      if (moment().isBefore($cookies.expiry)) {
+        $state.go('console');
+      }
+    }
+  };
+
   // Method to sign the user in.
   $scope.signin = function() {
     Restangular.all('accounts').login($scope.loginuser).then(function(info) {
