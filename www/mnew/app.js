@@ -1,0 +1,59 @@
+var twystMerchant = angular.module('twystMerchant', ['ngMaterial', 'ui.router', 'restangular']).
+config(function($stateProvider, $urlRouterProvider, $mdThemingProvider, RestangularProvider) {
+  (function configureStates() {
+    $urlRouterProvider.otherwise("/home");
+    $stateProvider
+      .state('home', {
+        url: "/home",
+        views: {
+          "content": {
+            controller: "AuthCtrl",
+            templateUrl: "partials/home/home.html"
+          },
+          "footer": {
+            templateUrl: "partials/common/footer.html"
+          }
+        }
+      })
+      .state('console', {
+        url: '/console',
+        views: {
+          "content": {
+            controller: "ConsoleCtrl",
+            templateUrl: "partials/console/console.html"
+          },
+          "footer": {
+            templateUrl: "partials/common/footer.html"
+          }
+        }
+      })
+      .state('console.create', {
+        url: '/create',
+        templateUrl: "partials/console/create/outlet.create.html"
+      })
+      .state('console.manage', {
+        url: '/manage',
+        templateUrl: "partials/console/manage/outlet.manage.html"
+      })
+      .state('console.reports', {
+        url: '/create',
+        templateUrl: "partials/console/reports/reports.view.html"
+      })
+      .state('console.transactions', {
+        url: '/create',
+        templateUrl: "partials/console/panel/transactions.manage.html"
+      });
+  })();
+
+  (function configureRESTAngular() {
+    RestangularProvider.setBaseUrl('/api/v4');
+    RestangularProvider.addElementTransformer('accounts', true, function(account) {
+      account.addRestangularMethod('login', 'post', 'login');
+      return account;
+
+    });
+  })();
+})
+.run(function($rootScope) {
+  $rootScope.debug = true;
+});

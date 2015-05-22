@@ -3,15 +3,16 @@
 // db.customers.update({},{$unset:{"username":"", "hash":"","salt":""}}, {multi:true})
 
 var db = db.getSiblingDB('retwyst');
-var cursor = db.customers.find();
+var cursor = db.users.find();
 while(cursor.hasNext()) {
   c = cursor.next();
   db.accounts.insert({
-      username: c.username,
-      hash: c.hash,
-      salt: c.salt,
-      phone: c.phone,
-      created_at: c.created_at,
-      customer: c._id
+    _id: c._id,
+    username: c.username,
+    hash: c.hash,
+    salt: c.salt,
+    role: c.role,
+    created_at: c.created_at,
+    user: c._id
   });
 }

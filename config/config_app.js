@@ -1,4 +1,6 @@
 'use strict';
+/*jslint node: true */
+
 var express = require('express'),
     mongoose = require('mongoose'),
     bodyParser = require('body-parser'),
@@ -15,7 +17,6 @@ var express = require('express'),
     LocalStrategy = require('passport-local').Strategy;
 
 
-var Merchant = require('../models/merchant');
 var Account = require('../models/account');
 
 var settings = require('./settings');
@@ -28,7 +29,8 @@ var session_store = new MongoStore({
 module.exports = function(app) {
   app.use(compression());
   app.use(morgan('dev'));
-  app.use(bodyParser());
+  app.use(bodyParser.urlencoded({extended: true}));
+  app.use(bodyParser.json());
   app.use(multer());
   app.use(cookieParser('Twyst_2014_Sessions'));
   app.use(session({
@@ -36,7 +38,9 @@ module.exports = function(app) {
       cookie: {
           maxAge: 31536000000
       },
-      store: session_store
+      store: session_store,
+      resave: true,
+      saveUninitialized: true
   }));
   app.use(methodOverride());
 
@@ -51,11 +55,6 @@ module.exports = function(app) {
       res.header("Access-Control-Allow-Methods", "GET, PUT, POST, HEAD, DELETE, OPTIONS");
       return next();
   });
-
-  // Merchant login
-  passport.use('merchant', new LocalStrategy(Merchant.authenticate()));
-  passport.serializeUser(Merchant.serializeUser());
-  passport.deserializeUser(Merchant.deserializeUser());
 
   // User login
   passport.use('account', new LocalStrategy(Account.authenticate()));

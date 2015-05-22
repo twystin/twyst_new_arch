@@ -1,24 +1,29 @@
 var db = db.getSiblingDB('twyst');
-var cursor = db.accounts.find({role:{$in:[6,7]}});
+var cursor = db.accounts.find();
 var retwyst = db.getSiblingDB('retwyst')
 while(cursor.hasNext()) {
   a = cursor.next();
-  retwyst.customers.insert({
+  retwyst.users.insert({
     _id: a._id,
     username: a.username,
     salt: a.salt,
     hash: a.hash,
+    role: a.role,
     phone: a.phone,
-    first_name: a.profile && a.profile.first_name || null,
+    company_name: a.company_name,
+    contact_person: a.contact_person,
+    website: a.website,
+    facebook_url: a.facebook_url,
+    twitter_url: a.twitter_url,
+    reset_password_token: a.reset_password_token,
+    remember: a.remember,
+    gcm: a.gcm,
+    first_name: a.profile && a.profile.first_name || a.name || null,
     middle_name: a.profile && a.profile.middle_name,
     last_name: a.profile && a.profile.last_name,
-    email: a.profile && a.profile.email,
-    bday: a.profile && a.profile.bday,
-    anniv: a.profile && a.profile.anniv,
-    gcm: a.gcm,
+    email: a.email || a.profile && a.profile.email,
     validation: {
-      otp: a.otp_validated,
-
+      otp: a.otp_validated
     },
     blacklisted: a.blacklisted,
     created_at: a.created_at

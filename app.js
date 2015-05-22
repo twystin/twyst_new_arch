@@ -12,13 +12,9 @@ var settings = require('./config/settings');
   // ROUTES SERVED BY RESTIFY
   var restify = require('express-restify-mongoose');
   var Outlet = require('./models/outlet');
-  var Merchant = require('./models/merchant');
-  var Customer = require('./models/customer');
 
   var router = express.Router();
   restify.serve(router, Outlet);
-  restify.serve(router, Merchant);
-  restify.serve(router, Customer);
 
   app.use(router);
 

@@ -2,13 +2,12 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var passportLocalMongoose = require('passport-local-mongoose');
+require('./user');
+var User = mongoose.model('User');
 
-require('./customer');
-var Customer =  mongoose.model('Customer');
 var Account = new Schema({
-  phone: String,
-  customer:{type: Schema.ObjectId, ref:'Customer'},
-  created_at: Date
+  role: Number,
+  user: {type: Schema.ObjectId, ref: User}
 });
 
 Account.plugin(passportLocalMongoose);

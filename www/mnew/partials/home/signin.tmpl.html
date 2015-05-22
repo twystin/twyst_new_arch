@@ -1,0 +1,16 @@
+<div layout="row" layout-sm="column" layout-padding layout-margin>
+  <md-input-container>
+    <label>Username</label>
+    <input ng-model="loginuser.username" type="text">
+  </md-input-container>
+  <md-input-container>
+    <label>Password</label>
+    <input ng-model="loginuser.password" type="password">
+  </md-input-container>
+  <md-input-container>
+    <md-button class="md-primary md-raised" ng-click="signin()">Go!</md-button>
+  </md-input-container>
+</div>
+<div layout="row">
+  <md-button class="md-primary" ng-click="forgotPassword($event)">Forgot your password?</md-button>
+</div>

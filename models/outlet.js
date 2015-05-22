@@ -48,6 +48,104 @@ var OutletSchema = new Schema({
       }]
   },
   attributes: {
+    delivery: {
+      delivery_area: String,
+      delivery_estimated_time: String,
+      delivery_timings: {
+          su: {
+              closed: {type: Boolean, default: false},
+              timings: [{
+                  open: {
+                      hr: {type: Number},
+                      min: {type: Number}
+                  },
+                  close: {
+                      hr: {type: Number},
+                      min: {type: Number}
+                  }
+              }]
+          },
+          mo: {
+              closed: {type: Boolean, default: false},
+              timings: [{
+                  open: {
+                      hr: {type: Number},
+                      min: {type: Number}
+                  },
+                  close: {
+                      hr: {type: Number},
+                      min: {type: Number}
+                  }
+              }]
+          },
+          tu: {
+              closed: {type: Boolean, default: false},
+              timings: [{
+                  open: {
+                      hr: {type: Number},
+                      min: {type: Number}
+                  },
+                  close: {
+                      hr: {type: Number},
+                      min: {type: Number}
+                  }
+              }]
+          },
+          we: {
+              closed: {type: Boolean, default: false},
+              timings: [{
+                  open: {
+                      hr: {type: Number},
+                      min: {type: Number}
+                  },
+                  close: {
+                      hr: {type: Number},
+                      min: {type: Number}
+                  }
+              }]
+          },
+          th: {
+              closed: {type: Boolean, default: false},
+              timings: [{
+                  open: {
+                      hr: {type: Number},
+                      min: {type: Number}
+                  },
+                  close: {
+                      hr: {type: Number},
+                      min: {type: Number}
+                  }
+              }]
+          },
+          fr: {
+              closed: {type: Boolean, default: false},
+              timings: [{
+                  open: {
+                      hr: {type: Number},
+                      min: {type: Number}
+                  },
+                  close: {
+                      hr: {type: Number},
+                      min: {type: Number}
+                  }
+              }]
+          },
+          sa: {
+              closed: {type: Boolean, default: false},
+              timings: [{
+                  open: {
+                      hr: {type: Number},
+                      min: {type: Number}
+                  },
+                  close: {
+                      hr: {type: Number},
+                      min: {type: Number}
+                  }
+              }]
+          }
+      },
+      delivery_conditions: String
+    },
       home_delivery: {type: Boolean},
       dine_in: {type: Boolean},
       veg: {type: Boolean},
@@ -84,36 +182,25 @@ var OutletSchema = new Schema({
           approved: {type: Boolean, default: false}
       }]
   },
-  rules: [
-    {
-      status: {type: String},
-      program: {type: String},
-      tier: {type: String},
-      event_clause: {type: String}, //or, and
-      events: [
-        {
-          event_type: {type: String},
-          criteria: {
-            condition: {type: String}, // <, ==, > etc.
-            value: {type: String}
-          }
-        }
-      ],
-      reward: {
-        title: {type: String},
-        terms: {type: String},
-        detail: {type: String},
-        expiry: {type: String},
-        reward_meta: {} // the structured rewards
-      },
-      message: {
-        sms: {type: String},
-        email: {type: String},
-        push: {type: String}
-      },
-      points: {type: Number}
-    }
-  ],
+  rules: [{
+    status: {type: String},
+    program: {type: String},
+    event_type: {type: String},
+    event_count: {type: String},
+    reward: {
+      title: {type: String},
+      terms: {type: String},
+      detail: {type: String},
+      expiry: {type: String},
+      reward_meta: {} // the structured rewards
+    },
+    message: {
+      sms: {type: String},
+      email: {type: String},
+      push: {type: String}
+    },
+    points: {type: Number}
+  }],
   jobs: [
     {
       job_name: {type: String},
@@ -127,7 +214,8 @@ var OutletSchema = new Schema({
       }
     }
   ],
-  menu: {
+  menu: [{
+      status: {type: String},
       name: {type: String},
       last_updated: {type: Date},
       menu_description: {type: String},
@@ -144,7 +232,7 @@ var OutletSchema = new Schema({
           }
         ]
       }]
-  },
+  }],
   hours: {
       su: {
           closed: {type: Boolean, default: false},

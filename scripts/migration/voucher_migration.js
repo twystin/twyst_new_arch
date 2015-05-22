@@ -1,9 +1,8 @@
 var db = db.getSiblingDB('twyst');
 var cursor = db.vouchers.find();
-var retwyst = db.getSiblingDB('retwyst')
 while(cursor.hasNext()) {
   a = cursor.next();
-  retwyst.customers.update({_id:a.issue_details.issued_to},{
+  retwyst.users.update({_id:a.issue_details.issued_to},{
     $push: {
       coupons: {
         code: a.basics.code,

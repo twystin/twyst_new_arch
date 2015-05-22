@@ -11,7 +11,7 @@ module.exports.login = function(req, res) {
     expiry: new Date(),
     user_type: 'customer',
     account: req.user._id,
-    customer: req.user.customer
+    user: req.user.user
   });
 
   auth_token.save(function(err) {

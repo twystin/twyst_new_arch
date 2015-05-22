@@ -1,0 +1,163 @@
+<form name="info" novalidate>
+  <md-content>
+    <md-card>
+      <md-card-content>
+        <div layout>
+          <md-input-container flex>
+            <label>Outlet name *</label>
+            <input name="basics_name" ng-model="outlet.basics.name" type="text" required>
+            <p class="md-caption warn" ng-show="info.basics_name.$invalid && !info.basics_name.$pristine">
+              Name is a required field
+            </p>
+          </md-input-container>
+          <md-input-container flex>
+            <label>Outlet address *</label>
+            <input name="basics_address" ng-model="outlet.contact.location.address" type="text" required>
+            <p class="md-caption warn" ng-show="info.basics_address.$invalid && !info.basics_address.$pristine">
+              Address is a required field
+            </p>
+          </md-input-container>
+        </div>
+        <div layout>
+          <md-input-container flex>
+            <label>Locality 1 *</label>
+            <input name="basics_locality_1" ng-model="outlet.contact.location.locality_1" type="text" required>
+            <p class="md-caption warn" ng-show="info.basics_locality_1.$invalid && !info.basics_locality_1.$pristine">
+              Locality 1 is a required field
+            </p>
+          </md-input-container>
+          <md-input-container flex>
+            <label>Locality 2</label>
+            <input ng-model="outlet.contact.location.locality_2" type="text">
+          </md-input-container>
+        </div>
+        <div layout>
+          <md-input-container flex>
+            <label>Enter phone number(s)</label>
+            <input ng-model="outlet.contact.phones.mobile" ng-list type="text">
+          </md-input-container>
+          <md-input-container flex>
+            <label>Pin code</label>
+            <input name="location_pin" ng-model="outlet.contact.location.pin" type="number" required ng-minlength="6" ng-maxlength="6">
+            <p class="md-caption warn" ng-show="info.location_pin.$invalid && !info.location_pin.$pristine">
+              Needs to be exactly 6 digits long.
+            </p>
+          </md-input-container>
+        </div>
+        <div layout>
+          <md-input-container flex>
+            <md-select placeholder="City" ng-model="outlet.contact.location.city">
+              <md-option value="Gurgaon">Gurgaon</md-option>
+              <md-option value="Delhi">Delhi</md-option>
+              <md-option value="Noida">Noida</md-option>
+              <md-option value="Mumbai">Mumbai</md-option>
+              <md-option value="Bangalore">Bangalore</md-option>
+            </md-select>
+          </md-input-container>
+          <md-input-container flex>
+            <md-select placeholder="Outlet type" ng-model="outlet.basics.is_a">
+              <div ng-repeat="o in is_a">
+                <md-option value="{{o}}">{{o | uppercase}}</md-option>
+              </div>
+            </md-select>
+          </md-input-container>
+        </div>
+      </md-card-content>
+    </md-card>
+    <md-card>
+      <md-card-content>
+        <div layout>
+          <md-input-container flex>
+            <md-switch class="md-primary" ng-model="outlet.attributes.alcohol" aria-label="Switch 1">
+              Serves alcohol
+            </md-switch>
+          </md-input-container>
+          <md-input-container flex>
+            <md-switch class="md-primary" ng-model="outlet.attributes.smoking" aria-label="Switch 1">
+              Has a smoking area
+            </md-switch>
+          </md-input-container>
+          <md-input-container flex>
+            <md-switch class="md-primary" ng-model="outlet.attributes.dine_in" aria-label="Switch 1">
+              Has dine-in seating
+            </md-switch>
+          </md-input-container>
+          <md-input-container flex>
+            <md-switch class="md-primary" ng-model="outlet.attributes.veg" aria-label="Switch 1">
+              Only vegetarian
+            </md-switch>
+          </md-input-container>
+        </div>
+        <div layout>
+          <md-input-container flex>
+            <md-switch class="md-primary" ng-model="outlet.attributes.chain" aria-label="Switch 1">
+              Part of a chain
+            </md-switch>
+          </md-input-container>
+          <md-input-container flex>
+            <md-switch class="md-primary" ng-model="outlet.attributes.outdoor" aria-label="Switch 1">
+              Has outdoor seating
+            </md-switch>
+          </md-input-container>
+          <md-input-container flex>
+            <md-switch class="md-primary" ng-model="outlet.attributes.home_delivery" aria-label="Switch 1">
+              <md-tooltip>
+                Refresh
+              </md-tooltip>
+              Does home delivery
+            </md-switch>
+          </md-input-container>
+          <md-input-container flex>
+            <md-switch class="md-primary" ng-model="outlet.attributes.foodcourt" aria-label="Switch 1">
+              Part of a foodcourt
+            </md-switch>
+          </md-input-container>
+        </div>
+      </md-card-content>
+    </md-card>
+    <md-card>
+      <md-card-content>
+        <div layout>
+          <md-input-container flex>
+            <md-select placeholder="Parking" ng-model="outlet.attributes.parking">
+              <md-option value="Available">Available</md-option>
+              <md-option value="Valet">Valet</md-option>
+              <md-option value="Not available">Not available</md-option>
+            </md-select>
+            <p class="md-caption">Parking</p>
+          </md-input-container>
+          <md-input-container flex>
+            <md-select placeholder="Air-conditioning" ng-model="outlet.attributes.air_conditioning">
+              <md-option value="Available">Available</md-option>
+              <md-option value="Partial">Partial</md-option>
+              <md-option value="Not available">Not available</md-option>
+            </md-select>
+            <p class="md-caption">Air-conditioning</p>
+          </md-input-container>
+          <md-input-container flex>
+            <md-select placeholder="Reservation" ng-model="outlet.attributes.reservation">
+              <md-option value="Required">Required</md-option>
+              <md-option value="Suggested">Suggested</md-option>
+              <md-option value="Not required">Not required</md-option>
+            </md-select>
+            <p class="md-caption">Reservation</p>
+          </md-input-container>
+          <md-input-container flex>
+            <md-select placeholder="Wi-Fi" ng-model="outlet.attributes.wifi">
+              <md-option value="Available">Available</md-option>
+              <md-option value="Paid">Paid</md-option>
+              <md-option value="Not available">Not available</md-option>
+            </md-select>
+            <p class="md-caption">Wi-Fi</p>
+          </md-input-container>
+        </div>
+      </md-card-content>
+    </md-card>
+    <md-button>Next</md-button>
+    <md-card ng-show="debug" class="debug">
+      <md-card-content>
+        {{outlet | json:object}}
+      </md-card-content>
+    </md-card>
+  </md-content>
+</form>

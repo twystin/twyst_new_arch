@@ -1,0 +1,22 @@
+<div layout>
+  <md-input-container flex>
+    <md-switch class="md-primary" ng-model="data.cb1" aria-label="Switch 1">
+      Send SMS on reward
+    </md-switch>
+  </md-input-container>
+  <md-input-container ng-show="data.cb1" flex>
+    <label>SMS message</label>
+    <input ng-model="deal.sms">
+  </md-input-container>
+</div>
+<div layout>
+  <md-input-container flex>
+    <md-switch class="md-primary" ng-model="data.cb2" aria-label="Switch 1">
+      Send Email on reward
+    </md-switch>
+  </md-input-container>
+  <md-input-container ng-show="data.cb2" flex>
+    <label>Email message</label>
+    <input ng-model="deal.email">
+  </md-input-container>
+</div>
