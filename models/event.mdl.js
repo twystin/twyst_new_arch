@@ -1,8 +1,10 @@
 'use strict';
+/*jslint node: true */
+
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-require('./user');
-require('./outlet');
+require('./user.mdl');
+require('./outlet.mdl');
 var Outlet = mongoose.model('Outlet');
 var User = mongoose.model('User');
 

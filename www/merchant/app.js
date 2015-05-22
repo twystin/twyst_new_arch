@@ -1,4 +1,4 @@
-var twystMerchant = angular.module('twystMerchant', ['ngMaterial', 'ui.router', 'restangular']).
+var twystMerchant = angular.module('twystMerchant', ['ngMaterial', 'ui.router', 'restangular', 'ngCookies', 'twyst.store']).
 config(function($stateProvider, $urlRouterProvider, $mdThemingProvider, RestangularProvider) {
   (function configureStates() {
     $urlRouterProvider.otherwise("/home");
@@ -54,6 +54,8 @@ config(function($stateProvider, $urlRouterProvider, $mdThemingProvider, Restangu
     });
   })();
 })
-.run(function($rootScope) {
+.run(function($rootScope, $cookies, Restangular) {
   $rootScope.debug = true;
+  Restangular.setDefaultRequestParams({token: $cookies.token});
+
 });

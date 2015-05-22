@@ -17,7 +17,7 @@ var express = require('express'),
     LocalStrategy = require('passport-local').Strategy;
 
 
-var Account = require('../models/account');
+var Account = require('../models/account.mdl');
 
 var settings = require('./settings');
 var env_config = settings.values.config[settings.values.env];

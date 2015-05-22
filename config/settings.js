@@ -1,4 +1,5 @@
 'use strict';
+/*jslint node: true */
 
 module.exports.values = {
   'env': 'LOCAL',

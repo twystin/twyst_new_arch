@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <link rel="stylesheet" href="../bower_components/angular-material/angular-material.css">
+  <link rel="stylesheet" href="./style.css">
+  <title>Twyst > Merchant Portal</title>
+</head>
+
+<body ng-app="twystMerchant" ng-cloak>
+
+  <!-- My main page is a wrapper with content and footer -->
+  <div id="wrapper">
+    <div id="content" ui-view="content"></div>
+    <div id="footer" ui-view="footer"></div>
+  </div>
+
+  <!-- All the external dependencies -->
+  <script src="../bower_components/angular/angular.js"></script>
+  <script src="../bower_components/angular-cookies/angular-cookies.js"></script>
+  <script src="../bower_components/angular-aria/angular-aria.js"></script>
+  <script src="../bower_components/angular-animate/angular-animate.js"></script>
+  <script src="../bower_components/angular-material/angular-material.js"></script>
+  <script src="../bower_components/angular-ui-router/release/angular-ui-router.js"></script>
+  <script src="../bower_components/lodash/lodash.js"></script>
+  <script src="../bower_components/restangular/dist/restangular.js"></script>
+
+  <!-- Use my modules -->
+  <script src="../common/modules/twyst.store.svc.js"></script>
+
+  <!-- All our JS code -->
+  <script src="./app.js"></script>
+  <script src="./controllers/auth.ctrl.js"></script>
+  <script src="./controllers/console.ctrl.js"></script>
+
+</body>
+
+</html>

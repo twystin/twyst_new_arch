@@ -1,8 +1,10 @@
 'use strict';
+/*jslint node: true */
+
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var passportLocalMongoose = require('passport-local-mongoose');
-require('./user');
+require('./user.mdl');
 var User = mongoose.model('User');
 
 var Account = new Schema({

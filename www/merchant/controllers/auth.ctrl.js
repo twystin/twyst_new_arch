@@ -1,4 +1,4 @@
-twystMerchant.controller('AuthCtrl', function($scope, $rootScope, $state, $mdDialog, Restangular) {
+twystMerchant.controller('AuthCtrl', function($scope, $rootScope, $state, $mdDialog, Restangular, $cookies) {
   // Initialize the variables for signin, register & forgot.
   $scope.loginuser = {};
   $scope.registeruser = {};
@@ -16,8 +16,9 @@ twystMerchant.controller('AuthCtrl', function($scope, $rootScope, $state, $mdDia
   // Method to sign the user in.
   $scope.signin = function() {
     Restangular.all('accounts').login($scope.loginuser).then(function(info) {
+      console.log(info);
       if (info.response) {
-        $rootScope.auth_token = info.data;
+        $cookies['token'] = info.data;
         $state.go('console');
       } else {
         console.log("Some fuck up happened");

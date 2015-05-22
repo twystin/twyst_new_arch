@@ -1,4 +1,4 @@
-twystMerchant.controller('ConsoleCtrl', function($scope, $log, $mdToast, $rootScope, $state, $mdDialog, Restangular) {
+twystMerchant.controller('ConsoleCtrl', function($scope, $log, $mdToast, $rootScope, $state, $mdDialog, Restangular, $cookies) {
   // Template for the outlet
   $scope.is_a = ['desserts', 'restaurant','biryani','chinese','conntinental','north_indian','fast_food','burgers','pizza','wraps','pub','beer','bakery','cake','cafe','bistro','takeaway','other'];
   $scope.outlet = {
@@ -99,6 +99,14 @@ twystMerchant.controller('ConsoleCtrl', function($scope, $log, $mdToast, $rootSc
     .position($scope.getToastPosition())
     .hideDelay(3000)
   );
+
+  var baseOutlets = Restangular.all('outlets');
+
+  $scope.save = function() {
+    baseOutlets.post($scope.outlet);
+    console.log($cookies.token);
+    console.log("SAVED CALLED");
+  };
 
   // For the tags
   var self = this;
