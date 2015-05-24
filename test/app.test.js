@@ -44,11 +44,9 @@ describe('Auth Tests', function() {
 describe('User Tests', function() {
   describe('Get user', function() {
     it('Get the logged in user - should pass', function(done) {
-      // console.log(token);
       api
         .get('/api/v4/users/0?token=' + token)
         .end(function(err, res) {
-          // console.log(res.body);
           res.status.should.equal(200);
           res.body.response.should.be.true;
           if (err) return done(err);
@@ -97,7 +95,6 @@ describe('Outlet Tests', function() {
         .set('Accept', 'application/json')
         .end(function(err, res) {
           res.status.should.equal(200);
-          // console.log(res.body);
           res.body.response.should.be.false;
           if (err) return done(err);
           done();
@@ -130,8 +127,6 @@ describe('Outlet Tests', function() {
         .send(outlet)
         .set('Accept', 'application/json')
         .end(function(err, res) {
-          // console.log(err);
-          // console.log(res.body);
           saved_outlet = res.body.data;
           res.status.should.equal(200);
           res.body.response.should.be.true;
@@ -146,8 +141,6 @@ describe('Outlet Tests', function() {
       .send(saved_outlet)
       .set('Accept', 'application/json')
       .end(function(err, res) {
-        console.log(err);
-        console.log(res.body);
         res.status.should.equal(200);
         res.body.response.should.be.true;
         if (err) return done(err);
@@ -156,7 +149,16 @@ describe('Outlet Tests', function() {
     });
 
     it('Get public outlets - should pass');
-    it('Get all outlets I have access to - should pass');
+    it('Get all outlets I have access to - should pass', function(done) {
+      api.get('/api/v4/outlets?token=' + token)
+      .end(function(err,res) {
+        res.status.should.equal(200);
+        res.body.response.should.be.true;
+        console.log(res.body.data);
+        if (err) return done(err);
+        done();
+      });
+    });
     it('Get a particular outlets details - should pass', function(done) {
       api.get('/api/v4/outlets/' + saved_outlet._id + '?token=' + token)
       .end(function(err, res) {

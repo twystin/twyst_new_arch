@@ -53,3 +53,16 @@ module.exports.get = function(req, res) {
     HttpHelper.error(res, err.data, err.message);
   });
 };
+
+module.exports.all = function(req, res) {
+  var token = req.query.token || null;
+  if (!token) {
+    HttpHelper.error(res, true, "Not authenticated");
+  }
+
+  OutletHelper.get_all_outlets(token).then(function(data) {
+    HttpHelper.success(res, data.data, data.message);
+  }, function(err) {
+    HttpHelper.error(res, err.data, err.message);
+  });
+};

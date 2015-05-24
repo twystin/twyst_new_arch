@@ -21,6 +21,22 @@ module.exports.get_outlet = function(id) {
   return deferred.promise;
 };
 
+module.exports.get_all_outlets = function(token) {
+  var deferred = Q.defer();
+
+  AuthHelper.get_user(token).then(function(data) {
+    User.findOne({_id:data.data._id}).select('outlets').populate('outlets').exec(function(err,outlets) {
+      if (err) {
+        deferred.reject({err: err || true, message: 'Couldn\'t get the outlets'});
+      } else {
+        deferred.resolve({data: outlets, message: 'Got your outlets'});
+      }
+    });
+  });
+
+  return deferred.promise;
+};
+
 module.exports.update_outlet = function(token, updated_outlet) {
   var deferred = Q.defer();
   var outlets = [];

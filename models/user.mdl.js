@@ -102,7 +102,7 @@ var User = new Schema({
       }
     ]
   },
-  outlets: [],
+  outlets: [{type: Schema.ObjectId, ref: 'Outlet'}],
   coupons: [
     {
       code: String,

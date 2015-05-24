@@ -55,6 +55,14 @@ module.exports = function(config) {
         cb(null);
       });
     });
+
+    activities.can('outlet.view', function(identity, params, cb) {
+      AuthHelper.have_permission(identity.user, 'outlet.view').then(function(data) {
+        cb(null, data);
+      }, function(err) {
+        cb(null);
+      });
+    });
   });
 
 };
