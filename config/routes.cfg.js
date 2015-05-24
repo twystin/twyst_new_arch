@@ -51,9 +51,7 @@ module.exports = function(app) {
     var OutletCtrl = require('../controllers/outlet.ctrl');
     app.post('/api/v4/outlets', mustBe.authorized('outlet.create', OutletCtrl.new));
     app.put('/api/v4/outlets/:outlet_id', mustBe.authorized('outlet.update', OutletCtrl.update));
-    app.get('/api/v4/outlets/:outlet_id', function(req, res) {
-      res.status(405).send({message: 'Not yet implemented'});
-    });
+    app.get('/api/v4/outlets/:outlet_id', OutletCtrl.get);
     app.get('/api/v4/outlets', function(req, res) {
       res.status(405).send({message: 'Not yet implemented'});
     });

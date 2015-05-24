@@ -5,6 +5,7 @@
 
 var faker = require('faker');
 var should = require('chai').should();
+var expect = require('chai').expect;
 var supertest = require('supertest');
 var api = supertest('http://localhost:3000');
 var token = '';
@@ -156,7 +157,17 @@ describe('Outlet Tests', function() {
 
     it('Get public outlets - should pass');
     it('Get all outlets I have access to - should pass');
-    it('Get a particular outlets details - should pass');
+    it('Get a particular outlets details - should pass', function(done) {
+      api.get('/api/v4/outlets/' + saved_outlet._id + '?token=' + token)
+      .end(function(err, res) {
+        res.status.should.equal(200);
+        res.body.response.should.be.true;
+        expect(res.body.data).eql(saved_outlet);
+        if (err) return done(err);
+        done();
+      });
+    });
+
     it('Deleting an outlet - should pass');
   });
 });

@@ -41,3 +41,15 @@ module.exports.update = function(req, res) {
     HttpHelper.error(res, err.data, err.message);
   });
 };
+
+module.exports.get = function(req, res) {
+  if (!req.params.outlet_id) {
+    HttpHelper.error(res, true, "No outlet id passed");
+  }
+
+  OutletHelper.get_outlet(req.params.outlet_id).then(function(data) {
+    HttpHelper.success(res, data.data, data.message);
+  }, function(err) {
+    HttpHelper.error(res, err.data, err.message);
+  });
+};

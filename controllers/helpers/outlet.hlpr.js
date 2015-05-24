@@ -8,6 +8,19 @@ var Outlet = mongoose.model('Outlet');
 var User = mongoose.model('User');
 var AuthHelper = require('../../common/auth.hlpr.js');
 
+module.exports.get_outlet = function(id) {
+  var deferred = Q.defer();
+  Outlet.findOne({_id: id}, function(err, outlet) {
+    if (err || !outlet) {
+      deferred.rejeect({err: err || true, message: 'Outlet not found'});
+    } else {
+      deferred.resolve({data: outlet, message: 'Found the outlet'});
+    }
+  });
+
+  return deferred.promise;
+};
+
 module.exports.update_outlet = function(token, updated_outlet) {
   var deferred = Q.defer();
   var outlets = [];
