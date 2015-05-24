@@ -7,12 +7,12 @@ var faker = require('faker');
 var should = require('chai').should();
 var supertest = require('supertest');
 var api = supertest('http://localhost:3000');
-var token = "";
-var saved_outlet = "";
+var token = '';
+var saved_outlet = '';
 
 
 describe('Auth Tests', function() {
-  describe("Login", function() {
+  describe('Login', function() {
     it('Login a valid user - should pass', function(done) {
       api
         .post('/api/v4/accounts/login')
@@ -30,12 +30,19 @@ describe('Auth Tests', function() {
           done();
         });
     });
+
+    it('Get a verification code - should pass');
+    it('Verify an unused code - should pass');
+  });
+
+  describe('Logout', function() {
+    it('Logout a user - should pass');
   });
 });
 
 describe('User Tests', function() {
-  describe("Get user", function() {
-    it('Get the logged in user', function(done) {
+  describe('Get user', function() {
+    it('Get the logged in user - should pass', function(done) {
       // console.log(token);
       api
         .get('/api/v4/users/0?token=' + token)
@@ -47,6 +54,36 @@ describe('User Tests', function() {
           done();
         });
     });
+
+    it('Get my coupons - should pass');
+  });
+});
+
+describe('Recommendation Tests', function() {
+  describe('Get recos', function() {
+    it('Get my recos - should pass');
+    it('Get future recos - should pass');
+    it('Get public recos - should pass');
+    it('Get recos with lat/long - should pass');
+    it('Search recos - should pass /q');
+  });
+});
+
+describe('Event Tests', function() {
+  describe('Checkin event', function() {
+    it('Checkin - should pass');
+  });
+
+  describe('Follow event', function() {
+    it('Follow - should pass');
+  });
+
+  describe('Gift event', function() {
+    it('Gift - should pass');
+  });
+
+  describe('Pool event', function() {
+    it('Pool - should pass');
   });
 });
 
@@ -103,7 +140,7 @@ describe('Outlet Tests', function() {
     });
 
     it('Updating an outlet - should pass', function(done) {
-      saved_outlet.basics.name = "Updated outlet";
+      saved_outlet.basics.name = 'Updated outlet';
       api.put('/api/v4/outlets/' + saved_outlet._id + '?token=' + token)
       .send(saved_outlet)
       .set('Accept', 'application/json')
@@ -116,5 +153,10 @@ describe('Outlet Tests', function() {
         done();
       });
     });
+
+    it('Get public outlets - should pass');
+    it('Get all outlets I have access to - should pass');
+    it('Get a particular outlets details - should pass');
+    it('Deleting an outlet - should pass');
   });
 });
