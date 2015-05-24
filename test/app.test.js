@@ -18,7 +18,7 @@ describe('Auth Tests', function() {
       api
         .post('/api/v4/accounts/login')
         .send({
-          username: 'arunr',
+          username: 'ablal',
           password: 'spam25'
         })
         .set('Accept', 'application/json')
@@ -149,16 +149,17 @@ describe('Outlet Tests', function() {
     });
 
     it('Get public outlets - should pass');
+
     it('Get all outlets I have access to - should pass', function(done) {
       api.get('/api/v4/outlets?token=' + token)
       .end(function(err,res) {
         res.status.should.equal(200);
         res.body.response.should.be.true;
-        console.log(res.body.data);
         if (err) return done(err);
         done();
       });
     });
+
     it('Get a particular outlets details - should pass', function(done) {
       api.get('/api/v4/outlets/' + saved_outlet._id + '?token=' + token)
       .end(function(err, res) {
@@ -170,6 +171,15 @@ describe('Outlet Tests', function() {
       });
     });
 
-    it('Deleting an outlet - should pass');
+    it('Deleting an outlet - should pass', function(done) {
+      api.delete('/api/v4/outlets/' + saved_outlet._id + '?token=' + token)
+      .end(function(err, res) {
+        res.status.should.equal(200);
+        res.body.response.should.be.true;
+        console.log(res.body.data);
+        if (err) return done(err);
+        done();
+      });
+    });
   });
 });

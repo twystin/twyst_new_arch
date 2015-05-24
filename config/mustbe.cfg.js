@@ -63,6 +63,14 @@ module.exports = function(config) {
         cb(null);
       });
     });
+
+    activities.can('outlet.remove', function(identity, params, cb) {
+      AuthHelper.have_permission(identity.user, 'outlet.remove').then(function(data) {
+        cb(null, data);
+      }, function(err) {
+        cb(null);
+      });
+    });
   });
 
 };

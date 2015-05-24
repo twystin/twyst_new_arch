@@ -100,3 +100,31 @@ module.exports.create_outlet = function(token, created_outlet) {
 
   return deferred.promise;
 };
+
+
+module.exports.remove_outlet = function(token, outlet_id) {
+  var deferred = Q.defer();
+  var outlet = null;
+  AuthHelper.get_user(token).then(function(data) {
+    Outlet.findOneAndRemove({_id: outlet_id}, function(err, outlet) {
+      if (err) {
+        deferred.reject({err: err || true, message: 'Couldn\'t remove the outlet'});
+      } else {
+        User.findOneAndUpdate(
+          {_id: data.data._id},
+          {$pull: {'outlets': outlet_id}},
+          function(err, element) {
+            if (err) {
+              deferred.reject({err: err || true, message: 'Couldn\'t remove the outlet reference from user'});
+            } else {
+              deferred.resolve({data: element, message: 'Successfully deleted the outlet'});
+            }
+          });
+      }
+    });
+  }, function(err) {
+    deferred.reject({err: err || true, message: 'Couldn\'t find the user'});
+  });
+
+  return deferred.promise;
+};

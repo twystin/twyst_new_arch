@@ -55,9 +55,7 @@ module.exports = function(app) {
     // Anonymous route
     app.get('/api/v4/outlets/:outlet_id', OutletCtrl.get);
     app.get('/api/v4/outlets', mustBe.authorized('outlet.view', OutletCtrl.all));
-    app.delete('/api/v4/outlets/:outlet_id', function(req, res) {
-      res.status(405).send({message: 'Not yet implemented'});
-    });
+    app.delete('/api/v4/outlets/:outlet_id', mustBe.authorized('outlet.remove', OutletCtrl.remove));
 
   })();
 
