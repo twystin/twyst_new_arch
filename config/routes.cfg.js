@@ -18,6 +18,7 @@ module.exports = function(app) {
   (function OutletRoutes() {
     var OutletCtrl = require('../controllers/outlet.ctrl');
     app.post('/api/v4/outlets', mustBe.authorized('outlet.create', OutletCtrl.new));
+    app.put('/api/v4/outlets/:outlet_id', mustBe.authorized('outlet.update', OutletCtrl.update));
   })();
 
   (function UserRoutes() {

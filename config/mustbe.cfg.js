@@ -24,7 +24,7 @@ module.exports = function(config) {
       if (req.query && req.query.token) {
         cb(null, req.query.token);
       } else {
-        cb(null)
+        cb(null);
       }
       // cb(null, req.user);
     });
@@ -42,6 +42,14 @@ module.exports = function(config) {
     // configure an activity with an authorization check
     activities.can('outlet.create', function(identity, params, cb) {
       AuthHelper.have_permission(identity.user, 'outlet.create').then(function(data) {
+        cb(null, data);
+      }, function(err) {
+        cb(null);
+      });
+    });
+
+    activities.can('outlet.update', function(identity, params, cb) {
+      AuthHelper.have_permission(identity.user, 'outlet.update').then(function(data) {
         cb(null, data);
       }, function(err) {
         cb(null);
