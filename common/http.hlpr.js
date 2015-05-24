@@ -11,8 +11,25 @@ module.exports.response = function(o) {
   } else {
     o.response.status(200).send({
       'response': false,
-      'message': o.error_data,
-      'data': o.error_message
+      'message': o.error_message,
+      'data': o.error_data
     });
   }
+};
+
+module.exports.error = function(res, err, msg) {
+  res.status(200).send({
+    'response': false,
+    'message': msg,
+    'data': err
+  });
+};
+
+
+module.exports.success = function(res, data, msg) {
+  res.status(200).send({
+    'response': true,
+    'message': msg,
+    'data': data
+  });
 };

@@ -1,6 +1,7 @@
 twystMerchant.controller('ConsoleCtrl', function($scope, $timeout, $log, $mdToast, $rootScope, $state, $mdDialog, Restangular, $cookies, resUser, authenticated) {
   // Template for the outlet
   $timeout(function() {
+    console.log(resUser);
     $scope.user = (resUser && resUser.data && resUser.data.data) || null;
     $scope.username = ($scope.user && $scope.user.email) || " ";
   });
@@ -37,77 +38,24 @@ twystMerchant.controller('ConsoleCtrl', function($scope, $timeout, $log, $mdToas
     showToast('Logged in successfully!');
   }
 
-  $scope.is_a = ['desserts', 'restaurant','biryani','chinese','conntinental','north_indian','fast_food','burgers','pizza','wraps','pub','beer','bakery','cake','cafe','bistro','takeaway','other'];
+  $scope.main_type = ['fnb', 'spa', 'retail', 'other'];
   $scope.outlet = {
-      publicUrl: null,
       basics : {
           name: null,
-          is_a: null,
-          icon: null
+          main_type: null,
       },
       contact: {
           location: {
-              coords: {
-                  longitude: null,
-                  latitude: null
-              },
               address: null,
-              landmarks: [],
               locality_1: [],
               locality_2: [],
               city : null,
               pin : null
           },
           phones: {
-              mobile: [],
-              reg_mobile: [],
+              mobile: []
           }
-      },
-      links: {
-          website_url: null,
-          facebook_url: null,
-          twitter_url: null,
-          youtube_url: null,
-          zomato_url: null,
-          foodpanda_url: null
-      },
-      business_hours: {},
-      attributes: {
-          delivery: {
-            delivery_area: null,
-            delivery_estimated_time: null,
-            delivery_timings: {},
-            delivery_conditions: null
-          },
-          home_delivery: false,
-          dine_in: false,
-          veg: false,
-          alcohol: false,
-          outdoor: false,
-          foodcourt: false,
-          smoking: false,
-          chain: false,
-          air_conditioning: null,
-          parking: null,
-          reservation: null,
-          wifi: null,
-          cost_for_two: {
-              min: 0,
-              max: 0
-          },
-          cuisines: [],
-          payment_options: [],
-          tags: []
-      },
-      photos: {
-          logo: null,
-          logo_gray: null,
-          background: null,
-          others:[]
-      },
-      offers: [],
-      jobs: [],
-      menu: []
+      }
   };
 
   $scope.action = {

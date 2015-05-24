@@ -9,7 +9,7 @@ var Outlet = mongoose.model('Outlet');
 
 module.exports.get = function(req, res) {
   console.log(req.params);
-  if (req.params.id === 0) {
+  if (req.params.id === '0') {
     AuthHelper.get_user(req.query.token).then(function(success) {
       HttpHelper.response({
         response: res,

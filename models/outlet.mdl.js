@@ -11,13 +11,9 @@ var OutletSchema = new Schema({
     basics : {
         name: {type: String, trim: true, required: true},
         slug: {type: String, trim: true, required: true, index: true},
-        relationship: {type: String, enum: ['Owner', 'General Manager','Floor Manager']},
-        merchant_name: {type: String, default: ''},
-        contact_person_name: {type: String, default: ''},
-        size: {type: String, default: '', trim: true}, // size of the establishament
-        is_a: {type: String, enum: ['desserts', 'restaurant','biryani','chinese','conntinental','north_indian','fast_food','burgers','pizza','wraps','pub','beer','bakery','cake','cafe','bistro','takeaway','other']},
-        icon: {type: String, enum: ['desserts', 'restaurant','biryani','chinese','conntinental','north_indian','fast_food','burgers','pizza','wraps','pub','beer','bakery','cake','cafe','bistro','takeaway','other']},
-        franchise: {type: Boolean},
+        main_type: {type: String, trim: true, required: true, enum:['fnb','spa','retail','other'], default:"other"},
+        is_a: {type: String, enum: ['desserts', 'restaurant','biryani','chinese','continental','north_indian','fast_food','burgers','pizza','wraps','pub','beer','bakery','cake','cafe','bistro','takeaway','other']},
+        icon: {type: String, enum: ['desserts', 'restaurant','biryani','chinese','continental','north_indian','fast_food','burgers','pizza','wraps','pub','beer','bakery','cake','cafe','bistro','takeaway','other']},
         images: [{type: String}],
         created_at : {type: Date, default: Date.now},
         modified_at: {type: Date, default: Date.now}
@@ -28,7 +24,7 @@ var OutletSchema = new Schema({
                 longitude: { type: Number },
                 latitude: { type: Number }
             },
-            address: {type: String, default: '', unique: true, trim: true},
+            address: {type: String, default: '', trim: true},
             map_url: {type: String, default: '', trim: true},
             landmarks: [{type: String, default: '', trim: true}],
             locality_1: [{type: String, default: '', trim: true}],
@@ -37,7 +33,7 @@ var OutletSchema = new Schema({
             pin : {type: String, default: '', trim: true}
         },
         phones: {
-            mobile: [{num: {type:String, default: '', trim: true}}],
+            mobile: [],
             reg_mobile: [{num: {type:String, default: '', trim: true}}],
             landline: {type:String, default: '', trim: true},
             type: {type: String, enum: ['landline', 'mobile', 'other']},
@@ -77,10 +73,10 @@ var OutletSchema = new Schema({
         foodcourt: {type: Boolean},
         smoking: {type: Boolean},
         chain: {type: Boolean},
-        air_conditioning: {type: String, enum: ["Available", "Not Available", "Partial"]},
-        parking: {type: String, enum: ["Available", "Not Available", "Valet"]},
-        reservation: {type: String, enum: ["Recommended", "Not Required"]},
-        wifi: {type: String, enum: ["Not Available", "Free", "Paid"]},
+        air_conditioning: {type: String, enum: ["available", "not_available", "partial", "unknown"]},
+        parking: {type: String, enum: ["available", "not_available", "valet", "unknown"]},
+        reservation: {type: String, enum: ["suggested", "not_required", "unknown"]},
+        wifi: {type: String, enum: ["not_available", "free", "paid", "unknown"]},
         cost_for_two: {
             min: Number,
             max: Number
