@@ -144,14 +144,3 @@ module.exports.have_permission = function(token, perm) {
   });
   return deferred.promise;
 };
-
-module.exports.token_check = function(token, res) {
-  if (!token) {
-    HttpHelper.response({
-      response: res,
-      error: true,
-      error_data: null,
-      error_message: "Not authenticated"
-    });
-  }
-};
