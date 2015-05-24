@@ -3,10 +3,13 @@
 /*jslint node: true */
 /*jslint expr: true*/
 
+var faker = require('faker');
 var should = require('chai').should();
 var supertest = require('supertest');
 var api = supertest('http://localhost:3000');
 var token = "";
+var saved_outlet = "";
+
 
 describe('Auth Tests', function() {
   describe("Login", function() {
@@ -71,7 +74,7 @@ describe('Outlet Tests', function() {
         },
         contact: {
             location: {
-                address: '1171 Sector 34C Chandigarh',
+                address: faker.address.streetAddress(),
                 locality_1: ['Sector 34'],
                 locality_2: ['Sector 34C'],
                 city : 'Gurgaon',
@@ -83,17 +86,35 @@ describe('Outlet Tests', function() {
         }
     };
     it('Saving an filled outlet - should pass', function(done) {
+
       api
         .post('/api/v4/outlets?token=' + token)
         .send(outlet)
         .set('Accept', 'application/json')
         .end(function(err, res) {
+          // console.log(err);
           // console.log(res.body);
+          saved_outlet = res.body.data;
           res.status.should.equal(200);
           res.body.response.should.be.true;
           if (err) return done(err);
           done();
         });
+    });
+
+    it('Updating an outlet - should pass', function(done) {
+      saved_outlet.basics.name = "Updated outlet";
+      api.put('/api/v4/outlets/' + saved_outlet._id + '?token=' + token)
+      .send(saved_outlet)
+      .set('Accept', 'application/json')
+      .end(function(err, res) {
+        console.log(err);
+        console.log(res.body);
+        res.status.should.equal(200);
+        res.body.response.should.be.true;
+        if (err) return done(err);
+        done();
+      });
     });
   });
 });

@@ -43,14 +43,18 @@ module.exports.new = function(req, res) {
 
 module.exports.update = function(req, res) {
   var token = req.query.token || null;
-  var updated_outlet = _.extend(updated_outlet, req.body);
+  var updated_outlet = {};
+  var outlets = [];
+  updated_outlet = _.extend(updated_outlet, req.body);
+
   var id = updated_outlet._id;
   delete updated_outlet._id;
   delete updated_outlet.__v;
 
   AuthHelper.token_check(token,res);
   AuthHelper.get_user(token).then(function(data) {
-    if (_.includes(data.data.outlets, id)) {
+    outlets = data.data.outlets.toString().split(',');
+    if (_.includes(outlets, id)) {
       Outlet.findOneAndUpdate(
         {_id: id},
         {$set: updated_outlet},
@@ -67,6 +71,6 @@ module.exports.update = function(req, res) {
       HttpHelper.error(res, true, 'No permissions to update the outlet');
     }
   }, function(err) {
-    HttpHelper.error(res, err || true, 'Couldn\'t find the user');    
+    HttpHelper.error(res, err || true, 'Couldn\'t find the user');
   });
 };
