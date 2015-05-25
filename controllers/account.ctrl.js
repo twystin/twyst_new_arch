@@ -12,6 +12,7 @@ var AuthToken = mongoose.model('AuthToken');
 var AuthCode = mongoose.model('AuthCode');
 var HttpHelper = require('../common/http.hlpr.js');
 var DTHelper = require('../common/datetime.hlpr.js');
+var SMSHelper = require('../common/sms.hlpr.js');
 
 // Log the user in and generate an auth token which will be needed in every API call to authenticate the user
 module.exports.login = function(req, res) {
@@ -49,8 +50,13 @@ module.exports.create_authcode = function(req, res) {
       if (authcode) {
         if (authcode.status === 'used') {
           // Create a new auth code
-          generate_new_code(phone).then(function(data ) {
-            HttpHelper.success(res, data.data, data.message);
+          generate_new_code(phone).then(function(auth_data) {
+            var message = 'Your Twyst verification code is ' + auth_data.code;
+            SMSHelper.send_sms(phone, message).then(function(sms_data) {
+              HttpHelper.success(res, auth_data.data, auth_data.message);
+            }, function(err) {
+              HttpHelper.error(res, err.err, err.message);
+            });
           }, function(err) {
             HttpHelper.error(res, err.err, err.message);
           });
@@ -63,11 +69,21 @@ module.exports.create_authcode = function(req, res) {
           } else {
             if (timediff < DTHelper.oneday) {
               // Send same authcode
-              HttpHelper.success(res, authcode, 'Re-sending your unused authcode');
+              var message = 'Your Twyst verification code is ' + authcode.code;
+              SMSHelper.send_sms(phone, message).then(function(sms_data) {
+                HttpHelper.success(res, authcode, 'Resending your unused auth code');
+              }, function(err) {
+                HttpHelper.error(res, err.err, err.message);
+              });
             } else {
               // Send new authcode
-              generate_new_code(phone).then(function(data ) {
-                HttpHelper.success(res, data.data, data.message);
+              generate_new_code(phone).then(function(auth_data) {
+                var message = 'Your Twyst verification code is ' + auth_data.code;
+                SMSHelper.send_sms(phone, message).then(function(sms_data) {
+                  HttpHelper.success(res, auth_data.data, auth_data.message);
+                }, function(err) {
+                  HttpHelper.error(res, err.err, err.message);
+                });
               }, function(err) {
                 HttpHelper.error(res, err.err, err.message);
               });
@@ -76,8 +92,13 @@ module.exports.create_authcode = function(req, res) {
         }
       } else {
         // Create a new authcode
-        generate_new_code(phone).then(function(data ) {
-          HttpHelper.success(res, data.data, data.message);
+        generate_new_code(phone).then(function(auth_data) {
+          var message = 'Your Twyst verification code is ' + auth_data.code;
+          SMSHelper.send_sms(phone, message).then(function(sms_data) {
+            HttpHelper.success(res, auth_data.data, auth_data.message);
+          }, function(err) {
+            HttpHelper.error(res, err.err, err.message);
+          });
         }, function(err) {
           HttpHelper.error(res, err.err, err.message);
         });
@@ -90,6 +111,8 @@ module.exports.verify_authcode_and_create_account = function(req, res) {
   res.send(405);
 };
 
+
+// Helper functions
 function generate_new_code(phone) {
   var deferred = Q.defer();
 

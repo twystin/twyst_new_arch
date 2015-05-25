@@ -35,7 +35,6 @@ describe('Auth Tests', function() {
     it('Get a verification code - should pass', function(done) {
       api.get('/api/v4/authcode/9779456097')
       .end(function(err,res) {
-        console.log(res);
         res.status.should.equal(200);
         res.body.response.should.be.true;
         if (err) return done(err);
