@@ -14,13 +14,9 @@ module.exports = function(app) {
       }, passport.authenticate('account'),
       AccountCtrl.login);
 
-    app.get('/api/v4/authcode', function(req, res) {
-      res.status(405).send({message: 'Not yet implemented'});
-    });
+    app.get('/api/v4/authcode/:phone', AccountCtrl.create_authcode);
 
-    app.post('/api/v4/authcode', function(req, res) {
-      res.status(405).send({message: 'Not yet implemented'});
-    });
+    app.post('/api/v4/authcode', AccountCtrl.verify_authcode_and_create_account);
 
     app.get('/api/v4/logout', function(req, res) {
       res.status(405).send({message: 'Not yet implemented'});
