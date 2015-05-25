@@ -1,49 +1,46 @@
-/*jslint node: true */
 'use strict';
+/*jslint node: true */
 
-var mongoose = require("mongoose"),
-  async = require('async'),
-  _ = require("underscore"),
-  CommonUtils = require('../../common/utilities');
-require('../../models/event.mdl');
-require('../../models/deal.mdl');
+var mongoose = require('mongoose');
+require('../models/event.mdl.js');
 var Event = mongoose.model('Event');
-var Deal = mongoose.model('Deal');
+var HttpHelper = require('../common/http.hlpr.js');
+var AuthHelper = require('../common/auth.hlpr.js');
+var _ = require('underscore');
 
-module.exports.registerEvent = function(req,res) {
+var Q = require('Q');
+
+module.exports.new = function(req, res) {
+  var token = req.query.token || null;
   var created_event = {};
-	created_event = _.extend(created_event, req.body);
-	var event = new Event(created_event);
 
-  // Find the deals that match the event & outlet or the Twyst deals if no event.
-  Deal
-  .find({'rule.event_type':event.event_type})
-  .elemMatch('outlets', {$eq: event.event_outlet})
-  .exec(function(err, deals) {
-    if (err) {
-      // Error getting info from teh server
-    } else {
-      console.log(deals);
-      if (deals) {
-        var event_handler = require('./event_handlers/' + created_event.event_type);
-        event_handler.handleEvent(created_event, deals);
+  if (!token) {
+    HttpHelper.error(res, true, "Not authenticated");
+  }
+
+  created_event = _.extend(created_event, req.body);
+  create_event(token, created_event).then(function(data) {
+    HttpHelper.success(res, data.data, data.message);
+  }, function(err) {
+    HttpHelper.error(res, err.data, err.message);
+  });
+};
+
+var create_event = function(token, created_event) {
+  var deferred = Q.defer();
+  var event = null;
+  AuthHelper.get_user(token).then(function(data) {
+    event = new Event(created_event);
+    event.save(function(err, e) {
+      if (err || !e) {
+        deferred.reject({err: err || true, message: 'Couldn\'t save the event.'});
       } else {
-        // No deals were found
+          deferred.resolve({data: e, message: 'Successfully created the event'});
       }
-    }
+    });
+  }, function(err) {
+    deferred.reject({err: err || true, message: 'Couldn\'t find the user'});
   });
 
-	event.save(function(err) {
-		if (err) {
-			res.send(400, {	'status': 'error',
-						'message': 'Event creation error. Please fill all required fields',
-						'info': JSON.stringify(err)
-			});
-		} else {
-			res.send(200, {	'status': 'success',
-						'message': 'Saved event',
-						'info': ''
-			});
-		}
-	});
+  return deferred.promise;
 };

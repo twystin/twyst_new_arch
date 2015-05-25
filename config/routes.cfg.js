@@ -31,15 +31,19 @@ module.exports = function(app) {
   })();
 
   (function EventRoutes() {
+    var EventCtrl = require('../controllers/event.ctrl');
     app.get('/api/v4/events', function(req, res) {
       res.status(405).send({message: 'Not yet implemented'});
     });
     app.get('/api/v4/events/:event_id', function(req, res) {
       res.status(405).send({message: 'Not yet implemented'});
     });
-    app.post('/api/v4/events', function(req, res) {
-      res.status(405).send({message: 'Not yet implemented'});
-    });
+    app.post('/api/v4/events', EventCtrl.new);
+    // PROXIES -- DO VERIFICATION INLINE
+    app.post('/api/v4/checkin', EventCtrl.new);
+    app.post('/api/v4/gift', EventCtrl.new);
+    app.post('/api/v4/follow', EventCtrl.new);
+
   })();
 
 

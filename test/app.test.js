@@ -94,20 +94,74 @@ describe('Recommendation Tests', function() {
 
 describe('Event Tests', function() {
   describe('Checkin event', function() {
-    it('Checkin - should pass');
+    it('Checkin - should pass', function(done) {
+      api
+        .post('/api/v4/checkin?token=' + token)
+        .send({
+          event_type: 'checkin',
+          event_date: new Date(),
+          event_meta: {
+            'qr': '12345'
+          },
+          event_user: null,
+          event_outlet: null
+        })
+        .set('Accept', 'application/json')
+        .end(function(err, res) {
+          res.status.should.equal(200);
+          res.body.response.should.be.true;
+          if (err) return done(err);
+          done();
+        });
+    });
   });
 
   describe('Follow event', function() {
-    it('Follow - should pass');
+    it('Follow - should pass', function(done) {
+      api
+        .post('/api/v4/follow?token=' + token)
+        .send({
+          event_type: 'follow',
+          event_date: new Date(),
+          event_meta: {
+          },
+          event_user: null,
+          event_outlet: null
+        })
+        .set('Accept', 'application/json')
+        .end(function(err, res) {
+          res.status.should.equal(200);
+          res.body.response.should.be.true;
+          if (err) return done(err);
+          done();
+        });
+    });
   });
 
   describe('Gift event', function() {
-    it('Gift - should pass');
+    it('Gift - should pass', function(done) {
+      api
+        .post('/api/v4/gift?token=' + token)
+        .send({
+          event_type: 'gift',
+          event_date: new Date(),
+          event_meta: {
+            'coupon_code': null,
+            'gifted_to': null
+          },
+          event_user: null,
+          event_outlet: null
+        })
+        .set('Accept', 'application/json')
+        .end(function(err, res) {
+          res.status.should.equal(200);
+          res.body.response.should.be.true;
+          if (err) return done(err);
+          done();
+        });
+    });
   });
 
-  describe('Pool event', function() {
-    it('Pool - should pass');
-  });
 });
 
 describe('Outlet Tests', function() {
