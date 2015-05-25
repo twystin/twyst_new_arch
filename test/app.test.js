@@ -10,6 +10,7 @@ var supertest = require('supertest');
 var api = supertest('http://localhost:3000');
 var token = '';
 var saved_outlet = '';
+var authcode = '';
 
 
 describe('Auth Tests', function() {
@@ -33,15 +34,30 @@ describe('Auth Tests', function() {
     });
 
     it('Get a verification code - should pass', function(done) {
-      api.get('/api/v4/authcode/9779456097')
+      api.get('/api/v4/authcode/100000001')
       .end(function(err,res) {
+        res.status.should.equal(200);
+        res.body.response.should.be.true;
+        authcode = res.body.data;
+        if (err) return done(err);
+        done();
+      });
+    });
+
+    it('Verify an unused code - should pass', function(done) {
+      api.post('/api/v4/authcode')
+      .send({
+        code: authcode.code,
+        phone: authcode.phone
+      })
+      .set('Accept', 'application/json')
+      .end(function(err, res) {
         res.status.should.equal(200);
         res.body.response.should.be.true;
         if (err) return done(err);
         done();
       });
     });
-    it('Verify an unused code - should pass');
   });
 
   describe('Logout', function() {
