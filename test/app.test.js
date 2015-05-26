@@ -12,7 +12,6 @@ var token = '';
 var saved_outlet = '';
 var authcode = '';
 
-
 describe('Auth Tests', function() {
   describe('Login', function() {
     it('Login a valid user - should pass', function(done) {
@@ -107,11 +106,67 @@ describe('User Tests', function() {
 
 describe('Recommendation Tests', function() {
   describe('Get recos', function() {
-    it('Get my recos - should pass');
-    it('Get future recos - should pass');
-    it('Get public recos - should pass');
-    it('Get recos with lat/long - should pass');
-    it('Search recos - should pass /q');
+    it('Get my recos - should pass', function(done) {
+      api
+        .get('/api/v4/recos?token=' + token)
+        .end(function(err, res) {
+          res.status.should.equal(200);
+          res.body.response.should.be.true;
+          if (err) return done(err);
+          done();
+        });
+    });
+    it('Get future recos - should pass', function(done) {
+      api
+        .get('/api/v4/recos?token=' + token + '&date=12-05-15&time=16:40')
+        .end(function(err, res) {
+          res.status.should.equal(200);
+          res.body.response.should.be.true;
+          if (err) return done(err);
+          done();
+        });
+    });
+    it('Get public recos - should pass', function(done) {
+      api
+        .get('/api/v4/recos')
+        .end(function(err, res) {
+          res.status.should.equal(200);
+          res.body.response.should.be.true;
+          if (err) return done(err);
+          done();
+        });
+    });
+    it('Get recos with lat/long - should pass', function(done) {
+      api
+        .get('/api/v4/recos?token=' + token + '&lat=123&long=342')
+        .end(function(err, res) {
+          res.status.should.equal(200);
+          res.body.response.should.be.true;
+          if (err) return done(err);
+          done();
+        });
+    });
+    it('Search recos - should pass /q', function(done) {
+      api
+        .get('/api/v4/recos?token=' + token + '&q=cafe')
+        .end(function(err, res) {
+          res.status.should.equal(200);
+          res.body.response.should.be.true;
+          if (err) return done(err);
+          done();
+        });
+    });
+
+    it('Get recos with pagination', function(done) {
+      api
+        .get('/api/v4/recos?token=' + token + '&start=1&end=20')
+        .end(function(err, res) {
+          res.status.should.equal(200);
+          res.body.response.should.be.true;
+          if (err) return done(err);
+          done();
+        });
+    });
   });
 });
 
@@ -278,8 +333,6 @@ describe('Outlet Tests', function() {
         done();
       });
     });
-
-    it('Get public outlets - should pass');
 
     it('Get all outlets I have access to - should pass', function(done) {
       api.get('/api/v4/outlets?token=' + token)

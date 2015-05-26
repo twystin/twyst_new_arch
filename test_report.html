@@ -1,0 +1,290 @@
+    <section class="suite">
+      <h1>Auth Tests</h1>
+      <dl>
+        <section class="suite">
+          <h1>Login</h1>
+          <dl>
+            <dt>Login a valid user - should pass</dt>
+            <dd><pre><code>api
+  .post('/api/v4/accounts/login')
+  .send({
+    username: 'ablal',
+    password: 'spam25'
+  })
+  .set('Accept', 'application/json')
+  .end(function(err, res) {
+    res.status.should.equal(200);
+    res.body.response.should.be.true;
+    token = res.body.data.token;
+    res.body.data.token.should.be.a('string');
+    if (err) return done(err);
+    done();
+  });</code></pre></dd>
+            <dt>Get a verification code - should pass</dt>
+            <dd><pre><code>api.get('/api/v4/authcode/100000001')
+.end(function(err,res) {
+  res.status.should.equal(200);
+  res.body.response.should.be.true;
+  authcode = res.body.data;
+  if (err) return done(err);
+  done();
+});</code></pre></dd>
+            <dt>Verify an unused code - should pass</dt>
+            <dd><pre><code>api.post('/api/v4/authcode')
+.send({
+  code: authcode.code,
+  phone: authcode.phone
+})
+.set('Accept', 'application/json')
+.end(function(err, res) {
+  res.status.should.equal(200);
+  res.body.response.should.be.true;
+  if (err) return done(err);
+  done();
+});</code></pre></dd>
+          </dl>
+        </section>
+        <section class="suite">
+          <h1>Logout</h1>
+          <dl>
+            <dt>Logout a user - should pass</dt>
+            <dd><pre><code>api.get('/api/v4/logout?token=' + token)
+.end(function(err, res) {
+  res.status.should.equal(200);
+  res.body.response.should.be.true;
+  if (err) return done(err);
+  done();
+});</code></pre></dd>
+          </dl>
+        </section>
+      </dl>
+    </section>
+    <section class="suite">
+      <h1>User Tests</h1>
+      <dl>
+        <section class="suite">
+          <h1>Get user</h1>
+          <dl>
+            <dt>Get the logged in user - should pass</dt>
+            <dd><pre><code>api
+  .get('/api/v4/users/0?token=' + token)
+  .end(function(err, res) {
+    res.status.should.equal(200);
+    res.body.response.should.be.true;
+    if (err) return done(err);
+    done();
+  });</code></pre></dd>
+          </dl>
+        </section>
+      </dl>
+    </section>
+    <section class="suite">
+      <h1>Recommendation Tests</h1>
+      <dl>
+        <section class="suite">
+          <h1>Get recos</h1>
+          <dl>
+            <dt>Get my recos - should pass</dt>
+            <dd><pre><code>api
+  .get('/api/v4/recos?token=' + token)
+  .end(function(err, res) {
+    res.status.should.equal(200);
+    res.body.response.should.be.true;
+    if (err) return done(err);
+    done();
+  });</code></pre></dd>
+            <dt>Get future recos - should pass</dt>
+            <dd><pre><code>api
+  .get('/api/v4/recos?token=' + token + '&amp;date=12-05-15&amp;time=16:40')
+  .end(function(err, res) {
+    res.status.should.equal(200);
+    res.body.response.should.be.true;
+    if (err) return done(err);
+    done();
+  });</code></pre></dd>
+            <dt>Get public recos - should pass</dt>
+            <dd><pre><code>api
+  .get('/api/v4/recos')
+  .end(function(err, res) {
+    res.status.should.equal(200);
+    res.body.response.should.be.true;
+    if (err) return done(err);
+    done();
+  });</code></pre></dd>
+            <dt>Get recos with lat/long - should pass</dt>
+            <dd><pre><code>api
+  .get('/api/v4/recos?token=' + token + '&amp;lat=123&amp;long=342')
+  .end(function(err, res) {
+    res.status.should.equal(200);
+    res.body.response.should.be.true;
+    if (err) return done(err);
+    done();
+  });</code></pre></dd>
+            <dt>Search recos - should pass /q</dt>
+            <dd><pre><code>api
+  .get('/api/v4/recos?token=' + token + '&amp;q=cafe')
+  .end(function(err, res) {
+    res.status.should.equal(200);
+    res.body.response.should.be.true;
+    if (err) return done(err);
+    done();
+  });</code></pre></dd>
+            <dt>Get recos with pagination</dt>
+            <dd><pre><code>api
+  .get('/api/v4/recos?token=' + token + '&amp;start=1&amp;end=20')
+  .end(function(err, res) {
+    res.status.should.equal(200);
+    res.body.response.should.be.true;
+    if (err) return done(err);
+    done();
+  });</code></pre></dd>
+          </dl>
+        </section>
+      </dl>
+    </section>
+    <section class="suite">
+      <h1>Event Tests</h1>
+      <dl>
+        <section class="suite">
+          <h1>Checkin event</h1>
+          <dl>
+            <dt>Checkin - should pass</dt>
+            <dd><pre><code>api
+  .post('/api/v4/checkin?token=' + token)
+  .send({
+    event_type: 'checkin',
+    event_date: new Date(),
+    event_meta: {
+      'qr': '12345'
+    },
+    event_user: null,
+    event_outlet: null
+  })
+  .set('Accept', 'application/json')
+  .end(function(err, res) {
+    res.status.should.equal(200);
+    res.body.response.should.be.true;
+    if (err) return done(err);
+    done();
+  });</code></pre></dd>
+          </dl>
+        </section>
+        <section class="suite">
+          <h1>Follow event</h1>
+          <dl>
+            <dt>Follow - should pass</dt>
+            <dd><pre><code>api
+  .post('/api/v4/follow?token=' + token)
+  .send({
+    event_type: 'follow',
+    event_date: new Date(),
+    event_meta: {
+    },
+    event_user: null,
+    event_outlet: null
+  })
+  .set('Accept', 'application/json')
+  .end(function(err, res) {
+    res.status.should.equal(200);
+    res.body.response.should.be.true;
+    if (err) return done(err);
+    done();
+  });</code></pre></dd>
+          </dl>
+        </section>
+        <section class="suite">
+          <h1>Gift event</h1>
+          <dl>
+            <dt>Gift - should pass</dt>
+            <dd><pre><code>api
+  .post('/api/v4/gift?token=' + token)
+  .send({
+    event_type: 'gift',
+    event_date: new Date(),
+    event_meta: {
+      'coupon_code': null,
+      'gifted_to': null
+    },
+    event_user: null,
+    event_outlet: null
+  })
+  .set('Accept', 'application/json')
+  .end(function(err, res) {
+    res.status.should.equal(200);
+    res.body.response.should.be.true;
+    if (err) return done(err);
+    done();
+  });</code></pre></dd>
+          </dl>
+        </section>
+      </dl>
+    </section>
+    <section class="suite">
+      <h1>Outlet Tests</h1>
+      <dl>
+        <section class="suite">
+          <h1>Outlet workout - CRUD</h1>
+          <dl>
+            <dt>Saving an empty outlet - should fail</dt>
+            <dd><pre><code>api
+  .post('/api/v4/outlets?token=' + token)
+  .send({})
+  .set('Accept', 'application/json')
+  .end(function(err, res) {
+    res.status.should.equal(200);
+    res.body.response.should.be.false;
+    if (err) return done(err);
+    done();
+  });</code></pre></dd>
+            <dt>Saving an filled outlet - should pass</dt>
+            <dd><pre><code>api
+        .post('/api/v4/outlets?token=' + token)
+        .send(outlet)
+        .set('Accept', 'application/json')
+        .end(function(err, res) {
+          saved_outlet = res.body.data;
+          res.status.should.equal(200);
+          res.body.response.should.be.true;
+          if (err) return done(err);
+          done();
+        });</code></pre></dd>
+            <dt>Updating an outlet - should pass</dt>
+            <dd><pre><code>saved_outlet.basics.name = 'Updated outlet';
+api.put('/api/v4/outlets/' + saved_outlet._id + '?token=' + token)
+.send(saved_outlet)
+.set('Accept', 'application/json')
+.end(function(err, res) {
+  res.status.should.equal(200);
+  res.body.response.should.be.true;
+  if (err) return done(err);
+  done();
+});</code></pre></dd>
+            <dt>Get all outlets I have access to - should pass</dt>
+            <dd><pre><code>api.get('/api/v4/outlets?token=' + token)
+.end(function(err,res) {
+  res.status.should.equal(200);
+  res.body.response.should.be.true;
+  if (err) return done(err);
+  done();
+});</code></pre></dd>
+            <dt>Get a particular outlets details - should pass</dt>
+            <dd><pre><code>api.get('/api/v4/outlets/' + saved_outlet._id + '?token=' + token)
+.end(function(err, res) {
+  res.status.should.equal(200);
+  res.body.response.should.be.true;
+  expect(res.body.data).eql(saved_outlet);
+  if (err) return done(err);
+  done();
+});</code></pre></dd>
+            <dt>Deleting an outlet - should pass</dt>
+            <dd><pre><code>api.delete('/api/v4/outlets/' + saved_outlet._id + '?token=' + token)
+.end(function(err, res) {
+  res.status.should.equal(200);
+  res.body.response.should.be.true;
+  if (err) return done(err);
+  done();
+});</code></pre></dd>
+          </dl>
+        </section>
+      </dl>
+    </section>

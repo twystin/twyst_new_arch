@@ -21,9 +21,8 @@ module.exports = function(app) {
   })();
 
   (function RecoRoutes() {
-    app.get('/api/v4/recos', function(req, res) {
-      res.status(405).send({message: 'Not yet implemented'});
-    });
+    var RecoCtrl = require('../controllers/reco.ctrl');
+    app.get('/api/v4/recos', RecoCtrl.get);
   })();
 
   (function EventRoutes() {
