@@ -61,11 +61,34 @@ describe('Auth Tests', function() {
   });
 
   describe('Logout', function() {
-    it('Logout a user - should pass');
+    it('Logout a user - should pass', function(done) {
+      api.get('/api/v4/logout?token=' + token)
+      .end(function(err, res) {
+        res.status.should.equal(200);
+        res.body.response.should.be.true;
+        if (err) return done(err);
+        done();
+      });
+    });
   });
 });
 
 describe('User Tests', function() {
+  before(function(done){
+    api
+      .post('/api/v4/accounts/login')
+      .send({
+        username: 'ablal',
+        password: 'spam25'
+      })
+      .set('Accept', 'application/json')
+      .end(function(err, res) {
+        token = res.body.data.token;
+        if (err) return done(err);
+        done();
+      });
+  });
+
   describe('Get user', function() {
     it('Get the logged in user - should pass', function(done) {
       api
@@ -93,6 +116,21 @@ describe('Recommendation Tests', function() {
 });
 
 describe('Event Tests', function() {
+  before(function(done){
+    api
+      .post('/api/v4/accounts/login')
+      .send({
+        username: 'ablal',
+        password: 'spam25'
+      })
+      .set('Accept', 'application/json')
+      .end(function(err, res) {
+        token = res.body.data.token;
+        if (err) return done(err);
+        done();
+      });
+  });
+
   describe('Checkin event', function() {
     it('Checkin - should pass', function(done) {
       api
@@ -165,6 +203,21 @@ describe('Event Tests', function() {
 });
 
 describe('Outlet Tests', function() {
+  before(function(done){
+    api
+      .post('/api/v4/accounts/login')
+      .send({
+        username: 'ablal',
+        password: 'spam25'
+      })
+      .set('Accept', 'application/json')
+      .end(function(err, res) {
+        token = res.body.data.token;
+        if (err) return done(err);
+        done();
+      });
+  });
+
   describe('Outlet workout - CRUD', function() {
     it('Saving an empty outlet - should fail', function(done) {
       api

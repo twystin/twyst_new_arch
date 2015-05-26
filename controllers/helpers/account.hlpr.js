@@ -15,6 +15,19 @@ var AuthCode = mongoose.model('AuthCode');
 var Account = mongoose.model('Account');
 var User = mongoose.model('User');
 
+module.exports.delete_auth_token = function(token) {
+  var deferred = Q.defer();
+  AuthToken.findOneAndRemove({token: token}, function(err) {
+    if (err) {
+      deferred.reject({err: err, message: 'Error deleting token'});
+    } else {
+      deferred.resolve({data: null, message: 'Deleted user token'});
+    }
+  });
+
+  return deferred.promise;
+};
+
 module.exports.save_auth_token = function(account, user) {
   var deferred = Q.defer();
   var token = keygen.session_id();

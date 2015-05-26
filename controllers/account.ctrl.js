@@ -20,6 +20,20 @@ module.exports.login = function(req, res) {
   });
 };
 
+module.exports.logout = function(req, res) {
+  var token = req.query.token || null;
+
+  if (!token) {
+    HttpHelper.error(res, true, "No user to logout!");
+  }
+
+  AccountHelper.delete_auth_token(token).then(function(data) {
+    HttpHelper.success(res, data.data, data.message);
+  }, function(err) {
+    HttpHelper.error(res, err.err, err.message);
+  });
+};
+
 module.exports.create_authcode = function(req, res) {
   var phone = req.params.phone;
   var code = '';
