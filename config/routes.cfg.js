@@ -56,10 +56,8 @@ module.exports = function(app) {
 
   (function UserRoutes() {
     var UserCtrl = require('../controllers/user.ctrl');
-    app.get('/api/v4/users/:id', UserCtrl.get);
-    app.get('/api/v4/coupons', function(req, res) {
-      res.status(405).send({message: 'Not yet implemented'});
-    });
+    app.get('/api/v4/profile', UserCtrl.get_profile);
+    app.get('/api/v4/coupons', UserCtrl.get_coupons);
   })();
 };
 

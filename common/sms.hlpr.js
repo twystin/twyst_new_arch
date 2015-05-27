@@ -3,7 +3,7 @@
 
 // require('../models/sms_log.mdl.js');
 var mongoose = require('mongoose');
-var Q = require('Q');
+var Q = require('q');
 var http = require('http');
 var sms_push_url = "http://myvaluefirst.com/smpp/sendsms?username=twysthttp&password=twystht6&to=";
 // var SMSLog = mongoose.model('SMSLog');

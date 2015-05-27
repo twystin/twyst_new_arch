@@ -4,7 +4,7 @@
 var keygen = require('keygenerator');
 var mongoose = require('mongoose');
 var moment = require('moment');
-var Q = require('Q');
+var Q = require('q');
 
 require('../../models/auth_token.mdl.js');
 require('../../models/auth_code.mdl.js');

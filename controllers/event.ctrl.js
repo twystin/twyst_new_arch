@@ -8,7 +8,7 @@ var HttpHelper = require('../common/http.hlpr.js');
 var AuthHelper = require('../common/auth.hlpr.js');
 var _ = require('underscore');
 
-var Q = require('Q');
+var Q = require('q');
 
 module.exports.new = function(req, res) {
   var token = req.query.token || null;

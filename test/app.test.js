@@ -91,7 +91,7 @@ describe('User Tests', function() {
   describe('Get user', function() {
     it('Get the logged in user - should pass', function(done) {
       api
-        .get('/api/v4/users/0?token=' + token)
+        .get('/api/v4/profile?token=' + token)
         .end(function(err, res) {
           res.status.should.equal(200);
           res.body.response.should.be.true;
@@ -100,7 +100,15 @@ describe('User Tests', function() {
         });
     });
 
-    it('Get my coupons - should pass');
+    it('Get my coupons - should pass', function(done) {
+      api.get('/api/v4/coupons?token=' + token)
+      .end(function(err, res) {
+        res.status.should.equal(200);
+        res.body.response.should.be.true;
+        if (err) return done(err);
+        done();
+      });
+    });
   });
 });
 
@@ -159,7 +167,7 @@ describe('Recommendation Tests', function() {
 
     it('Get recos with pagination', function(done) {
       api
-        .get('/api/v4/recos?token=' + token + '&start=1&end=20')
+        .get('/api/v4/recos?token=' + token + '&start=1&long=342')
         .end(function(err, res) {
           res.status.should.equal(200);
           res.body.response.should.be.true;
