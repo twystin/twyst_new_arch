@@ -57,6 +57,7 @@ module.exports = function(app) {
   (function UserRoutes() {
     var UserCtrl = require('../controllers/user.ctrl');
     app.get('/api/v4/profile', UserCtrl.get_profile);
+    app.put('/api/v4/profile', UserCtrl.update_profile);
     app.get('/api/v4/coupons', UserCtrl.get_coupons);
   })();
 };

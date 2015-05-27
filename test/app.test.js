@@ -11,6 +11,7 @@ var api = supertest('http://localhost:3000');
 var token = '';
 var saved_outlet = '';
 var authcode = '';
+var user = '';
 
 describe('Auth Tests', function() {
   describe('Login', function() {
@@ -95,9 +96,24 @@ describe('User Tests', function() {
         .end(function(err, res) {
           res.status.should.equal(200);
           res.body.response.should.be.true;
+          user = res.body.data.data;
           if (err) return done(err);
           done();
         });
+    });
+
+    it('Update the logged in user - should pass', function(done) {
+      var updated_user = user;
+      updated_user.first_name = 'Abhimanyu';
+      api.put('/api/v4/profile?token=' + token)
+      .send(updated_user)
+      .set('Accept', 'application/json')
+      .end(function(err,res) {
+        res.status.should.equal(200);
+        res.body.response.should.be.true;
+        if (err) return done(err);
+        done();
+      });
     });
 
     it('Get my coupons - should pass', function(done) {
