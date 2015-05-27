@@ -36,7 +36,7 @@ twystMerchant.controller('AuthCtrl', function($scope, $rootScope, $state, $mdDia
         $cookies['expiry'] = info.data.expiry;
         $state.go('console');
       } else {
-        console.log("Some fuck up happened");
+        console.log("Some mess up happened");
       }
     }, function(err) {
       console.log(err);

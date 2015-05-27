@@ -22,7 +22,7 @@ config(function($stateProvider, $urlRouterProvider, $mdThemingProvider, Restangu
             resolve: {
               resUser: function(Restangular) {
                 // GET 0 means get me!
-                return Restangular.all('users').get('0')
+                return Restangular.one('profile').get();
               },
               authenticated: function($cookies) {
                 if ($cookies.token) {
