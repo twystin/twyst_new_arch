@@ -67,13 +67,34 @@
           <dl>
             <dt>Get the logged in user - should pass</dt>
             <dd><pre><code>api
-  .get('/api/v4/users/0?token=' + token)
+  .get('/api/v4/profile?token=' + token)
   .end(function(err, res) {
     res.status.should.equal(200);
     res.body.response.should.be.true;
+    user = res.body.data.data;
     if (err) return done(err);
     done();
   });</code></pre></dd>
+            <dt>Update the logged in user - should pass</dt>
+            <dd><pre><code>var updated_user = user;
+updated_user.first_name = 'Abhimanyu';
+api.put('/api/v4/profile?token=' + token)
+.send(updated_user)
+.set('Accept', 'application/json')
+.end(function(err,res) {
+  res.status.should.equal(200);
+  res.body.response.should.be.true;
+  if (err) return done(err);
+  done();
+});</code></pre></dd>
+            <dt>Get my coupons - should pass</dt>
+            <dd><pre><code>api.get('/api/v4/coupons?token=' + token)
+.end(function(err, res) {
+  res.status.should.equal(200);
+  res.body.response.should.be.true;
+  if (err) return done(err);
+  done();
+});</code></pre></dd>
           </dl>
         </section>
       </dl>
@@ -131,7 +152,7 @@
   });</code></pre></dd>
             <dt>Get recos with pagination</dt>
             <dd><pre><code>api
-  .get('/api/v4/recos?token=' + token + '&amp;start=1&amp;end=20')
+  .get('/api/v4/recos?token=' + token + '&amp;start=1&amp;long=342')
   .end(function(err, res) {
     res.status.should.equal(200);
     res.body.response.should.be.true;

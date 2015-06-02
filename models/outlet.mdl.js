@@ -6,15 +6,12 @@ var mongoose = require('mongoose'),
     hours = require("./partials/hours.mdl");
 
 var OutletSchema = new Schema({
-    publicUrl: [{type: String}],
-    shortUrl: [{type: String}],
     basics : {
         name: {type: String, trim: true, required: true},
         slug: {type: String, trim: true, required: true, index: true},
         main_type: {type: String, trim: true, required: true, enum:['fnb','spa','retail','other'], default:"other"},
         is_a: {type: String, enum: ['desserts', 'restaurant','biryani','chinese','continental','north_indian','fast_food','burgers','pizza','wraps','pub','beer','bakery','cake','cafe','bistro','takeaway','other']},
         icon: {type: String, enum: ['desserts', 'restaurant','biryani','chinese','continental','north_indian','fast_food','burgers','pizza','wraps','pub','beer','bakery','cake','cafe','bistro','takeaway','other']},
-        images: [{type: String}],
         created_at : {type: Date, default: Date.now},
         modified_at: {type: Date, default: Date.now}
     },
@@ -33,7 +30,7 @@ var OutletSchema = new Schema({
             pin : {type: String, default: '', trim: true}
         },
         phones: {
-            mobile: [],
+            mobile: [{num: {type:String, default: '', trim: true}}],
             reg_mobile: [{num: {type:String, default: '', trim: true}}],
             landline: {type:String, default: '', trim: true},
             type: {type: String, enum: ['landline', 'mobile', 'other']},
@@ -46,6 +43,8 @@ var OutletSchema = new Schema({
         }
     },
     links: {
+        public_url: [{type: String}],
+        short_url: [{type: String}],
         website_url: {type: String, default: ''},
         facebook_url: {type: String, default: ''},
         twitter_url: {type: String, default: ''},
@@ -137,19 +136,36 @@ var OutletSchema = new Schema({
         coupons_expired: {type: Number}
       }
     },
-    jobs: [
-      {
-        job_name: {type: String},
-        job_parameters: {}, // depends on the job, leaving it open
+    offers: [{
+      offer_status: {type: String}, // active
+      offer_type: {type: String}, // job,
+      offer_group: {type: String}, // to model the program
+      offer_start_date: {type: Date},
+      offer_end_date: {type: Date},
+      rule: {
+        event_type: String,
+        event_count: Number,
+        event_match: String,
+        friendly_text: String,
+        event_params: {}
+      },
+      actions: {
         reward: {
           title: {type: String},
           terms: {type: String},
           detail: {type: String},
           expiry: {type: String},
-          reward_meta: {} // the structured rewards
-        }
+          reward_meta: {}, // the structured rewards
+          reward_hours: hours.hours
+        },
+        message: {
+          sms: {type: String},
+          email: {type: String},
+          push: {type: String}
+        },
+        points: {type: Number}        
       }
-    ],
+    }],
     menu: [{
         status: {type: String},
         name: {type: String},

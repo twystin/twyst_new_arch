@@ -155,6 +155,11 @@
       </md-card-content>
     </md-card> -->
     <md-button ng-click="save()">Create</md-button>
+    <md-card ng-show="save.outlet">
+      <md-card-content>
+        Yippee, saved the outlet!
+      </md-card-content>
+    </md-card>
     <md-card ng-show="debug" class="debug">
       <md-card-content>
         {{outlet | json:object}}

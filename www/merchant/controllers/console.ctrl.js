@@ -68,9 +68,15 @@ twystMerchant.controller('ConsoleCtrl', function($scope, $timeout, $log, $mdToas
 
   $scope.save = function() {
     baseOutlets.post($scope.outlet).then(function(success) {
+      $scope.save = $scope.save || {};
+      $scope.save.outlet = true;
+      $scope.save.data = success;
       console.log(success);
     }, function(err){
       console.log(err);
+      $scope.save = $scope.save || {};
+      $scope.save.outlet = false;
+      $scope.save.data = err;
     });
   };
 
