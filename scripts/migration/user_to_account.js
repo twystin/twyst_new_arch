@@ -1,7 +1,3 @@
-// Separate the customer and account collections
-// After this run
-// db.customers.update({},{$unset:{"username":"", "hash":"","salt":""}}, {multi:true})
-
 var db = db.getSiblingDB('retwyst');
 var cursor = db.users.find();
 while(cursor.hasNext()) {
@@ -16,3 +12,6 @@ while(cursor.hasNext()) {
     user: c._id
   });
 }
+
+var retwyst = db.getSiblingDB('retwyst');
+retwyst.users.update({},{$unset:{"username":"", "hash":"","salt":"", role: ""}}, {multi:true});

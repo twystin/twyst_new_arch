@@ -20,17 +20,22 @@ while(program_cursor.hasNext()) {
           o = offer_cursor.next();
           retwyst.outlets.update({_id: {$in: p.outlets}},{
             $push: {
-              rules: {
-                status: p.status,
-                program: p.name,
-                reward: {
-                  title: o.basics.title,
-                  detail: o.basics.description,
-                  reward_meta: o.reward
+              offers: {
+                offer_status: p.status,
+                offer_type: 'checkin',
+                offer_group: p.name,
+                actions: {
+                  reward: {
+                    title: o.basics.title,
+                    terms: o.terms,
+                    detail: o.basics.description,
+                    reward_meta: o.reward
+                  }
                 },
-                events: {
+                rule: {
                   event_type: 'checkin',
-                  criteria: o.user_eligibility.criteria
+                  event_count: o.user_eligibility.criteria.value,
+                  event_match: o.user_eligibility.criteria.condition
                 }
               }
             },

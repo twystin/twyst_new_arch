@@ -20,7 +20,7 @@ config(function($stateProvider, $urlRouterProvider, $mdThemingProvider, Restangu
         views: {
           "content": {
             resolve: {
-              resUser: function(Restangular) {
+              resUser: function(Restangular, $timeout) {
                 // GET 0 means get me!
                 return Restangular.one('profile').get();
               },
