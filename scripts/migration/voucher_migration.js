@@ -1,4 +1,5 @@
 var db = db.getSiblingDB('twyst');
+var retwyst = db.getSiblingDB('retwyst');
 var cursor = db.vouchers.find();
 while(cursor.hasNext()) {
   a = cursor.next();
