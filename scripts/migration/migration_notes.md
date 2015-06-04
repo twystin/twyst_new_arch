@@ -5,6 +5,8 @@
 3. user_to_account.js
 4. outlet_accounts.js
 5. offer_migration.js: to clean up.
+6. deal_migration.js: to migrate hours.
+7. favourite_migration.js
 
 ## Earlier models
 1. Account - Migrated
@@ -12,9 +14,9 @@
 3. Beta Users - Backup
 4. Checkin - TBD
 5. Coupon - Nothing
-6. Deal - TBD
+6. Deal - Migrated
 7. Favourite - TBD
-8. Feedback - TBD
+8. Feedback - Migrated
 9. Group Program - Nothing
 10. Log - Backup
 11. New Year - Remove

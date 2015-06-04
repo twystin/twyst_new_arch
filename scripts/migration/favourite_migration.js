@@ -1,17 +1,17 @@
 var db = db.getSiblingDB('twyst');
 var cursor = db.favourites.find();
-var retwyst = db.getSiblingDB('retwyst')
+var retwyst = db.getSiblingDB('retwyst');
 while(cursor.hasNext()) {
   f = cursor.next();
-  retwyst.customers.update({_id:f.account},{
-    $push: {
-      events: {
-        event_type: 'favourite',
-        outlet: f.outlets,
-        event_date: f.created_date
-      }
+  retwyst.events.insert({
+    event_type: 'favourite',
+    event_date: f.created_date,
+    event_user: f.account,
+    event_outlet: f.outlets,
+    event_meta: {
+      program: f.program,
+      tier: f.tier,
+      offer: f.offers
     }
-  }, {
-    multi: true
   });
 }
