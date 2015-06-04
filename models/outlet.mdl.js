@@ -163,7 +163,7 @@ var OutletSchema = new Schema({
           email: {type: String},
           push: {type: String}
         },
-        points: {type: Number}        
+        points: {type: Number}
       }
     }],
     menu: [{
