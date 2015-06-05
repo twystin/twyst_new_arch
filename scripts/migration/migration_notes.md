@@ -7,6 +7,8 @@
 5. offer_migration.js: to clean up.
 6. deal_migration.js: to migrate hours.
 7. favourite_migration.js
+8. feedback_migration.js
+9. special_programs_migration.js
 
 ## Earlier models
 1. Account - Migrated
@@ -15,7 +17,7 @@
 4. Checkin - TBD
 5. Coupon - Nothing
 6. Deal - Migrated
-7. Favourite - TBD
+7. Favourite - Migrated
 8. Feedback - Migrated
 9. Group Program - Nothing
 10. Log - Backup
@@ -34,7 +36,7 @@
 23. SMS Log - Remove
 24. SMS Message Sent Log - Remove
 25. Social - TBD
-26. Special Program - TBD
+26. Special Program - Migrated
 27. Tag - TBD
 28. Temp OTP - Backup
 29. Tier - Migrated
