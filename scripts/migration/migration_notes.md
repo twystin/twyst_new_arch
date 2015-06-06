@@ -9,12 +9,14 @@
 7. favourite_migration.js
 8. feedback_migration.js
 9. special_programs_migration.js
+10. winback_migration.js
+11. checkin_migration: need to fix up the users
 
 ## Earlier models
 1. Account - Migrated
 2. Beta Merchants - Backup
 3. Beta Users - Backup
-4. Checkin - TBD
+4. Checkin - Migrated - 1st run
 5. Coupon - Nothing
 6. Deal - Migrated
 7. Favourite - Migrated
