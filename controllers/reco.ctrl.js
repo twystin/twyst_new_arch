@@ -24,6 +24,8 @@ module.exports.get = function(req, res) {
     var q = query.q || null;
     var token = query.token || null;
 
+    var massaged_data = [];
+
     if (end < start) {
       return [];
     }
@@ -37,7 +39,7 @@ module.exports.get = function(req, res) {
       massaged_item.address = item.contact.location.address;
       massaged_item.distance = distance(lat, long, item.contact.location.coords.latitude, item.contact.location.coords.longitude, 'K');
       massaged_item.phone = item.contact.phones.mobile[0] && item.contact.phones.mobile[0].num;
-      massaged_item.open = open_now(item.business_hours);
+      massaged_item.open = RecoHelper.isClosed(item.business_hours);
       massaged_item.thumbnail = item.photos.others[0] && item.photos.others[0].image._th;
       massaged_item.offers = _.map(item.offers, filter_offer);
 
@@ -55,15 +57,13 @@ module.exports.get = function(req, res) {
       return massaged_item;
     }
 
-    var massaged_data = massaged_data.slice(start - 1, end);
-
+    massaged_data = _.shuffle(massaged_data);
+    massaged_data = massaged_data.slice(start - 1, end);
     return massaged_data;
   }
 };
 
-function open_now(hours) {
-  return RecoHelper.isClosed(hours);
-}
+
 
 function distance(lat1, lon1, lat2, lon2, unit) {
 	var radlat1 = Math.PI * lat1/180;
