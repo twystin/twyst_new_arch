@@ -47,6 +47,7 @@ module.exports.get = function(req, res) {
       return [];
     }
 
+
     massaged_data = _.map(data, pick);
 
     function pick(item) {
@@ -60,7 +61,9 @@ module.exports.get = function(req, res) {
       massaged_item.open = RecoHelper.isClosed(item.business_hours);
       massaged_item.thumbnail = item.photos.others[0] && item.photos.others[0].image._th;
       massaged_item.offers = _.map(item.offers, filter_offer);
-
+      massaged_item.redeemed = item.analytics &&
+                               item.analytics.coupon_analytics &&
+                               item.analytics.coupon_analytics.coupons_redeemed || 0;
       function filter_offer(offer) {
         var massaged_offer = {};
         massaged_offer.type = offer.offer_type;
@@ -75,7 +78,9 @@ module.exports.get = function(req, res) {
       return massaged_item;
     }
 
-    massaged_data = _.shuffle(massaged_data); // TO FIX UP
+    massaged_data = _.sortBy(massaged_data, function(item) {
+      return -item.redeemed;
+    });
     massaged_data = massaged_data.slice(start - 1, end);
 
     function couponify(data) {
