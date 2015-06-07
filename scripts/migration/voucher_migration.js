@@ -7,7 +7,7 @@ while(cursor.hasNext()) {
     $push: {
       coupons: {
         code: a.basics.code,
-        outlets: a.issue_details.issued_to,
+        outlets: a.issue_details.issued_at,
         title: a.basics.description,
         detail: a.basics.description,
         expiry: a.validity.end_date,

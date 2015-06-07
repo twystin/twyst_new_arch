@@ -5,24 +5,41 @@ var mongoose = require('mongoose');
 var Outlet = mongoose.model('Outlet');
 var HttpHelper = require('../common/http.hlpr.js');
 var RecoHelper = require('./helpers/reco.hlpr.js');
+var AuthHelper = require('../common/auth.hlpr.js');
+var Cache = require('../common/cache.hlpr.js');
 var _ = require('underscore');
 
 module.exports.get = function(req, res) {
-  Outlet.find({}, function(err, outlets) {
-    if (err || outlets.length === 0) {
-      HttpHelper.error(res, err || true, "Couldn't get outlets");
-    } else {
-      HttpHelper.success(res, massage(outlets, req.query), "Found outlets");
-    }
-  });
+  var token = req.query.token;
 
-  function massage(data, query) {
+  if (!Cache.outlets) {
+    Outlet.find({}, function(err, outlets) {
+      if (err || outlets.length === 0) {
+        HttpHelper.error(res, err || true, "Couldn't get outlets");
+      } else {
+        Cache.outlets = outlets;
+        if (token === null) {
+          HttpHelper.success(res, massage(Cache.outlets, req.query), "Found outlets");
+        } else {
+          AuthHelper.get_user(token).then(function(data) {
+            HttpHelper.success(res, massage(Cache.outlets, req.query, data.data), "Found outlets");
+          }, function(err) {
+            HttpHelper.success(res, massage(outlets, req.query), "Found outlets");
+          });
+        }
+      }
+    });
+  } else {
+    HttpHelper.success(res, massage(Cache.outlets, req.query), "Found outlets");
+  }
+
+
+  function massage(data, query, user) {
     var start = query.start || 1;
     var end = query.end || undefined;
     var lat = query.lat || 28.46;
     var long = query.long || 77.06;
     var q = query.q || null;
-    var token = query.token || null;
 
     var massaged_data = [];
 
@@ -34,6 +51,7 @@ module.exports.get = function(req, res) {
 
     function pick(item) {
       var massaged_item = {};
+      massaged_item._id = item._id;
       massaged_item.name = item.basics.name;
       massaged_item.city = item.contact.location.city;
       massaged_item.address = item.contact.location.address;
@@ -57,9 +75,36 @@ module.exports.get = function(req, res) {
       return massaged_item;
     }
 
-    massaged_data = _.shuffle(massaged_data);
+    massaged_data = _.shuffle(massaged_data); // TO FIX UP
     massaged_data = massaged_data.slice(start - 1, end);
-    return massaged_data;
+
+    function couponify(data) {
+      if (user && user.coupons) {
+        _.each(data, function(outlet) {
+          _.each(user.coupons, function(coupon) {
+            _.each(coupon.outlets, function(coupon_outlet) {
+              if (coupon_outlet + "" == outlet._id + "") {
+                var massaged_offer = {};
+                massaged_offer.type = 'coupon';
+                massaged_offer.title = coupon.title;
+                massaged_offer.expiry = coupon.expiry;
+                massaged_offer.detail = coupon.detail;
+                massaged_offer.meta = {
+                  used_details : coupon.used_details,
+                  code : coupon.code,
+                  issued_at: coupon.issued_at
+                };
+                outlet.offers[outlet.offers.length] = massaged_offer;
+              }
+            });
+          });
+        });
+      }
+
+      return data;
+    }
+
+    return couponify(massaged_data);
   }
 };
 
