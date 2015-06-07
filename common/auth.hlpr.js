@@ -16,7 +16,7 @@ module.exports.get_user = function(token) {
   var deferred = Q.defer();
   AuthToken.findOne({
     'token': token
-  }, function(err, token) {
+  }, function(err, found_token) {
     if (err) {
       deferred.reject({
         response: false,
@@ -25,9 +25,9 @@ module.exports.get_user = function(token) {
       });
     }
 
-    if (token) {
+    if (found_token) {
       User.findOne({
-        '_id': token.user
+        '_id': found_token.user
       }, function(err, user) {
         if (err) {
           deferred.reject({
