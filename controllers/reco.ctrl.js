@@ -157,8 +157,8 @@ function pick_outlet_fields(params) {
     massaged_item.name = item.basics.name;
     massaged_item.city = item.contact.location.city;
     massaged_item.address = item.contact.location.address;
-    massaged_item.locality_1 = item.contact.location.locality_1;
-    massaged_item.locality_2 = item.contact.location.locality_2;
+    massaged_item.locality_1 = item.contact.location.locality_1[0];
+    massaged_item.locality_2 = item.contact.location.locality_2[0];
     massaged_item.distance = item.recco.distance;
     massaged_item.open = !item.recco.closed;
     massaged_item.phone = item.contact.phones.mobile[0];
@@ -172,6 +172,18 @@ function pick_outlet_fields(params) {
 
 function pick_offer_fields(params) {
   var deferred = Q.defer();
+  params.outlets = _.map(params.outlets, function(item) {
+    // TODO: Fix up the relevance for the offers, like outlets.
+    item.offers = _.map(item.offers, function(offer) {
+      var massaged_offer = {};
+      massaged_offer.type = offer.offer_type;
+      massaged_offer.title = offer.actions.reward.title;
+      massaged_offer.terms = offer.actions.reward.terms;
+      massaged_offer.meta = offer.actions.reward.reward_meta;
+      return massaged_offer;
+    });
+    return item;
+  });
   deferred.resolve(params);
   return deferred.promise;
 }
@@ -191,6 +203,10 @@ function paginate(params) {
   return deferred.promise;
 }
 
+
+/**
+1. TODO: Cache the recco set for pagination.
+**/
 module.exports.get = function(req, res) {
   get_outlets(req.query)
   .then(function(data){
