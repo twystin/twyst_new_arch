@@ -1,0 +1,30 @@
+<div layout="column" layout-fill>
+  <div ng-include="'./partials/home/home.header.html'"></div>
+  <md-content ng-init="signed_in()">
+    <div ng-repeat="reco in recos.data">
+
+    <div layout="row">
+        <div flex="40" offset="10">
+          <md-card>
+            <md-card-content>
+                {{reco.name}}
+                {{reco.distance}} kms away
+                {{reco.address}}
+            </md-card-content>
+          </md-card>
+        </div>
+        <div flex="40">
+          <md-card>
+            <md-card-content>
+              <div ng-repeat="o in reco.offers">
+                {{$index + 1}}. {{o.type}} > {{o.title}}
+              </div>
+            </md-card-content>
+          </md-card>
+        </div>
+      <div flex="10"></div>
+    </div>
+  </div>
+
+  </md-content>
+</div>

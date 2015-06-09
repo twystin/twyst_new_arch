@@ -1,0 +1,17 @@
+<div layout="column" layout-fill>
+  <div ng-include="'./partials/console/console.header.html'"></div>
+
+  <div layout="row">
+    <md-side-nav layout="column" flex="20">
+      <md-card class="mblack mtall">
+        <md-button ui-sref="console.manage" class="md-raised">Manage your outlets</md-button>
+        <md-button ui-sref="console.create" class="md-raised">Create an outlet</md-button>
+        <md-button ui-sref="console.reports" class="md-raised">View reports</md-button>
+        <md-button ui-sref="console.transactions" class="md-raised">Manage transactions</md-button>
+      </md-card>
+    </md-side-nav>
+    <md-content layout="column" flex>
+      <div ui-view></div>
+    </md-content>
+  </div>
+</div>

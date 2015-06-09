@@ -6,15 +6,24 @@ var mongoose = require('mongoose');
 
 require('../models/auth_code.mdl.js');
 var AuthCode = mongoose.model('AuthCode');
+var Event = mongoose.model('Event');
 var HttpHelper = require('../common/http.hlpr.js');
 var DTHelper = require('../common/datetime.hlpr.js');
 var SMSHelper = require('../common/sms.hlpr.js');
 var AccountHelper = require('./helpers/account.hlpr.js');
+var Cache = require('../common/cache.hlpr.js');
 
 // Log the user in and generate an auth token which will be needed in every API call to authenticate the user
 module.exports.login = function(req, res) {
   AccountHelper.save_auth_token(req.user._id, req.user.user).then(function(data) {
-    HttpHelper.success(res, data.data, data.message);
+    Event.find({'event_type':'checkin', 'event_user': mongoose.Types.ObjectId(req.user._id)}, function(err, events) {
+      if (!err) {
+        Cache[req.user._id] = Cache[req.user._id] || {};
+        Cache[req.user._id].checkins = events;
+        console.log(Cache);
+      }
+      HttpHelper.success(res, data.data, data.message);
+    });
   }, function(err) {
     HttpHelper.error(res, err.err, err.message);
   });

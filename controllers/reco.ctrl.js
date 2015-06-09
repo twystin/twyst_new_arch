@@ -3,6 +3,7 @@
 
 var mongoose = require('mongoose');
 var Outlet = mongoose.model('Outlet');
+var Event = mongoose.model('Event');
 var HttpHelper = require('../common/http.hlpr.js');
 var RecoHelper = require('./helpers/reco.hlpr.js');
 var AuthHelper = require('../common/auth.hlpr.js');
@@ -47,7 +48,6 @@ module.exports.get = function(req, res) {
       return [];
     }
 
-
     massaged_data = _.map(data, pick);
 
     function pick(item) {
@@ -64,7 +64,9 @@ module.exports.get = function(req, res) {
       massaged_item.redeemed = item.analytics &&
                                item.analytics.coupon_analytics &&
                                item.analytics.coupon_analytics.coupons_redeemed || 0;
+
       function filter_offer(offer) {
+
         var massaged_offer = {};
         massaged_offer.type = offer.offer_type;
         massaged_offer.title = offer.actions.reward.title;
@@ -108,7 +110,9 @@ module.exports.get = function(req, res) {
 
       return data;
     }
-
+    console.log(user._id);
+    // console.log(Cache);
+    console.log(Cache[user._id]);
     return couponify(massaged_data);
   }
 };

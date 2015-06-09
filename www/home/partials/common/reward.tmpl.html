@@ -1,0 +1,39 @@
+<form name="reward" novalidate>
+  <div layout>
+    <md-input-container flex>
+      <label>Reward title *</label>
+      <input name="reward_title" ng-model="action.rewards.title" required>
+      <p class="md-caption warn" ng-show="reward.reward_title.$invalid && !reward.reward_title.$pristine">
+        Title is a required field
+      </p>
+    </md-input-container>
+    <md-input-container flex>
+      <label>Reward detail *</label>
+      <input name="reward_detail" ng-model="action.rewards.detail" required>
+      <p class="md-caption warn" ng-show="reward.reward_detail.$invalid && !reward.reward_detail.$pristine">
+        Detail is a required field
+      </p>
+    </md-input-container>
+  </div>
+  <div layout>
+    <md-input-container flex>
+      <label>Reward terms</label>
+      <input ng-model="action.rewards.terms">
+    </md-input-container>
+    <md-input-container flex>
+      <label>Reward expires after</label>
+      <input ng-model="action.rewards.expires">
+    </md-input-container>
+  </div>
+  <div layout>
+    <md-input-container flex>
+      <label>Points to award the user</label>
+      <input ng-model="action.points">
+    </md-input-container>
+  </div>
+</form>
+<md-card ng-show="debug" class="debug">
+  <md-card-content>
+    {{action | json:object}}
+  </md-card-content>
+</md-card>

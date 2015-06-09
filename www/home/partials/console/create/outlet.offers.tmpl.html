@@ -1,0 +1,86 @@
+<md-content>
+  <md-card>
+    <md-card-content>
+      <div layout>
+        <md-input-container flex>
+          <md-select placeholder="Offer type" ng-model="deal.type">
+            <md-option value="Always-on">Always-on offer</md-option>
+            <md-option value="Walk-in">Walk-in offer</md-option>
+            <md-option value="Birthday">Birthday offer</md-option>
+            <md-option value="Winback">Winback offer</md-option>
+            <md-option value="Referral">Referral offer</md-option>
+            <md-option value="Social">Social offer</md-option>
+          </md-select>
+        </md-input-container>
+      </div>
+    </md-card-content>
+  </md-card>
+  <div ng-show="deal.type==='Birthday'">
+    <md-card>
+      <md-card-content>
+        <div layout>
+          <md-input-container flex>
+            <label>Send before how many days?</label>
+            <input ng-model="deal.title">
+          </md-input-container>
+        </div>
+      </md-card-content>
+    </md-card>
+    <md-card>
+      <md-card-content>
+        <div ng-include="'./partials/common/reward.tmpl.html'"></div>
+      </md-card-content>
+    </md-card>
+    <md-card>
+      <md-card-content>
+        <div ng-include="'./partials/common/messages.tmpl.html'"></div>
+
+      </md-card-content>
+    </md-card>
+  </div>
+
+  <div ng-show="deal.type==='Winback'">
+    <md-card>
+      <md-card-content>
+        <div layout>
+          <md-input-container flex>
+            <label>Send if user hasn't visited in...</label>
+            <input ng-model="deal.title">
+          </md-input-container>
+        </div>
+      </md-card-content>
+    </md-card>
+    <md-card>
+      <md-card-content>
+        <div ng-include="'./partials/common/reward.tmpl.html'"></div>
+      </md-card-content>
+    </md-card>
+    <md-card>
+      <md-card-content>
+        <div ng-include="'./partials/common/messages.tmpl.html'"></div>
+      </md-card-content>
+    </md-card>
+  </div>
+
+
+  <div ng-show="deal.type==='Walk-in'">
+    <md-card>
+      <md-card-content>
+        <div ng-include="'./partials/common/reward.tmpl.html'"></div>
+      </md-card-content>
+    </md-card>
+
+  </div>
+
+
+  <div ng-show="deal.type==='Always-on'">
+
+    <md-card>
+      <md-card-content>
+        <div ng-include="'./partials/common/reward.tmpl.html'"></div>
+      </md-card-content>
+    </md-card>
+
+  </div>
+
+</md-content>
