@@ -3,6 +3,7 @@
 
 var keygen = require('keygenerator');
 var mongoose = require('mongoose');
+var _ = require('underscore');
 
 require('../models/auth_code.mdl.js');
 var AuthCode = mongoose.model('AuthCode');
@@ -19,8 +20,10 @@ module.exports.login = function(req, res) {
     Event.find({'event_type':'checkin', 'event_user': mongoose.Types.ObjectId(req.user._id)}, function(err, events) {
       if (!err) {
         Cache[req.user._id] = Cache[req.user._id] || {};
-        Cache[req.user._id].checkins = events;
-        console.log(Cache);
+        Cache[req.user._id].checkin_map = _.reduce(events, function(memo, item) {
+          memo[item.event_outlet] = memo[item.event_outlet] + 1 || 1;
+          return memo;
+        }, {});
       }
       HttpHelper.success(res, data.data, data.message);
     });
@@ -31,7 +34,6 @@ module.exports.login = function(req, res) {
 
 module.exports.logout = function(req, res) {
   var token = req.query.token || null;
-
   if (!token) {
     HttpHelper.error(res, true, "No user to logout!");
   }

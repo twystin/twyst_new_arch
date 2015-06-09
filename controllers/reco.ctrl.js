@@ -31,9 +31,16 @@ module.exports.get = function(req, res) {
       }
     });
   } else {
-    HttpHelper.success(res, massage(Cache.outlets, req.query), "Found outlets");
+    if (token === null) {
+      HttpHelper.success(res, massage(Cache.outlets, req.query, null), "Found outlets");
+    } else {
+      AuthHelper.get_user(token).then(function(data) {
+        HttpHelper.success(res, massage(Cache.outlets, req.query, data.data), "Found outlets");
+      }, function(err) {
+        HttpHelper.success(res, massage(Cache.outlets, req.query, null), "Found outlets");
+      });
+    }
   }
-
 
   function massage(data, query, user) {
     var start = query.start || 1;
@@ -41,6 +48,7 @@ module.exports.get = function(req, res) {
     var lat = query.lat || 28.46;
     var long = query.long || 77.06;
     var q = query.q || null;
+    var cmap = Cache[user._id].checkin_map;
 
     var massaged_data = [];
 
@@ -66,7 +74,6 @@ module.exports.get = function(req, res) {
                                item.analytics.coupon_analytics.coupons_redeemed || 0;
 
       function filter_offer(offer) {
-
         var massaged_offer = {};
         massaged_offer.type = offer.offer_type;
         massaged_offer.title = offer.actions.reward.title;
@@ -110,9 +117,7 @@ module.exports.get = function(req, res) {
 
       return data;
     }
-    console.log(user._id);
-    // console.log(Cache);
-    console.log(Cache[user._id]);
+
     return couponify(massaged_data);
   }
 };
