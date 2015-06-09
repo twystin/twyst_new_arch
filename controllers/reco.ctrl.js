@@ -152,6 +152,20 @@ function sort_by_relevance(params) {
 
 function pick_outlet_fields(params) {
   var deferred = Q.defer();
+  params.outlets = _.map(params.outlets, function(item) {
+    var massaged_item = {};
+    massaged_item.name = item.basics.name;
+    massaged_item.city = item.contact.location.city;
+    massaged_item.address = item.contact.location.address;
+    massaged_item.locality_1 = item.contact.location.locality_1;
+    massaged_item.locality_2 = item.contact.location.locality_2;
+    massaged_item.distance = item.recco.distance;
+    massaged_item.open = !item.recco.closed;
+    massaged_item.phone = item.contact.phones.mobile[0];
+    massaged_item.offers = item.offers;
+    return massaged_item;
+  });
+
   deferred.resolve(params);
   return deferred.promise;
 }
