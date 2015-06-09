@@ -11,6 +11,8 @@
 9. special_programs_migration.js
 10. winback_migration.js
 11. checkin_migration: need to fix up the users
+12. voucher_migration
+13. tag_migration
 
 ## Earlier models
 1. Account - Migrated
