@@ -48,6 +48,29 @@ function get_user(params) {
   return deferred.promise;
 }
 
+function set_user_checkins(params) {
+  var deferred = Q.defer();
+  if (params.user) {
+    var cmap =  Cache[params.user._id] &&
+                Cache[params.user._id].checkin_map || null;
+
+    var outlets = params.outlets;
+    if (cmap) {
+      _.each(cmap, function(value, key) {
+        outlets[key].recco = outlets[key].recco || {};
+        outlets[key].recco.checkins = value;
+      });
+      params.outlets = outlets;
+      deferred.resolve(params);
+    } else {
+      deferred.resolve(params);
+    }
+  } else {
+    deferred.resolve(params);
+  }
+  return deferred.promise;
+}
+
 function set_distance(params) {
   var deferred = Q.defer();
   if (params.query.lat && params.query.long) {
@@ -81,12 +104,48 @@ function set_open_closed(params) {
 
 function calculate_relevance(params) {
   var deferred = Q.defer();
+  params.outlets = _.mapObject(params.outlets, function(val, key) {
+    var relevance = 0;
+    val.recco = val.recco || {};
+
+    if (val.recco.checkins) {
+      relevance = relevance + val.recco.checkins * 10;
+    }
+
+    if (val.recco.distance) {
+      relevance = relevance + val.recco.distance;
+    }
+
+    if (!val.recco.closed) {
+      relevance = relevance + 100;
+    }
+
+    if (val.analytics &&
+        val.analytics.coupon_analytics &&
+        val.analytics.coupon_analytics.coupons_redeemed) {
+      relevance = val.analytics.coupon_analytics.coupons_redeemed * 10;
+    }
+
+    if (val.analytics &&
+        val.analytics.coupon_analytics &&
+        val.analytics.coupon_analytics.coupons_generated) {
+      relevance = val.analytics.coupon_analytics.coupons_generated;
+    }
+
+    val.recco = val.recco || {};
+    val.recco.relevance = relevance;
+    return val;
+  });
   deferred.resolve(params);
   return deferred.promise;
 }
 
 function sort_by_relevance(params) {
   var deferred = Q.defer();
+  params.outlets = _.sortBy(params.outlets, function(item) {
+    return -item.recco.relevance;
+  });
+
   deferred.resolve(params);
   return deferred.promise;
 }
@@ -109,26 +168,12 @@ function add_user_coupons(params) {
   return deferred.promise;
 }
 
-function set_user_checkins(params) {
+function paginate(params) {
   var deferred = Q.defer();
-  if (params.user) {
-    var cmap =  Cache[params.user._id] &&
-                Cache[params.user._id].checkin_map || null;
-
-    var outlets = params.outlets;
-    if (cmap) {
-      _.each(cmap, function(value, key) {
-        outlets[key].recco = outlets[key].recco || {};
-        outlets[key].recco.checkins = value;
-      });
-      params.outlets = outlets;
-      deferred.resolve(params);
-    } else {
-      deferred.resolve(params);
-    }
-  } else {
-    deferred.resolve(params);
-  }
+  var start = params.query.start || 1;
+  var end = params.query.end || undefined;
+  var outlets = params.outlets.slice(start - 1, end);
+  deferred.resolve(outlets);
   return deferred.promise;
 }
 
@@ -160,6 +205,9 @@ module.exports.get = function(req, res) {
   })
   .then(function(data) {
     return add_user_coupons(data);
+  })
+  .then(function(data) {
+    return paginate(data);
   })
   .then(function(data) {
     HttpHelper.success(res, data, "Got the recos");
