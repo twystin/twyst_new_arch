@@ -170,28 +170,68 @@ function pick_outlet_fields(params) {
   return deferred.promise;
 }
 
-function pick_offer_fields(params) {
+function massage_offers(params) {
   var deferred = Q.defer();
+
   params.outlets = _.map(params.outlets, function(item) {
-    // TODO: Fix up the relevance for the offers, like outlets.
+    item = pick_offer_fields(
+                    add_user_coupons(
+                      select_relevant_checkin_offer(item)));
+    return item;
+  });
+
+  deferred.resolve(params);
+  return deferred.promise;
+
+  // PRIVATE FUNCTIONS
+  function select_relevant_checkin_offer(item) {
+    var checkins = (item.recco && item.recco.checkins || 0);
+    var returned = false;
+    item.offers = _.sortBy(item.offers, function(offer) {
+      if (offer.offer_type === 'checkin') {
+        if (offer.rule && offer.rule.event_count) {
+          return offer.rule.event_count;
+        } else {
+          return 0;
+        }
+      } else {
+        return 0;
+      }
+    });
+
+    item.offers = _.filter(item.offers, function(offer) {
+      if (offer.offer_type === 'checkin') {
+        if (checkins < offer.rule.event_count && !returned) {
+          returned = true;
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return true;
+      }
+    });
+
+    return item;
+  }
+
+  function add_user_coupons(item) {
+    return item;
+  }
+
+  function pick_offer_fields(item) {
     item.offers = _.map(item.offers, function(offer) {
       var massaged_offer = {};
       massaged_offer.type = offer.offer_type;
-      massaged_offer.title = offer.actions.reward.title;
-      massaged_offer.terms = offer.actions.reward.terms;
-      massaged_offer.meta = offer.actions.reward.reward_meta;
+      massaged_offer.title = offer.actions && offer.actions.reward && offer.actions.reward.title;
+      massaged_offer.terms = offer.actions && offer.actions.reward && offer.actions.reward.terms;
+      massaged_offer.next = offer.rule && offer.rule.event_count;
+      massaged_offer.checkins = item.recco && item.recco.checkins || 0;
+      massaged_offer.meta = offer.actions && offer.actions.reward && offer.actions.reward.reward_meta;
       return massaged_offer;
     });
     return item;
-  });
-  deferred.resolve(params);
-  return deferred.promise;
-}
-
-function add_user_coupons(params) {
-  var deferred = Q.defer();
-  deferred.resolve(params);
-  return deferred.promise;
+  }
 }
 
 function paginate(params) {
@@ -202,11 +242,7 @@ function paginate(params) {
   deferred.resolve(outlets);
   return deferred.promise;
 }
-
-
-/**
-1. TODO: Cache the recco set for pagination.
-**/
+//TODO: Cache the recco set for pagination.
 module.exports.get = function(req, res) {
   get_outlets(req.query)
   .then(function(data){
@@ -228,13 +264,10 @@ module.exports.get = function(req, res) {
     return sort_by_relevance(data);
   })
   .then(function(data) {
+    return massage_offers(data);
+  })
+  .then(function(data) {
     return pick_outlet_fields(data);
-  })
-  .then(function(data) {
-    return pick_offer_fields(data);
-  })
-  .then(function(data) {
-    return add_user_coupons(data);
   })
   .then(function(data) {
     return paginate(data);
