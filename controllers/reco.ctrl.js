@@ -38,6 +38,17 @@ function get_user(params) {
   if (params.query.token) {
     AuthHelper.get_user(params.query.token).then(function(data) {
       params.user = data.data;
+      if (params.user.coupons && params.user.coupons.length !== 0 ) {
+        Cache[params.user._id] = Cache[params.user._id] || {};
+        Cache[params.user._id].coupon_map = _.reduce(params.user.coupons, function(memo, item) {
+          _.each(item.outlets, function(outlet) {
+            memo[outlet] = memo[outlet] || {};
+            memo[outlet].coupons = memo[outlet].coupons || [];
+            memo[outlet].coupons.push(item);
+          });
+          return memo;
+        }, {});
+      }
       deferred.resolve(params);
     });
   } else {
@@ -70,6 +81,30 @@ function set_user_checkins(params) {
   }
   return deferred.promise;
 }
+
+function set_user_coupons(params) {
+  var deferred = Q.defer();
+  if (params.user) {
+    var cmap =  Cache[params.user._id] &&
+                Cache[params.user._id].coupon_map || null;
+
+    var outlets = params.outlets;
+    if (cmap) {
+      _.each(cmap, function(value, key) {
+        outlets[key].recco = outlets[key].recco || {};
+        outlets[key].recco.coupons = value.coupons.length;
+      });
+      params.outlets = outlets;
+      deferred.resolve(params);
+    } else {
+      deferred.resolve(params);
+    }
+  } else {
+    deferred.resolve(params);
+  }
+  return deferred.promise;
+}
+
 
 function set_distance(params) {
   var deferred = Q.defer();
@@ -108,28 +143,43 @@ function calculate_relevance(params) {
     var relevance = 0;
     val.recco = val.recco || {};
 
+    // USER CHECKIN RELEVANCE
     if (val.recco.checkins) {
       relevance = relevance + val.recco.checkins * 10;
     }
 
+    // USER COUPON RELEVANCE
+    if (val.recco.coupons) {
+      relevance = relevance + val.recco.coupons * 1000;
+    }
+
+    // OUTLET DISTANCE RELEVANCE
     if (val.recco.distance) {
       relevance = relevance + val.recco.distance;
     }
 
+    // OUTLET OPEN RELEVANCE
     if (!val.recco.closed) {
       relevance = relevance + 100;
     }
 
+    // OUTLET REDEEMED RELEVANCE
     if (val.analytics &&
         val.analytics.coupon_analytics &&
         val.analytics.coupon_analytics.coupons_redeemed) {
-      relevance = val.analytics.coupon_analytics.coupons_redeemed * 10;
+      relevance = relevance + val.analytics.coupon_analytics.coupons_redeemed * 10;
     }
 
+    // OUTLET GENERATED RELEVANCE
     if (val.analytics &&
         val.analytics.coupon_analytics &&
         val.analytics.coupon_analytics.coupons_generated) {
-      relevance = val.analytics.coupon_analytics.coupons_generated;
+      relevance = relevance + val.analytics.coupon_analytics.coupons_generated;
+    }
+
+    // CURRENT OFFERS RELEVANCE
+    if (val.offers && val.offers.length > 1) {
+      relevance = relevance + val.offers.length * 1000;
     }
 
     val.recco = val.recco || {};
@@ -163,6 +213,7 @@ function pick_outlet_fields(params) {
     massaged_item.open = !item.recco.closed;
     massaged_item.phone = item.contact.phones.mobile[0];
     massaged_item.offers = item.offers;
+    massaged_item.relevance = item.recco.relevance;
     return massaged_item;
   });
 
@@ -187,6 +238,8 @@ function massage_offers(params) {
   function select_relevant_checkin_offer(item) {
     var checkins = (item.recco && item.recco.checkins || 0);
     var returned = false;
+
+    // SORT BY THE EVENT COUNT
     item.offers = _.sortBy(item.offers, function(offer) {
       if (offer.offer_type === 'checkin') {
         if (offer.rule && offer.rule.event_count) {
@@ -199,6 +252,7 @@ function massage_offers(params) {
       }
     });
 
+    // AND THEN PICK THE FIRST ONE
     item.offers = _.filter(item.offers, function(offer) {
       if (offer.offer_type === 'checkin') {
         if (checkins < offer.rule.event_count && !returned) {
@@ -216,7 +270,12 @@ function massage_offers(params) {
   }
 
   function add_user_coupons(item) {
-    return item;
+    if (params.user && params.user.coupons) {
+      item.coupons = params.user.coupons;
+      return item;
+    } else {
+      return item;
+    }
   }
 
   function pick_offer_fields(item) {
@@ -252,19 +311,22 @@ module.exports.get = function(req, res) {
     return set_user_checkins(data);
   })
   .then(function(data) {
+    return set_user_coupons(data);
+  })
+  .then(function(data) {
     return set_distance(data);
   })
   .then(function(data) {
     return set_open_closed(data);
   })
   .then(function(data) {
+    return massage_offers(data);
+  })
+  .then(function(data) {
     return calculate_relevance(data);
   })
   .then(function(data) {
     return sort_by_relevance(data);
-  })
-  .then(function(data) {
-    return massage_offers(data);
   })
   .then(function(data) {
     return pick_outlet_fields(data);

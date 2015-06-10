@@ -25,6 +25,16 @@ module.exports.login = function(req, res) {
           return memo;
         }, {});
       }
+      if (req.user.coupons && req.user.coupons.length !== 0 ) {
+        Cache[req.user._id].coupon_map = _.reduce(req.user.coupons, function(memo, item) {
+          _.each(item.outlets, function(outlet) {
+            memo[outlet] = memo[outlet] || [];
+            memo[outlet] = memo[outlet].push(item);
+          });
+          return memo;
+        }, {});
+        console.log(Cache[req.user._id].coupon_map);
+      }
       HttpHelper.success(res, data.data, data.message);
     });
   }, function(err) {

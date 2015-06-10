@@ -2,3 +2,5 @@ TO DO:
   - Recco API:
     ☐ Pagination should take from cache.
     ☐ Fix up the relevance for the offers, like outlets.
+    ☐ Add the relevance score of offers into outlets.
+    ☐ Add faves, etc.
