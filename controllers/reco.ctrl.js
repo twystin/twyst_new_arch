@@ -44,7 +44,9 @@ function get_user(params) {
           _.each(item.outlets, function(outlet) {
             memo[outlet] = memo[outlet] || {};
             memo[outlet].coupons = memo[outlet].coupons || [];
-            memo[outlet].coupons.push(item);
+            if (item.status === "active") {
+              memo[outlet].coupons.push(item);
+            }
           });
           return memo;
         }, {});
@@ -104,7 +106,6 @@ function set_user_coupons(params) {
   }
   return deferred.promise;
 }
-
 
 function set_distance(params) {
   var deferred = Q.defer();
@@ -213,7 +214,8 @@ function pick_outlet_fields(params) {
     massaged_item.open = !item.recco.closed;
     massaged_item.phone = item.contact.phones.mobile[0];
     massaged_item.offers = item.offers;
-    massaged_item.relevance = item.recco.relevance;
+    massaged_item.checkins = item.recco.checkins;
+    massaged_item.coupons = item.recco.coupons;
     return massaged_item;
   });
 
@@ -225,8 +227,8 @@ function massage_offers(params) {
   var deferred = Q.defer();
 
   params.outlets = _.map(params.outlets, function(item) {
-    item = pick_offer_fields(
-                    add_user_coupons(
+    item = add_user_coupons(
+                pick_offer_fields(
                       select_relevant_checkin_offer(item)));
     return item;
   });
@@ -271,7 +273,22 @@ function massage_offers(params) {
 
   function add_user_coupons(item) {
     if (params.user && params.user.coupons) {
-      item.coupons = params.user.coupons;
+      var coupon_map = Cache[params.user._id].coupon_map[item._id] &&
+                        Cache[params.user._id].coupon_map[item._id].coupons || null;
+
+      if (item.offers && item.offers.length !== 0 && coupon_map !== null) {
+        coupon_map = _.map(coupon_map, function(item) {
+          var coupon = {};
+          coupon.type = "coupon";
+          coupon.status = item.status;
+          coupon.title = item.title;
+          coupon.terms = item.detail;
+          coupon.expiry = item.expiry;
+          return coupon;
+        });
+
+        item.offers = item.offers.concat(coupon_map);
+      }
       return item;
     } else {
       return item;
