@@ -205,6 +205,7 @@ function pick_outlet_fields(params) {
   var deferred = Q.defer();
   params.outlets = _.map(params.outlets, function(item) {
     var massaged_item = {};
+    massaged_item._id = item._id;
     massaged_item.name = item.basics.name;
     massaged_item.city = item.contact.location.city;
     massaged_item.address = item.contact.location.address;
@@ -212,10 +213,10 @@ function pick_outlet_fields(params) {
     massaged_item.locality_2 = item.contact.location.locality_2[0];
     massaged_item.distance = item.recco.distance;
     massaged_item.open = !item.recco.closed;
-    massaged_item.phone = item.contact.phones.mobile[0];
+    massaged_item.phone = item.contact.phones.mobile[0] && item.contact.phones.mobile[0].num;
     massaged_item.offers = item.offers;
-    massaged_item.checkins = item.recco.checkins;
-    massaged_item.coupons = item.recco.coupons;
+    massaged_item.following = false; //TODO
+    massaged_item.image = "TBD"; //TODO
     return massaged_item;
   });
 
@@ -264,7 +265,11 @@ function massage_offers(params) {
           return false;
         }
       } else {
-        return true;
+        if (offer.offer_type === 'winback' || offer.offer_type === 'birthday') {
+          return false;
+        } else {
+          return true;
+        }
       }
     });
 
