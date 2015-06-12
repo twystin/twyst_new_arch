@@ -279,7 +279,7 @@ function massage_offers(params) {
   }
 
   function add_user_coupons(item) {
-    if (params.user && params.user.coupons) {
+    if (params.user && params.user.coupons.length !== 0) {
       var coupon_map = Cache[params.user._id].coupon_map[item._id] &&
                         Cache[params.user._id].coupon_map[item._id].coupons || null;
 
@@ -367,6 +367,6 @@ module.exports.get = function(req, res) {
     HttpHelper.success(res, data, "Got the recos");
   })
   .fail(function(err) {
-    HttpHelper.error(res, err, "Error getting reccos");
+    HttpHelper.error(res, err || false, "Error getting reccos");
   });
 };
