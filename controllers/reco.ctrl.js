@@ -302,14 +302,19 @@ function massage_offers(params) {
 
   function pick_offer_fields(item) {
     item.offers = _.map(item.offers, function(offer) {
-      var massaged_offer = {};
-      massaged_offer.type = offer.offer_type;
-      massaged_offer.title = offer.actions && offer.actions.reward && offer.actions.reward.title;
-      massaged_offer.terms = offer.actions && offer.actions.reward && offer.actions.reward.terms;
-      massaged_offer.next = offer.rule && offer.rule.event_count;
-      massaged_offer.checkins = item.recco && item.recco.checkins || 0;
-      massaged_offer.meta = offer.actions && offer.actions.reward && offer.actions.reward.reward_meta;
-      return massaged_offer;
+      if (offer.type) {
+        return offer;
+      } else {
+        var massaged_offer = {};
+        massaged_offer.type = offer.offer_type;
+        massaged_offer.title = offer.actions && offer.actions.reward && offer.actions.reward.title;
+        massaged_offer.terms = offer.actions && offer.actions.reward && offer.actions.reward.terms;
+        massaged_offer.next = offer.rule && offer.rule.event_count;
+        massaged_offer.checkins = item.recco && item.recco.checkins || 0;
+        massaged_offer.meta = offer.actions && offer.actions.reward && offer.actions.reward.reward_meta;
+        return massaged_offer;
+      }
+
     });
     return item;
   }
