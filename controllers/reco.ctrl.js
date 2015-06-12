@@ -52,6 +52,8 @@ function get_user(params) {
         }, {});
       }
       deferred.resolve(params);
+    }, function(err) {
+      deferred.reject(err);
     });
   } else {
     params.user = null;
@@ -365,6 +367,6 @@ module.exports.get = function(req, res) {
     HttpHelper.success(res, data, "Got the recos");
   })
   .fail(function(err) {
-    console.log(err);
+    HttpHelper.error(res, err, "Error getting reccos");
   });
 };
