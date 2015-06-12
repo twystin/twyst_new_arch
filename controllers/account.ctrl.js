@@ -62,7 +62,7 @@ module.exports.create_authcode = function(req, res) {
     HttpHelper.error(res, true, 'Phone number required for verification');
   }
 
-  AuthCode.find({phone:phone}).sort({created_date:-1}).exec(function(err, authcodes) {
+  AuthCode.find({phone:phone}).sort({created_at:-1}).exec(function(err, authcodes) {
     if (err) {
       HttpHelper.error(res, err, 'Couldn\'t get authcode');
     } else {
