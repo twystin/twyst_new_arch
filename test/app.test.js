@@ -19,8 +19,8 @@ describe('Auth Tests', function() {
       api
         .post('/api/v4/accounts/login')
         .send({
-          username: 'ablal',
-          password: 'spam25'
+          username: '9779456097',
+          password: '9779456097'
         })
         .set('Accept', 'application/json')
         .end(function(err, res) {
@@ -34,7 +34,7 @@ describe('Auth Tests', function() {
     });
 
     it('Get a verification code - should pass', function(done) {
-      api.get('/api/v4/authcode/100000001')
+      api.get('/api/v4/authcode/9779456097')
       .end(function(err,res) {
         res.status.should.equal(200);
         res.body.response.should.be.true;
@@ -78,8 +78,8 @@ describe('User Tests', function() {
     api
       .post('/api/v4/accounts/login')
       .send({
-        username: 'ablal',
-        password: 'spam25'
+        username: '9779456097',
+        password: '9779456097'
       })
       .set('Accept', 'application/json')
       .end(function(err, res) {
