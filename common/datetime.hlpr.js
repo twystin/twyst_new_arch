@@ -8,5 +8,7 @@ var fiveminutes = module.exports.fiveminutes = 5 * oneminute;
 var oneday = module.exports.oneday = 24 * 60 * oneminute;
 
 module.exports.timediff = function(time) {
+  console.log("NOW:" + Date.now());
+  console.log("CREATED:" + new Date(time));
   return (Date.now() - new Date(time)) || null;
 };
