@@ -150,12 +150,13 @@ function calculate_relevance(params) {
     if (val.recco.checkins) {
       relevance = relevance + val.recco.checkins * 10;
     }
-
     // USER FOLLOW RELEVANCE
-    if (Cache[params.user._id] &&
-        Cache[params.user._id].favourite_map &&
-        Cache[params.user._id].favourite_map[val._id]) {
-      relevance = relevance + 10000;
+    if (params.user) {
+      if (Cache[params.user._id] &&
+          Cache[params.user._id].favourite_map &&
+          Cache[params.user._id].favourite_map[val._id]) {
+        relevance = relevance + 10000;
+      }
     }
 
     // USER COUPON RELEVANCE
@@ -220,19 +221,26 @@ function pick_outlet_fields(params) {
     massaged_item.address = item.contact.location.address;
     massaged_item.locality_1 = item.contact.location.locality_1[0];
     massaged_item.locality_2 = item.contact.location.locality_2[0];
-    massaged_item.distance = item.recco.distance;
+    massaged_item.distance = item.recco.distance || null;
     massaged_item.open = !item.recco.closed;
     massaged_item.phone = item.contact.phones.mobile[0] && item.contact.phones.mobile[0].num;
     massaged_item.offers = item.offers;
-    if (Cache[params.user._id] &&
-        Cache[params.user._id].favourite_map &&
-        Cache[params.user._id].favourite_map[item._id]) {
-      massaged_item.following = true;
-    } else {
-      massaged_item.following = false;
+    if (params.user) {
+      if (Cache[params.user._id] &&
+          Cache[params.user._id].favourite_map &&
+          Cache[params.user._id].favourite_map[item._id]) {
+        massaged_item.following = true;
+      } else {
+        massaged_item.following = false;
+      }
     }
-    massaged_item.image = "TBD"; //TODO
-    massaged_item.open_next = RecoHelper.opensAt(item.business_hours); //TODO
+    if (item.photos && item.photos.logo) {
+      massaged_item.logo = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + item._id + '/'+ item.photos.logo;
+    }
+    if (item.photos && item.photos.background) {
+      massaged_item.background = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + item._id + '/'+ item.photos.background;
+    }
+    massaged_item.open_next = RecoHelper.opensAt(item.business_hours);
     return massaged_item;
   });
 
