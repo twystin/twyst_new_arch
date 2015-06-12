@@ -17,24 +17,23 @@ var Cache = require('../common/cache.hlpr.js');
 // Log the user in and generate an auth token which will be needed in every API call to authenticate the user
 module.exports.login = function(req, res) {
   AccountHelper.save_auth_token(req.user._id, req.user.user).then(function(data) {
-    Event.find({'event_type':'checkin', 'event_user': mongoose.Types.ObjectId(req.user._id)}, function(err, events) {
+    Event.find({'event_user': mongoose.Types.ObjectId(req.user._id)}, function(err, events) {
       if (!err) {
+        var event_map = _.groupBy(events, function(item) {
+          return item.event_type;
+        });
+        // console.log(event_map.checkin);
         Cache[req.user._id] = Cache[req.user._id] || {};
-        Cache[req.user._id].checkin_map = _.reduce(events, function(memo, item) {
+        Cache[req.user._id].checkin_map = _.reduce(event_map.checkin, function(memo, item) {
+          memo[item.event_outlet] = memo[item.event_outlet] + 1 || 1;
+          return memo;
+        }, {});
+        Cache[req.user._id].favourite_map = _.reduce(event_map.favourite, function(memo, item) {
           memo[item.event_outlet] = memo[item.event_outlet] + 1 || 1;
           return memo;
         }, {});
       }
-      if (req.user.coupons && req.user.coupons.length !== 0 ) {
-        Cache[req.user._id].coupon_map = _.reduce(req.user.coupons, function(memo, item) {
-          _.each(item.outlets, function(outlet) {
-            memo[outlet] = memo[outlet] || [];
-            memo[outlet] = memo[outlet].push(item);
-          });
-          return memo;
-        }, {});
-        console.log(Cache[req.user._id].coupon_map);
-      }
+
       HttpHelper.success(res, data.data, data.message);
     });
   }, function(err) {

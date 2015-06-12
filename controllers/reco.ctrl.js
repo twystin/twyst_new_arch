@@ -151,6 +151,13 @@ function calculate_relevance(params) {
       relevance = relevance + val.recco.checkins * 10;
     }
 
+    // USER FOLLOW RELEVANCE
+    if (Cache[params.user._id] &&
+        Cache[params.user._id].favourite_map &&
+        Cache[params.user._id].favourite_map[val._id]) {
+      relevance = relevance + 10000;
+    }
+
     // USER COUPON RELEVANCE
     if (val.recco.coupons) {
       relevance = relevance + val.recco.coupons * 1000;
@@ -217,8 +224,15 @@ function pick_outlet_fields(params) {
     massaged_item.open = !item.recco.closed;
     massaged_item.phone = item.contact.phones.mobile[0] && item.contact.phones.mobile[0].num;
     massaged_item.offers = item.offers;
-    massaged_item.following = false; //TODO
+    if (Cache[params.user._id] &&
+        Cache[params.user._id].favourite_map &&
+        Cache[params.user._id].favourite_map[item._id]) {
+      massaged_item.following = true;
+    } else {
+      massaged_item.following = false;
+    }
     massaged_item.image = "TBD"; //TODO
+    massaged_item.open_next = RecoHelper.opensAt(item.business_hours); //TODO
     return massaged_item;
   });
 
@@ -311,7 +325,7 @@ function massage_offers(params) {
         massaged_offer.type = offer.offer_type;
         massaged_offer.title = offer.actions && offer.actions.reward && offer.actions.reward.title;
         massaged_offer.terms = offer.actions && offer.actions.reward && offer.actions.reward.terms;
-        massaged_offer.next = offer.rule && offer.rule.event_count;
+        massaged_offer.next = parseInt(offer.rule && offer.rule.event_count);
         massaged_offer.checkins = item.recco && item.recco.checkins || 0;
         massaged_offer.meta = offer.actions && offer.actions.reward && offer.actions.reward.reward_meta;
         return massaged_offer;
