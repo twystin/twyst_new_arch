@@ -62,11 +62,12 @@ module.exports.create_authcode = function(req, res) {
     HttpHelper.error(res, true, 'Phone number required for verification');
   }
 
-  AuthCode.findOne({phone:phone}, function(err, authcode) {
+  AuthCode.find({phone:phone}).sort({created_date:-1}).exec(function(err, authcodes) {
     if (err) {
       HttpHelper.error(res, err, 'Couldn\'t get authcode');
     } else {
-      if (authcode) {
+      if (authcodes.length !== 0) {
+        var authcode = authcodes[0];
         if (authcode.status === 'used') {
           // Create a new auth code
           get_code_and_send(res, phone);
