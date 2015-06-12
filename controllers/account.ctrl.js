@@ -45,7 +45,7 @@ module.exports.login = function(req, res) {
 module.exports.logout = function(req, res) {
   var token = req.query.token || null;
   if (!token) {
-    HttpHelper.error(res, true, "No user to logout!");
+    HttpHelper.error(res, null, "No user to logout!");
   }
 
   AccountHelper.delete_auth_token(token).then(function(data) {
@@ -59,7 +59,7 @@ module.exports.create_authcode = function(req, res) {
   var phone = req.params.phone;
   var code = '';
   if (!phone) {
-    HttpHelper.error(res, true, 'Phone number required for verification');
+    HttpHelper.error(res, null, 'Phone number required for verification');
   }
 
   AuthCode.find({phone:phone}).sort({created_at:-1}).exec(function(err, authcodes) {
@@ -110,7 +110,7 @@ module.exports.verify_authcode_and_create_account = function(req, res) {
       code: authcode
     }, function(err, code) {
       if (err || !code) {
-        HttpHelper.error(res, err || true, 'Incorrect verification code');
+        HttpHelper.error(res, err || null, 'Incorrect verification code');
       } else {
         AccountHelper.create_user_account(phone).then(function(data) {
           AccountHelper.save_auth_token(data.data.account && data.data.account._id || null,
@@ -124,7 +124,7 @@ module.exports.verify_authcode_and_create_account = function(req, res) {
       }
     });
   } else {
-    HttpHelper.error(res, true, 'Please send authcode and phone number for verification!');
+    HttpHelper.error(res, null, 'Please send authcode and phone number for verification!');
   }
 };
 

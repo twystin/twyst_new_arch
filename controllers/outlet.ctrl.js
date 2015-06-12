@@ -15,7 +15,7 @@ module.exports.new = function(req, res) {
   var created_outlet = {};
 
   if (!token) {
-    HttpHelper.error(res, true, "Not authenticated");
+    HttpHelper.error(res, null, "Not authenticated");
   }
 
   created_outlet = _.extend(created_outlet, req.body);
@@ -32,7 +32,7 @@ module.exports.update = function(req, res) {
   updated_outlet = _.extend(updated_outlet, req.body);
 
   if (!token) {
-    HttpHelper.error(res, true, "Not authenticated");
+    HttpHelper.error(res, null, "Not authenticated");
   }
 
   OutletHelper.update_outlet(token, updated_outlet).then(function(data) {
@@ -44,7 +44,7 @@ module.exports.update = function(req, res) {
 
 module.exports.get = function(req, res) {
   if (!req.params.outlet_id) {
-    HttpHelper.error(res, true, "No outlet id passed");
+    HttpHelper.error(res, null, "No outlet id passed");
   }
 
   OutletHelper.get_outlet(req.params.outlet_id).then(function(data) {
@@ -57,7 +57,7 @@ module.exports.get = function(req, res) {
 module.exports.all = function(req, res) {
   var token = req.query.token || null;
   if (!token) {
-    HttpHelper.error(res, true, "Not authenticated");
+    HttpHelper.error(res, null, "Not authenticated");
   }
 
   OutletHelper.get_all_outlets(token).then(function(data) {
@@ -70,11 +70,11 @@ module.exports.all = function(req, res) {
 module.exports.remove = function(req, res) {
   var token = req.query.token || null;
   if (!token) {
-    HttpHelper.error(res, true, "Not authenticated");
+    HttpHelper.error(res, null, "Not authenticated");
   }
 
   if (!req.params.outlet_id) {
-    HttpHelper.error(res, true, "No outlet id passed");
+    HttpHelper.error(res, null, "No outlet id passed");
   }
 
   OutletHelper.remove_outlet(token, req.params.outlet_id).then(function(data) {

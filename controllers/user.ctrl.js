@@ -11,7 +11,7 @@ module.exports.get_coupons = function(req, res) {
   var token = req.query.token || null;
 
   if (!token) {
-    HttpHelper.error(res, true, "Not authenticated");
+    HttpHelper.error(res, null, "Not authenticated");
   }
 
   AuthHelper.get_user(req.query.token).then(function(data) {
@@ -25,7 +25,7 @@ module.exports.get_profile = function(req, res) {
   var token = req.query.token || null;
 
   if (!token) {
-    HttpHelper.error(res, true, "Not authenticated");
+    HttpHelper.error(res, null, "Not authenticated");
   }
 
   AuthHelper.get_user(req.query.token).then(function(data) {
@@ -39,7 +39,7 @@ module.exports.update_profile = function(req, res) {
   var token = req.query.token || null;
 
   if (!token) {
-    HttpHelper.error(res, true, "Not authenticated");
+    HttpHelper.error(res, null, "Not authenticated");
   }
 
   var updated_user = {};

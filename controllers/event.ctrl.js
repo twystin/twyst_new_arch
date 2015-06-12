@@ -15,7 +15,7 @@ module.exports.new = function(req, res) {
   var created_event = {};
 
   if (!token) {
-    HttpHelper.error(res, true, "Not authenticated");
+    HttpHelper.error(res, null, "Not authenticated");
   }
 
   created_event = _.extend(created_event, req.body);
