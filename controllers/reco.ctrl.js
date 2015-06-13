@@ -336,6 +336,13 @@ function massage_offers(params) {
         massaged_offer.next = parseInt(offer.rule && offer.rule.event_count);
         massaged_offer.checkins = item.recco && item.recco.checkins || 0;
         massaged_offer.meta = offer.actions && offer.actions.reward && offer.actions.reward.reward_meta;
+        massaged_offer.expiry = offer.actions.reward.expiry;
+        if (offer && offer.actions && offer.actions.reward && offer.actions.reward.reward_hours) {
+          massaged_offer.available_now = RecoHelper.isClosed(offer.actions.reward.reward_hours);
+          massaged_offer.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
+        }
+        massaged_offer.applicability = offer.actions.reward.applicability;
+        massaged_offer.valid_days = offer.actions.reward.valid_days;
         return massaged_offer;
       }
 

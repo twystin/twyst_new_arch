@@ -7,9 +7,17 @@
         <div flex="40" offset="10">
           <md-card>
             <md-card-content>
-                {{reco.name}}
-                {{reco.distance}} kms away
-                {{reco.address}}
+              <div layout="row">
+                <div flex="20">
+                  <img ng-src="{{reco.logo}}" width="80px" height="auto">
+                </div>
+                <div flex="80">
+                  {{reco.name}}
+                  {{reco.distance}} kms away
+                  {{reco.address}}
+                </div>
+              </div>
+
             </md-card-content>
           </md-card>
         </div>

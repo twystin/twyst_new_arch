@@ -29,6 +29,10 @@ while(program_cursor.hasNext()) {
                     title: o.basics.title,
                     terms: o.terms,
                     detail: o.basics.description,
+                    expiry: p.validity.earn_end,
+                    reward_hours: o.avail_hours,
+                    applicability: o.reward_applicability,
+                    valid_days: o.valid_days,
                     reward_meta: o.reward
                   }
                 },

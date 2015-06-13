@@ -83,12 +83,14 @@ module.exports.opensAt = function(business_hours) {
     return checkNextDays();
   } else {
     for (var i = 0; i < today.timings.length; i++) {
-      var open_min = today.timings[i].open.hr * 60 + today.timings[i].open.min;
-      if (open_min > minutes) {
-        var hr = today.timings[i].open.hr;
-        var min = today.timings[i].open.min;
-        opens.time = formatTime(hr, min);
-        return opens;
+      if (today.timings[i].open && today.timings[i].open.hr && today.timings[i].open.min) {
+        var open_min = today.timings[i].open.hr * 60 + today.timings[i].open.min;
+        if (open_min > minutes) {
+          var hr = today.timings[i].open.hr;
+          var min = today.timings[i].open.min;
+          opens.time = formatTime(hr, min);
+          return opens;
+        }
       }
     }
     return checkNextDays();
@@ -101,17 +103,17 @@ module.exports.opensAt = function(business_hours) {
       var day = days[time.getDay()];
       var today = business_hours[day];
       if (today.closed || !today.timings || !today.timings.length) {
-
       } else {
-
         for (var i = 0; i < today.timings.length; i++) {
-          var open_min = today.timings[i].open.hr * 60 + today.timings[i].open.min;
-          if (minutes < open_min) {
-            opens.day = day.substr(0, 3);
-            var hr = today.timings[i].open.hr;
-            var min = today.timings[i].open.min;
-            opens.time = formatTime(hr, min);
-            return opens;
+          if (today.timings[i].open && today.timings[i].open.hr && today.timings[i].open.min) {
+            var open_min = today.timings[i].open.hr * 60 + today.timings[i].open.min;
+            if (minutes < open_min) {
+              opens.day = day.substr(0, 3);
+              var hr = today.timings[i].open.hr;
+              var min = today.timings[i].open.min;
+              opens.time = formatTime(hr, min);
+              return opens;
+            }
           }
         }
       }
@@ -121,6 +123,9 @@ module.exports.opensAt = function(business_hours) {
 };
 
 function formatTime(hours, minutes) {
+  if (!hours || !minutes) {
+    return "";
+  }
   var ampm = hours >= 12 ? 'PM' : 'AM';
   hours = hours % 12;
   hours = hours ? hours : 12; // the hour '0' should be '12'

@@ -156,7 +156,9 @@ var OutletSchema = new Schema({
           detail: {type: String},
           expiry: {type: String},
           reward_meta: {}, // the structured rewards
-          reward_hours: hours.hours
+          reward_hours: hours.hours,
+          applicability: {},
+          valid_days: {type: Number}
         },
         message: {
           sms: {type: String},
