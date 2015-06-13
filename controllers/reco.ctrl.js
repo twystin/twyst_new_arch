@@ -341,7 +341,7 @@ function massage_offers(params) {
           massaged_offer.available_now = RecoHelper.isClosed(offer.actions.reward.reward_hours);
           massaged_offer.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
         }
-        massaged_offer.applicability = offer.actions.reward.applicability;
+        // massaged_offer.applicability = offer.actions.reward.applicability;
         massaged_offer.valid_days = offer.actions.reward.valid_days;
         return massaged_offer;
       }
