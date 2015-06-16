@@ -29,19 +29,7 @@ function get_user(params) {
   if (params.query.token) {
     AuthHelper.get_user(params.query.token).then(function(data) {
       params.user = data.data;
-      if (params.user.coupons && params.user.coupons.length !== 0 ) {
-        var coupon_map = _.reduce(params.user.coupons, function(memo, item) {
-          _.each(item.outlets, function(outlet) {
-            memo[outlet] = memo[outlet] || {};
-            memo[outlet].coupons = memo[outlet].coupons || [];
-            if (item.status === "active") {
-              memo[outlet].coupons.push(item);
-            }
-          });
-          return memo;
-        }, {});
-        Cache.hset(params.user._id, 'coupon_map', JSON.stringify(coupon_map));
-      }
+      RecoHelper.cache_user_coupons(params.user);
       deferred.resolve(params);
     }, function(err) {
       deferred.reject(err);

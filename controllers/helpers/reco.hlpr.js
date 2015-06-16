@@ -1,3 +1,8 @@
+var fs = require('fs'),
+  _ = require('underscore'),
+  dateFormat = require('dateformat'),
+  Cache = require('../../common/cache.hlpr');
+
 module.exports.distance = function(p1, p2) {
 
   if (!p1 || !p1.latitude || ! p1.longitude ||
@@ -28,10 +33,33 @@ module.exports.distance = function(p1, p2) {
   return d.toFixed(1) * 1;
 };
 
+module.exports.cache_user_coupons = function(user) {
+  if (Cache.hget(user._id, 'coupon_map'), function(err, reply) {
+    if (err || !reply) {
+      if (user.coupons && user.coupons.length !== 0 ) {
+        var coupon_map = _.reduce(user.coupons, function(memo, item) {
+          _.each(item.outlets, function(outlet) {
+            memo[outlet] = memo[outlet] || {};
+            memo[outlet].coupons = memo[outlet].coupons || [];
+            if (item.status === "active") {
+              memo[outlet].coupons.push(item);
+            }
+          });
+          return memo;
+        }, {});
+        Cache.hset(user._id, 'coupon_map', JSON.stringify(coupon_map));
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return true;
+    }
+  });
+};
+
+
 // OLD CODE THAT SHOULD BE CLEANED UP
-var fs = require('fs'),
-  _ = require('underscore'),
-  dateFormat = require('dateformat');
 
 module.exports.shuffleArray = function(array) {
   var counter = array.length,
