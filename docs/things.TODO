@@ -9,3 +9,12 @@ TO DO:
     ☐ Web app
     ☐ Merchant app
     ☐ Tests
+
+ISSUES:
+  ☐ Fix cache issue / deep copy issue
+  ☐ Fix issue of update to user
+  ☐ Fix cache to use redis
+
+REFACTORING:
+  ☐ Replace underscore with lodash?
+  ☐ Switch to ioredis instead of node_redis

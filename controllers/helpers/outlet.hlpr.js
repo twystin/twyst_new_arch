@@ -1,6 +1,6 @@
 'use strict';
 /*jslint node: true */
-
+var Cache = require('../../common/cache.hlpr');
 var Q = require('q');
 var _ = require('underscore');
 var mongoose = require('mongoose');
@@ -10,13 +10,26 @@ var AuthHelper = require('../../common/auth.hlpr.js');
 
 module.exports.get_outlet = function(id) {
   var deferred = Q.defer();
-  Outlet.findOne({_id: id}, function(err, outlet) {
-    if (err || !outlet) {
-      deferred.rejeect({err: err || true, message: 'Outlet not found'});
+  Cache.get('outlets', function(err, reply) {
+    if (err) {
+
     } else {
-      deferred.resolve({data: outlet, message: 'Found the outlet'});
+      if (!reply) {
+        Outlet.findOne({_id: id}, function(err, outlet) {
+          if (err || !outlet) {
+            deferred.rejeect({err: err || true, message: 'Outlet not found'});
+          } else {
+            deferred.resolve({data: outlet, message: 'Found the outlet'});
+          }
+        });
+      } else {
+        console.log("GETTING FROM CACHE");
+        var outlets = JSON.parse(reply);
+        deferred.resolve({data: outlets[id], message: 'Found the outlet'});
+      }
     }
   });
+
 
   return deferred.promise;
 };

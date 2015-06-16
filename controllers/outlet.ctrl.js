@@ -47,12 +47,24 @@ module.exports.get = function(req, res) {
     HttpHelper.error(res, null, "No outlet id passed");
   }
 
-  OutletHelper.get_outlet(req.params.outlet_id).then(function(data) {
-    HttpHelper.success(res, data.data, data.message);
-  }, function(err) {
-    HttpHelper.error(res, err.data, err.message);
+  OutletHelper.get_outlet(req.params.outlet_id)
+  .then(function(data) {
+    return filter_fields(req, data);
+  })
+  .then(function(data){
+    HttpHelper.success(res, data, "Got outlet info");
+  })
+  .fail(function(err) {
+    HttpHelper.error(res, err, err);
   });
 };
+
+function filter_fields(req, data) {
+  if (req.params.lat) {
+    console.log("LAT FOUND");
+  }
+  return data;
+}
 
 module.exports.all = function(req, res) {
   var token = req.query.token || null;

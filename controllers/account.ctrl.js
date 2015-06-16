@@ -23,15 +23,19 @@ module.exports.login = function(req, res) {
           return item.event_type;
         });
         // console.log(event_map.checkin);
-        Cache[req.user._id] = Cache[req.user._id] || {};
-        Cache[req.user._id].checkin_map = _.reduce(event_map.checkin, function(memo, item) {
+        // Cache[req.user._id] = Cache[req.user._id] || {};
+        var checkin_map = _.reduce(event_map.checkin, function(memo, item) {
           memo[item.event_outlet] = memo[item.event_outlet] + 1 || 1;
           return memo;
         }, {});
-        Cache[req.user._id].favourite_map = _.reduce(event_map.favourite, function(memo, item) {
+        var favourite_map = _.reduce(event_map.favourite, function(memo, item) {
           memo[item.event_outlet] = memo[item.event_outlet] + 1 || 1;
           return memo;
         }, {});
+
+        Cache.hset(req.user._id, 'checkin_map', JSON.stringify(checkin_map));
+        Cache.hset(req.user._id, 'favourite_map', JSON.stringify(favourite_map));
+
       }
 
       HttpHelper.success(res, data.data, data.message);

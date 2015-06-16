@@ -13,22 +13,28 @@ var Q = require('q');
 
 function get_outlets(params) {
   var deferred = Q.defer();
-  if (!Cache.outlets) {
-    Outlet.find({}).lean().exec(function(err, outlets) {
-      if (err || outlets.length === 0) {
-        deferred.reject('Could not get outlets');
+  Cache.get('outlets', function(err, reply) {
+    if (err) {
+      deferred.reject('Could not get outlets');
+    } else {
+      if (!reply) {
+        Outlet.find({}).lean().exec(function(err, outlets) {
+          if (err || outlets.length === 0) {
+            deferred.reject('Could not get outlets');
+          } else {
+            var reduced_outlets = _.reduce(outlets, function(memo, item) {
+              memo[item._id] = item;
+              return memo;
+            }, {});
+            Cache.set('outlets', JSON.stringify(reduced_outlets));
+            deferred.resolve({query:params, outlets:reduced_outlets});
+          }
+        });
       } else {
-        var reduced_outlets = _.reduce(outlets, function(memo, item) {
-          memo[item._id] = item;
-          return memo;
-        }, {});
-        Cache.outlets = reduced_outlets;
-        deferred.resolve({query:params, outlets:reduced_outlets});
+        deferred.resolve({query: params, outlets: JSON.parse(reply)});
       }
-    });
-  } else {
-    deferred.resolve({query: params, outlets: Cache.outlets});
-  }
+    }
+  });
 
   return deferred.promise;
 }
@@ -39,8 +45,7 @@ function get_user(params) {
     AuthHelper.get_user(params.query.token).then(function(data) {
       params.user = data.data;
       if (params.user.coupons && params.user.coupons.length !== 0 ) {
-        Cache[params.user._id] = Cache[params.user._id] || {};
-        Cache[params.user._id].coupon_map = _.reduce(params.user.coupons, function(memo, item) {
+        var coupon_map = _.reduce(params.user.coupons, function(memo, item) {
           _.each(item.outlets, function(outlet) {
             memo[outlet] = memo[outlet] || {};
             memo[outlet].coupons = memo[outlet].coupons || [];
@@ -50,6 +55,7 @@ function get_user(params) {
           });
           return memo;
         }, {});
+        Cache.hset(params.user._id, 'coupon_map', JSON.stringify(coupon_map));
       }
       deferred.resolve(params);
     }, function(err) {
@@ -66,20 +72,24 @@ function get_user(params) {
 function set_user_checkins(params) {
   var deferred = Q.defer();
   if (params.user) {
-    var cmap =  Cache[params.user._id] &&
-                Cache[params.user._id].checkin_map || null;
-
-    var outlets = params.outlets;
-    if (cmap) {
-      _.each(cmap, function(value, key) {
-        outlets[key].recco = outlets[key].recco || {};
-        outlets[key].recco.checkins = value;
-      });
-      params.outlets = outlets;
-      deferred.resolve(params);
-    } else {
-      deferred.resolve(params);
-    }
+    Cache.hget(params.user._id, "checkin_map", function(err, reply) {
+      if (err || !reply) {
+        deferred.resolve(params);
+      } else {
+        var cmap = JSON.parse(reply);
+        var outlets = params.outlets;
+        if (cmap) {
+          _.each(cmap, function(value, key) {
+            outlets[key].recco = outlets[key].recco || {};
+            outlets[key].recco.checkins = value;
+          });
+          params.outlets = outlets;
+          deferred.resolve(params);
+        } else {
+          deferred.resolve(params);
+        }
+      }
+    });
   } else {
     deferred.resolve(params);
   }
@@ -89,20 +99,24 @@ function set_user_checkins(params) {
 function set_user_coupons(params) {
   var deferred = Q.defer();
   if (params.user) {
-    var cmap =  Cache[params.user._id] &&
-                Cache[params.user._id].coupon_map || null;
-
-    var outlets = params.outlets;
-    if (cmap) {
-      _.each(cmap, function(value, key) {
-        outlets[key].recco = outlets[key].recco || {};
-        outlets[key].recco.coupons = value.coupons.length;
-      });
-      params.outlets = outlets;
-      deferred.resolve(params);
-    } else {
-      deferred.resolve(params);
-    }
+    Cache.hget(params.user._id, 'coupon_map', function(err, reply) {
+      if (err || !reply) {
+        deferred.resolve(params);
+      } else {
+        var cmap = JSON.parse(reply);
+        var outlets = params.outlets;
+        if (cmap) {
+          _.each(cmap, function(value, key) {
+            outlets[key].recco = outlets[key].recco || {};
+            outlets[key].recco.coupons = value.coupons.length;
+          });
+          params.outlets = outlets;
+          deferred.resolve(params);
+        } else {
+          deferred.resolve(params);
+        }
+      }
+    });
   } else {
     deferred.resolve(params);
   }
@@ -152,11 +166,14 @@ function calculate_relevance(params) {
     }
     // USER FOLLOW RELEVANCE
     if (params.user) {
-      if (Cache[params.user._id] &&
-          Cache[params.user._id].favourite_map &&
-          Cache[params.user._id].favourite_map[val._id]) {
-        relevance = relevance + 10000;
-      }
+      Cache.hget(params.user._id, 'favourite_map', function(err, reply) {
+        if (reply) {
+          var fmap = JSON.parse(reply);
+          if (fmap && fmap[val._id]) {
+            relevance = relevance + 10000;
+          }
+        }
+      });
     }
 
     // USER COUPON RELEVANCE
@@ -213,52 +230,77 @@ function sort_by_relevance(params) {
 
 function pick_outlet_fields(params) {
   var deferred = Q.defer();
-  params.outlets = _.map(params.outlets, function(item) {
-    var massaged_item = {};
-    massaged_item._id = item._id;
-    massaged_item.name = item.basics.name;
-    massaged_item.city = item.contact.location.city;
-    massaged_item.address = item.contact.location.address;
-    massaged_item.locality_1 = item.contact.location.locality_1[0];
-    massaged_item.locality_2 = item.contact.location.locality_2[0];
-    massaged_item.distance = item.recco.distance || null;
-    massaged_item.open = !item.recco.closed;
-    massaged_item.phone = item.contact.phones.mobile[0] && item.contact.phones.mobile[0].num;
-    massaged_item.offers = item.offers;
-    if (params.user) {
-      if (Cache[params.user._id] &&
-          Cache[params.user._id].favourite_map &&
-          Cache[params.user._id].favourite_map[item._id]) {
-        massaged_item.following = true;
-      } else {
-        massaged_item.following = false;
+  var fmap = null;
+  if (params.user) {
+    Cache.hget(params.user._id, 'favourite_map', function(err, reply) {
+      if (reply) {
+        fmap = JSON.parse(reply);
       }
-    }
-    if (item.photos && item.photos.logo) {
-      massaged_item.logo = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + item._id + '/'+ item.photos.logo;
-    }
-    if (item.photos && item.photos.background) {
-      massaged_item.background = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + item._id + '/'+ item.photos.background;
-    }
-    massaged_item.open_next = RecoHelper.opensAt(item.business_hours);
-    return massaged_item;
-  });
 
-  deferred.resolve(params);
+      params.outlets = _.map(params.outlets, function(item) {
+        var massaged_item = {};
+        massaged_item._id = item._id;
+        massaged_item.name = item.basics.name;
+        massaged_item.city = item.contact.location.city;
+        massaged_item.address = item.contact.location.address;
+        massaged_item.locality_1 = item.contact.location.locality_1[0];
+        massaged_item.locality_2 = item.contact.location.locality_2[0];
+        massaged_item.distance = item.recco.distance || null;
+        massaged_item.open = !item.recco.closed;
+        massaged_item.phone = item.contact.phones.mobile[0] && item.contact.phones.mobile[0].num;
+        massaged_item.offers = item.offers;
+        if (fmap && fmap[item._id]) {
+          massaged_item.following = true;
+        } else {
+          massaged_item.following = false;
+        }
+
+        if (item.photos && item.photos.logo) {
+          massaged_item.logo = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + item._id + '/'+ item.photos.logo;
+        }
+        if (item.photos && item.photos.background) {
+          massaged_item.background = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + item._id + '/'+ item.photos.background;
+        }
+        massaged_item.open_next = RecoHelper.opensAt(item.business_hours);
+
+        return massaged_item;
+      });
+
+      deferred.resolve(params);
+    });
+  } else {
+    deferred.resolve(params);
+  }
   return deferred.promise;
 }
 
 function massage_offers(params) {
   var deferred = Q.defer();
+  var coupon_map = null;
+  if (params.user) {
+    Cache.hget(params.user._id, 'coupon_map', function(err, reply) {
+      if (err || !reply) {
+        coupon_map = null;
+      } else {
+        coupon_map = JSON.parse(reply);
+      }
 
-  params.outlets = _.map(params.outlets, function(item) {
-    item = add_user_coupons(
-                pick_offer_fields(
-                      select_relevant_checkin_offer(item)));
-    return item;
-  });
+      params.outlets = _.map(params.outlets, function(item) {
+        item = add_user_coupons(
+                    pick_offer_fields(
+                          select_relevant_checkin_offer(item)), coupon_map && coupon_map[item._id] && coupon_map[item._id].coupons);
+        return item;
+      });
+      deferred.resolve(params);
 
-  deferred.resolve(params);
+    });
+  } else {
+    params.outlets = _.map(params.outlets, function(item) {
+      item = pick_offer_fields(select_relevant_checkin_offer(item));
+      return item;
+    });
+    deferred.resolve(params);
+  }
   return deferred.promise;
 
   // PRIVATE FUNCTIONS
@@ -300,28 +342,20 @@ function massage_offers(params) {
     return item;
   }
 
-  function add_user_coupons(item) {
-    if (params.user && params.user.coupons.length !== 0) {
-      var coupon_map = Cache[params.user._id].coupon_map[item._id] &&
-                        Cache[params.user._id].coupon_map[item._id].coupons || null;
-
-      if (item.offers && item.offers.length !== 0 && coupon_map !== null) {
-        coupon_map = _.map(coupon_map, function(item) {
+  function add_user_coupons(item, coupon_map) {
+    if (item.offers && item.offers.length !== 0 && coupon_map !== null) {
+        coupon_map = _.map(coupon_map, function(itemd) {
           var coupon = {};
           coupon.type = "coupon";
-          coupon.status = item.status;
-          coupon.title = item.title;
-          coupon.terms = item.detail;
-          coupon.expiry = item.expiry;
+          coupon.status = itemd && itemd.status;
+          coupon.title = itemd && itemd.title;
+          coupon.terms = itemd && itemd.detail;
+          coupon.expiry = itemd && itemd.expiry;
           return coupon;
         });
-
         item.offers = item.offers.concat(coupon_map);
       }
       return item;
-    } else {
-      return item;
-    }
   }
 
   function pick_offer_fields(item) {
@@ -359,6 +393,7 @@ function paginate(params) {
   deferred.resolve(outlets);
   return deferred.promise;
 }
+
 //TODO: Cache the recco set for pagination.
 module.exports.get = function(req, res) {
   get_outlets(req.query)

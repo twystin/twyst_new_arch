@@ -4,7 +4,8 @@
     <div ng-repeat="reco in recos.data">
 
     <div layout="row">
-        <div flex="40" offset="10">
+        <div ng-show="$index%2" flex="40" offset="{{10*($index%2)+($index%2)*40}}">
+          {{($index%2)*40}}
           <md-card>
             <md-card-content>
               <div layout="row">
@@ -12,25 +13,40 @@
                   <img ng-src="{{reco.logo}}" width="80px" height="auto">
                 </div>
                 <div flex="80">
-                  {{reco.name}}
-                  {{reco.distance}} kms away
-                  {{reco.address}}
+                  <strong>{{reco.name}}</strong>
+                  <small>
+                    <p>Address: {{reco.address}}</p>
+                    <p>Phone: {{reco.phone}}</p>
+                    <p ng-show="reco.open">Open now</p>
+                    <p ng-hide="reco.open">Closed now</p>
+                  </small>
                 </div>
               </div>
 
             </md-card-content>
           </md-card>
         </div>
-        <div flex="40">
+        <div ng-hide="$index%2" flex="40" offset="{{10*($index%2)+($index%2)*40}}">
           <md-card>
             <md-card-content>
-              <div ng-repeat="o in reco.offers">
-                {{$index + 1}}. {{o.type}} > {{o.title}}
+              <div layout="row">
+                <div flex="20">
+                  <img ng-src="{{reco.logo}}" width="80px" height="auto">
+                </div>
+                <div flex="80">
+                  <strong>{{reco.name}}</strong>
+                  <small>
+                    <p>Address: {{reco.address}}</p>
+                    <p>Phone: {{reco.phone}}</p>
+                    <p ng-show="reco.open">Open now</p>
+                    <p ng-hide="reco.open">Closed now</p>
+                  </small>
+                </div>
               </div>
+
             </md-card-content>
           </md-card>
         </div>
-      <div flex="10"></div>
     </div>
   </div>
 
