@@ -17,22 +17,7 @@ function get_outlets(params) {
     if (err) {
       deferred.reject('Could not get outlets');
     } else {
-      if (!reply) {
-        Outlet.find({}).lean().exec(function(err, outlets) {
-          if (err || outlets.length === 0) {
-            deferred.reject('Could not get outlets');
-          } else {
-            var reduced_outlets = _.reduce(outlets, function(memo, item) {
-              memo[item._id] = item;
-              return memo;
-            }, {});
-            Cache.set('outlets', JSON.stringify(reduced_outlets));
-            deferred.resolve({query:params, outlets:reduced_outlets});
-          }
-        });
-      } else {
-        deferred.resolve({query: params, outlets: JSON.parse(reply)});
-      }
+      deferred.resolve({query: params, outlets: JSON.parse(reply)});
     }
   });
 

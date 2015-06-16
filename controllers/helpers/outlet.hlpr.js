@@ -12,24 +12,16 @@ module.exports.get_outlet = function(id) {
   var deferred = Q.defer();
   Cache.get('outlets', function(err, reply) {
     if (err) {
-
+      deferred.reject('Could not find outlets');
     } else {
-      if (!reply) {
-        Outlet.findOne({_id: id}, function(err, outlet) {
-          if (err || !outlet) {
-            deferred.rejeect({err: err || true, message: 'Outlet not found'});
-          } else {
-            deferred.resolve({data: outlet, message: 'Found the outlet'});
-          }
-        });
-      } else {
-        console.log("GETTING FROM CACHE");
-        var outlets = JSON.parse(reply);
+      var outlets = JSON.parse(reply);
+      if (outlets[id]) {
         deferred.resolve({data: outlets[id], message: 'Found the outlet'});
+      } else {
+        deferred.reject('Could not find outlet');
       }
     }
   });
-
 
   return deferred.promise;
 };

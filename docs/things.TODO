@@ -1,20 +1,32 @@
-TO DO:
+CODE:
   - Recco API:
     ☐ Pagination should take from cache.
     ☐ Fix up the relevance for the offers, like outlets.
-    ☐ Add the relevance score of offers into outlets.
-    ☐ Add faves, etc.
-  - Other:
-    ☐ Fix up migrations
-    ☐ Web app
-    ☐ Merchant app
-    ☐ Tests
+    ✔ Add the relevance score of offers into outlets. @done(2015-06-16 07:12) @project(TO DO / - Recco API)
+    ✔ Add faves, etc. @done(2015-06-16 07:12) @project(TO DO / - Recco API)
+
 
 ISSUES:
-  ☐ Fix cache issue / deep copy issue
+  ✔ Fix cache issue / deep copy issue @done(2015-06-16 07:12) @project(ISSUES)
+  ✔ Fix cache to use redis @done(2015-06-16 07:13) @project(ISSUES)
   ☐ Fix issue of update to user
-  ☐ Fix cache to use redis
+  ☐ Use cache to repopulate
 
 REFACTORING:
   ☐ Replace underscore with lodash?
-  ☐ Switch to ioredis instead of node_redis
+  ✔ Switch to ioredis instead of node_redis @done(2015-06-16 07:13) @project(REFACTORING)
+
+DEPLOYMENT:
+  ☐ Use Amazon elasticache instead of local redis
+
+LARGE FEATURES:
+  ☐ Fix up migrations
+  ☐ Web app
+  ☐ Merchant app
+  ☐ Tests
+
+RAHUL:
+- All offer class & states
+- All reward templates
+- Fix up plan ahead
+- Put in the table

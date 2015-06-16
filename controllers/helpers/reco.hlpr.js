@@ -1,3 +1,7 @@
+
+
+
+// OLD CODE THAT SHOULD BE CLEANED UP
 var fs = require('fs'),
   _ = require('underscore'),
   dateFormat = require('dateformat');

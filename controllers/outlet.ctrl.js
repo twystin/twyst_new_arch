@@ -4,7 +4,7 @@
 var HttpHelper = require('../common/http.hlpr.js');
 var AuthHelper = require('../common/auth.hlpr.js');
 var OutletHelper = require('./helpers/outlet.hlpr.js');
-
+var RecoHelper = require('./helpers/reco.hlpr.js');
 var _ = require('underscore');
 var mongoose = require('mongoose');
 var Outlet = mongoose.model('Outlet');
@@ -55,13 +55,18 @@ module.exports.get = function(req, res) {
     HttpHelper.success(res, data, "Got outlet info");
   })
   .fail(function(err) {
-    HttpHelper.error(res, err, err);
+    HttpHelper.error(res, err, "Error getting outlet info");
   });
 };
 
 function filter_fields(req, data) {
-  if (req.params.lat) {
-    console.log("LAT FOUND");
+  if (req.query.lat && req.query.long) {
+    data.recco = data.recco || {};
+    console.log(data.data.contact.location.coords);
+    data.recco.distance = RecoHelper.distance({
+      latitude: req.query.lat,
+      longitude: req.query.long
+    }, data.data.contact.location.coords);
   }
   return data;
 }

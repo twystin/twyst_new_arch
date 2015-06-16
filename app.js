@@ -7,19 +7,8 @@ var settings = require('./config/settings');
   // CONFIGURE THE APP & THE DATA MODELS
   require('./config/app.cfg')(app);
   require('./config/models.cfg')();
-
-
-  // ROUTES SERVED BY RESTIFY
-  // var restify = require('express-restify-mongoose');
-  // var Outlet = require('./models/outlet');
-  //
-  // var router = express.Router();
-  // restify.serve(router, Outlet);
-  //
-  // app.use(router);
-
-  // CUSTOM ROUTES
   require('./config/routes.cfg')(app);
+  require('./config/cache.cfg').populate();
 
   // START THE SERVER
   console.log('STARTING THE TWYST SERVER');
