@@ -1,5 +1,32 @@
+module.exports.distance = function(p1, p2) {
 
+  if (!p1 || !p1.latitude || ! p1.longitude ||
+      !p2 || !p2.latitude || !p2.longitude) {
+    return undefined;
+  }
 
+  var R = 6371; // radius of the earth in km
+  if (typeof(Number.prototype.toRad) === 'undefined') {
+    Number.prototype.toRad = function() {
+      return this * Math.PI / 180;
+    };
+  }
+
+  var dLat = (p2.latitude - p1.latitude).toRad();
+  var dLon = (p2.longitude - p1.longitude).toRad();
+
+  var lat1 = (p1.latitude * 1).toRad();
+  var lat2 = (p2.latitude * 1).toRad();
+
+  var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  var d = R * c;
+
+  return d.toFixed(1) * 1;
+};
 
 // OLD CODE THAT SHOULD BE CLEANED UP
 var fs = require('fs'),
@@ -149,41 +176,7 @@ module.exports.formatDate = function(date) {
   return dateFormat(date, "dd mmm yyyy");
 };
 
-module.exports.distance = function(a, b) {
-  var p1 = {
-    latitude: a && a.latitude,
-    longitude: a && a.longitude
-  };
 
-  var p2 = {
-    latitude: b && b.latitude || 23,
-    longitude: b && b.longitude || 77
-  };
-
-  var R = 6371; // km
-  if (typeof(Number.prototype.toRad) === "undefined") {
-    Number.prototype.toRad = function() {
-      return this * Math.PI / 180;
-    };
-  }
-
-  if (!p1 || !p2) {
-    return 100;
-  };
-
-  var dLat = (p2.latitude - p1.latitude).toRad();
-  var dLon = (p2.longitude - p1.longitude).toRad();
-
-  var lat1 = (p1.latitude * 1).toRad();
-  var lat2 = (p2.latitude * 1).toRad();
-
-  var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-          Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
-  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  var d = R * c;
-
-  return d.toFixed(1) * 1;
-};
 
 
 module.exports.replaceAll = function(str, find, replace) {
