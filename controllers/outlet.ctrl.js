@@ -52,8 +52,11 @@ function get_outlet(query, params) {
     } else {
       var outlets = JSON.parse(reply);
       var outlet = {};
-      outlet[query.outlet_id] = outlets[query.outlet_id];
-      deferred.resolve({query: params, outlet: outlet});
+      if (outlets[query.outlet_id]) {
+        deferred.reject('Could not find outlet');
+      } else {
+        deferred.resolve({query: params, outlet: outlet});
+      }
     }
   });
 
@@ -89,16 +92,9 @@ function set_user_checkins(params) {
       } else {
         var cmap = JSON.parse(reply);
         var outlet = params.outlet;
-        if (cmap) {
-          _.each(cmap, function(value, key) {
-            outlet[key].recco = outlet[key].recco || {};
-            outlet[key].recco.checkins = value;
-          });
-          params.outlet = outlet;
-          deferred.resolve(params);
-        } else {
-          deferred.resolve(params);
-        }
+        console.log(cmap);
+        deferred.resolve(params);
+
       }
     });
   } else {
