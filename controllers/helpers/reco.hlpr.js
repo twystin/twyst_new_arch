@@ -58,7 +58,6 @@ module.exports.cache_user_coupons = function(user) {
   });
 };
 
-
 // OLD CODE THAT SHOULD BE CLEANED UP
 
 module.exports.shuffleArray = function(array) {

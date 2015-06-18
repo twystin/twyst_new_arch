@@ -13,7 +13,8 @@ var OutletSchema = new Schema({
         is_a: {type: String, enum: ['desserts', 'restaurant','biryani','chinese','continental','north_indian','fast_food','burgers','pizza','wraps','pub','beer','bakery','cake','cafe','bistro','takeaway','other']},
         icon: {type: String, enum: ['desserts', 'restaurant','biryani','chinese','continental','north_indian','fast_food','burgers','pizza','wraps','pub','beer','bakery','cake','cafe','bistro','takeaway','other']},
         created_at : {type: Date, default: Date.now},
-        modified_at: {type: Date, default: Date.now}
+        modified_at: {type: Date, default: Date.now},
+        featured: Boolean
     },
     contact: {
         location: {
