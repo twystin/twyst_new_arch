@@ -235,23 +235,23 @@ function massage_offers(params) {
       }
     });
 
-    // AND THEN PICK THE FIRST ONE
-    item.offers = _.filter(item.offers, function(offer) {
-      if (offer.offer_type === 'checkin') {
-        if (checkins < offer.rule.event_count && !returned) {
-          returned = true;
-          return true;
-        } else {
-          return false;
-        }
-      } else {
-        if (offer.offer_type === 'winback' || offer.offer_type === 'birthday') {
-          return false;
-        } else {
-          return true;
-        }
-      }
-    });
+    // // AND THEN PICK THE FIRST ONE
+    // item.offers = _.filter(item.offers, function(offer) {
+    //   if (offer.offer_type === 'checkin') {
+    //     if (checkins < offer.rule.event_count && !returned) {
+    //       returned = true;
+    //       return true;
+    //     } else {
+    //       return false;
+    //     }
+    //   } else {
+    //     if (offer.offer_type === 'winback' || offer.offer_type === 'birthday') {
+    //       return false;
+    //     } else {
+    //       return true;
+    //     }
+    //   }
+    // });
 
     return item;
   }
@@ -298,7 +298,6 @@ function massage_offers(params) {
     return item;
   }
 }
-
 
 module.exports.get = function(req, res) {
   get_outlet(req.params, req.query)
