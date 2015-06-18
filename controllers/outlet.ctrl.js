@@ -51,11 +51,10 @@ function get_outlet(query, params) {
       deferred.reject('Could not get outlet');
     } else {
       var outlets = JSON.parse(reply);
-      var outlet = {};
-      if (outlets[query.outlet_id]) {
+      if (!outlets[query.outlet_id]) {
         deferred.reject('Could not find outlet');
       } else {
-        deferred.resolve({query: params, outlet: outlet});
+        deferred.resolve({query: params, outlet: outlets[query.outlet_id]});
       }
     }
   });
@@ -91,10 +90,9 @@ function set_user_checkins(params) {
         deferred.resolve(params);
       } else {
         var cmap = JSON.parse(reply);
-        var outlet = params.outlet;
-        console.log(cmap);
+        params.outlet.recco = params.outlet.recco || {};
+        params.outlet.recco.checkins = cmap[params.outlet._id];
         deferred.resolve(params);
-
       }
     });
   } else {
@@ -112,17 +110,9 @@ function set_user_coupons(params) {
         deferred.resolve(params);
       } else {
         var cmap = JSON.parse(reply);
-        var outlet = params.outlet;
-        if (cmap) {
-          _.each(cmap, function(value, key) {
-            outlet[key].recco = outlet[key].recco || {};
-            outlet[key].recco.coupons = value.coupons.length;
-          });
-          params.outlet = outlet;
-          deferred.resolve(params);
-        } else {
-          deferred.resolve(params);
-        }
+        params.outlet.recco = params.outlet.recco || {};
+        params.outlet.recco.coupons = cmap[params.outlet._id].length;
+        deferred.resolve(params);
       }
     });
   } else {
@@ -132,6 +122,7 @@ function set_user_coupons(params) {
 }
 
 function set_distance(params) {
+
   var deferred = Q.defer();
   if (params.query.lat && params.query.long) {
     params.outlet.recco = params.outlet.recco || {};
@@ -146,6 +137,7 @@ function set_distance(params) {
 }
 
 function set_open_closed(params) {
+
   var deferred = Q.defer();
   if (params.query.date && params.query.time) {
     params.outlet.recco = params.outlet.recco || {};
@@ -159,7 +151,6 @@ function set_open_closed(params) {
 }
 
 function pick_outlet_fields(params) {
-
   var deferred = Q.defer();
   var fmap = null;
   var user = params.user && params.user._id || null;
@@ -339,24 +330,6 @@ module.exports.get = function(req, res) {
     HttpHelper.error(res, err || false, "Error getting the outlet");
   });
 };
-
-
-// module.exports.get = function(req, res) {
-//   if (!req.params.outlet_id) {
-//     HttpHelper.error(res, null, "No outlet id passed");
-//   }
-//
-//   OutletHelper.get_outlet(req.params.outlet_id)
-//   .then(function(data) {
-//     return filter_fields(req, data);
-//   })
-//   .then(function(data){
-//     HttpHelper.success(res, data, "Got outlet info");
-//   })
-//   .fail(function(err) {
-//     HttpHelper.error(res, err, "Error getting outlet info");
-//   });
-// };
 
 function filter_fields(req, data) {
   if (req.query.lat && req.query.long) {
