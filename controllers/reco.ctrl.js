@@ -366,8 +366,8 @@ function paginate(params) {
   var deferred = Q.defer();
   var start = params.query.start || 1;
   var end = params.query.end || undefined;
-  var outlets = params.outlets.slice(start - 1, end);
-  deferred.resolve(outlets);
+  params.outlets = params.outlets.slice(start - 1, end);
+  deferred.resolve(params);
   return deferred.promise;
 }
 
@@ -405,7 +405,7 @@ module.exports.get = function(req, res) {
     return paginate(data);
   })
   .then(function(data) {
-    HttpHelper.success(res, data, "Got the recos");
+    HttpHelper.success(res, data.outlets, "Got the recos");
   })
   .fail(function(err) {
     HttpHelper.error(res, err || false, "Error getting reccos");

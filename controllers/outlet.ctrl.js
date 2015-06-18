@@ -170,6 +170,7 @@ function pick_outlet_fields(params) {
       massaged_item.open = !params.outlet.recco.closed;
       massaged_item.phone = params.outlet.contact.phones.mobile[0] && params.outlet.contact.phones.mobile[0].num;
       massaged_item.offers = params.outlet.offers;
+      massaged_item.attributes = params.outlet.attributes;
       if (fmap && fmap[params.outlet._id]) {
         massaged_item.following = true;
       } else {
@@ -323,7 +324,7 @@ module.exports.get = function(req, res) {
     return pick_outlet_fields(data);
   })
   .then(function(data) {
-    HttpHelper.success(res, data, "Got the outlet");
+    HttpHelper.success(res, data.outlet, "Got the outlet");
   })
   .fail(function(err) {
     HttpHelper.error(res, err || false, "Error getting the outlet");
