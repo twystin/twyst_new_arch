@@ -154,11 +154,11 @@ function pick_outlet_fields(params) {
   var deferred = Q.defer();
   var fmap = null;
   var user = params.user && params.user._id || null;
-    Cache.hget(params.user._id, 'favourite_map', function(err, reply) {
+    Cache.hget(user, 'favourite_map', function(err, reply) {
       if (reply) {
         fmap = JSON.parse(reply);
       }
-
+      params.outlet.recco = params.outlet.recco || {};
       var massaged_item = {};
       massaged_item._id = params.outlet._id;
       massaged_item.name = params.outlet.basics.name;
