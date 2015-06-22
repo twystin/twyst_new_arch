@@ -36,10 +36,7 @@ module.exports.distance = function(p1, p2) {
 
 module.exports.cache_user_coupons = function(user) {
   var deferred = Q.defer();
-  console.log(user._id);
   Cache.hget(user._id, 'coupon_map', function(err, reply) {
-    console.log(reply);
-    console.log(err);
     if (err || !reply) {
       if (user.coupons && user.coupons.length !== 0 ) {
         var coupon_map = _.reduce(user.coupons, function(memo, item) {

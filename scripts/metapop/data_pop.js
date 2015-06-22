@@ -309,7 +309,7 @@ db.outlets.update(
   }
 );
 
-// User update
+// User update = 1st
 db.users.update(
   {_id: ObjectId("53158fabe1aba1724c00005b")},
   {
@@ -326,7 +326,92 @@ db.users.update(
         },
         status: 'active',
         issued: '6/23/15'
-      }
+      },
+    }
+  }
+);
+
+// User update = 2nd
+db.users.update(
+  {_id: ObjectId("53158fabe1aba1724c00005b")},
+  {
+    $push: {
+      coupons: {
+        code: 'TEST34',
+        outlets: ObjectId('530ef84902bc583c21000004'),
+        header: '2 hours',
+        line1: 'extra happy hours',
+        line2: 'on all weekdays',
+        expiry: '7/20/2015',
+        reward_meta: {
+          reward_type: 'happyhours'
+        },
+        status: 'active',
+        issued: '6/23/15'
+      },
+    }
+  }
+);
+
+db.users.update(
+  {_id: ObjectId("53158fabe1aba1724c00005b")},
+  {
+    $push: {
+      coupons: {
+        code: 'TEST12',
+        outlets: ObjectId('540ea3d32f61834b5170eb10'),
+        header: '1+1',
+        line1: 'on all classic pizzas',
+        line2: '(chicken/veg only)',
+        expiry: '7/15/2015',
+        reward_meta: {
+          reward_type: 'buyonegetone'
+        },
+        status: 'active',
+        issued: '6/23/15'
+      },
+    }
+  }
+);
+
+db.users.update(
+  {_id: ObjectId("53158fabe1aba1724c00005b")},
+  {
+    $push: {
+      coupons: {
+        code: 'TEST12',
+        outlets: ObjectId('540ea3d32f61834b5170eb10'),
+        header: '1+1',
+        line1: 'on all classic pizzas',
+        line2: '(chicken/veg only)',
+        expiry: '7/15/2015',
+        reward_meta: {
+          reward_type: 'buyonegetone'
+        },
+        status: 'active',
+        issued: '6/23/15'
+      },
+    }
+  }
+);
+
+db.users.update(
+  {_id: ObjectId("53158fabe1aba1724c00005b")},
+  {
+    $push: {
+      coupons: {
+        code: 'TEST12',
+        outlets: ObjectId('540ea3d32f61834b5170eb10'),
+        header: '1+1',
+        line1: 'on all classic pizzas',
+        line2: '(chicken/veg only)',
+        expiry: '7/15/2015',
+        reward_meta: {
+          reward_type: 'buyonegetone'
+        },
+        status: 'active',
+        issued: '6/23/15'
+      },
     }
   }
 );
