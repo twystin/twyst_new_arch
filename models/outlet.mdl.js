@@ -159,7 +159,11 @@ var OutletSchema = new Schema({
           reward_meta: {}, // the structured rewards
           reward_hours: hours.hours,
           applicability: {},
-          valid_days: {type: Number}
+          valid_days: {type: Number},
+          // New fields
+          header: {type: String},
+          line1: {type: String},
+          line2: {type: String}
         },
         message: {
           sms: {type: String},
