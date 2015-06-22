@@ -52,10 +52,10 @@ module.exports.cache_user_coupons = function(user) {
         Cache.hset(user._id, 'coupon_map', JSON.stringify(coupon_map));
         deferred.resolve(true);
       } else {
-        deferred.reject(false);
+        deferred.resolve(true);
       }
     } else {
-      deferred.reject(false);
+      deferred.resolve(true);
     }
   });
   return deferred.promise;

@@ -47,3 +47,4 @@ THINGS TO DO:
   ☐ Fix up applicability
   ☐ Set time out on cache items --- not being deleted.
   ☐ Social pool items
+  ☐ Fix bug where if cache not cleared, not getting picked up
