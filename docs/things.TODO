@@ -30,3 +30,10 @@ RAHUL:
 - All reward templates
 - Fix up plan ahead
 - Put in the table
+
+- URL for Terms of Use - I can't seem to find it :(
+- Turn on SMS so that Dew can use the service
+- FB app ID and key to Dew for them to complete the FB sign up
+- API required for Dew/app to be able to post user's phonebook, Facebook and Google data back to the DB
+- Sample offers against the 'featured' outlets uploaded - for testing on Discover and Outlet Detail
+- Offer Details API

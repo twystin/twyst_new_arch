@@ -27,22 +27,21 @@ module.exports.send_sms = function(phone, message, type, from, outlet) {
                       sms_message;
 
   var deferred = Q.defer();
-	deferred.resolve({data:null, message:'Done'});
-  // http.get(send_sms_url, function(res){
-  //   var body = '';
-  //   res.on('data', function(chunk) {
-  //           // append chunk to your data
-  //           body += chunk;
-  //       });
-	//
-  //       res.on('end', function() {
-  //         deferred.resolve({data: body, message:'Sent SMS'});
-  //       });
-	//
-  //       res.on('error', function(e) {
-  //         deferred.reject({err: e, message: 'Couldn\'t send SMS'});
-  //       });
-  // });
+    http.get(send_sms_url, function (res) {
+        var body = '';
+        res.on('data', function (chunk) {
+            // append chunk to your data
+            body += chunk;
+        });
+
+        res.on('end', function () {
+            deferred.resolve({data: body, message: 'Sent SMS'});
+        });
+
+        res.on('error', function (e) {
+            deferred.reject({err: e, message: 'Couldn\'t send SMS'});
+        });
+    });
 
   return deferred.promise;
 };
