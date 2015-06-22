@@ -82,7 +82,7 @@ db.outlets.update(
         offer_group: 'test_offer',
         actions: {
           reward: {
-            expiry: null,
+            expiry: '9/22/2015',
             reward_hours: null,
             applicability: null,
             valid_days: null,
@@ -114,7 +114,7 @@ db.outlets.update(
         offer_group: 'test_offer',
         actions: {
           reward: {
-            expiry: null,
+            expiry: '8/31/2015',
             reward_hours: null,
             applicability: null,
             valid_days: null,
@@ -146,7 +146,7 @@ db.outlets.update(
         offer_group: 'test_offer',
         actions: {
           reward: {
-            expiry: null,
+            expiry: '8/10/2015',
             reward_hours: null,
             applicability: null,
             valid_days: null,
@@ -175,7 +175,7 @@ db.outlets.update(
         offer_group: 'test_offer',
         actions: {
           reward: {
-            expiry: '8/31/2015',
+            expiry: '9/10/2015',
             reward_hours: null,
             applicability: null,
             valid_days: null,
@@ -207,7 +207,7 @@ db.outlets.update(
         offer_group: 'test_offer',
         actions: {
           reward: {
-            expiry: '9/30/2015',
+            expiry: '9/18/2015',
             reward_hours: null,
             applicability: null,
             valid_days: null,
@@ -235,7 +235,7 @@ db.outlets.update(
         offer_group: 'test_offer',
         actions: {
           reward: {
-            expiry: null,
+            expiry: '9/30/2015',
             reward_hours: null,
             applicability: null,
             valid_days: null,
@@ -263,7 +263,7 @@ db.outlets.update(
         offer_group: 'test_offer',
         actions: {
           reward: {
-            expiry: null,
+            expiry: '9/1/2015',
             reward_hours: null,
             applicability: null,
             valid_days: null,
@@ -292,7 +292,7 @@ db.outlets.update(
         offer_source: 'citibank',
         actions: {
           reward: {
-            expiry: null,
+            expiry: '12/31/2015',
             reward_hours: null,
             applicability: null,
             valid_days: null,
@@ -304,6 +304,28 @@ db.outlets.update(
             line2: 'at Rs 1599++',
           }
         }
+      }
+    }
+  }
+);
+
+// User update
+db.users.update(
+  {_id: ObjectId("53158fabe1aba1724c00005b")},
+  {
+    $push: {
+      coupons: {
+        code: 'TEST12',
+        outlets: ObjectId('540ea3d32f61834b5170eb10'),
+        header: '1+1',
+        line1: 'on all classic pizzas',
+        line2: '(chicken/veg only)',
+        expiry: '7/15/2015',
+        reward_meta: {
+          reward_type: 'buyonegetone'
+        },
+        status: 'active',
+        issued: '6/23/15'
       }
     }
   }

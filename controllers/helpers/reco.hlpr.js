@@ -1,7 +1,8 @@
 var fs = require('fs'),
   _ = require('underscore'),
   dateFormat = require('dateformat'),
-  Cache = require('../../common/cache.hlpr');
+  Cache = require('../../common/cache.hlpr'),
+  Q = require('q');
 
 module.exports.distance = function(p1, p2) {
 
@@ -34,7 +35,11 @@ module.exports.distance = function(p1, p2) {
 };
 
 module.exports.cache_user_coupons = function(user) {
-  if (Cache.hget(user._id, 'coupon_map'), function(err, reply) {
+  var deferred = Q.defer();
+  console.log(user._id);
+  Cache.hget(user._id, 'coupon_map', function(err, reply) {
+    console.log(reply);
+    console.log(err);
     if (err || !reply) {
       if (user.coupons && user.coupons.length !== 0 ) {
         var coupon_map = _.reduce(user.coupons, function(memo, item) {
@@ -48,14 +53,15 @@ module.exports.cache_user_coupons = function(user) {
           return memo;
         }, {});
         Cache.hset(user._id, 'coupon_map', JSON.stringify(coupon_map));
-        return true;
+        deferred.resolve(true);
       } else {
-        return false;
+        deferred.reject(false);
       }
     } else {
-      return true;
+      deferred.reject(false);
     }
   });
+  return deferred.promise;
 };
 
 // OLD CODE THAT SHOULD BE CLEANED UP

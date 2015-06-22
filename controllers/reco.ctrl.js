@@ -29,8 +29,11 @@ function get_user(params) {
   if (params.query.token) {
     AuthHelper.get_user(params.query.token).then(function(data) {
       params.user = data.data;
-      RecoHelper.cache_user_coupons(params.user);
-      deferred.resolve(params);
+      RecoHelper.cache_user_coupons(params.user).then(function(data) {
+        deferred.resolve(params);
+      }, function(err) {
+        deferred.reject(err);
+      });
     }, function(err) {
       deferred.reject(err);
     });
@@ -325,9 +328,9 @@ function massage_offers(params) {
           var coupon = {};
           coupon.type = "coupon";
           coupon.status = itemd && itemd.status;
-          coupon.title = itemd && itemd.title;
-          coupon.terms = itemd && itemd.detail;
-          coupon.expiry = itemd && itemd.expiry;
+          coupon.title = itemd && itemd.title || itemd && itemd.header;
+          coupon.terms = itemd && itemd.detail || itemd && itemd.line1;
+          coupon.expiry = itemd && itemd.expiry || itemd && itemd.line2;
           return coupon;
         });
         item.offers = item.offers.concat(coupon_map);
