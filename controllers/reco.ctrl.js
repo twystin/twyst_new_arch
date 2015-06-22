@@ -341,9 +341,11 @@ function massage_offers(params) {
         return offer;
       } else {
         var massaged_offer = {};
+        massaged_offer.header = offer.actions && offer.actions.reward && offer.actions.reward.header;
+        massaged_offer.line1 = offer.actions && offer.actions.reward && offer.actions.reward.line1;
+        massaged_offer.line2 = offer.actions && offer.actions.reward && offer.actions.reward.line2;
+
         massaged_offer.type = offer.offer_type;
-        massaged_offer.title = offer.actions && offer.actions.reward && offer.actions.reward.title;
-        massaged_offer.terms = offer.actions && offer.actions.reward && offer.actions.reward.terms;
         massaged_offer.next = parseInt(offer.rule && offer.rule.event_count);
         massaged_offer.checkins = item.recco && item.recco.checkins || 0;
         massaged_offer.meta = offer.actions && offer.actions.reward && offer.actions.reward.reward_meta;
