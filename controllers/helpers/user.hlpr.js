@@ -32,3 +32,30 @@ module.exports.update_user = function(token, updated_user) {
 
   return deferred.promise;
 };
+
+module.exports.update_friends = function(token, friend_list) {
+  var deferred = Q.defer();
+
+  AuthHelper.get_user(token).then(function(data) {
+    var user = data.data;
+    User.findOneAndUpdate(
+      {_id: user._id},
+      {$set: {
+        friend_source: friend_list.source,
+        friend_list: friend_list.list
+      }},
+      {upser: true},
+      function(err, u) {
+        if (err || !u) {
+          deferred.reject({err: err || true, message: "Couldn\'t update user"});
+        } else {
+          deferred.resolve({data: u, message: 'Updated user'});
+        }
+      }
+    );
+  }, function(err) {
+    deferred.reject({err: err || true, message: "Couldn\'t find user"});
+  });
+
+  return deferred.promise;
+};

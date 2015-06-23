@@ -331,7 +331,7 @@ function massage_offers(params) {
           coupon.header = itemd && itemd.title || itemd && itemd.header;
           coupon.line1 = itemd && itemd.detail || itemd && itemd.line1;
           coupon.line2 = itemd && itemd.line2;
-          coupon.expiry = itemd && itemd.expiry;
+          coupon.expiry = itemd && itemd.expiry;  
           return coupon;
         });
         item.offers = item.offers.concat(coupon_map);

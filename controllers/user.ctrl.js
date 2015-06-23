@@ -51,3 +51,20 @@ module.exports.update_profile = function(req, res) {
     HttpHelper.error(res, err.err, err.message);
   });
 };
+
+module.exports.update_friends = function(req, res) {
+  var token = req.query.token || null;
+
+  if (!token) {
+    HttpHelper.error(res, null, "Not authenticated");
+  }
+
+  var friend_list = {};
+  friend_list = _.extend(friend_list, req.body);
+
+  UserHelper.update_friends(token, friend_list).then(function(data) {
+    HttpHelper.success(res, data.data, data.message);
+  }, function(err) {
+    HttpHelper.error(res, err.err, err.message);
+  });
+};

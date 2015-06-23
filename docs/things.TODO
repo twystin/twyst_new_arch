@@ -41,10 +41,10 @@ THINGS TO DO:
   ✔ Populate the coupons  @done(2015-06-23 00:39) @project(THINGS TO DO)
   ✔ Update API to send back line 1 / line 2 @done(2015-06-22 23:43) @project(THINGS TO DO)
   ☐ Update migration script to populate these fields
-  ☐ Run on retwsyt & check it
-  ☐ Change user coupon model as well to have header / line 1 / line 2 format
+  ✔ Run on retwsyt & check it @done(2015-06-23 00:52) @project(THINGS TO DO)
+  ✔ Change user coupon model as well to have header / line 1 / line 2 format @done(2015-06-23 00:52) @project(THINGS TO DO)
   ✔ Update offers to have expiry dates @done(2015-06-22 23:56) @project(THINGS TO DO)
   ☐ Fix up applicability
   ☐ Set time out on cache items --- not being deleted.
   ☐ Social pool items
-  ☐ Fix bug where if cache not cleared, not getting picked up
+  ✔ Fix bug where if cache not cleared, not getting picked up @done(2015-06-23 00:52) @project(THINGS TO DO)
