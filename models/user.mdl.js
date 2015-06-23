@@ -111,11 +111,14 @@ var User = new Schema({
       title: String,
       detail: String,
       expiry: Date,
+      meta: {
+        reward_type: {type: String}
+      },
       used_details: {
         used_time: Date,
         used_by: {type: Schema.ObjectId, ref:'Customer'},
         used_at: {type: Schema.ObjectId, ref:'Outlet'},
-        used_phone: String,
+        used_phone: String
       },
       status: String,
       actions: {
@@ -123,7 +126,7 @@ var User = new Schema({
         action_source: {type: Schema.ObjectId, ref:'Customer'},
         action_destination: {type: Schema.ObjectId, ref:'Customer'}
       },
-      issued_at: Date,
+      issued_at: Date
     }
   ],
   friends: [{

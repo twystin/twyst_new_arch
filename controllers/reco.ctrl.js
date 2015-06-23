@@ -327,11 +327,13 @@ function massage_offers(params) {
         coupon_map = _.map(coupon_map, function(itemd) {
           var coupon = {};
           coupon.type = "coupon";
+          coupon.code = itemd && itemd.code;
           coupon.status = itemd && itemd.status;
           coupon.header = itemd && itemd.title || itemd && itemd.header;
           coupon.line1 = itemd && itemd.detail || itemd && itemd.line1;
           coupon.line2 = itemd && itemd.line2;
-          coupon.expiry = itemd && itemd.expiry;  
+          coupon.expiry = itemd && itemd.expiry;
+          coupon.meta = itemd && itemd.meta;
           return coupon;
         });
         item.offers = item.offers.concat(coupon_map);
@@ -359,7 +361,7 @@ function massage_offers(params) {
           massaged_offer.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
         }
         // massaged_offer.applicability = offer.actions.reward.applicability;
-        massaged_offer.valid_days = offer.actions.reward.valid_days;
+        // massaged_offer.valid_days = offer.actions.reward.valid_days;
         return massaged_offer;
       }
 

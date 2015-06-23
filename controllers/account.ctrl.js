@@ -134,12 +134,16 @@ module.exports.verify_authcode_and_create_account = function(req, res) {
 // Helper functions
 function get_code_and_send(res, phone) {
   AccountHelper.generate_new_code(phone).then(function(auth_data) {
-    var message = 'Your Twyst verification code is ' + auth_data.code;
-    SMSHelper.send_sms(phone, message).then(function(sms_data) {
-      HttpHelper.success(res, auth_data.data, auth_data.message);
-    }, function(err) {
+    if (auth_data.code) {
+      var message = 'Your Twyst verification code is ' + auth_data.code;
+      SMSHelper.send_sms(phone, message).then(function (sms_data) {
+        HttpHelper.success(res, auth_data.data, auth_data.message);
+      }, function (err) {
+        HttpHelper.error(res, err.err, err.message);
+      });
+    } else {
       HttpHelper.error(res, err.err, err.message);
-    });
+    }
   }, function(err) {
     HttpHelper.error(res, err.err, err.message);
   });
