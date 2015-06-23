@@ -8,10 +8,11 @@ while(cursor.hasNext()) {
       coupons: {
         code: a.basics.code,
         outlets: a.issue_details.issued_at,
-        title: a.basics.description,
-        detail: a.basics.description,
+        header: a.basics.description,
+        line1: "",
+        line2: "",
         expiry: a.validity.end_date,
-        reward_meta: null,
+        meta: a.issue_details,
         used_details: {
           used_time: a.used_details && a.used_details.used_time,
           used_by: a.used_details && a.used_details.used_by,

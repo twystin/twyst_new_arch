@@ -108,8 +108,9 @@ var User = new Schema({
       code: String,
       outlets: [{type: Schema.ObjectId, ref:'Outlet'}],
       coupon_source: {type: String},
-      title: String,
-      detail: String,
+      header: String,
+      line1: String,
+      line2: String,
       expiry: Date,
       meta: {
         reward_type: {type: String}

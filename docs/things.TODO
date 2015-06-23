@@ -45,6 +45,8 @@ THINGS TO DO:
   ✔ Change user coupon model as well to have header / line 1 / line 2 format @done(2015-06-23 00:52) @project(THINGS TO DO)
   ✔ Update offers to have expiry dates @done(2015-06-22 23:56) @project(THINGS TO DO)
   ☐ Fix up applicability
+  ☐ Fix up coupon meta
   ☐ Set time out on cache items --- not being deleted.
   ☐ Social pool items
   ✔ Fix bug where if cache not cleared, not getting picked up @done(2015-06-23 00:52) @project(THINGS TO DO)
+  ☐ Migrate new offers
