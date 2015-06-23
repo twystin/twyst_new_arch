@@ -353,8 +353,10 @@ function massage_offers(params) {
         massaged_offer.line2 = offer.actions && offer.actions.reward && offer.actions.reward.line2;
 
         massaged_offer.type = offer.offer_type;
-        massaged_offer.next = parseInt(offer.rule && offer.rule.event_count);
-        massaged_offer.checkins = item.recco && item.recco.checkins || 0;
+        if (offer.offer_type === 'checkin') {
+          massaged_offer.next = parseInt(offer.rule && offer.rule.event_count);
+          massaged_offer.checkins = item.recco && item.recco.checkins || 0;
+        }
         massaged_offer.meta = offer.actions && offer.actions.reward && offer.actions.reward.reward_meta;
         massaged_offer.expiry = offer.actions.reward.expiry;
         if (offer && offer.actions && offer.actions.reward && offer.actions.reward.reward_hours) {
