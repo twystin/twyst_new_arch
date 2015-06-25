@@ -1,6 +1,7 @@
-twystMerchant.controller('ConsoleCtrl', function($scope, $timeout, $log, $mdToast, $rootScope, $state, $mdDialog, Restangular, $cookies, resUser, authenticated) {
+twystMerchant.controller('ConsoleCtrl', function($scope, $timeout, $log, $mdToast, $rootScope, $state, $mdDialog, $cookies, resUser, authenticated) {
   // Template for the outlet
   $timeout(function() {
+      console.log("CAME HERE");
     console.log(resUser);
     $scope.user = (resUser && resUser.data && resUser.data.data) || null;
     $scope.username = ($scope.user && $scope.user.email) || " ";
@@ -64,7 +65,6 @@ twystMerchant.controller('ConsoleCtrl', function($scope, $timeout, $log, $mdToas
   };
 
 
-  var baseOutlets = Restangular.all('outlets');
 
   $scope.save = function() {
     baseOutlets.post($scope.outlet).then(function(success) {

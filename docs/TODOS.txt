@@ -1,0 +1,16 @@
+- DONE: Get latest version of Angular Material
+- TODO: Create login screen for merchant
+        - Login (done)
+        - Forgot password
+        - Errors
+        - Data service (done)
+- TODO: View my outlets screen, with links to view detail, edit & delete
+- TODO: View details screen
+- TODO: Edit outlet screen
+- TODO: Delete outlet screen
+- TODO: Create outlet screen(s)
+- TODO: Save basic information
+- TODO: Save outlet attributes
+- TODO: Add offers screen(s)
+- TODO: Delete offers screen(s)
+- TODO: Add / modify menus screen(s)

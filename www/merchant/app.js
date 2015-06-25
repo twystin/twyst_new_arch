@@ -1,5 +1,5 @@
-var twystMerchant = angular.module('twystMerchant', ['ngMaterial', 'ui.router', 'restangular', 'ngCookies', 'angularMoment', 'twyst.store']).
-config(function($stateProvider, $urlRouterProvider, $mdThemingProvider, RestangularProvider) {
+var twystMerchant = angular.module('twystMerchant', ['ngMaterial', 'ui.router', 'ngCookies', 'angularMoment', 'twyst.store']).
+config(function($stateProvider, $urlRouterProvider, $mdThemingProvider) {
   (function configureStates() {
     $urlRouterProvider.otherwise("/home");
     $stateProvider
@@ -20,12 +20,11 @@ config(function($stateProvider, $urlRouterProvider, $mdThemingProvider, Restangu
         views: {
           "content": {
             resolve: {
-              resUser: function(Restangular, $timeout) {
-                // GET 0 means get me!
-                return Restangular.one('profile').get();
+              resUser: function(twystRESTSvc, $timeout) {
+                return twystRESTSvc.profile();
               },
               authenticated: function($cookies) {
-                if ($cookies.token) {
+                if ($cookies.get('token')) {
                   return true;
                 } else {
                   return false;
@@ -58,16 +57,8 @@ config(function($stateProvider, $urlRouterProvider, $mdThemingProvider, Restangu
       });
   })();
 
-  (function configureRESTAngular() {
-    RestangularProvider.setBaseUrl('/api/v4');
-    RestangularProvider.addElementTransformer('accounts', true, function(account) {
-      account.addRestangularMethod('login', 'post', 'login');
-      return account;
-    });
-  })();
 })
-.run(function($rootScope, $cookies, Restangular) {
+.run(function($rootScope, $cookies) {
   $rootScope.debug = true;
-  Restangular.setDefaultRequestParams({token: $cookies.token});
 
 });
