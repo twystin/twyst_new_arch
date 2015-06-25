@@ -1,8 +1,8 @@
 - DONE: Get latest version of Angular Material
 - TODO: Create login screen for merchant
         - Login (done)
-        - Forgot password
-        - Errors
+        - Forgot password (TBD)
+        - Errors (TBD)
         - Data service (done)
 - TODO: View my outlets screen, with links to view detail, edit & delete
 - TODO: View details screen

@@ -1,3 +1,4 @@
-<md-content>
+<md-content ng-init="getOutlets()">
 <h2>Manage outlets</h2>
+    <div ng-repeat="o in outlets">{{o}}</div>
 </md-content>

@@ -1,4 +1,4 @@
-twystMerchant.controller('ConsoleCtrl', function($scope, $timeout, $log, $mdToast, $rootScope, $state, $mdDialog, $cookies, resUser, authenticated) {
+twystMerchant.controller('ConsoleCtrl', function($scope, $timeout, $log, $mdToast, $rootScope, $state, $mdDialog, $cookies, resUser, authenticated, twystRESTSvc) {
   // Template for the outlet
   $timeout(function() {
       console.log("CAME HERE");
@@ -38,6 +38,15 @@ twystMerchant.controller('ConsoleCtrl', function($scope, $timeout, $log, $mdToas
   } else {
     showToast('Logged in successfully!');
   }
+
+    $scope.getOutlets = function() {
+        twystRESTSvc.outlets().then(function(data) {
+            $scope.outlets = data.data.outlets;
+            console.log(data);
+        }, function(err) {
+            console.log(err);
+        })
+    }
 
   $scope.main_type = ['fnb', 'spa', 'retail', 'other'];
   $scope.outlet = {
