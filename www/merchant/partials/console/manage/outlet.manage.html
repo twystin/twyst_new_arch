@@ -1,4 +1,22 @@
 <md-content ng-init="getOutlets()">
 <h2>Manage outlets</h2>
-    <div ng-repeat="o in outlets">{{o}}</div>
+    <div ng-repeat="o in outlets">
+        <div flex-50>
+        <md-card>
+            <md-card-content>
+                {{o.basics.name}}
+            </md-card-content>
+            <div class="md-actions" layout="row" layout-align="end center">
+                <md-button ng-click="view($index)">View details</md-button>
+
+                <md-button>Update</md-button>
+                <md-button>Delete</md-button>
+            </div>
+            <div ui-view></div>
+
+        </md-card>
+        </div>
+
+
+    </div>
 </md-content>

@@ -4,7 +4,7 @@
         - Forgot password (TBD)
         - Errors (TBD)
         - Data service (done)
-- TODO: View my outlets screen, with links to view detail, edit & delete
+- TODO: View my outlets screen, with links to view detail, edit & delete (done)
 - TODO: View details screen
 - TODO: Edit outlet screen
 - TODO: Delete outlet screen
