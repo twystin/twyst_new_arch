@@ -26,14 +26,17 @@ while(program_cursor.hasNext()) {
                 offer_group: p.name,
                 actions: {
                   reward: {
-                    title: o.basics.title,
-                    terms: o.terms,
-                    detail: o.basics.description,
+                    header: o.basics.title,
+                    line1: o.basics.description,
+                    line2: o.terms,
                     expiry: p.validity.earn_end,
                     reward_hours: o.avail_hours,
                     applicability: o.reward_applicability,
                     valid_days: o.valid_days,
-                    reward_meta: o.reward
+                    reward_meta: {
+                      reward_type: Object.keys(o.reward)[0],
+                      reward_info: o.reward
+                    }
                   }
                 },
                 rule: {

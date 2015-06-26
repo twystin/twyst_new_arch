@@ -14,7 +14,7 @@ db.outlets.update(
         offer_group: 'test_offer',
         actions: {
           reward: {
-            expiry: '8/31/2015',
+            expiry: new Date('8/31/2015'),
             reward_hours: null,
             applicability: null,
             valid_days: null,
@@ -50,7 +50,7 @@ db.outlets.update(
         offer_group: 'test_offer',
         actions: {
           reward: {
-            expiry: '9/30/2015',
+            expiry: new Date('9/30/2015'),
             reward_hours: null,
             applicability: null,
             valid_days: null,
@@ -82,7 +82,7 @@ db.outlets.update(
         offer_group: 'test_offer',
         actions: {
           reward: {
-            expiry: '9/22/2015',
+            expiry: new Date('9/22/2015'),
             reward_hours: null,
             applicability: null,
             valid_days: null,
@@ -114,7 +114,7 @@ db.outlets.update(
         offer_group: 'test_offer',
         actions: {
           reward: {
-            expiry: '8/31/2015',
+            expiry: new Date('8/31/2015'),
             reward_hours: null,
             applicability: null,
             valid_days: null,
@@ -146,7 +146,7 @@ db.outlets.update(
         offer_group: 'test_offer',
         actions: {
           reward: {
-            expiry: '8/10/2015',
+            expiry: new Date('8/10/2015'),
             reward_hours: null,
             applicability: null,
             valid_days: null,
@@ -175,7 +175,7 @@ db.outlets.update(
         offer_group: 'test_offer',
         actions: {
           reward: {
-            expiry: '9/10/2015',
+            expiry: new Date('9/10/2015'),
             reward_hours: null,
             applicability: null,
             valid_days: null,
@@ -207,7 +207,7 @@ db.outlets.update(
         offer_group: 'test_offer',
         actions: {
           reward: {
-            expiry: '9/18/2015',
+            expiry: new Date('9/18/2015'),
             reward_hours: null,
             applicability: null,
             valid_days: null,
@@ -235,7 +235,7 @@ db.outlets.update(
         offer_group: 'test_offer',
         actions: {
           reward: {
-            expiry: '9/30/2015',
+            expiry: new Date('9/30/2015'),
             reward_hours: null,
             applicability: null,
             valid_days: null,
@@ -263,7 +263,7 @@ db.outlets.update(
         offer_group: 'test_offer',
         actions: {
           reward: {
-            expiry: '9/1/2015',
+            expiry: new Date('9/1/2015'),
             reward_hours: null,
             applicability: null,
             valid_days: null,
@@ -292,7 +292,7 @@ db.outlets.update(
         offer_source: 'citibank',
         actions: {
           reward: {
-            expiry: '12/31/2015',
+            expiry: new Date('12/31/2015'),
             reward_hours: null,
             applicability: null,
             valid_days: null,
@@ -320,7 +320,7 @@ db.users.update(
         header: '1+1',
         line1: 'on all classic pizzas',
         line2: '(chicken/veg only)',
-        expiry: '7/15/2015',
+        expiry: new Date('7/15/2015'),
         reward_meta: {
           reward_type: 'buyonegetone'
         },
@@ -342,7 +342,7 @@ db.users.update(
         header: '2 hours',
         line1: 'extra happy hours',
         line2: 'on all weekdays',
-        expiry: '7/20/2015',
+        expiry: new Date('7/20/2015'),
         reward_meta: {
           reward_type: 'happyhours'
         },
@@ -363,7 +363,7 @@ db.users.update(
         header: '1+1',
         line1: 'on all classic pizzas',
         line2: '(chicken/veg only)',
-        expiry: '7/15/2015',
+        expiry: new Date('7/15/2015'),
         reward_meta: {
           reward_type: 'buyonegetone'
         },
@@ -384,12 +384,12 @@ db.users.update(
         header: '1+1',
         line1: 'on all classic pizzas',
         line2: '(chicken/veg only)',
-        expiry: '7/15/2015',
+        expiry: new Date('7/15/2015'),
         reward_meta: {
           reward_type: 'buyonegetone'
         },
         status: 'active',
-        issued: '6/23/15'
+        issued: new Date('6/23/15')
       },
     }
   }
@@ -405,13 +405,13 @@ db.users.update(
         header: '1+1',
         line1: 'on all classic pizzas',
         line2: '(chicken/veg only)',
-        expiry: '7/15/2015',
+        expiry: new Date('7/15/2015'),
         reward_meta: {
           reward_type: 'buyonegetone'
         },
         status: 'active',
-        issued: '6/23/15'
-      },
+        issued: new Date('6/23/15')
+      }
     }
   }
 );
