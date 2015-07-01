@@ -166,6 +166,8 @@ function pick_outlet_fields(params) {
       massaged_item.address = params.outlet.contact.location.address;
       massaged_item.locality_1 = params.outlet.contact.location.locality_1[0];
       massaged_item.locality_2 = params.outlet.contact.location.locality_2[0];
+      massaged_item.lat = params.outlet.contact.location.coords.latitude || null;
+      massaged_item.long = params.outlet.contact.location.coords.longitude || null;
       massaged_item.distance = params.outlet.recco.distance || null;
       massaged_item.open = !params.outlet.recco.closed;
       massaged_item.phone = params.outlet.contact.phones.mobile[0] && params.outlet.contact.phones.mobile[0].num;
