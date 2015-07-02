@@ -6,12 +6,12 @@ var mongoose = require('mongoose');
 var Outlet = mongoose.model('Outlet');
 var _ = require('underscore');
 
-module.exports.populate = function() {
-  Outlet.find({}).lean().exec(function(err, outlets) {
+function populateOutlets() {
+  Outlet.find({}).lean().exec(function (err, outlets) {
     if (err || outlets.length === 0) {
       console.log("Error populating cache");
     } else {
-      var reduced_outlets = _.reduce(outlets, function(memo, item) {
+      var reduced_outlets = _.reduce(outlets, function (memo, item) {
         memo[item._id] = item;
         return memo;
       }, {});
@@ -19,4 +19,8 @@ module.exports.populate = function() {
       console.log("Populated the cache");
     }
   });
+}
+
+module.exports.populate = function() {
+  populateOutlets();
 };

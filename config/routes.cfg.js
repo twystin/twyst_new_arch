@@ -38,6 +38,7 @@ module.exports = function(app) {
     app.post('/api/v4/checkin', EventCtrl.new);
     app.post('/api/v4/gift', EventCtrl.new);
     app.post('/api/v4/follow', EventCtrl.new);
+    app.post('/api/v4/unfollow', EventCtrl.new);
 
   })();
 
