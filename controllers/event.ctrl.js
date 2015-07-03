@@ -101,13 +101,34 @@ var follow_processor = {
         var deferred = Q.defer();
         var passed_data = data;
         var updated_user = passed_data.user;
-        var token = passed_data.user_token;
 
         updated_user.following  = updated_user.following || [];
         updated_user.following.push(passed_data.event_data.event_outlet);
         updated_user.following = _.uniq(updated_user.following, false, function(f) {
             return f.toString();
         });
+        UserHelper.update_user(token, updated_user).then(function(data) {
+            deferred.resolve(passed_data);
+        }, function(err) {
+            deferred.reject('Could not update the user: ' + JSON.stringify(err));
+        });
+        return deferred.promise;
+    }
+};
+
+var unfollow_processor = {
+    process: function(data) {
+        console.log("UNFOLLOW PROCESSOR BEGIN");
+
+        var deferred = Q.defer();
+        var passed_data = data;
+        var updated_user = passed_data.user;
+
+        updated_user.following = updated_user.following || [];
+        updated_user.following = _.filter(function(f) {
+            return f !==  data.event_data.event_outlet;
+        });
+
         UserHelper.update_user(token, updated_user).then(function(data) {
             deferred.resolve(passed_data);
         }, function(err) {
@@ -128,7 +149,8 @@ var checkin_processor = {
 function event_processor(event_type) {
     var processors = {
         'follow': follow_processor,
-        'checkin': checkin_processor
+        'checkin': checkin_processor,
+        'unfollow': unfollow_processor
     };
 
     return processors[event_type] || null;
