@@ -12,4 +12,5 @@
 
 var Redis = require('ioredis');
 var redis = new Redis();
+redis.flushall(); // This removes everything from the cache on a server start -- good idea?
 module.exports = redis;

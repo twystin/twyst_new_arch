@@ -37,8 +37,8 @@ module.exports = function(app) {
     // PROXIES -- DO VERIFICATION INLINE
     app.post('/api/v4/checkin', EventCtrl.new);
     app.post('/api/v4/gift', EventCtrl.new);
-    app.post('/api/v4/follow', EventCtrl.new);
-    app.post('/api/v4/unfollow', EventCtrl.new);
+    app.post('/api/v4/follow', EventCtrl.follow);
+    app.post('/api/v4/unfollow', EventCtrl.unfollow);
 
   })();
 

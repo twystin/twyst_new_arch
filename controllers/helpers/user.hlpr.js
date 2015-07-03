@@ -17,7 +17,7 @@ module.exports.update_user = function(token, updated_user) {
     User.findOneAndUpdate(
       {_id: user._id},
       {$set: updated_user},
-      {upser: true},
+      {upsert: true},
       function(err, u) {
         if (err || !u) {
           deferred.reject({err: err || true, message: "Couldn\'t update user"});
