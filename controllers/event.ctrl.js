@@ -91,7 +91,20 @@ function create_event(data) {
 var follow_processor = {
     process: function(data) {
         var deferred = Q.defer();
-        deferred.resolve(true);
+        var passed_data = data;
+        var updated_user = data.user;
+        var token = data.req.query.token;
+        updated_user.following  = updated_user.following || [];
+        updated_user.following.push(data.req.body.event_outlet);
+        updated_user.following = _.uniq(updated_user.following, false, function(f) {
+            return f.toString();
+        });
+
+        UserHelper.update_user(token, updated_user).then(function(data) {
+            deferred.resolve(passed_data);
+        }, function(err) {
+            deferred.reject('Could not update the user: ' + JSON.stringify(err));
+        });
         return deferred.promise;
     }
 };
