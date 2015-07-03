@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="5b0d2070-deb3-4f33-9d78-600f212848f4" name="Default" comment="Fixed up SMS code, and made some changes to user model.">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/controllers/event.ctrl.js" afterPath="$PROJECT_DIR$/controllers/event.ctrl.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/controllers/helpers/user.hlpr.js" afterPath="$PROJECT_DIR$/controllers/helpers/user.hlpr.js" />
     </list>
     <ignored path="twystServer.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -37,7 +38,7 @@
         <entry file="file://$PROJECT_DIR$/config/routes.cfg.js">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="38" column="41" selection-start-line="38" selection-start-column="41" selection-end-line="38" selection-end-column="41" />
+              <caret line="40" column="25" selection-start-line="40" selection-start-column="22" selection-end-line="40" selection-end-column="25" />
               <folding />
             </state>
           </provider>
@@ -46,8 +47,8 @@
       <file leaf-file-name="event.ctrl.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/controllers/event.ctrl.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.66071427">
-              <caret line="155" column="29" selection-start-line="155" selection-start-column="29" selection-end-line="155" selection-end-column="29" />
+            <state vertical-scroll-proportion="0.8020833">
+              <caret line="242" column="0" selection-start-line="242" selection-start-column="0" selection-end-line="242" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -118,8 +119,8 @@
       <file leaf-file-name="user.hlpr.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/controllers/helpers/user.hlpr.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="27" column="6" selection-start-line="27" selection-start-column="6" selection-end-line="27" selection-end-column="6" />
+            <state vertical-scroll-proportion="-4.9259257">
+              <caret line="7" column="11" selection-start-line="7" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -167,8 +168,8 @@
         <option value="$PROJECT_DIR$/common/cache.hlpr.js" />
         <option value="$PROJECT_DIR$/config/routes.cfg.js" />
         <option value="$PROJECT_DIR$/models/user.mdl.js" />
-        <option value="$PROJECT_DIR$/controllers/helpers/user.hlpr.js" />
         <option value="$PROJECT_DIR$/common/auth.hlpr.js" />
+        <option value="$PROJECT_DIR$/controllers/helpers/user.hlpr.js" />
         <option value="$PROJECT_DIR$/controllers/event.ctrl.js" />
       </list>
     </option>
@@ -935,14 +936,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/controllers/helpers/user.hlpr.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="27" column="6" selection-start-line="27" selection-start-column="6" selection-end-line="27" selection-end-column="6" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/models/user.mdl.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -977,14 +970,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/config/routes.cfg.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="38" column="41" selection-start-line="38" selection-start-column="41" selection-end-line="38" selection-end-column="41" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/controllers/helpers/outlet.hlpr.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -993,10 +978,26 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/controllers/helpers/user.hlpr.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-4.9259257">
+          <caret line="7" column="11" selection-start-line="7" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config/routes.cfg.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="40" column="25" selection-start-line="40" selection-start-column="22" selection-end-line="40" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/controllers/event.ctrl.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.66071427">
-          <caret line="155" column="29" selection-start-line="155" selection-start-column="29" selection-end-line="155" selection-end-column="29" />
+        <state vertical-scroll-proportion="0.8020833">
+          <caret line="242" column="0" selection-start-line="242" selection-start-column="0" selection-end-line="242" selection-end-column="0" />
           <folding />
         </state>
       </provider>

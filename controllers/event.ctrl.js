@@ -9,6 +9,8 @@ var HttpHelper = require('../common/http.hlpr.js');
 var AuthHelper = require('../common/auth.hlpr.js');
 var OutletHelper = require('./helpers/outlet.hlpr.js');
 var UserHelper = require('./helpers/user.hlpr.js');
+var User = mongoose.model('User');
+
 var _ = require('underscore');
 
 var Q = require('q');
@@ -101,17 +103,19 @@ var follow_processor = {
         var deferred = Q.defer();
         var passed_data = data;
         var updated_user = passed_data.user;
+        var token = passed_data.token;
 
-        updated_user.following  = updated_user.following || [];
-        updated_user.following.push(passed_data.event_data.event_outlet);
-        updated_user.following = _.uniq(updated_user.following, false, function(f) {
-            return f.toString();
-        });
-        UserHelper.update_user(token, updated_user).then(function(data) {
-            deferred.resolve(passed_data);
-        }, function(err) {
-            deferred.reject('Could not update the user: ' + JSON.stringify(err));
-        });
+        User.findOneAndUpdate(
+            {_id: updated_user._id},
+            {$addToSet: {following: passed_data.event_data.event_outlet}},
+            function(err, u) {
+                if (err) {
+                    deferred.reject('Could not update user');
+                } else {
+                    deferred.resolve(passed_data);
+                }
+            });
+
         return deferred.promise;
     }
 };
@@ -124,16 +128,17 @@ var unfollow_processor = {
         var passed_data = data;
         var updated_user = passed_data.user;
 
-        updated_user.following = updated_user.following || [];
-        updated_user.following = _.filter(function(f) {
-            return f !==  data.event_data.event_outlet;
-        });
+        User.findOneAndUpdate(
+            {_id: updated_user._id},
+            {$pull: {following: passed_data.event_data.event_outlet}},
+            function(err, u) {
+                if (err) {
+                    deferred.reject('Could not update user');
+                } else {
+                    deferred.resolve(passed_data);
+                }
+            });
 
-        UserHelper.update_user(token, updated_user).then(function(data) {
-            deferred.resolve(passed_data);
-        }, function(err) {
-            deferred.reject('Could not update the user: ' + JSON.stringify(err));
-        });
         return deferred.promise;
     }
 };
@@ -225,6 +230,14 @@ module.exports.follow = function(req, res) {
 };
 
 module.exports.unfollow = function(req, res) {
+    var passed_data = {};
+
+    passed_data.event_data = req.body || {};
+    passed_data.event_data.event_type = 'unfollow';
+    passed_data.user_token = req.query.token || null;
+    passed_data.query_params = req.params || null;
+
+    create_new(res, passed_data);
 
 };
 
