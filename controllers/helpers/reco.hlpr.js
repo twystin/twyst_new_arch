@@ -36,23 +36,16 @@ module.exports.distance = function(p1, p2) {
 
 module.exports.cache_user_favourites = function(user) {
   var deferred = Q.defer();
-  Cache.hget(user._id, 'favourite_map', function(err, reply) {
-    if (err || !reply) {
-      if (user.following && user.following.length !== 0) {
-        var favourite_map = _.reduce(user.following, function(memo, item) {
-          memo[item] = 1;
-          return memo;
-        }, {});
-        console.log(favourite_map);
-        Cache.hset(user._id, 'favourite_map', JSON.stringify(favourite_map));
-        deferred.resolve(true);
-      } else {
-        deferred.resolve(true);
-      }
-    } else {
-      deferred.resolve(true);
-    }
-  });
+  if (user.following && user.following.length !== 0) {
+    var favourite_map = _.reduce(user.following, function(memo, item) {
+      memo[item] = 1;
+      return memo;
+    }, {});
+    Cache.hset(user._id, 'favourite_map', JSON.stringify(favourite_map));
+    deferred.resolve(true);
+  } else {
+    deferred.resolve(true);
+  }
 
   return deferred.promise;
 };

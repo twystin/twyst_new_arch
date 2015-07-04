@@ -5,7 +5,6 @@ var Q = require('q');
 var _ = require('underscore');
 
 var mongoose = require('mongoose');
-var HttpHelper = require('./http.hlpr');
 require('../models/auth_token.mdl.js');
 require('../models/user.mdl.js');
 
@@ -24,7 +23,6 @@ module.exports.get_user = function(token) {
         data: null
       });
     }
-
     if (found_token) {
       User.findOne({
         '_id': found_token.user
