@@ -8,7 +8,6 @@ var Outlet = mongoose.model('Outlet');
 var HttpHelper = require('../common/http.hlpr.js');
 var AuthHelper = require('../common/auth.hlpr.js');
 var OutletHelper = require('./helpers/outlet.hlpr.js');
-var UserHelper = require('./helpers/user.hlpr.js');
 var User = mongoose.model('User');
 
 var _ = require('underscore');

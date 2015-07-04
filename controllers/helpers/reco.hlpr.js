@@ -34,22 +34,55 @@ module.exports.distance = function(p1, p2) {
   return d.toFixed(1) * 1;
 };
 
+module.exports.cache_user_favourites = function(user) {
+  var deferred = Q.defer();
+  Cache.hget(user._id, 'favourite_map', function(err, reply) {
+    if (err || !reply) {
+      if (user.following && user.following.length !== 0) {
+        var favourite_map = _.reduce(user.following, function(memo, item) {
+          memo[item] = 1;
+          return memo;
+        }, {});
+        //console.log(favourite_map);
+        Cache.hset(user._id, 'favourite_map', JSON.stringify(favourite_map));
+        deferred.resolve(true);
+      } else {
+        deferred.resolve(true);
+      }
+    } else {
+      deferred.resolve(true);
+    }
+  });
+
+  return deferred.promise;
+};
+
 module.exports.cache_user_coupons = function(user) {
   var deferred = Q.defer();
   Cache.hget(user._id, 'coupon_map', function(err, reply) {
     if (err || !reply) {
       if (user.coupons && user.coupons.length !== 0 ) {
         var coupon_map = _.reduce(user.coupons, function(memo, item) {
-          _.each(item.outlets, function(outlet) {
-            memo[outlet] = memo[outlet] || {};
-            memo[outlet].coupons = memo[outlet].coupons || [];
-            if (item.status === "active") {
-              memo[outlet].coupons.push(item);
+            if (item.outlets.length) {
+                _.each(item.outlets, function(outlet) {
+                    memo[outlet] = memo[outlet] || {};
+                    memo[outlet].coupons = memo[outlet].coupons || [];
+                    if (item.status === "active") {
+                        memo[outlet].coupons.push(item);
+                    }
+                });
+            } else {
+                memo[item.outlets] = memo[item.outlets] || {};
+                memo[item.outlets].coupons = memo[item.outlets].coupons || [];
+                if (item.status === "active") {
+                    memo[item.outlets].coupons.push(item);
+                }
             }
-          });
+
           return memo;
         }, {});
-        Cache.hset(user._id, 'coupon_map', JSON.stringify(coupon_map));
+
+          Cache.hset(user._id, 'coupon_map', JSON.stringify(coupon_map));
         deferred.resolve(true);
       } else {
         deferred.resolve(true);

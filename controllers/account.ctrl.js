@@ -28,13 +28,20 @@ module.exports.login = function(req, res) {
           memo[item.event_outlet] = memo[item.event_outlet] + 1 || 1;
           return memo;
         }, {});
-        var favourite_map = _.reduce(event_map.favourite, function(memo, item) {
-          memo[item.event_outlet] = memo[item.event_outlet] + 1 || 1;
-          return memo;
-        }, {});
+        //var favourite_map = _.reduce(event_map.favourite, function(memo, item) {
+        //  memo[item.event_outlet] = memo[item.event_outlet] + 1 || 1;
+        //  return memo;
+        //}, {});
+
+        //console.log(req.user);
+        //var favourite_map = _.reduce(req.user.user.following, function(memo, item) {
+        //  memo[item] = 1;
+        //}, {});
+
+        //console.log(favourite_map);
 
         Cache.hset(req.user._id, 'checkin_map', JSON.stringify(checkin_map));
-        Cache.hset(req.user._id, 'favourite_map', JSON.stringify(favourite_map));
+        //Cache.hset(req.user._id, 'favourite_map', JSON.stringify(favourite_map));
 
       }
 

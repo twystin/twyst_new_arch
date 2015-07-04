@@ -30,7 +30,11 @@ function get_user(params) {
     AuthHelper.get_user(params.query.token).then(function(data) {
       params.user = data.data;
       RecoHelper.cache_user_coupons(params.user).then(function(data) {
-        deferred.resolve(params);
+        RecoHelper.cache_user_favourites(params.user).then(function(data) {
+          deferred.resolve(params);
+        }, function(err) {
+          deferred.reject(err);
+        })
       }, function(err) {
         deferred.reject(err);
       });
@@ -83,8 +87,8 @@ function set_user_coupons(params) {
         var outlets = params.outlets;
         if (cmap) {
           _.each(cmap, function(value, key) {
-            outlets[key].recco = outlets[key].recco || {};
-            outlets[key].recco.coupons = value.coupons.length;
+              outlets[key].recco = outlets[key].recco || {};
+              outlets[key].recco.coupons = value.coupons.length;
           });
           params.outlets = outlets;
           deferred.resolve(params);
