@@ -43,7 +43,7 @@ module.exports.cache_user_favourites = function(user) {
           memo[item] = 1;
           return memo;
         }, {});
-        //console.log(favourite_map);
+        console.log(favourite_map);
         Cache.hset(user._id, 'favourite_map', JSON.stringify(favourite_map));
         deferred.resolve(true);
       } else {
@@ -63,6 +63,8 @@ module.exports.cache_user_coupons = function(user) {
     if (err || !reply) {
       if (user.coupons && user.coupons.length !== 0 ) {
         var coupon_map = _.reduce(user.coupons, function(memo, item) {
+            //TODO: see where else this problem occurs
+            //TODO: also fix up coupon migration map
             if (item.outlets.length) {
                 _.each(item.outlets, function(outlet) {
                     memo[outlet] = memo[outlet] || {};
