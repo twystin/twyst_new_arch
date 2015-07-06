@@ -46,8 +46,10 @@
     "serve-favicon": "latest",
     "string": "~1.8.0",
     "superagent": "^0.19.0",
+    "tracer": "^0.7.4",
     "underscore": "latest",
-    "validator": "^3.19.1"
+    "validator": "^3.19.1",
+    "winston": "^1.0.1"
   },
   "devDependencies": {
     "chai": "latest",
