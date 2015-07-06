@@ -383,7 +383,6 @@ db.outlets.update(
                             }
                         },
                         applicability: null,
-                        valid_days: null,
                         reward_meta: {
                             reward_type: 'happyhours'
                         },
@@ -415,9 +414,73 @@ db.outlets.update(
                     reward: {
                         _id: new ObjectId(),
                         expiry: new Date('8/31/2015'),
-                        reward_hours: null,
+                        reward_hours: {
+                            sunday: {
+                                closed: false,
+                                timings: [{
+                                    open: {
+                                        hr: 12,
+                                        min: 00
+                                    },
+                                    close: {
+                                        hr: 15,
+                                        min: 00
+                                    }
+                                }]
+                            },
+                            monday: {
+                                closed: true,
+                                timings: []
+                            },
+                            tuesday: {
+                                closed: true,
+                                timings: []
+                            },
+                            wednesday: {
+                                closed: true,
+                                timings: []
+                            },
+                            thursday: {
+                                closed: false,
+                                timings: [{
+                                    open: {
+                                        hr: 12,
+                                        min: 00
+                                    },
+                                    close: {
+                                        hr: 15,
+                                        min: 00
+                                    }
+                                }]
+                            },
+                            friday: {
+                                closed: false,
+                                timings: [{
+                                    open: {
+                                        hr: 12,
+                                        min: 00
+                                    },
+                                    close: {
+                                        hr: 15,
+                                        min: 00
+                                    }
+                                }]
+                            },
+                            saturday: {
+                                closed: false,
+                                timings: [{
+                                    open: {
+                                        hr: 12,
+                                        min: 00
+                                    },
+                                    close: {
+                                        hr: 15,
+                                        min: 00
+                                    }
+                                }]
+                            }
+                        },
                         applicability: null,
-                        valid_days: null,
                         reward_meta: {
                             reward_type: 'reducedprice'
                         },
