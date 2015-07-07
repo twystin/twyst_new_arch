@@ -512,7 +512,81 @@ db.outlets.update(
                     reward: {
                         _id: new ObjectId(),
                         expiry: new Date('8/10/2015'),
-                        reward_hours: null,
+                        reward_hours: {
+                            sunday: {
+                                closed: false,
+                                timings: [{
+                                    open: {
+                                        hr: 19,
+                                        min: 00
+                                    },
+                                    close: {
+                                        hr: 23,
+                                        min: 00
+                                    }
+                                }]
+                            },
+                            monday: {
+                                closed: false,
+                                timings: [{
+                                    open: {
+                                        hr: 19,
+                                        min: 00
+                                    },
+                                    close: {
+                                        hr: 23,
+                                        min: 00
+                                    }
+                                }]
+                            },
+                            tuesday: {
+                                closed: false,
+                                timings: [{
+                                    open: {
+                                        hr: 19,
+                                        min: 00
+                                    },
+                                    close: {
+                                        hr: 23,
+                                        min: 00
+                                    }
+                                }]
+                            },
+                            wednesday: {
+                                closed: false,
+                                timings: [{
+                                    open: {
+                                        hr: 19,
+                                        min: 00
+                                    },
+                                    close: {
+                                        hr: 23,
+                                        min: 00
+                                    }
+                                }]
+                            },
+                            thursday: {
+                                closed: false,
+                                timings: [{
+                                    open: {
+                                        hr: 19,
+                                        min: 00
+                                    },
+                                    close: {
+                                        hr: 23,
+                                        min: 00
+                                    }
+                                }]
+                            },
+                            friday: {
+                                closed: true,
+                                timings: []
+                            },
+                            saturday: {
+                                closed: true,
+                                timings: []
+                            }
+                        },
                         applicability: null,
                         valid_days: null,
                         reward_meta: {
@@ -543,7 +617,90 @@ db.outlets.update(
                     reward: {
                         _id: new ObjectId(),
                         expiry: new Date('9/10/2015'),
-                        reward_hours: null,
+                        reward_hours: {
+                            sunday: {
+                                closed: false,
+                                timings: [{
+                                    open: {
+                                        hr: 9,
+                                        min: 00
+                                    },
+                                    close: {
+                                        hr: 23,
+                                        min: 00
+                                    }
+                                }]
+                            },
+                            monday: {
+                                closed: false,
+                                timings: [{
+                                    open: {
+                                        hr: 9,
+                                        min: 00
+                                    },
+                                    close: {
+                                        hr: 23,
+                                        min: 00
+                                    }
+                                }]
+                            },
+                            tuesday: {
+                                closed: true,
+                                timings: []
+                            },
+                            wednesday: {
+                                closed: false,
+                                timings: [{
+                                    open: {
+                                        hr: 9,
+                                        min: 00
+                                    },
+                                    close: {
+                                        hr: 23,
+                                        min: 00
+                                    }
+                                }]
+                            },
+                            thursday: {
+                                closed: false,
+                                timings: [{
+                                    open: {
+                                        hr: 9,
+                                        min: 00
+                                    },
+                                    close: {
+                                        hr: 23,
+                                        min: 00
+                                    }
+                                }]
+                            },
+                            friday: {
+                                closed: false,
+                                timings: [{
+                                    open: {
+                                        hr: 9,
+                                        min: 00
+                                    },
+                                    close: {
+                                        hr: 23,
+                                        min: 00
+                                    }
+                                }]
+                            },
+                            saturday: {
+                                closed: false,
+                                timings: [{
+                                    open: {
+                                        hr: 9,
+                                        min: 00
+                                    },
+                                    close: {
+                                        hr: 23,
+                                        min: 00
+                                    }
+                                }]
+                            }
+                        },
                         applicability: null,
                         valid_days: null,
                         reward_meta: {
@@ -577,7 +734,99 @@ db.outlets.update(
                     reward: {
                         _id: new ObjectId(),
                         expiry: new Date('9/18/2015'),
-                        reward_hours: null,
+                        reward_hours: {
+                            sunday: {
+                                closed: false,
+                                timings: [{
+                                    open: {
+                                        hr: 9,
+                                        min: 00
+                                    },
+                                    close: {
+                                        hr: 23,
+                                        min: 00
+                                    }
+                                }]
+                            },
+                            monday: {
+                                closed: false,
+                                timings: [{
+                                    open: {
+                                        hr: 9,
+                                        min: 00
+                                    },
+                                    close: {
+                                        hr: 23,
+                                        min: 00
+                                    }
+                                }]
+                            },
+                            tuesday: {
+                                closed: false,
+                                timings: [{
+                                    open: {
+                                        hr: 9,
+                                        min: 00
+                                    },
+                                    close: {
+                                        hr: 23,
+                                        min: 00
+                                    }
+                                }]
+                            },
+                            wednesday: {
+                                closed: false,
+                                timings: [{
+                                    open: {
+                                        hr: 9,
+                                        min: 00
+                                    },
+                                    close: {
+                                        hr: 23,
+                                        min: 00
+                                    }
+                                }]
+                            },
+                            thursday: {
+                                closed: false,
+                                timings: [{
+                                    open: {
+                                        hr: 9,
+                                        min: 00
+                                    },
+                                    close: {
+                                        hr: 23,
+                                        min: 00
+                                    }
+                                }]
+                            },
+                            friday: {
+                                closed: false,
+                                timings: [{
+                                    open: {
+                                        hr: 9,
+                                        min: 00
+                                    },
+                                    close: {
+                                        hr: 23,
+                                        min: 00
+                                    }
+                                }]
+                            },
+                            saturday: {
+                                closed: false,
+                                timings: [{
+                                    open: {
+                                        hr: 9,
+                                        min: 00
+                                    },
+                                    close: {
+                                        hr: 23,
+                                        min: 00
+                                    }
+                                }]
+                            }
+                        },
                         applicability: null,
                         valid_days: null,
                         reward_meta: {
