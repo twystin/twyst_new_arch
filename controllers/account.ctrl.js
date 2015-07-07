@@ -134,8 +134,8 @@ module.exports.verify_authcode_and_create_account = function(req, res) {
 // Helper functions
 function get_code_and_send(res, phone) {
   AccountHelper.generate_new_code(phone).then(function(auth_data) {
-    if (auth_data.code) {
-      var message = 'Your Twyst verification code is ' + auth_data.code;
+    if (auth_data.data.code) {
+      var message = 'Your Twyst verification code is ' + auth_data.data.code;
       SMSHelper.send_sms(phone, message).then(function (sms_data) {
         HttpHelper.success(res, auth_data.data, auth_data.message);
       }, function (err) {
