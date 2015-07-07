@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="5b0d2070-deb3-4f33-9d78-600f212848f4" name="Default" comment="Fixed up SMS code, and made some changes to user model.">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/metapop/data_pop.js" afterPath="$PROJECT_DIR$/scripts/metapop/data_pop.js" />
-    </list>
+    <list default="true" id="5b0d2070-deb3-4f33-9d78-600f212848f4" name="Default" comment="Fixed up SMS code, and made some changes to user model." />
     <ignored path="twystServer.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
