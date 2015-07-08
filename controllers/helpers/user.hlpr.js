@@ -14,12 +14,16 @@ module.exports.update_user = function(token, updated_user) {
 
   AuthHelper.get_user(token).then(function(data) {
     var user = data.data;
+    user = _.extend(user, updated_user);
+    console.log(user);
     User.findOneAndUpdate(
       {_id: user._id},
-      {$set: updated_user},
-      {upsert: false},
-      {overwrite: true},
-      function(err, u) {
+      {$set: user},
+      {
+        upsert: false,
+        overwrite: true
+      }).exec(function(err, u) {
+        console.log(err);
         if (err || !u) {
           deferred.reject({err: err || true, message: "Couldn\'t update user"});
         } else {

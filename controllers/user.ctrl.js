@@ -36,6 +36,7 @@ module.exports.get_profile = function(req, res) {
 };
 
 module.exports.update_profile = function(req, res) {
+
   var token = req.query.token || null;
 
   if (!token) {
