@@ -1,3 +1,6 @@
+var db = db.getSiblingDB('retwyst');
+
+
 db.outlets.update({
 	_id: ObjectId('5502780b5cfd36a03c11c989')
 }, {
