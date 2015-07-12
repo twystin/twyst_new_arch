@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5b0d2070-deb3-4f33-9d78-600f212848f4" name="Default" comment="Fixed up SMS code, and made some changes to user model.">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/import_csv.js" afterPath="$PROJECT_DIR$/scripts/import_csv.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/o.js" afterPath="$PROJECT_DIR$/scripts/o.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/scripts/import_csv.js" afterPath="$PROJECT_DIR$/scripts/metapop/import_csv.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/scripts/o.js" afterPath="$PROJECT_DIR$/scripts/metapop/o.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/scripts/offers.csv" afterPath="$PROJECT_DIR$/scripts/metapop/offers.csv" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="twystServer.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -24,11 +26,37 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="import_csv.js" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/scripts/import_csv.js">
+      <file leaf-file-name="import_csv.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/scripts/metapop/import_csv.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.19791667">
-              <caret line="7" column="59" selection-start-line="7" selection-start-column="59" selection-end-line="7" selection-end-column="59" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="29" column="12" selection-start-line="29" selection-start-column="12" selection-end-line="29" selection-end-column="12" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="data_pop.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/scripts/metapop/data_pop.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-6.5555553">
+              <caret line="318" column="33" selection-start-line="318" selection-start-column="0" selection-end-line="384" selection-end-column="0" />
+              <folding>
+                <element signature="e#674#4579#0" expanded="false" />
+                <element signature="e#12906#15629#0" expanded="false" />
+                <element signature="e#16670#19393#0" expanded="false" />
+                <element signature="e#20417#23534#0" expanded="false" />
+                <element signature="e#24435#27940#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="o.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/scripts/metapop/o.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.59375">
+              <caret line="21" column="5" selection-start-line="21" selection-start-column="5" selection-end-line="21" selection-end-column="5" />
               <folding />
             </state>
           </provider>
@@ -83,6 +111,7 @@
         <option value="$PROJECT_DIR$/controllers/user.ctrl.js" />
         <option value="$PROJECT_DIR$/controllers/helpers/user.hlpr.js" />
         <option value="$PROJECT_DIR$/scripts/import_csv.js" />
+        <option value="$PROJECT_DIR$/scripts/metapop/import_csv.js" />
       </list>
     </option>
   </component>
@@ -152,6 +181,24 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="twystServer" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="twystServer" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="scripts" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="metapop" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
       <pane id="Scope" />
@@ -173,6 +220,11 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.highlight.symlinks" value="true" />
     <property name="WebServerToolWindowPanel.toolwindow.highlight.mappings" value="true" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/scripts/metapop" />
+    </key>
   </component>
   <component name="RestClientSettings">
     <option name="REQUEST_HISTORY">
@@ -416,13 +468,13 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1366" height="768" extended-state="0" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32714286" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32857144" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.18884759" sideWeight="0.49253732" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.18884759" sideWeight="0.49253732" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39714286" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32857144" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24535316" sideWeight="0.5074627" order="2" side_tool="true" content_ui="tabs" />
@@ -790,7 +842,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/offers.csv">
+    <entry file="file://$PROJECT_DIR$/scripts/metapop/offers.csv">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.2827381">
           <caret line="10" column="16" selection-start-line="10" selection-start-column="16" selection-end-line="10" selection-end-column="16" />
@@ -862,20 +914,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/metapop/data_pop.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-4.5185184">
-          <caret line="865" column="36" selection-start-line="865" selection-start-column="32" selection-end-line="865" selection-end-column="36" />
-          <folding>
-            <element signature="e#674#4579#0" expanded="false" />
-            <element signature="e#12906#15629#0" expanded="false" />
-            <element signature="e#16670#19393#0" expanded="false" />
-            <element signature="e#20417#23534#0" expanded="false" />
-            <element signature="e#24435#27940#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/recco_populate.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -892,18 +930,32 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/o.js">
+    <entry file="file://$PROJECT_DIR$/scripts/metapop/import_csv.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.2440476">
-          <caret line="321" column="23" selection-start-line="321" selection-start-column="23" selection-end-line="321" selection-end-column="23" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="29" column="12" selection-start-line="29" selection-start-column="12" selection-end-line="29" selection-end-column="12" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/import_csv.js">
+    <entry file="file://$PROJECT_DIR$/scripts/metapop/data_pop.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.19791667">
-          <caret line="7" column="59" selection-start-line="7" selection-start-column="59" selection-end-line="7" selection-end-column="59" />
+        <state vertical-scroll-proportion="-6.5555553">
+          <caret line="318" column="33" selection-start-line="318" selection-start-column="0" selection-end-line="384" selection-end-column="0" />
+          <folding>
+            <element signature="e#674#4579#0" expanded="false" />
+            <element signature="e#12906#15629#0" expanded="false" />
+            <element signature="e#16670#19393#0" expanded="false" />
+            <element signature="e#20417#23534#0" expanded="false" />
+            <element signature="e#24435#27940#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/metapop/o.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.59375">
+          <caret line="21" column="5" selection-start-line="21" selection-start-column="5" selection-end-line="21" selection-end-column="5" />
           <folding />
         </state>
       </provider>

@@ -16,7 +16,7 @@ basicCSV.readCSV("./offers.csv",  {
             "actions: {\n\t\t\t\t reward: {" + "\n\t\t\t\t\t" +
             "_id: new ObjectId()," + "\n\t\t\t\t\t" +
             "expiry: new Date('" + get_date(rows[i][16]) + "')," + "\n\t\t\t\t\t" +
-            "reward_hours:null," + "\n\t\t\t\t\t" +
+            "reward_hours:" + reward_hours() +  "\n\t\t\t\t\t" +
             "reward_meta: { reward_type:'" + rows[i][9] + "'}," + "\n\t\t\t\t\t" +
             "header:'" + fixup(rows[i][10]) + "'," + "\n\t\t\t\t\t" +
             "line1:'" + fixup(rows[i][11]) + "'," + "\n\t\t\t\t\t" +
@@ -25,6 +25,76 @@ basicCSV.readCSV("./offers.csv",  {
         );
     }
 });
+
+function reward_hours() {
+    return "    {sunday: {\
+        closed: true,\
+            timings: []\
+    },\
+    monday: {\
+        closed: false,\
+            timings: [{\
+            open: {\
+                hr: 18,\
+                min: 00\
+            },\
+            close: {\
+                hr: 22,\
+                min: 00\
+            }\
+        }]\
+    },\
+    tuesday: {\
+        closed: false,\
+            timings: [{\
+            open: {\
+                hr: 18,\
+                min: 00\
+            },\
+            close: {\
+                hr: 22,\
+                min: 00\
+            }\
+        }]\
+    },\
+    wednesday: {\
+        closed: false,\
+            timings: [{\
+            open: {\
+                hr: 18,\
+                min: 00\
+            },\
+            close: {\
+                hr: 22,\
+                min: 00\
+            }\
+        }]\
+    },\
+    thursday: {\
+        closed: false,\
+            timings: [{\
+            open: {\
+                hr: 18,\
+                min: 00\
+            },\
+            close: {\
+                hr: 22,\
+                min: 00\
+            }\
+        }]\
+    },\
+    friday: {\
+        closed: true,\
+            timings: []\
+    },\
+    saturday: {\
+        closed: true,\
+            timings: []\
+    }\
+},";
+}
+
+
 
 function fixup(str) {
     return str.replace(/'/g, '\\\'');
