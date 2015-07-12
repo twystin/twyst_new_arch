@@ -5,25 +5,31 @@ basicCSV.readCSV("./offers.csv",  {
     var i = 0;
 
     for (i =0; i < rows.length; i++) {
+        if (rows[i][2] !== 'coupon' && rows[i][2] !== 'pool')
         console.log(
-            "db.outlets.update({_id: ObjectId('" + rows[i][7] + "')}," +
-            "{$push: {offers: {" +
-            "_id: new ObjectId()," +
-            "offer_status: 'active'," +
-            "offer_type: '" + deal_type(rows[i][0]) + "'," +
-            "offer_group: 'test_offer'," +
-            "actions: { reward: {" +
-            "_id: new ObjectId()," +
-            "expiry: new Date('" + get_date(rows[i][16]) + "')," +
-            "reward_hours:null," +
-            "reward_meta: { reward_type:'" + rows[i][8] + "'}," +
-            "header:'" + rows[i][9] + "'," +
-            "line1:'" + rows[i][10] + "'," +
-            "line2:'" + rows[i][11] + "'" +
-                "}}}}});"
+            "db.outlets.update({\n\t_id: ObjectId('" + rows[i][7] + "')\n}, {" + "\n\t" +
+            "$push:{\n\t\toffers: {" + "\n\t\t\t" +
+            "_id: new ObjectId()," + "\n\t\t\t" +
+            "offer_status: 'active'," + "\n\t\t\t" +
+            "offer_type: '" + deal_type(rows[i][2]) + "'," + "\n\t\t\t" +
+            "offer_group: 'test_offer'," + "\n\t\t\t" +
+            "actions: {\n\t\t\t\t reward: {" + "\n\t\t\t\t\t" +
+            "_id: new ObjectId()," + "\n\t\t\t\t\t" +
+            "expiry: new Date('" + get_date(rows[i][16]) + "')," + "\n\t\t\t\t\t" +
+            "reward_hours:null," + "\n\t\t\t\t\t" +
+            "reward_meta: { reward_type:'" + rows[i][9] + "'}," + "\n\t\t\t\t\t" +
+            "header:'" + fixup(rows[i][10]) + "'," + "\n\t\t\t\t\t" +
+            "line1:'" + fixup(rows[i][11]) + "'," + "\n\t\t\t\t\t" +
+            "line2:'" + fixup(rows[i][12]) + "'" + "\n\t\t\t\t" +
+            "}\n\t\t\t}\n\t\t}\n\t}\n});\n"
         );
     }
 });
+
+function fixup(str) {
+    return str.replace(/'/g, '\\\'');
+
+}
 
 function deal_type(i) {
     return i;
