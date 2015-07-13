@@ -37,16 +37,18 @@ module.exports.login = function(req, res) {
 };
 
 module.exports.logout = function(req, res) {
+    logger.log();
     var token = req.query.token || null;
     if (!token) {
         HttpHelper.error(res, null, "No user to logout!");
     }
 
-    AccountHelper.delete_auth_token(token).then(function(data) {
-        HttpHelper.success(res, data.data, data.message);
-    }, function(err) {
-        HttpHelper.error(res, err.err, err.message);
-    });
+    AccountHelper.delete_auth_token(token)
+        .then(function(data) {
+            HttpHelper.success(res, data, "Logged out successfully.");
+        }, function(err) {
+            HttpHelper.error(res, err, "Could not log the user out.");
+        });
 };
 
 module.exports.create_authcode = function(req, res) {

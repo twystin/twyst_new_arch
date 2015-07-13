@@ -20,12 +20,17 @@ var _ = require('underscore');
 var Cache = require('../../common/cache.hlpr.js');
 
 module.exports.delete_auth_token = function(token) {
+    logger.log();
     var deferred = Q.defer();
-    AuthToken.findOneAndRemove({token: token}, function(err) {
+    AuthToken.findOneAndRemove({token: token}, function(err, data) {
         if (err) {
-            deferred.reject({err: err, message: 'Error deleting token'});
+            deferred.reject(err || null);
         } else {
-            deferred.resolve({data: null, message: 'Deleted user token'});
+            if (!data) {
+                deferred.resolve("User is already logged out")
+            } else {
+                deferred.resolve("Logged out the user");
+            }
         }
     });
 

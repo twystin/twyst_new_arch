@@ -4,8 +4,7 @@
     <list default="true" id="5b0d2070-deb3-4f33-9d78-600f212848f4" name="Default" comment="Fixed up SMS code, and made some changes to user model.">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/controllers/account.ctrl.js" afterPath="$PROJECT_DIR$/controllers/account.ctrl.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/controllers/helpers/account.hlpr.js" afterPath="$PROJECT_DIR$/controllers/helpers/account.hlpr.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/models/account.mdl.js" afterPath="$PROJECT_DIR$/models/account.mdl.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/controllers/event.ctrl.js" afterPath="$PROJECT_DIR$/controllers/event.ctrl.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/config/routes.cfg.js" afterPath="$PROJECT_DIR$/config/routes.cfg.js" />
     </list>
     <ignored path="twystServer.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -36,15 +35,14 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="account.ctrl.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="account.ctrl.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/controllers/account.ctrl.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.57462686">
-              <caret line="31" column="52" selection-start-line="31" selection-start-column="52" selection-end-line="31" selection-end-column="52" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="39" column="17" selection-start-line="39" selection-start-column="17" selection-end-line="39" selection-end-column="17" />
               <folding>
-                <element signature="e#1173#1508#0" expanded="false" />
-                <element signature="e#1563#3470#0" expanded="false" />
-                <element signature="e#3544#4583#0" expanded="false" />
+                <element signature="e#1629#3536#0" expanded="false" />
+                <element signature="e#3610#4649#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -60,11 +58,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="account.hlpr.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="account.hlpr.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/controllers/helpers/account.hlpr.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="79" column="0" selection-start-line="79" selection-start-column="0" selection-end-line="79" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.3119403">
+              <caret line="22" column="17" selection-start-line="22" selection-start-column="17" selection-end-line="22" selection-end-column="17" />
               <folding />
             </state>
           </provider>
@@ -74,7 +72,7 @@
         <entry file="file://$PROJECT_DIR$/config/routes.cfg.js">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="10" column="16" selection-start-line="10" selection-start-column="16" selection-end-line="10" selection-end-column="16" />
+              <caret line="18" column="30" selection-start-line="18" selection-start-column="30" selection-end-line="18" selection-end-column="30" />
               <folding />
             </state>
           </provider>
@@ -113,7 +111,6 @@
         <option value="$PROJECT_DIR$/config/app.cfg.js" />
         <option value="$PROJECT_DIR$/config/cache.cfg.js" />
         <option value="$PROJECT_DIR$/common/cache.hlpr.js" />
-        <option value="$PROJECT_DIR$/config/routes.cfg.js" />
         <option value="$PROJECT_DIR$/models/user.mdl.js" />
         <option value="$PROJECT_DIR$/controllers/helpers/reco.hlpr.js" />
         <option value="$PROJECT_DIR$/common/auth.hlpr.js" />
@@ -132,8 +129,9 @@
         <option value="$PROJECT_DIR$/www/merchant/index.html" />
         <option value="$PROJECT_DIR$/models/account.mdl.js" />
         <option value="$PROJECT_DIR$/controllers/event.ctrl.js" />
-        <option value="$PROJECT_DIR$/controllers/helpers/account.hlpr.js" />
+        <option value="$PROJECT_DIR$/config/routes.cfg.js" />
         <option value="$PROJECT_DIR$/controllers/account.ctrl.js" />
+        <option value="$PROJECT_DIR$/controllers/helpers/account.hlpr.js" />
       </list>
     </option>
   </component>
@@ -950,14 +948,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/config/routes.cfg.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="16" selection-start-line="10" selection-start-column="16" selection-end-line="10" selection-end-column="16" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/controllers/event.ctrl.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -966,23 +956,30 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/controllers/helpers/account.hlpr.js">
+    <entry file="file://$PROJECT_DIR$/config/routes.cfg.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="79" column="0" selection-start-line="79" selection-start-column="0" selection-end-line="79" selection-end-column="0" />
+          <caret line="18" column="30" selection-start-line="18" selection-start-column="30" selection-end-line="18" selection-end-column="30" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/controllers/account.ctrl.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.57462686">
-          <caret line="31" column="52" selection-start-line="31" selection-start-column="52" selection-end-line="31" selection-end-column="52" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="39" column="17" selection-start-line="39" selection-start-column="17" selection-end-line="39" selection-end-column="17" />
           <folding>
-            <element signature="e#1173#1508#0" expanded="false" />
-            <element signature="e#1563#3470#0" expanded="false" />
-            <element signature="e#3544#4583#0" expanded="false" />
+            <element signature="e#1629#3536#0" expanded="false" />
+            <element signature="e#3610#4649#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/controllers/helpers/account.hlpr.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.3119403">
+          <caret line="22" column="17" selection-start-line="22" selection-start-column="17" selection-end-line="22" selection-end-column="17" />
+          <folding />
         </state>
       </provider>
     </entry>
