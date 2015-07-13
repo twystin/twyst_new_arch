@@ -9,13 +9,13 @@ var HttpHelper = require('../common/http.hlpr.js');
 var AuthHelper = require('../common/auth.hlpr.js');
 var OutletHelper = require('./helpers/outlet.hlpr.js');
 var User = mongoose.model('User');
+var logger = require('tracer').colorConsole();
 
 var _ = require('underscore');
-
 var Q = require('q');
 
 function check_event(data) {
-    console.log("CHECK EVENT BEGIN");
+    logger.log();
     var deferred = Q.defer();
     var passed_data = data;
 
@@ -37,7 +37,7 @@ function check_event(data) {
 }
 
 function get_user(data) {
-    console.log("GET USER BEGIN");
+    logger.log();
 
     var deferred = Q.defer();
     var passed_data = data;
@@ -55,7 +55,7 @@ function get_user(data) {
 }
 
 function get_outlet(data) {
-    console.log("GET OUTLET BEGIN");
+    logger.log();
 
     var deferred = Q.defer();
     var event = {};
@@ -73,7 +73,7 @@ function get_outlet(data) {
 }
 
 function create_event(data) {
-    console.log("CREATE EVENT BEGIN");
+    logger.log();
 
     var deferred = Q.defer();
     var event = {};
@@ -97,7 +97,7 @@ function create_event(data) {
 
 var follow_processor = {
     process: function(data) {
-        console.log("FOLLOW PROCESSOR BEGIN");
+        logger.log();
 
         var deferred = Q.defer();
         var passed_data = data;
@@ -121,7 +121,7 @@ var follow_processor = {
 
 var unfollow_processor = {
     process: function(data) {
-        console.log("UNFOLLOW PROCESSOR BEGIN");
+        logger.log();
 
         var deferred = Q.defer();
         var passed_data = data;
@@ -161,7 +161,7 @@ function event_processor(event_type) {
 }
 
 function process_event(data) {
-    console.log("PROCESS EVENT BEGIN");
+    logger.log();
 
     var deferred = Q.defer();
     var passed_data = data;
@@ -185,6 +185,8 @@ function process_event(data) {
 }
 
 function create_new(res, passed_data) {
+    logger.log();
+
     check_event(passed_data)
         .then(function(data) {
             return get_user(data)
@@ -207,6 +209,8 @@ function create_new(res, passed_data) {
 }
 
 module.exports.new = function(req, res) {
+    logger.log();
+
     var passed_data = {};
 
     passed_data.event_data = req.body || {};
@@ -217,6 +221,8 @@ module.exports.new = function(req, res) {
 
 
 module.exports.follow = function(req, res) {
+    logger.log();
+
     var passed_data = {};
 
     passed_data.event_data = req.body || {};
@@ -229,6 +235,8 @@ module.exports.follow = function(req, res) {
 };
 
 module.exports.unfollow = function(req, res) {
+    logger.log();
+
     var passed_data = {};
 
     passed_data.event_data = req.body || {};
