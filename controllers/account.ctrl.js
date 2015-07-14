@@ -116,9 +116,9 @@ module.exports.verify_authcode_and_create_account = function(req, res) {
                     passed_data.user = (data.data.user && data.data.user._id) || null;
                     AccountHelper.save_auth_token(passed_data)
                         .then(function(data) {
-                            HttpHelper.success(res, data.data, data.message);
+                            HttpHelper.success(res, data, "Successfully created account");
                         }, function(err) {
-                            HttpHelper.error(res, err.err, err.message);
+                            HttpHelper.error(res, err, "Could not create account");
                         });
                 });
             }

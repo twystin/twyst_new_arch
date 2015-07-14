@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="5b0d2070-deb3-4f33-9d78-600f212848f4" name="Default" comment="Fixed up SMS code, and made some changes to user model.">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/controllers/account.ctrl.js" afterPath="$PROJECT_DIR$/controllers/account.ctrl.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/controllers/helpers/account.hlpr.js" afterPath="$PROJECT_DIR$/controllers/helpers/account.hlpr.js" />
     </list>
     <ignored path="twystServer.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -38,7 +37,7 @@
         <entry file="file://$PROJECT_DIR$/controllers/account.ctrl.js">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.55820894">
-              <caret line="120" column="46" selection-start-line="120" selection-start-column="46" selection-end-line="120" selection-end-column="46" />
+              <caret line="120" column="80" selection-start-line="120" selection-start-column="80" selection-end-line="120" selection-end-column="80" />
               <folding />
             </state>
           </provider>
@@ -962,7 +961,7 @@
     <entry file="file://$PROJECT_DIR$/controllers/account.ctrl.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.55820894">
-          <caret line="120" column="46" selection-start-line="120" selection-start-column="46" selection-end-line="120" selection-end-column="46" />
+          <caret line="120" column="80" selection-start-line="120" selection-start-column="80" selection-end-line="120" selection-end-column="80" />
           <folding />
         </state>
       </provider>
