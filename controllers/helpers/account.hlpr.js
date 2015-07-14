@@ -93,6 +93,7 @@ module.exports.populate_cache = function(data) {
 };
 
 module.exports.create_user_account = function(phone) {
+    logger.log();
     var deferred = Q.defer();
     var return_data = {};
 

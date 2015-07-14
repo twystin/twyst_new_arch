@@ -52,7 +52,7 @@ module.exports.logout = function(req, res) {
 };
 
 module.exports.create_authcode = function(req, res) {
-    var phone = req.params.phone;
+    var phone = (req.params && req.params.phone) || null;
     var code = '';
     if (!phone) {
         HttpHelper.error(res, null, 'Phone number required for verification');
@@ -97,8 +97,10 @@ module.exports.create_authcode = function(req, res) {
 };
 
 module.exports.verify_authcode_and_create_account = function(req, res) {
-    var phone = req.body.phone + '';
-    var authcode = req.body.code + '';
+    logger.log();
+
+    var phone = (req.body && req.body.phone + '') || null;
+    var authcode = (req.body && req.body.code + '') || null;
 
     if (phone && authcode) {
         AuthCode.findOne({
@@ -109,8 +111,10 @@ module.exports.verify_authcode_and_create_account = function(req, res) {
                 HttpHelper.error(res, err || null, 'Incorrect verification code');
             } else {
                 AccountHelper.create_user_account(phone).then(function(data) {
-                    AccountHelper.save_auth_token(data.data.account && data.data.account._id || null,
-                        data.data.user && data.data.user._id || null)
+                    var passed_data = {};
+                    passed_data.account = (data.data.account && data.data.account._id) || null;
+                    passed_data.user = (data.data.user && data.data.user._id) || null;
+                    AccountHelper.save_auth_token(passed_data)
                         .then(function(data) {
                             HttpHelper.success(res, data.data, data.message);
                         }, function(err) {
