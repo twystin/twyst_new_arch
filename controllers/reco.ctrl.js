@@ -329,7 +329,7 @@ function massage_offers(params) {
 
         // AND THEN PICK THE FIRST ONE
         item.offers = _.filter(item.offers, function(offer) {
-            if (offer.offer_type === 'checkin') {
+            if (offer.offer_type === 'checkin' && offer.rule && offer.rule.event_count) {
                 if (checkins < offer.rule.event_count && !returned) {
                     returned = true;
                     return true;
