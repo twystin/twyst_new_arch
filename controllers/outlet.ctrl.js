@@ -294,6 +294,9 @@ function massage_offers(params) {
         }
         // massaged_offer.applicability = offer.actions.reward.applicability;
         massaged_offer.valid_days = offer.actions.reward.valid_days;
+        massaged_offer.header = offer.actions.reward.header;
+        massaged_offer.line1 = offer.actions.reward.line1;
+        massaged_offer.line2 = offer.actions.reward.line2;
         return massaged_offer;
       }
 
