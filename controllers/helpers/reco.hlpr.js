@@ -44,7 +44,7 @@ module.exports.cache_user_favourites = function(user) {
     }, {});
     Cache.hset(user._id, 'favourite_map', JSON.stringify(favourite_map));
     deferred.resolve(true);
-    
+
     return deferred.promise;
 };
 
