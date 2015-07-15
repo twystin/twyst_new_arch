@@ -236,6 +236,7 @@ function pick_outlet_fields(params) {
     var deferred = Q.defer();
     var fmap = null;
     var user = params.user && params.user._id || null;
+    user = user.toString();
 
     Cache.hget(user, 'favourite_map', function(err, reply) {
         if (reply) {

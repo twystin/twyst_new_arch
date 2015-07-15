@@ -3,6 +3,7 @@
 
 var Q = require('q');
 var _ = require('underscore');
+var logger = require('tracer').colorConsole();
 
 var mongoose = require('mongoose');
 require('../models/auth_token.mdl.js');

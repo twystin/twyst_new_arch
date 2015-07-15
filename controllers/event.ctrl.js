@@ -10,6 +10,7 @@ var AuthHelper = require('../common/auth.hlpr.js');
 var OutletHelper = require('./helpers/outlet.hlpr.js');
 var User = mongoose.model('User');
 var logger = require('tracer').colorConsole();
+var RecoHelper = require('./helpers/reco.hlpr.js');
 
 var _ = require('underscore');
 var Q = require('q');
@@ -111,7 +112,11 @@ var follow_processor = {
                 if (err) {
                     deferred.reject('Could not update user');
                 } else {
-                    deferred.resolve(passed_data);
+                    RecoHelper.cache_user_favourites(updated_user).then(function(data) {
+                        deferred.resolve(passed_data);
+                    }, function(err) {
+                        deferred.reject('Could not update user cache')
+                    })
                 }
             });
 
@@ -134,10 +139,23 @@ var unfollow_processor = {
                 if (err) {
                     deferred.reject('Could not update user');
                 } else {
-                    deferred.resolve(passed_data);
+                    RecoHelper.cache_user_favourites(updated_user).then(function(data) {
+                        deferred.resolve(passed_data);
+                    }, function(err) {
+                        deferred.reject('Could not update user cache');
+                    });
                 }
             });
 
+        return deferred.promise;
+    }
+};
+
+var feedback_processor = {
+    process: function(data) {
+        logger.log();
+        var deferred = Q.defer();
+        deferred.resolve(true);
         return deferred.promise;
     }
 };
@@ -154,7 +172,8 @@ function event_processor(event_type) {
     var processors = {
         'follow': follow_processor,
         'checkin': checkin_processor,
-        'unfollow': unfollow_processor
+        'unfollow': unfollow_processor,
+        'feedback': feedback_processor
     };
 
     return processors[event_type] || null;
@@ -232,6 +251,18 @@ module.exports.follow = function(req, res) {
 
     create_new(res, passed_data);
 
+};
+
+module.exports.feedback = function(req, res) {
+    logger.log();
+    var passed_data = {};
+
+    passed_data.event_data = req.body || {};
+    passed_data.event_data.event_type = 'feedback';
+    passed_data.user_token = req.query.token || null;
+    passed_data.query_params = req.params || null;
+
+    create_new(res, passed_data);
 };
 
 module.exports.unfollow = function(req, res) {
