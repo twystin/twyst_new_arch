@@ -143,6 +143,8 @@ var OutletSchema = new Schema({
       offer_group: {type: String}, // to model the program
       offer_start_date: {type: Date},
       offer_end_date: {type: Date},
+      offer_lapse_date: {type: Date},
+      offer_likes: [{type: Schema.ObjectId, ref:'User'}],
       offer_source: {type: String},
       rule: {
         event_type: String,
