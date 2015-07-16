@@ -64,6 +64,12 @@ module.exports = function(app) {
 
         app.get('/api/v4/coupons', UserCtrl.get_coupons);
     })();
+
+    (function LocationRoutes() {
+        var LocationCtrl = require('../controllers/location.ctrl');
+        app.get('/api/v4/locations', LocationCtrl.get_locations);
+        
+    })();
 };
 
 
