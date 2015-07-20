@@ -24,16 +24,21 @@ function check_event(data) {
         deferred.reject("Authentication error - no token passed.");
     }
 
-    if (!passed_data.event_data.event_outlet && passed_data.event_data.event_meta && !passed_data.event_data.event_meta.outlet_name) {
-        deferred.reject('No outlet to log the event at - please pass event_outlet');
-    }
-
     if (!passed_data.event_data.event_type) {
         deferred.reject('No event type - please pass event_type');
     }
 
-    if (passed_data.event_data.event_type == 'offer_submit_event' && !passed_data.event_data.event_meta.offer) {
-        deferred.reject('No offer  - please pass offer');
+    if (passed_data.event_data && passed_data.event_data.event_type === 'suggestion') {
+        if (!passed_data.event_data.event_meta ||
+            !passed_data.event_data.event_meta.offer || 
+            !passed_data.event_data.event_meta.outlet) {
+            deferred.reject('No suggestion information - outlet and offer need to be passed');
+        }
+
+    } else {
+        if (!passed_data.event_data.event_outlet) {
+            deferred.reject('No outlet to log the event at - please pass event_outlet');
+        }
     }
 
     deferred.resolve(passed_data);
@@ -78,7 +83,6 @@ function get_outlet(data) {
         deferred.resolve(passed_data);
     }
     
-
     return deferred.promise;
 }
 
@@ -95,9 +99,6 @@ function create_event(data) {
         event.event_outlet = passed_data.outlet._id;    
     }
     
-    if(event.event_type == 'offer_submit_event') {
-        event.event_outlet = new mongoose.Types.ObjectId;
-    }
     event.event_date = new Date();
     var created_event = new Event(event);
     created_event.save(function(err, e) {
@@ -183,7 +184,7 @@ var checkin_processor = {
     }
 };
 
-var offer_submit_processor = {
+var suggestion_processor = {
     process: function(data) {
         var deferred = Q.defer();
         deferred.resolve(true);
@@ -197,7 +198,7 @@ function event_processor(event_type) {
         'checkin': checkin_processor,
         'unfollow': unfollow_processor,
         'feedback': feedback_processor,
-        'offer_submit_event': offer_submit_processor
+        'suggestion': suggestion_processor
     };
 
     return processors[event_type] || null;
@@ -304,12 +305,12 @@ module.exports.unfollow = function(req, res) {
 
 };
 
-module.exports.submit_offer = function(req, res) {
+module.exports.suggestion = function(req, res) {
     logger.log();
     var passed_data = {};
 
     passed_data.event_data = req.body || {};
-    passed_data.event_data.event_type = 'offer_submit_event';
+    passed_data.event_data.event_type = 'suggestion';
     passed_data.user_token = req.query.token || null;
     passed_data.query_params = req.params || null;
 
