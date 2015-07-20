@@ -24,12 +24,16 @@ function check_event(data) {
         deferred.reject("Authentication error - no token passed.");
     }
 
-    if (!passed_data.event_data.event_outlet) {
+    if (!passed_data.event_data.event_outlet && passed_data.event_data.event_meta && !passed_data.event_data.event_meta.outlet_name) {
         deferred.reject('No outlet to log the event at - please pass event_outlet');
     }
 
     if (!passed_data.event_data.event_type) {
         deferred.reject('No event type - please pass event_type');
+    }
+
+    if (passed_data.event_data.event_type == 'offer_submit_event' && !passed_data.event_data.event_meta.offer) {
+        deferred.reject('No offer  - please pass offer');
     }
 
     deferred.resolve(passed_data);
@@ -63,12 +67,17 @@ function get_outlet(data) {
     var passed_data = data;
     event = _.extend(event, passed_data.event_data);
 
-    OutletHelper.get_outlet(event.event_outlet).then(function(data) {
-        passed_data.outlet = data.data;
+    if (event.event_outlet) {
+        OutletHelper.get_outlet(event.event_outlet).then(function(data) {
+            passed_data.outlet = data.data;
+            deferred.resolve(passed_data);
+        }, function(err) {
+            deferred.reject('Could not find the outlet for this id - ' + event.event_outlet);
+        });
+    } else {
         deferred.resolve(passed_data);
-    }, function(err) {
-        deferred.reject('Could not find the outlet for this id - ' + event.event_outlet);
-    });
+    }
+    
 
     return deferred.promise;
 }
@@ -82,7 +91,13 @@ function create_event(data) {
 
     event = _.extend(event, passed_data.event_data);
     event.event_user = passed_data.user._id;
-    event.event_outlet = passed_data.outlet._id;
+    if(passed_data.outlet) {
+        event.event_outlet = passed_data.outlet._id;    
+    }
+    
+    if(event.event_type == 'offer_submit_event') {
+        event.event_outlet = new mongoose.Types.ObjectId;
+    }
     event.event_date = new Date();
     var created_event = new Event(event);
     created_event.save(function(err, e) {
@@ -168,12 +183,21 @@ var checkin_processor = {
     }
 };
 
+var offer_submit_processor = {
+    process: function(data) {
+        var deferred = Q.defer();
+        deferred.resolve(true);
+        return deferred.promise;
+    }
+};
+
 function event_processor(event_type) {
     var processors = {
         'follow': follow_processor,
         'checkin': checkin_processor,
         'unfollow': unfollow_processor,
-        'feedback': feedback_processor
+        'feedback': feedback_processor,
+        'offer_submit_event': offer_submit_processor
     };
 
     return processors[event_type] || null;
@@ -223,6 +247,7 @@ function create_new(res, passed_data) {
             HttpHelper.success(res, data.outlets, "Processed the event successfully.");
         })
         .fail(function(err) {
+            console.log(err)
             HttpHelper.error(res, err || false, "Error processing the event");
         });
 }
@@ -279,3 +304,14 @@ module.exports.unfollow = function(req, res) {
 
 };
 
+module.exports.submit_offer = function(req, res) {
+    logger.log();
+    var passed_data = {};
+
+    passed_data.event_data = req.body || {};
+    passed_data.event_data.event_type = 'offer_submit_event';
+    passed_data.user_token = req.query.token || null;
+    passed_data.query_params = req.params || null;
+
+    create_new(res, passed_data);
+};
