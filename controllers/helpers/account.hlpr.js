@@ -65,7 +65,6 @@ module.exports.save_auth_token = function(data) {
     return deferred.promise;
 };
 
-
 module.exports.populate_cache = function(data) {
     logger.log();
     var deferred = Q.defer();

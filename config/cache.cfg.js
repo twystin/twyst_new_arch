@@ -4,6 +4,8 @@
 var Cache = require('../common/cache.hlpr');
 var mongoose = require('mongoose');
 var Outlet = mongoose.model('Outlet');
+var LocationHandler = require('../scripts/location.js');
+
 var _ = require('underscore');
 
 function populateOutlets() {
@@ -21,6 +23,13 @@ function populateOutlets() {
   });
 }
 
+function populateLocations() {
+  Cache.hset('locations', 'location_map', JSON.stringify(LocationHandler.locations));
+
+
+}
+
 module.exports.populate = function() {
   populateOutlets();
+  populateLocations();
 };
