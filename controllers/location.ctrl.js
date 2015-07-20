@@ -13,7 +13,6 @@ module.exports.get_locations = function(req, res) {
         } else {
 
             HttpHelper.success(res, JSON.parse(reply), 'Returning locations');
-
         }
     });
 };
