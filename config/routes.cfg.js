@@ -40,7 +40,7 @@ module.exports = function(app) {
         app.post('/api/v4/follow', EventCtrl.follow);
         app.post('/api/v4/unfollow', EventCtrl.unfollow);
         app.post('/api/v4/feedback', EventCtrl.feedback);
-
+        app.post('/api/v4/suggestion', EventCtrl.suggestion);
     })();
 
 
