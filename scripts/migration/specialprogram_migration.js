@@ -7,11 +7,13 @@ while(program_cursor.hasNext()) {
   retwyst.outlets.update({_id: {$in: p.outlets}},{
     $push: {
       offers: {
+        _id: new ObjectId(),
         offer_status: p.status,
         offer_type: p.types.birth?'birthday':'anniversary',
         offer_group: p.name,
         actions: {
           reward: {
+            _id: new ObjectId(),
             title: p.name,
             terms: p.ranges[0].terms,
             detail: p.desc,
@@ -19,6 +21,7 @@ while(program_cursor.hasNext()) {
           }
         },
         rule: {
+          _id: new ObjectId(),
           event_type: p.types.birth?'birthday':'anniversary',
           event_count: p.ranges[0].count_from,
           event_match: 'after'

@@ -4,6 +4,7 @@ var retwyst = db.getSiblingDB('retwyst');
 while(cursor.hasNext()) {
   c = cursor.next();
   retwyst.events.insert({
+    _id: new ObjectId(),
     event_type: 'checkin',
     event_date: c.created_date,
     event_outlet: c.outlet,

@@ -7,6 +7,7 @@ while(program_cursor.hasNext()) {
   retwyst.outlets.update({_id: {$in: p.outlets}},{
     $push: {
       offers: {
+        _id: new ObjectId(),
         offer_status: p.status,
         offer_type: 'winback',
         offer_group: p.name,
@@ -14,6 +15,7 @@ while(program_cursor.hasNext()) {
         offer_end_date: p.validity.earn_end,
         actions: {
           reward: {
+            _id: new ObjectId(),
             title: p.name,
             terms: p.terms,
             detail: p.name,
@@ -26,6 +28,7 @@ while(program_cursor.hasNext()) {
           }
         },
         rule: {
+          _id: new ObjectId(),
           event_type: 'winback',
           event_count: p.min_historical_checkins,
           event_match: 'after',

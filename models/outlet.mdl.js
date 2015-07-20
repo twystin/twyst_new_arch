@@ -138,6 +138,7 @@ var OutletSchema = new Schema({
       }
     },
     offers: [{
+      _id: {type: Schema.Types.ObjectId},
       offer_status: {type: String}, // active
       offer_type: {type: String}, // job,
       offer_group: {type: String}, // to model the program
@@ -147,6 +148,7 @@ var OutletSchema = new Schema({
       offer_likes: [{type: Schema.ObjectId, ref:'User'}],
       offer_source: {type: String},
       rule: {
+        _id: {type: Schema.Types.ObjectId},
         event_type: String,
         event_count: Number,
         event_match: String,
@@ -155,6 +157,7 @@ var OutletSchema = new Schema({
       },
       actions: {
         reward: {
+          _id: {type: Schema.Types.ObjectId},
           title: {type: String},
           terms: {type: String},
           detail: {type: String},

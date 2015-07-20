@@ -21,11 +21,13 @@ while(program_cursor.hasNext()) {
           retwyst.outlets.update({_id: {$in: p.outlets}},{
             $push: {
               offers: {
+                _id: new ObjectId(),
                 offer_status: p.status,
                 offer_type: 'checkin',
                 offer_group: p.name,
                 actions: {
                   reward: {
+                    _id: new ObjectId(),
                     header: o.basics.title,
                     line1: o.basics.description,
                     line2: o.terms,
@@ -40,6 +42,7 @@ while(program_cursor.hasNext()) {
                   }
                 },
                 rule: {
+                  _id: new ObjectId(),
                   event_type: 'checkin',
                   event_count: o.user_eligibility.criteria.value,
                   event_match: o.user_eligibility.criteria.condition

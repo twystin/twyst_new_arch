@@ -6,6 +6,7 @@ while(deal_cursor.hasNext()) {
   retwyst.outlets.update({_id: {$in: d.outlets}},{
     $push: {
       offers: {
+        _id: new ObjectId(),
         offer_status: d.status,
         offer_type: 'deal',
         offer_group: 'deal',
