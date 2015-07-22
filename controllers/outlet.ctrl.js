@@ -297,6 +297,7 @@ function massage_offers(params) {
         massaged_offer.header = offer.actions.reward.header;
         massaged_offer.line1 = offer.actions.reward.line1;
         massaged_offer.line2 = offer.actions.reward.line2;
+        massaged_offer.offer_likes = offer.offer_likes;
         return massaged_offer;
       }
 

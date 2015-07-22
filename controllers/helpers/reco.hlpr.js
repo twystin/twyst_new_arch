@@ -88,6 +88,27 @@ module.exports.cache_user_coupons = function(user) {
     return deferred.promise;
 };
 
+module.exports.cache_offer_likes = function(outlet, updated_offer, user) {
+    logger.log();
+    var deferred = Q.defer();
+    //console.log(offer.outlet)
+    //Cache.hset(offer.offer, 'offer_like_map', JSON.stringify(user));
+    Cache.hget(updated_offer, 'offer_like_map', function(err, reply) {
+        if (err || !reply) {
+            //console.log(err)
+        }
+        else{
+            console.log(reply)
+        }
+    })
+
+    
+    
+    deferred.resolve(true);
+
+    return deferred.promise;    
+}
+
 // OLD CODE THAT SHOULD BE CLEANED UP
 
 module.exports.shuffleArray = function(array) {
@@ -111,7 +132,7 @@ module.exports.shuffleArray = function(array) {
     return array;
 };
 
-module.exports.isClosed = function(date, tm, business_hours) {
+module.exports.isClosed = function(business_hours) {
     var days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     if (!business_hours) {
         return false;

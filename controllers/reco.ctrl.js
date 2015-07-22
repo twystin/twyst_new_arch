@@ -390,6 +390,7 @@ function massage_offers(params) {
                 }
                 massaged_offer.meta = offer.actions && offer.actions.reward && offer.actions.reward.reward_meta;
                 massaged_offer.expiry = offer.actions.reward.expiry;
+                massaged_offer.offer_likes = offer.offer_likes;
                 if (offer && offer.actions && offer.actions.reward && offer.actions.reward.reward_hours) {
                     massaged_offer.available_now = RecoHelper.isClosed(offer.actions.reward.reward_hours);
                     massaged_offer.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
