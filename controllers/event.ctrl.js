@@ -31,8 +31,9 @@ function check_event(data) {
     if (passed_data.event_data && passed_data.event_data.event_type === 'suggestion') {
         if (!passed_data.event_data.event_meta ||
             !passed_data.event_data.event_meta.offer || 
-            !passed_data.event_data.event_meta.outlet) {
-            deferred.reject('No suggestion information - outlet and offer need to be passed');
+            !passed_data.event_data.event_meta.outlet || 
+            !passed_data.event_data.event_meta.location) {
+            deferred.reject('Suggestion information needs to have offer, outlet & location at least.');
         }
 
     } else {
