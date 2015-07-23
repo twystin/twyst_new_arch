@@ -132,17 +132,19 @@ module.exports.shuffleArray = function(array) {
     return array;
 };
 
-module.exports.isClosed = function(business_hours) {
+module.exports.isClosed = function(date, tm, business_hours) {
     var days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     if (!business_hours) {
         return false;
     }
     var time = null;
-    if (date && tm) {
-        time = new Date(date + ' ' + tm);
-    } else {
-        time = new Date();
-    }
+    //Commented for now
+    //if (date && tm) {
+        //time = new Date(date + ' ' + tm);
+   // } else {
+     //   time = new Date();
+    //}
+    time = new Date(Date.now() + 19800000);
 
     var day = days[time.getDay()];
     var today = business_hours[day];
