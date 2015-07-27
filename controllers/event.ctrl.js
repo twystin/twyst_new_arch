@@ -28,7 +28,8 @@ function check_event(data) {
         deferred.reject('No event type - please pass event_type');
     }
 
-    if (passed_data.event_data && passed_data.event_data.event_type === 'suggestion') {
+    if (passed_data.event_data && passed_data.event_data.event_type === 'suggestion' 
+        || passed_data.event_data.event_type === 'offer_like_event') {
         if (!passed_data.event_data.event_meta ||
             !passed_data.event_data.event_meta.offer || 
             !passed_data.event_data.event_meta.outlet || 
@@ -193,13 +194,45 @@ var suggestion_processor = {
     }
 };
 
+
+var offer_like_processor = {
+    process: function(data) {
+        logger.log();
+
+        var deferred = Q.defer();
+        var passed_data = data;
+        var updated_user = passed_data.user;
+        var token = passed_data.token;
+        Outlet.findOneAndUpdate(
+            {_id: passed_data.event_data.event_meta.outlet, 
+            offers: {$elemMatch: {'_id': passed_data.event_data.event_meta.offer}}},
+            {$addToSet: {'offers.$.offer_likes': updated_user._id}},
+            function(err, updated_outlet) {
+                if (err) {
+                    console.log(err);
+                    deferred.reject('Could not update offer');
+                } else {             
+                    RecoHelper.cache_offer_likes(updated_outlet.offers, passed_data.event_data.event_meta.offer, updated_user._id).then(function(data) {
+                        deferred.resolve(passed_data);
+                    }, function(err) {
+                        deferred.reject('Could not update outlet cache');
+                    });                            
+                }
+            });
+
+        return deferred.promise;
+    }
+};
+
+
 function event_processor(event_type) {
     var processors = {
         'follow': follow_processor,
         'checkin': checkin_processor,
         'unfollow': unfollow_processor,
         'feedback': feedback_processor,
-        'suggestion': suggestion_processor
+        'suggestion': suggestion_processor,
+        'offer_like_event': offer_like_processor
     };
 
     return processors[event_type] || null;
@@ -316,4 +349,17 @@ module.exports.suggestion = function(req, res) {
     passed_data.query_params = req.params || null;
 
     create_new(res, passed_data);
+};
+
+module.exports.like_offer = function(req, res) {
+    logger.log();
+
+    var passed_data = {};
+
+    passed_data.event_data = req.body || {};
+    passed_data.event_data.event_type = 'offer_like_event';
+    passed_data.user_token = req.query.token || null;
+    passed_data.query_params = req.params || null;
+    create_new(res, passed_data);
+
 };
