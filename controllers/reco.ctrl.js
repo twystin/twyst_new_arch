@@ -96,8 +96,11 @@ function set_user_coupons(params) {
                 var outlets = params.outlets;
                 if (cmap) {
                     _.each(cmap, function(value, key) {
-                        outlets[key].recco = outlets[key].recco || {};
-                        outlets[key].recco.coupons = value.coupons.length;
+                        if(outlets[key]) {
+                            outlets[key].recco = outlets[key].recco || {};
+                            outlets[key].recco.coupons = value.coupons.length;    
+                        }
+                        
                     });
                     params.outlets = outlets;
                     deferred.resolve(params);

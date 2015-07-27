@@ -88,21 +88,27 @@ module.exports.cache_user_coupons = function(user) {
     return deferred.promise;
 };
 
-module.exports.cache_offer_likes = function(outlet, updated_offer, user) {
+module.exports.cache_offer_likes = function(outlet, updated_offer, new_user) {
     logger.log();
     var deferred = Q.defer();
-    //console.log(offer.outlet)
-    //Cache.hset(offer.offer, 'offer_like_map', JSON.stringify(user));
+    var users =  [];
     Cache.hget(updated_offer, 'offer_like_map', function(err, reply) {
         if (err || !reply) {
-            //console.log(err)
+            users.push(JSON.stringify(new_user));
+            Cache.hset(updated_offer, 'offer_like_map', users);
+            deferred.resolve(true);
         }
-        else{
-            console.log(reply)
+        else    {   
+            users.push(JSON.parse(reply));
+            users = _.flatten(users);
+            if(!_.contains(users, JSON.stringify(new_user))){
+                users.push(JSON.stringify(new_user));   
+            }
+
+            Cache.hset(updated_offer, 'offer_like_map', JSON.stringify(users));
+            deferred.resolve(true);
         }
     })
-
-    
     
     deferred.resolve(true);
 
