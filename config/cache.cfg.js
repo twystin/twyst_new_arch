@@ -25,8 +25,6 @@ function populateOutlets() {
 
 function populateLocations() {
   Cache.hset('locations', 'location_map', JSON.stringify(LocationHandler.locations));
-
-
 }
 
 module.exports.populate = function() {
