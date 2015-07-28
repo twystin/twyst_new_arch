@@ -5,6 +5,7 @@ TODO:
   ☐ Clean up reco engine, detail, event
   ☐ Merchant app
   ☐ User app
+  ☐ Fix the bug of cache
 
   1. User likes an offer >
 2. _id / offer >

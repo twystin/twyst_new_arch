@@ -10,25 +10,33 @@ var _ = require('lodash');
 var logger = require('tracer').colorConsole();
 
 function populateOutlets() {
-  Outlet.find({}).lean().exec(function (err, outlets) {
+  Outlet.find({}).lean().exec(function(err, outlets) {
     if (err || outlets.length === 0) {
       logger.error("Error populating cache");
     } else {
-      var reduced_outlets = _.reduce(outlets, function (memo, item) {
+      var reduced_outlets = _.reduce(outlets, function(memo, item) {
         memo[item._id] = item;
         return memo;
       }, {});
-      Cache.set('outlets', JSON.stringify(reduced_outlets));
-      logger.info("Populated the cache");
+      Cache.set('outlets', JSON.stringify(reduced_outlets), function(err) {
+        if (!err) {
+          logger.info('Populated cache with outlets');
+        }
+      });
     }
   });
 }
 
 function populateLocations() {
-  Cache.hset('locations', 'location_map', JSON.stringify(LocationHandler.locations));
+  Cache.hset('locations', 'location_map', JSON.stringify(LocationHandler.locations), function(err) {
+    if (!err) {
+      logger.info('Populated cache with locations');
+    }
+  });
 }
 
 module.exports.populate = function() {
+  logger.info('Trying to populate the cache');
   populateOutlets();
   populateLocations();
 };
