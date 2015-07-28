@@ -4,16 +4,18 @@
       <strong>Plese sign-in</strong>
     </div>
     <div class="panel-body">
-      <form action="">
+      <form>
         <div class="form-group">
           <label for="username">Username</label>
-          <input type="text" class="form-control">
+          <input type="text" class="form-control" ng-model="user.username">
         </div>
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" class="form-control">
+          <input type="password" class="form-control" ng-model="user.password">
         </div>
-        <button class="btn btn-info">Sign in</button>
+        <button class="btn btn-info" ng-click="login()">Sign in</button>
+        <button class="btn btn-info" ng-click="logout()">Logout</button>
+
       </form>
     </div>
   </div>
