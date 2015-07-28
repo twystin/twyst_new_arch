@@ -1,9 +1,9 @@
-merchantApp.controller('AuthCtrl', ['$scope', '$cookies', '$log', 'twystRESTSvc', function($scope, $cookies, $log, twystRESTSvc) {
+merchantApp.controller('AuthCtrl', ['$scope', '$cookies', '$log', '$state', 'twystRESTSvc', function($scope, $cookies, $log, $state, twystRESTSvc) {
   $scope.login = function() {
     $log.log("Login called");
     twystRESTSvc.login($scope.user).then(function(data) {
     	$cookies.put('token', data.data);
-    	console.log(data);
+    	$state.go('hub');
     }, function(err) {
     	console.log(err);
     });

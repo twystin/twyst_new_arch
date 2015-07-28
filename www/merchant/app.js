@@ -8,10 +8,16 @@ var merchantApp = angular.module('merchantApp', ['ui.router', 'ngCookies', 'angu
   			'content': {
   				controller: 'HomeCtrl',
   				templateUrl: 'templates/home/home.html'
-  			},
-  			'footer': {
-  				templateUrl: 'templates/common/footer.html' 
   			}
   		}
   	})
+    .state('hub', {
+      url: '/hub',
+      views: {
+        'content': {
+          controller: 'HomeCtrl',
+          templateUrl: 'templates/hub/hub.html'
+        }
+      }
+    })
   })
