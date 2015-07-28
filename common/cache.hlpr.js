@@ -35,5 +35,10 @@ redis.on('end', function() {
   process.exit(1);
 });
 
-redis.flushall(); // This removes everything from the cache on a server start -- good idea?
+redis.flushall(function(err) {
+  if (!err) {
+    logger.info('Cleared the cache');
+  }
+}); 
+
 module.exports = redis;
