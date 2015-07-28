@@ -6,19 +6,20 @@ var mongoose = require('mongoose');
 var Outlet = mongoose.model('Outlet');
 var LocationHandler = require('../scripts/location.js');
 
-var _ = require('underscore');
+var _ = require('lodash');
+var logger = require('tracer').colorConsole();
 
 function populateOutlets() {
   Outlet.find({}).lean().exec(function (err, outlets) {
     if (err || outlets.length === 0) {
-      console.log("Error populating cache");
+      logger.error("Error populating cache");
     } else {
       var reduced_outlets = _.reduce(outlets, function (memo, item) {
         memo[item._id] = item;
         return memo;
       }, {});
       Cache.set('outlets', JSON.stringify(reduced_outlets));
-      console.log("Populated the cache");
+      logger.info("Populated the cache");
     }
   });
 }

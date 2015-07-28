@@ -54,6 +54,7 @@
   },
   "devDependencies": {
     "chai": "latest",
+    "colors": "^1.1.2",
     "faker": "^2.1.3",
     "mocha": "latest",
     "should": "latest",

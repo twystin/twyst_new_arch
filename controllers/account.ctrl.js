@@ -2,8 +2,6 @@
 /*jslint node: true */
 
 var mongoose = require('mongoose');
-var _ = require('underscore');
-
 require('../models/auth_code.mdl.js');
 var AuthCode = mongoose.model('AuthCode');
 var Event = mongoose.model('Event');
@@ -14,15 +12,15 @@ var SMSHelper = require('../common/sms.hlpr.js');
 var AccountHelper = require('./helpers/account.hlpr.js');
 var Cache = require('../common/cache.hlpr.js');
 
-var _ = require('underscore');
+var _ = require('lodash');
 var Q = require('q');
 var logger = require('tracer').colorConsole();
 
 module.exports.login = function(req, res) {
-    logger.log();
+    logger.info();
     var passed_data = {};
-    passed_data.account = req.user._id;
-    passed_data.user = req.user.user;
+    passed_data.account = _.get(req, 'user._id');
+    passed_data.user = _.get(req, 'user.user');
 
     AccountHelper.save_auth_token(passed_data)
         .then(function(data) {
@@ -37,8 +35,8 @@ module.exports.login = function(req, res) {
 };
 
 module.exports.logout = function(req, res) {
-    logger.log();
-    var token = req.query.token || null;
+    logger.info();
+    var token = _.get(req, 'query.token');
     if (!token) {
         HttpHelper.error(res, null, "No user to logout!");
     }
@@ -52,13 +50,18 @@ module.exports.logout = function(req, res) {
 };
 
 module.exports.create_authcode = function(req, res) {
-    var phone = (req.params && req.params.phone) || null;
+    logger.info();
+    var phone = _.get(req, 'params.phone');
     var code = '';
     if (!phone) {
         HttpHelper.error(res, null, 'Phone number required for verification');
     }
 
-    AuthCode.find({phone:phone}).sort({created_at:-1}).exec(function(err, authcodes) {
+    AuthCode.find({
+        phone: phone
+    }).sort({
+        created_at: -1
+    }).exec(function(err, authcodes) {
         if (err) {
             HttpHelper.error(res, err, 'Couldn\'t get authcode');
         } else {
@@ -90,17 +93,17 @@ module.exports.create_authcode = function(req, res) {
                 }
             } else {
                 // Create a new authcode
-                get_code_and_send(res,phone);
+                get_code_and_send(res, phone);
             }
         }
     });
 };
 
 module.exports.verify_authcode_and_create_account = function(req, res) {
-    logger.log();
+    logger.info();
 
-    var phone = (req.body && req.body.phone + '') || null;
-    var authcode = (req.body && req.body.code + '') || null;
+    var phone = _.get(req, 'body.phone'); 
+    var authcode = _.get(req, 'body.code');
 
     if (phone && authcode) {
         AuthCode.findOne({
@@ -112,12 +115,12 @@ module.exports.verify_authcode_and_create_account = function(req, res) {
             } else {
                 AccountHelper.create_user_account(phone).then(function(data) {
                     var passed_data = {};
-                    passed_data.account = (data.data.account && data.data.account._id) || null;
-                    passed_data.user = (data.data.user && data.data.user._id) || null;
+                    passed_data.account = _.get(data, 'data.account._id');
+                    passed_data.user = _.get(data, 'data.user._id');
                     AccountHelper.save_auth_token(passed_data)
                         .then(function(data) {
                             var return_data = {};
-                            return_data.token = data.token.token;
+                            return_data.token = _.get(data,'token.token');
                             HttpHelper.success(res, return_data, "Successfully created account");
                         }, function(err) {
                             HttpHelper.error(res, err, "Could not create account");
@@ -132,12 +135,13 @@ module.exports.verify_authcode_and_create_account = function(req, res) {
 
 // Helper functions
 function get_code_and_send(res, phone) {
+    logger.info();
     AccountHelper.generate_new_code(phone).then(function(auth_data) {
-        if (auth_data.data.code) {
-            var message = 'Your Twyst verification code is ' + auth_data.data.code;
-            SMSHelper.send_sms(phone, message).then(function (sms_data) {
+        if (_.get(auth_data,'data.code')) {
+            var message = 'Your Twyst verification code is ' + _.get(auth_data, 'data.code');
+            SMSHelper.send_sms(phone, message).then(function(sms_data) {
                 HttpHelper.success(res, auth_data.data, auth_data.message);
-            }, function (err) {
+            }, function(err) {
                 HttpHelper.error(res, err.err, err.message);
             });
         } else {

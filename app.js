@@ -1,4 +1,7 @@
 var settings = require('./config/settings');
+var logger = require('tracer').colorConsole();
+
+
 (function () {
   'use strict';
   var express = require('express');
@@ -11,16 +14,15 @@ var settings = require('./config/settings');
   require('./config/cache.cfg').populate();
 
   // START THE SERVER
-  console.log('STARTING THE TWYST SERVER');
-  console.log('-------------------------');
-  console.log('Environment:' + settings.values.env);
-  console.log('URL:' + settings.values.config[settings.values.env].server);
-  console.log('Port:' + settings.values.config[settings.values.env].port);
+  logger.info('STARTING THE TWYST SERVER');
+  logger.info('Environment:' + settings.values.env);
+  logger.info('URL:' + settings.values.config[settings.values.env].server);
+  logger.info('Port:' + settings.values.config[settings.values.env].port);
   app.listen(settings.values.config[settings.values.env].port);
-  console.log('Started the server');
+  logger.info('Started the server');
   process.on('uncaughtException', function (error) {
-      console.log(error.stack);
-      console.log(error);
+      logger.info(error.stack);
+      logger.info(error);
   });
 
 })();
