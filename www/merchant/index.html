@@ -16,19 +16,20 @@
   <script src="../bower_components/jquery/dist/jquery.js"></script>
   <script src="../bower_components/bootstrap/dist/js/bootstrap.js"></script>
   <script src="../bower_components/angular-bootstrap/ui-bootstrap.js"></script>
+  <script src= "../bower_components/angular-toastr/dist/angular-toastr.tpls.js"></script>
   <script src="app.js"></script>
   <script src="services/twystRESTSvc.js"></script>
   <script src="controllers/home.ctrl.js"></script>
   <script src="controllers/auth.ctrl.js"></script>
   <link href="style.css" rel="stylesheet">
   <link href="../bower_components/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
-  <link href="../bower_components/bootstrap/dist/css/bootstrap-theme.css" rel="stylesheet">
+  <link rel="stylesheet" href="../bower_components/angular-toastr/dist/angular-toastr.css">
+<!--   <link href="../bower_components/bootstrap/dist/css/bootstrap-theme.css" rel="stylesheet"> -->
+  <link rel="stylesheet" type="text/css" href="https://bootswatch.com/flatly/bootstrap.css">
 </head>
 
 <body>
-  <div class="container-fluid">
-    <div ui-view="content"></div>
-  </div>
+  <div ui-view="content"></div>
   <div ng-include="'templates/common/footer.html'"></div>
 </body>
 </html>
