@@ -10,7 +10,7 @@ merchantApp.factory('twystRESTSvc', ['$http', '$q', '$cookies', function($http, 
     return deferred.promise;
   };
 
-  twystRESTSvc.logout = function(token) {
+  twystRESTSvc.logout = function() {
   	var deferred = $q.defer();
     var token = $cookies.get('token');
   	$http.get('/api/v4/accounts/logout?token='+token).then(function(data) {
@@ -20,6 +20,17 @@ merchantApp.factory('twystRESTSvc', ['$http', '$q', '$cookies', function($http, 
     });
     return deferred.promise;
   };
+
+  twystRESTSvc.getOutlets = function() {
+    var deferred = $q.defer();
+    var token = $cookies.get('token');
+    $http.get('/api/v4/outlets?token='+token).then(function(data) {
+      deferred.resolve(data.data);
+    }, function(err) {
+      deferred.reject(err);
+    });
+    return deferred.promise;    
+  }
 
   return twystRESTSvc;
 }]);

@@ -7,70 +7,74 @@ var mongoose = require('mongoose');
 var passport = require('passport');
 module.exports = function(app) {
 
-    (function AccountRoutes() {
-        var AccountCtrl = require('../controllers/account.ctrl');
-        app.post('/api/v4/accounts/login', function(req, res, next) {
-                next();
-            }, passport.authenticate('account'),
-            AccountCtrl.login);
+  (function AccountRoutes() {
+    var AccountCtrl = require('../controllers/account.ctrl');
+    app.post('/api/v4/accounts/login', function(req, res, next) {
+        next();
+      }, passport.authenticate('account'),
+      AccountCtrl.login);
 
-        app.get('/api/v4/authcode/:phone', AccountCtrl.create_authcode);
-        app.post('/api/v4/authcode', AccountCtrl.verify_authcode_and_create_account);
-        app.get('/api/v4/accounts/logout', AccountCtrl.logout);
+    app.get('/api/v4/authcode/:phone', AccountCtrl.create_authcode);
+    app.post('/api/v4/authcode', AccountCtrl.verify_authcode_and_create_account);
+    app.get('/api/v4/accounts/logout', AccountCtrl.logout);
 
-    })();
+  })();
 
-    (function RecoRoutes() {
-        var RecoCtrl = require('../controllers/reco.ctrl');
-        app.get('/api/v4/recos', RecoCtrl.get);
-    })();
+  (function RecoRoutes() {
+    var RecoCtrl = require('../controllers/reco.ctrl');
+    app.get('/api/v4/recos', RecoCtrl.get);
+  })();
 
-    (function EventRoutes() {
-        var EventCtrl = require('../controllers/event.ctrl');
-        app.get('/api/v4/events', function(req, res) {
-            res.status(405).send({message: 'Not yet implemented'});
-        });
-        app.get('/api/v4/events/:event_id', function(req, res) {
-            res.status(405).send({message: 'Not yet implemented'});
-        });
-        app.post('/api/v4/events', EventCtrl.new);
-        // PROXIES -- DO VERIFICATION INLINE
-        app.post('/api/v4/checkin', EventCtrl.new);
-        app.post('/api/v4/gift', EventCtrl.new);
-        app.post('/api/v4/follow', EventCtrl.follow);
-        app.post('/api/v4/unfollow', EventCtrl.unfollow);
-        app.post('/api/v4/feedback', EventCtrl.feedback);
-        app.post('/api/v4/suggestion', EventCtrl.suggestion);
-        app.post('/api/v4/like_offer', EventCtrl.like_offer);
-    })();
+  (function EventRoutes() {
+    var EventCtrl = require('../controllers/event.ctrl');
+    app.get('/api/v4/events', function(req, res) {
+      res.status(405).send({
+        message: 'Not yet implemented'
+      });
+    });
+    app.get('/api/v4/events/:event_id', function(req, res) {
+      res.status(405).send({
+        message: 'Not yet implemented'
+      });
+    });
+    app.post('/api/v4/events', EventCtrl.new);
+    // PROXIES -- DO VERIFICATION INLINE
+    app.post('/api/v4/checkin', EventCtrl.new);
+    app.post('/api/v4/gift', EventCtrl.new);
+    app.post('/api/v4/follow', EventCtrl.follow);
+    app.post('/api/v4/unfollow', EventCtrl.unfollow);
+    app.post('/api/v4/feedback', EventCtrl.feedback);
+    app.post('/api/v4/suggestion', EventCtrl.suggestion);
+    app.post('/api/v4/like_offer', EventCtrl.like_offer);
+  })();
 
 
-    (function OutletRoutes() {
-        var OutletCtrl = require('../controllers/outlet.ctrl');
-        app.post('/api/v4/outlets', mustBe.authorized('outlet.create', OutletCtrl.new));
-        app.put('/api/v4/outlets/:outlet_id', mustBe.authorized('outlet.update', OutletCtrl.update));
+  (function OutletRoutes() {
+    var OutletCtrl = require('../controllers/outlet.ctrl');
+    app.post('/api/v4/outlets', mustBe.authorized('outlet.create', OutletCtrl.new));
+    app.put('/api/v4/outlets/:outlet_id', mustBe.authorized('outlet.update', OutletCtrl.update));
 
-        // Anonymous route
-        app.get('/api/v4/outlets/:outlet_id', OutletCtrl.get);
-        app.get('/api/v4/outlets', mustBe.authorized('outlet.view', OutletCtrl.all));
-        app.delete('/api/v4/outlets/:outlet_id', mustBe.authorized('outlet.remove', OutletCtrl.remove));
+    // Anonymous route
+    app.get('/api/v4/outlets/:outlet_id', OutletCtrl.get);
+    app.get('/api/v4/outlets', mustBe.authorized('outlet.view', OutletCtrl.all));
+    app.delete('/api/v4/outlets/:outlet_id', mustBe.authorized('outlet.remove', OutletCtrl.remove));
 
-    })();
+  })();
 
-    (function UserRoutes() {
-        var UserCtrl = require('../controllers/user.ctrl');
-        app.get('/api/v4/profile', UserCtrl.get_profile);
-        app.put('/api/v4/profile', UserCtrl.update_profile);
-        app.put('/api/v4/friends', UserCtrl.update_friends);
+  (function UserRoutes() {
+    var UserCtrl = require('../controllers/user.ctrl');
+    app.get('/api/v4/profile', UserCtrl.get_profile);
+    app.put('/api/v4/profile', UserCtrl.update_profile);
+    app.put('/api/v4/friends', UserCtrl.update_friends);
 
-        app.get('/api/v4/coupons', UserCtrl.get_coupons);
-    })();
+    app.get('/api/v4/coupons', UserCtrl.get_coupons);
+  })();
 
-    (function LocationRoutes() {
-        var LocationCtrl = require('../controllers/location.ctrl');
-        app.get('/api/v4/locations', LocationCtrl.get_locations);
-        
-    })();
+  (function LocationRoutes() {
+    var LocationCtrl = require('../controllers/location.ctrl');
+    app.get('/api/v4/locations', LocationCtrl.get_locations);
+
+  })();
 };
 
 
