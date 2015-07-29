@@ -2,12 +2,10 @@
 <div class="container-fluid">
   <div class="row">
     <div class="col-md-2 border-right">
-      <ul class="nav nav-pills nav-stacked">
-        <li role="presentation"><a href="#">Manage outlets</a></li>
-        <li role="presentation"><a href="#">View analytics</a></li>
-        <li role="presentation"><a href="#">Control panel</a></li>
-        <li role="presentation"><a href="#">Manage profile</a></li>
-      </ul>
+      <div ng-include="'templates/partials/left_nav.html'"></div>
+    </div>
+    <div class="col-md-10">
+    	<div ui-view></div>
     </div>
   </div>
 </div>

@@ -4,7 +4,7 @@ merchantApp.controller('AuthCtrl', ['$scope', '$cookies', '$log', '$state', 'twy
     twystRESTSvc.login($scope.user).then(function(data) {
     	$cookies.put('token', data.data);
       toastr.success('Logged in');
-    	$state.go('hub');
+    	$state.go('hub.outlets');
     }, function(err) {
       toastr.error('Please check your username & password', 'Error');
     });

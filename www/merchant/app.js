@@ -20,4 +20,20 @@ var merchantApp = angular.module('merchantApp', ['ui.router', 'ngCookies', 'angu
         }
       }
     })
+    .state('hub.outlets', {
+      url: '/outlets',
+      templateUrl: 'templates/hub/outlets.html'
+    })
+    .state('hub.analytics', {
+      url: '/outlets',
+      templateUrl: 'templates/hub/outlets.html'
+    })
+    .state('hub.profile', {
+      url: '/outlets',
+      templateUrl: 'templates/hub/outlets.html'
+    })
+    .state('hub.panel', {
+      url: '/outlets',
+      templateUrl: 'templates/hub/outlets.html'
+    })
   })
