@@ -1,4 +1,4 @@
-var merchantApp = angular.module('merchantApp', ['ui.router', 'ngCookies', 'angularMoment', 'toastr', 'angular-loading-bar', 'ngAnimate', 'ngStorage'])
+var merchantApp = angular.module('merchantApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angularMoment', 'toastr', 'angular-loading-bar', 'ngAnimate', 'ngStorage', 'mgo-angular-wizard'])
   .config(function($stateProvider, $urlRouterProvider) {
   	$urlRouterProvider.otherwise('/home');
   	$stateProvider
@@ -24,6 +24,11 @@ var merchantApp = angular.module('merchantApp', ['ui.router', 'ngCookies', 'angu
       url: '/outlets',
       controller: 'OutletsCtrl',
       templateUrl: 'templates/hub/outlets.html'
+    })
+    .state('hub.create_outlet', {
+      url: '/outlets/new',
+      controller: 'OutletCreateCtrl',
+      templateUrl: 'templates/hub/create.html'
     })
     .state('hub.view_outlet_detail', {
       url: '/outlets/:outletId',

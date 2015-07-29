@@ -1,6 +1,6 @@
 merchantApp.controller('OutletsCtrl', ['$scope', '$cookies', '$log', '$state', 'twystRESTSvc', 'toastr', function($scope, $cookies, $log, $state, twystRESTSvc, toastr) {
 
-  $scope.getOutlets = function() {
+  $scope.get_outlets = function() {
     $log.log("Get outlets called");
     twystRESTSvc.getOutlets().then(function(data) {
       $log.log("Got outlets");
@@ -12,7 +12,11 @@ merchantApp.controller('OutletsCtrl', ['$scope', '$cookies', '$log', '$state', '
     });
   };
 
-  $scope.view = function(o, p) {
+  $scope.new_outlet = function() {
+    $state.go('hub.create_outlet');
+  }
+
+  $scope.view_outlet = function(o, p) {
     var index = p * 3 + o; // unchunk
     $state.go('hub.view_outlet_detail', {outletId:$scope.outlets[index]._id});
   }
