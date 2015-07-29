@@ -27,7 +27,7 @@ module.exports.update_user = function(token, updated_user) {
         if (err || !u) {
           deferred.reject({err: err || true, message: "Couldn\'t update user"});
         } else {
-          deferred.resolve({data: u, message: 'Updated user'});
+          deferred.resolve({data: user, message: 'Updated user'});
         }
       }
     );
@@ -49,10 +49,35 @@ module.exports.update_friends = function(token, friend_list) {
         friend_source: friend_list.source,
         friend_list: friend_list.list
       }},
-      {upser: true},
+      {upsert: true},
       function(err, u) {
         if (err || !u) {
           deferred.reject({err: err || true, message: "Couldn\'t update user"});
+        } else {
+          deferred.resolve({data: u, message: 'Updated user'});
+        }
+      }
+    );
+  }, function(err) {
+    deferred.reject({err: err || true, message: "Couldn\'t find user"});
+  });
+
+  return deferred.promise;
+};
+
+module.exports.update_voucher_lapse_date = function(token, voucher_id, new_lapse_date) {
+  var deferred = Q.defer();
+
+  AuthHelper.get_user(token).then(function(data) {
+    var user = data.data;
+    User.findOneAndUpdate(
+      {_id: user._id,
+      coupons: {$elemMatch: {'_id': voucher_id}}},
+      {$set: {'coupons.$.lapse_date': new_lapse_date }},
+      {upsert: true},
+      function(err, u) {
+        if (err || !u) {
+          deferred.reject({err: err || true, message: "Couldn\'t  extend voucher validity"});
         } else {
           deferred.resolve({data: u, message: 'Updated user'});
         }

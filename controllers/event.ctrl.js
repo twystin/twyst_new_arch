@@ -28,18 +28,42 @@ function check_event(data) {
         deferred.reject('No event type - please pass event_type');
     }
 
-    if (passed_data.event_data && passed_data.event_data.event_type === 'suggestion' 
-        || passed_data.event_data.event_type === 'offer_like_event') {
+
+    if (passed_data.event_data && passed_data.event_data.event_type === 'submit_offer') {
         if (!passed_data.event_data.event_meta ||
             !passed_data.event_data.event_meta.offer || 
-            !passed_data.event_data.event_meta.outlet) {
-            deferred.reject('No information - outlet and offer need to be passed');
+            !passed_data.event_data.event_meta.outlet ||
+            !passed_data.event_data.event_meta.location) {
+            deferred.reject('Submit offer information needs to have offer, outlet & location at least.');
         }
 
-    } else {
-        if (!passed_data.event_data.event_outlet) {
-            deferred.reject('No outlet to log the event at - please pass event_outlet');
+    }
+    else if (passed_data.event_data && passed_data.event_data.event_type === 'suggestion') {
+        if (!passed_data.event_data.event_meta ||
+            !passed_data.event_data.event_meta.outlet ||
+            !passed_data.event_data.event_meta.location) {
+            deferred.reject('Suggestion information needs to have outlet & location at least.');
         }
+
+    } 
+    else if(passed_data.event_data && passed_data.event_data.event_type === 'offer_like_event' 
+        || passed_data.event_data.event_type === 'share_offer') {
+        if (!passed_data.event_data.event_meta ||
+            !passed_data.event_data.event_meta.offer || 
+            !passed_data.event_data.event_meta.outlet ) {
+            deferred.reject('No information - outlet and offer need to be passed');
+        }
+    }
+    else if (passed_data.event_data && passed_data.event_data.event_type === 'upload_bill') {
+        if(!passed_data.event_data.event_meta ||  !passed_data.event_data.event_meta.photo ||  
+            !passed_data.event_data.event_meta.outlet_name ||  !passed_data.event_data.event_meta.bill_date
+            ){
+            deferred.reject('No information - outlet, date, photo to be passed');   
+        }
+    } 
+    else if (!passed_data.event_data.event_outlet) {
+        deferred.reject('No outlet to log the event at - please pass event_outlet');
+        
     }
 
     deferred.resolve(passed_data);
@@ -185,7 +209,7 @@ var checkin_processor = {
     }
 };
 
-var suggestion_processor = {
+var submit_offer_processor = {
     process: function(data) {
         var deferred = Q.defer();
         deferred.resolve(true);
@@ -224,14 +248,87 @@ var offer_like_processor = {
 };
 
 
+var upload_bill_processor = {
+    process: function(data) {
+        var deferred = Q.defer();
+        deferred.resolve(true);
+        return deferred.promise;
+    }
+};
+
+var share_offer_processor = {
+    process: function(data) {
+        var deferred = Q.defer();
+        deferred.resolve(true);
+
+        var passed_data = data;
+        var updated_user = passed_data.user;
+        var shared_offer = {};
+        shared_offer.event_type = passed_data.event_data.event_type;
+        shared_offer.event_target = passed_data.event_data.event_meta.offer;
+
+        User.findOneAndUpdate(
+            {_id: updated_user},
+            {$addToSet: {'user_meta.total_events': shared_offer}},
+            function(err, updated_user) {
+                if (err) {
+                    console.log(err);
+                    deferred.reject('Could not update user');
+                } else {                                 
+                    deferred.resolve(passed_data);
+                }
+            });
+        return deferred.promise;
+    }
+};
+
+var share_outlet_processor = {
+    process: function(data) {
+        var deferred = Q.defer();
+        deferred.resolve(true);
+
+        var passed_data = data;
+        var updated_user = passed_data.user;
+        var shared_offer = {};
+
+        shared_offer.event_type = passed_data.event_data.event_type;
+        shared_offer.event_target = passed_data.event_data.event_meta.outlet;
+
+        User.findOneAndUpdate(
+            {_id: updated_user},
+            {$addToSet: {'user_meta.total_events': shared_offer}},
+            function(err, updated_user) {
+                if (err) {
+                    console.log(err);
+                    deferred.reject('Could not update user');
+                } else {                                 
+                    deferred.resolve(passed_data);
+                }
+            });
+        return deferred.promise;
+    }
+};
+
+var suggestion_processor = {
+    process: function(data) {
+        var deferred = Q.defer();
+        deferred.resolve(true);
+        return deferred.promise;
+    }
+};
+
 function event_processor(event_type) {
     var processors = {
         'follow': follow_processor,
         'checkin': checkin_processor,
         'unfollow': unfollow_processor,
         'feedback': feedback_processor,
-        'suggestion': suggestion_processor,
-        'offer_like_event': offer_like_processor
+        'submit_offer': submit_offer_processor,
+        'offer_like_event': offer_like_processor,
+        'upload_bill': upload_bill_processor,
+        'share_offer': share_offer_processor,
+        'share_outlet': share_outlet_processor,
+        'suggestion': suggestion_processor
     };
 
     return processors[event_type] || null;
@@ -338,12 +435,12 @@ module.exports.unfollow = function(req, res) {
 
 };
 
-module.exports.suggestion = function(req, res) {
+module.exports.submit_offer = function(req, res) {
     logger.log();
     var passed_data = {};
 
     passed_data.event_data = req.body || {};
-    passed_data.event_data.event_type = 'suggestion';
+    passed_data.event_data.event_type = 'submit_offer';
     passed_data.user_token = req.query.token || null;
     passed_data.query_params = req.params || null;
 
@@ -357,6 +454,58 @@ module.exports.like_offer = function(req, res) {
 
     passed_data.event_data = req.body || {};
     passed_data.event_data.event_type = 'offer_like_event';
+    passed_data.user_token = req.query.token || null;
+    passed_data.query_params = req.params || null;
+    create_new(res, passed_data);
+
+};
+
+module.exports.upload_bill = function(req, res) {
+    logger.log();
+
+    var passed_data = {};
+
+    passed_data.event_data = req.body || {};
+    passed_data.event_data.event_type = 'upload_bill';
+    passed_data.user_token = req.query.token || null;
+    passed_data.query_params = req.params || null;
+    create_new(res, passed_data);
+
+};
+
+module.exports.share_offer = function(req, res) {
+    logger.log();
+
+    var passed_data = {};
+
+    passed_data.event_data = req.body || {};
+    passed_data.event_data.event_type = 'share_offer';
+    passed_data.user_token = req.query.token || null;
+    passed_data.query_params = req.params || null;
+    create_new(res, passed_data);
+
+};
+
+module.exports.share_outlet = function(req, res) {
+    logger.log();
+
+    var passed_data = {};
+
+    passed_data.event_data = req.body || {};
+    passed_data.event_data.event_type = 'share_outlet';
+    passed_data.user_token = req.query.token || null;
+    passed_data.query_params = req.params || null;
+    create_new(res, passed_data);
+
+};
+
+module.exports.suggestion = function(req, res) {
+    logger.log();
+
+    var passed_data = {};
+
+    passed_data.event_data = req.body || {};
+    passed_data.event_data.event_type = 'suggestion';
     passed_data.user_token = req.query.token || null;
     passed_data.query_params = req.params || null;
     create_new(res, passed_data);
