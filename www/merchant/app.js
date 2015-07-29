@@ -1,6 +1,6 @@
 var merchantApp = angular.module('merchantApp', ['ui.router', 'ngCookies', 'angularMoment'])
   .config(function($stateProvider, $urlRouterProvider) {
-  	$urlRouterProvider.otherwise('/fourofour');
+  	$urlRouterProvider.otherwise('/home');
   	$stateProvider
   	.state('home', {
   		url: '/home',

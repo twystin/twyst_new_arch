@@ -12,7 +12,8 @@ merchantApp.controller('AuthCtrl', ['$scope', '$cookies', '$log', '$state', 'twy
   $scope.logout = function() {
   	$log.log("Logout called");
   	twystRESTSvc.logout().then(function(data) {
-  		console.log(data);
+  		$cookies.remove('token');
+      $state.go('home');
   	}, function(err) {
   		console.log(err);
   	});
