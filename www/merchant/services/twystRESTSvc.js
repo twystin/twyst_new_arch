@@ -25,7 +25,11 @@ merchantApp.factory('twystRESTSvc', ['$http', '$q', '$cookies', function($http, 
     var deferred = $q.defer();
     var token = $cookies.get('token');
     $http.get('/api/v4/outlets?token='+token).then(function(data) {
-      deferred.resolve(data.data);
+      if (!data.data.response) {
+        deferred.reject(data.data);
+      } else {
+        deferred.resolve(data.data);
+      }
     }, function(err) {
       deferred.reject(err);
     });
