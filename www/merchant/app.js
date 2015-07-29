@@ -25,6 +25,11 @@ var merchantApp = angular.module('merchantApp', ['ui.router', 'ngCookies', 'angu
       controller: 'OutletsCtrl',
       templateUrl: 'templates/hub/outlets.html'
     })
+    .state('hub.view_outlet_detail', {
+      url: '/outlets/:outletId',
+      controller: 'OutletViewCtrl',
+      templateUrl: 'templates/hub/view.html'
+    })
     .state('hub.analytics', {
       url: '/analytics',
       templateUrl: 'templates/hub/analytics.html'

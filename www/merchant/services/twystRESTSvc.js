@@ -36,5 +36,20 @@ merchantApp.factory('twystRESTSvc', ['$http', '$q', '$cookies', function($http, 
     return deferred.promise;    
   }
 
+  twystRESTSvc.getOutletDetail = function(outlet_id) {
+    var deferred = $q.defer();
+    var token = $cookies.get('token');
+    $http.get('/api/v4/outlets/' + outlet_id).then(function(data) {
+      if (!data.data.response) {
+        deferred.reject(data.data);
+      } else {
+        deferred.resolve(data.data);
+      }
+    }, function(err) {
+      deferred.reject(err);
+    });
+    return deferred.promise;    
+  }
+
   return twystRESTSvc;
 }]);

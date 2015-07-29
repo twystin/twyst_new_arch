@@ -12,6 +12,11 @@ merchantApp.controller('OutletsCtrl', ['$scope', '$cookies', '$log', '$state', '
     });
   };
 
+  $scope.view = function(o, p) {
+    var index = p * 3 + o; // unchunk
+    $state.go('hub.view_outlet_detail', {outletId:$scope.outlets[index]._id});
+  }
+
   function chunk(arr, size) {
     var newArr = [];
     for (var i = 0; i < arr.length; i += size) {

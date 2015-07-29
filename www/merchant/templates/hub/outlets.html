@@ -9,12 +9,12 @@
         <div class="panel panel-info">
           <div class="panel-heading">{{outlet.basics.name}}</div>
           <div class="panel-body">
-          	<p>{{outlet.contact.location.address}}</p>
+            <p>{{outlet.contact.location.address}}</p>
           </div>
           <div class="panel-footer">
-          	<button class="btn btn-link">View</button>
-			<button class="btn btn-link">Edit</button>
-			<button class="btn btn-link">Delete</button>
+            <button class="btn btn-link" ng-click="view($index, $parent.$index)">View</button>
+            <button class="btn btn-link">Edit</button>
+            <button class="btn btn-link">Delete</button>
           </div>
         </div>
       </div>
