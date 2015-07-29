@@ -1,4 +1,4 @@
-var merchantApp = angular.module('merchantApp', ['ui.router', 'ngCookies', 'angularMoment', 'toastr', 'angular-loading-bar', 'ngAnimate'])
+var merchantApp = angular.module('merchantApp', ['ui.router', 'ngCookies', 'angularMoment', 'toastr', 'angular-loading-bar', 'ngAnimate', 'ngStorage'])
   .config(function($stateProvider, $urlRouterProvider) {
   	$urlRouterProvider.otherwise('/home');
   	$stateProvider
