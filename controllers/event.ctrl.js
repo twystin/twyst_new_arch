@@ -25,6 +25,11 @@ module.exports.grab = function(req, res) {
   create_new(res, setup_event(req, 'grab'));
 };
 
+module.exports.redeem = function(req, res) {
+  logger.log();
+  create_new(res, setup_event(req, 'grab'));
+};
+
 module.exports.follow = function(req, res) {
   logger.log();
   create_new(res, setup_event(req, 'follow'));
