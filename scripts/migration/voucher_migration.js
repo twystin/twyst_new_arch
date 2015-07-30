@@ -6,7 +6,7 @@ while(cursor.hasNext()) {
   retwyst.users.update({_id:a.issue_details.issued_to},{
     $push: {
       coupons: {
-        _id: new ObjectId(),
+        _id: a._id,
         code: a.basics.code,
         outlets: a.issue_details.issued_at,
         header: a.basics.description,

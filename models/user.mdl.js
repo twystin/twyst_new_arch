@@ -28,6 +28,7 @@ var User = new Schema({
     life_events: [
         {
             event_type: String, // enum
+            event_meta: {},
             event_date: {
                 d: Number,
                 m: Number,
@@ -112,7 +113,8 @@ var User = new Schema({
             header: String,
             line1: String,
             line2: String,
-            expiry: Date,
+            lapse_date: Date,
+            expiry_date: Date,
             meta: {
                 reward_type: {type: String}
             },
@@ -140,10 +142,12 @@ var User = new Schema({
         calculated_cuisines: [],
         calculated_restaurant_types: [],
         calculated_attributes: [],
-        total_events: {
-            event_type: String,
-            event_count: Number
-        },
+        total_events:  [ 
+            {
+                event_type: String,
+                event_target: {type: Schema.ObjectId} //outlet_id/offfer_id/checkin_id etc               
+            }
+        ],  
         total_event_by_outlet: [
             {
                 outlet_id: {type: Schema.ObjectId, ref: Outlet},

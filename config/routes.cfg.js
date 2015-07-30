@@ -6,7 +6,6 @@ var mustBe = require('mustbe').routeHelpers();
 var mongoose = require('mongoose');
 var passport = require('passport');
 module.exports = function(app) {
-
   (function AccountRoutes() {
     var AccountCtrl = require('../controllers/account.ctrl');
     app.post('/api/v4/accounts/login', function(req, res, next) {
@@ -40,12 +39,16 @@ module.exports = function(app) {
     app.post('/api/v4/events', EventCtrl.new);
     // PROXIES -- DO VERIFICATION INLINE
     app.post('/api/v4/checkin', EventCtrl.new);
+    app.post('/api/v4/upload_bill', EventCtrl.upload_bill);
     app.post('/api/v4/gift', EventCtrl.new);
     app.post('/api/v4/follow', EventCtrl.follow);
     app.post('/api/v4/unfollow', EventCtrl.unfollow);
     app.post('/api/v4/feedback', EventCtrl.feedback);
-    app.post('/api/v4/suggestion', EventCtrl.suggestion);
+    app.post('/api/v4/submit_offer', EventCtrl.submit_offer);
     app.post('/api/v4/like_offer', EventCtrl.like_offer);
+    app.post('/api/v4/share_offer', EventCtrl.share_offer);
+    app.post('/api/v4/share_outlet', EventCtrl.share_outlet);
+    app.post('/api/v4/suggestion', EventCtrl.suggestion);
   })();
 
 
@@ -68,6 +71,8 @@ module.exports = function(app) {
     app.put('/api/v4/friends', UserCtrl.update_friends);
 
     app.get('/api/v4/coupons', UserCtrl.get_coupons);
+
+    app.post('/api/v4/extend_my_voucher', UserCtrl.extend_my_voucher);
   })();
 
   (function LocationRoutes() {

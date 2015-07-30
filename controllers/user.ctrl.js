@@ -69,3 +69,24 @@ module.exports.update_friends = function(req, res) {
     HttpHelper.error(res, err.err, err.message);
   });
 };
+
+
+module.exports.extend_my_voucher = function(req, res) {
+  var token = req.query.token || null;
+
+  if (!token) {
+    HttpHelper.error(res, null, "Not authenticated");
+  }
+  var date = new Date(req.body.date);
+
+  if(date.getTime() < (new Date().getTime())){
+    HttpHelper.error(res, null, "You can not extend to past date");
+  }
+
+  UserHelper.update_voucher_lapse_date(token, req.body.voucher, date).then(function(data) {
+    HttpHelper.success(res, data.data, data.message);
+  }, function(err) {
+    HttpHelper.error(res, err.err, err.message);
+  });
+};
+
