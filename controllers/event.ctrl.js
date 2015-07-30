@@ -222,7 +222,7 @@ function event_processor(event_type) {
     'upload_bill': require('./processors/upload_bill'),
     'share_offer': require('./processors/share_offer'),
     'share_outlet': require('./processors/share_outlet'),
-    'suggestion': suggestion_processor
+    'suggestion': require('./processors/suggestion')
   };
 
   return processors[event_type] || null;
