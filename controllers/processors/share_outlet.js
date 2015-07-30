@@ -27,7 +27,7 @@ module.exports.process = function(data) {
   var shared_offer = {};
 
   shared_offer.event_type = passed_data.event_data.event_type;
-  shared_offer.event_target = passed_data.event_data.event_meta.outlet;
+  shared_offer.event_target = passed_data.event_data.event_outlet;
 
   User.findOneAndUpdate({
       _id: updated_user

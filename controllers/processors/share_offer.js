@@ -10,7 +10,7 @@ module.exports.check = function(data) {
   var deferred = Q.defer();
   var passed_data = data;
   var offer = _.get(passed_data, 'event_data.event_meta.offer');
-  var outlet = _.get(passed_data, 'event_data.event_meta.outlet');
+  var outlet = _.get(passed_data, 'event_data.event_outlet');
 
   if (!offer || !outlet) {
     deferred.reject('Share offer information needs to have offer & outlet.');

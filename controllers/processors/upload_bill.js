@@ -8,10 +8,11 @@ module.exports.check = function(data) {
   var passed_data = data;
   var bill_date = _.get(passed_data, 'event_data.event_meta.bill_date');
   var photo = _.get(passed_data, 'event_data.event_meta.photo');
+  var outlet_name = _.get(passed_data, 'event_data.event_meta.outlet_name');
   var outlet = _.get(passed_data, 'event_data.event_outlet');
 
-  if (!bill_date || !photo || !outlet) {
-    deferred.reject('Submit bill needs to have bill date, photo & outlet.');
+  if (!bill_date || !photo || !outlet_name) {
+    deferred.reject('Submit bill needs to have bill date, photo & outlet name.');
   } else {
     deferred.resolve(passed_data);
   }

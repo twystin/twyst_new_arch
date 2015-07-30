@@ -6,11 +6,11 @@ module.exports.check = function(data) {
   logger.log();
   var deferred = Q.defer();
   var passed_data = data;
-  var offer = _.get(passed_data, 'event_data.event_meta.offer');
+  var outlet = _.get(passed_data, 'event_data.event_meta.outlet');
   var location = _.get(passed_data, 'event_data.event_meta.location');
 
-  if (!offer || !location) {
-    deferred.reject('Suggestion needs to have offer & location.');
+  if (!outlet || !location) {
+    deferred.reject('Suggestion needs to have outlet & location.');
   } else {
     deferred.resolve(passed_data);
   }
