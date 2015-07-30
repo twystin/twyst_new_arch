@@ -15,54 +15,125 @@ var RecoHelper = require('./helpers/reco.hlpr.js');
 var _ = require('lodash');
 var Q = require('q');
 
+module.exports.new = function(req, res) {
+    logger.log();
+    create_new(res, setup_event(req, req.body.event_type || ''));
+};
+
+module.exports.follow = function(req, res) {
+    logger.log();
+    create_new(res, setup_event(req, 'follow'));
+};
+
+module.exports.feedback = function(req, res) {
+    logger.log();
+    create_new(res, setup_event(req, 'feedback'));
+};
+
+module.exports.unfollow = function(req, res) {
+    logger.log();
+    create_new(res, setup_event(req, 'unfollow'));
+};
+
+module.exports.submit_offer = function(req, res) {
+    logger.log();
+    create_new(res, setup_event(req, 'submit_offer'));
+};
+
+module.exports.like_offer = function(req, res) {
+    logger.log();
+    create_new(res, setup_event(req, 'offer_like_event'));
+};
+
+module.exports.upload_bill = function(req, res) {
+    logger.log();
+    create_new(res, setup_event(req, 'upload_bill'));
+};
+
+module.exports.share_offer = function(req, res) {
+    logger.log();
+    create_new(res, setup_event(req, 'share_offer'));
+};
+
+module.exports.share_outlet = function(req, res) {
+    logger.log();
+    create_new(res, setup_event(req, 'share_outlet'));
+};
+
+module.exports.suggestion = function(req, res) {
+    logger.log();
+    create_new(res, setup_event(req, 'suggestion'));
+};
+
+function create_new(res, passed_data) {
+    logger.log();
+
+    check_event(passed_data)
+        .then(function(data) {
+            return get_user(data)
+        })
+        .then(function(data) {
+            return get_outlet(data);
+        })
+        .then(function(data) {
+            return process_event(data);
+        })
+        .then(function(data) {
+            return create_event(data);
+        })
+        .then(function(data) {
+            HttpHelper.success(res, data.outlets, "Processed the event successfully.");
+        })
+        .fail(function(err) {
+            console.log(err)
+            HttpHelper.error(res, err || false, "Error processing the event");
+        });
+}
+
+function setup_event(req, type) {
+    logger.log();
+    var passed_data = {};
+    passed_data.event_data = req.body || {};
+    passed_data.event_data.event_type = type;
+    passed_data.user_token = (req.query && req.query.token) || null;
+    passed_data.query_params = req.params || null;
+    return passed_data;
+}
+
 function check_event(data) {
     logger.log();
     var deferred = Q.defer();
     var passed_data = data;
 
-    if (!passed_data.user_token) {
+    if (!_.get(passed_data, 'user_token')) {
         deferred.reject("Authentication error - no token passed.");
     }
 
-    if (!passed_data.event_data.event_type) {
+    if (!_.get(passed_data, 'event_data.event_type')) {
         deferred.reject('No event type - please pass event_type');
     }
 
-    if (passed_data.event_data && passed_data.event_data.event_type === 'submit_offer') {
-        if (!passed_data.event_data.event_meta ||
-            !passed_data.event_data.event_meta.offer || 
-            !passed_data.event_data.event_meta.outlet ||
-            !passed_data.event_data.event_meta.location) {
-            deferred.reject('Submit offer information needs to have offer, outlet & location at least.');
-        }
-
+    var event_type = _.get(passed_data, 'event_data.event_type');
+    var offer = _.get(passed_data, 'event_data.event_meta.offer');
+    var outlet = _.get(passed_data, 'event_data.event_meta.outlet');
+    var location = _.get(passed_data, 'event_data.event_meta.location');
+    var photo = _.get(passed_data, 'event_data.event_meta.photo');
+    var bill_date = _.get(passed_data, 'event_data.event_meta.bill_date')
+    
+    if (event_type === 'submit_offer' && (!offer || !outlet || !location)) {
+        deferred.reject('Submit offer information needs to have offer, outlet & location at least.');
     }
-    else if (passed_data.event_data && passed_data.event_data.event_type === 'suggestion') {
-        if (!passed_data.event_data.event_meta ||
-            !passed_data.event_data.event_meta.outlet ||
-            !passed_data.event_data.event_meta.location) {
-            deferred.reject('Suggestion information needs to have outlet & location at least.');
-        }
-
-    } 
-    else if(passed_data.event_data && passed_data.event_data.event_type === 'offer_like_event' 
-        || passed_data.event_data.event_type === 'share_offer') {
-        if (!passed_data.event_data.event_meta ||
-            !passed_data.event_data.event_meta.offer || 
-            !passed_data.event_data.event_meta.outlet ) {
-            deferred.reject('No information - outlet and offer need to be passed');
-        }
+    else if (event_type === 'suggestion' && (!offer || !location)) {
+        deferred.reject('Suggestion information needs to have outlet & location at least.');
     }
-    else if (passed_data.event_data && passed_data.event_data.event_type === 'upload_bill') {
-        if(!passed_data.event_data.event_meta ||  !passed_data.event_data.event_meta.photo ||  
-            !passed_data.event_data.event_meta.outlet_name ||  !passed_data.event_data.event_meta.bill_date
-            ){
-            deferred.reject('No information - outlet, date, photo to be passed');   
-        }
+    else if((event_type === 'offer_like_event' || event_type === 'share_offer') && (!offer || !outlet)) {
+        deferred.reject('No information - outlet and offer need to be passed');
+    }
+    else if (event_type === 'upload_bill' && (!photo || !bill_date || !outlet)) {
+        deferred.reject('No information - outlet, date, photo to be passed');   
     } 
     else if (!passed_data.event_data.event_outlet) {
         deferred.reject('No outlet to log the event at - please pass event_outlet');
-        
     }
 
     deferred.resolve(passed_data);
@@ -355,89 +426,4 @@ function process_event(data) {
 
     deferred.resolve(passed_data);
     return deferred.promise;
-}
-
-function create_new(res, passed_data) {
-    logger.log();
-
-    check_event(passed_data)
-        .then(function(data) {
-            return get_user(data)
-        })
-        .then(function(data) {
-            return get_outlet(data);
-        })
-        .then(function(data) {
-            return process_event(data);
-        })
-        .then(function(data) {
-            return create_event(data);
-        })
-        .then(function(data) {
-            HttpHelper.success(res, data.outlets, "Processed the event successfully.");
-        })
-        .fail(function(err) {
-            console.log(err)
-            HttpHelper.error(res, err || false, "Error processing the event");
-        });
-}
-
-module.exports.new = function(req, res) {
-    logger.log();
-    create_new(res, setup_event(req, req.body.event_type || ''));
-};
-
-module.exports.follow = function(req, res) {
-    logger.log();
-    create_new(res, setup_event(req, 'follow'));
-};
-
-module.exports.feedback = function(req, res) {
-    logger.log();
-    create_new(res, setup_event(req, 'feedback'));
-};
-
-module.exports.unfollow = function(req, res) {
-    logger.log();
-    create_new(res, setup_event(req, 'unfollow'));
-};
-
-module.exports.submit_offer = function(req, res) {
-    logger.log();
-    create_new(res, setup_event(req, 'submit_offer'));
-};
-
-module.exports.like_offer = function(req, res) {
-    logger.log();
-    create_new(res, setup_event(req, 'offer_like_event'));
-};
-
-module.exports.upload_bill = function(req, res) {
-    logger.log();
-    create_new(res, setup_event(req, 'upload_bill'));
-};
-
-module.exports.share_offer = function(req, res) {
-    logger.log();
-    create_new(res, setup_event(req, 'share_offer'));
-};
-
-module.exports.share_outlet = function(req, res) {
-    logger.log();
-    create_new(res, setup_event(req, 'share_outlet'));
-};
-
-module.exports.suggestion = function(req, res) {
-    logger.log();
-    create_new(res, setup_event(req, 'suggestion'));
-};
-
-function setup_event(req, type) {
-    logger.log();
-    var passed_data = {};
-    passed_data.event_data = req.body || {};
-    passed_data.event_data.event_type = type;
-    passed_data.user_token = (req.query && req.query.token) || null;
-    passed_data.query_params = req.params || null;
-    return passed_data;
 }
