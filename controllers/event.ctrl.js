@@ -173,6 +173,8 @@ function process_event(data) {
   var processors = {
     'follow': require('./processors/follow'),
     'checkin': require('./processors/checkin'),
+    'gift': require('./processors/gift'),
+    'grab': require('./processors/grab'),
     'unfollow': require('./processors/unfollow'),
     'feedback': require('./processors/feedback'),
     'submit_offer': require('./processors/submit_offer'),
