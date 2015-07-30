@@ -91,3 +91,18 @@ THINGS TO DO:
   ☐ Social pool items
   ✔ Fix bug where if cache not cleared, not getting picked up @done(2015-06-23 00:52) @project(THINGS TO DO)
   ☐ Migrate new offers
+
+
+NOTES FROM CHAT WITH RAHUL:
+ ☐ Exclusive walk-in offers - type offer - it will have a code (like a coupon)
+ ☐ Type coupon, offer, deal
+ ☐ ONly thing in wallet - type = coupon
+ ☐ Bill upload flow
+ ☐ Merchant app
+ ☐ Merchant offers
+ ☐ Do redeem
+ ☐ Have a word with Kuldeep on creating the sample offers
+ ☐ APIs - move over today
+ ☐ Write out how to do the APIs - write out the architecture of the new service, when do we migrate over.
+ ☐ Opened up mongodb
+ ☐ HIring one guy - day after, NSIT - Android dev

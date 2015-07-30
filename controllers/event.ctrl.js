@@ -171,18 +171,18 @@ function process_event(data) {
   logger.log();
 
   var processors = {
-    'follow': require('./processors/follow'),
-    'checkin': require('./processors/checkin'),
-    'gift': require('./processors/gift'),
-    'grab': require('./processors/grab'),
-    'unfollow': require('./processors/unfollow'),
-    'feedback': require('./processors/feedback'),
-    'submit_offer': require('./processors/submit_offer'),
-    'like_offer': require('./processors/like_offer'),
-    'upload_bill': require('./processors/upload_bill'),
-    'share_offer': require('./processors/share_offer'),
-    'share_outlet': require('./processors/share_outlet'),
-    'suggestion': require('./processors/suggestion')
+    'follow': require('./processors/follow.proc'),
+    'checkin': require('./processors/checkin.proc'),
+    'gift': require('./processors/gift.proc'),
+    'grab': require('./processors/grab.proc'),
+    'unfollow': require('./processors/unfollow.proc'),
+    'feedback': require('./processors/feedback.proc'),
+    'submit_offer': require('./processors/submit_offer.proc'),
+    'like_offer': require('./processors/like_offer.proc'),
+    'upload_bill': require('./processors/upload_bill.proc'),
+    'share_offer': require('./processors/share_offer.proc'),
+    'share_outlet': require('./processors/share_outlet.proc'),
+    'suggestion': require('./processors/suggestion.proc')
   };
 
   var deferred = Q.defer();

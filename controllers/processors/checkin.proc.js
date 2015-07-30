@@ -23,6 +23,8 @@ module.exports.check = function(data) {
 };
 
 module.exports.process = function(data) {
+  // UNLOCK VOUCHER 
+
   var deferred = Q.defer();
   deferred.resolve(true);
   return deferred.promise;

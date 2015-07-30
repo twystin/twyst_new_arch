@@ -39,21 +39,25 @@ module.exports = function(app) {
     app.post('/api/v4/events', EventCtrl.new);
 
     // TO BE IMPLEMENTED
-    app.post('/api/v4/gift', EventCtrl.gift);
-    app.post('/api/v4/checkin', EventCtrl.checkin);
-    app.post('/api/v4/grab', EventCtrl.grab);
+    app.post('/api/v4/coupon/gift', EventCtrl.gift);
+    app.post('/api/v4/coupon/grab', EventCtrl.grab);
+    app.post('/api/v4/coupon/redeem', EventCtrl.redeem);
 
 
     // IMPLEMENTED
-    app.post('/api/v4/bill', EventCtrl.upload_bill);
-    app.post('/api/v4/follow', EventCtrl.follow);
-    app.post('/api/v4/unfollow', EventCtrl.unfollow);
-    app.post('/api/v4/feedback', EventCtrl.feedback);
+    app.post('/api/v4/checkin/bill', EventCtrl.upload_bill);
+    app.post('/api/v4/checkin/qr', EventCtrl.checkin);
+    app.post('/api/v4/checkin/panel', EventCtrl.checkin);
+
+    app.post('/api/v4/outlet/follow', EventCtrl.follow);
+    app.post('/api/v4/outlet/unfollow', EventCtrl.unfollow);
+    app.post('/api/v4/outlet/feedback', EventCtrl.feedback);
+    app.post('/api/v4/outlet/share', EventCtrl.share_outlet);
+
     app.post('/api/v4/offer/submit', EventCtrl.submit_offer);
     app.post('/api/v4/offer/like', EventCtrl.like_offer);
     app.post('/api/v4/offer/share', EventCtrl.share_offer);
-    app.post('/api/v4/outlet/share', EventCtrl.share_outlet);
-    app.post('/api/v4/suggestion', EventCtrl.suggestion);
+    app.post('/api/v4/offer/suggestion', EventCtrl.suggestion);
   })();
 
 
