@@ -65,10 +65,20 @@ module.exports.suggestion = function(req, res) {
   create_new(res, setup_event(req, 'suggestion'));
 };
 
+function setup_event(req, type) {
+  logger.log();
+  var passed_data = {};
+  passed_data.event_data = req.body || {};
+  passed_data.event_data.event_type = type;
+  passed_data.user_token = (req.query && req.query.token) || null;
+  passed_data.query_params = req.params || null;
+  return passed_data;
+}
+
 function create_new(res, passed_data) {
   logger.log();
 
-  check_event(passed_data)
+  basic_checks(passed_data)
     .then(function(data) {
       return get_user(data)
     })
@@ -90,17 +100,7 @@ function create_new(res, passed_data) {
     });
 }
 
-function setup_event(req, type) {
-  logger.log();
-  var passed_data = {};
-  passed_data.event_data = req.body || {};
-  passed_data.event_data.event_type = type;
-  passed_data.user_token = (req.query && req.query.token) || null;
-  passed_data.query_params = req.params || null;
-  return passed_data;
-}
-
-function check_event(data) {
+function basic_checks(data) {
   logger.log();
   var deferred = Q.defer();
   var passed_data = data;
@@ -111,25 +111,6 @@ function check_event(data) {
 
   if (!_.get(passed_data, 'event_data.event_type')) {
     deferred.reject('No event type - please pass event_type');
-  }
-
-  var event_type = _.get(passed_data, 'event_data.event_type');
-  var offer = _.get(passed_data, 'event_data.event_meta.offer');
-  var outlet = _.get(passed_data, 'event_data.event_meta.outlet');
-  var location = _.get(passed_data, 'event_data.event_meta.location');
-  var photo = _.get(passed_data, 'event_data.event_meta.photo');
-  var bill_date = _.get(passed_data, 'event_data.event_meta.bill_date')
-
-  if (event_type === 'submit_offer' && (!offer || !outlet || !location)) {
-    deferred.reject('Submit offer information needs to have offer, outlet & location at least.');
-  } else if (event_type === 'suggestion' && (!offer || !location)) {
-    deferred.reject('Suggestion information needs to have outlet & location at least.');
-  } else if ((event_type === 'offer_like_event' || event_type === 'share_offer') && (!offer || !outlet)) {
-    deferred.reject('No information - outlet and offer need to be passed');
-  } else if (event_type === 'upload_bill' && (!photo || !bill_date || !outlet)) {
-    deferred.reject('No information - outlet, date, photo to be passed');
-  } else if (!passed_data.event_data.event_outlet) {
-    deferred.reject('No outlet to log the event at - please pass event_outlet');
   }
 
   deferred.resolve(passed_data);
@@ -177,6 +158,33 @@ function get_outlet(data) {
   return deferred.promise;
 }
 
+function process_event(data) {
+  logger.log();
+
+  var deferred = Q.defer();
+  var passed_data = data;
+
+  var event_type = passed_data.event_data.event_type;
+  var processor = event_processor(event_type);
+
+  if (!processor) {
+    deferred.reject('I don\'t know this type of event - ' + event_type);
+  }
+
+  processor.check(passed_data)
+    .then(function(data) {
+      return processor.process(passed_data);
+    })
+    .then(function(data) {
+      deferred.resolve(passed_data);
+    })
+    .fail(function(err) {
+      deferred.reject('Could not process the event - ' + err);
+    });
+
+  return deferred.promise;
+}
+
 function create_event(data) {
   logger.log();
 
@@ -203,7 +211,38 @@ function create_event(data) {
   return deferred.promise;
 }
 
+// Processor code below
+
+function event_processor(event_type) {
+  var processors = {
+    'follow': follow_processor,
+    'checkin': checkin_processor,
+    'unfollow': unfollow_processor,
+    'feedback': feedback_processor,
+    'submit_offer': submit_offer_processor,
+    'offer_like_event': offer_like_processor,
+    'upload_bill': upload_bill_processor,
+    'share_offer': share_offer_processor,
+    'share_outlet': share_outlet_processor,
+    'suggestion': suggestion_processor
+  };
+
+  return processors[event_type] || null;
+}
+
 var follow_processor = {
+  check: function(data) {
+    logger.log();
+    var deferred = Q.defer();
+    var passed_data = data;
+
+    if (!_.get(passed_data, 'event_data.event_outlet')) {
+        deferred.reject('Follow outlet requires an outlet to be passed');
+    } else {
+        deferred.resolve(passed_data);
+    }
+    return deferred.promise;
+  },
   process: function(data) {
     logger.log();
 
@@ -236,6 +275,18 @@ var follow_processor = {
 };
 
 var unfollow_processor = {
+  check: function(data) {
+    logger.log();
+    var deferred = Q.defer();
+    var passed_data = data;
+
+    if (!_.get(passed_data, 'event_data.event_outlet')) {
+        deferred.reject('Unfollowing an outlet requires an outlet to be passed');
+    } else {
+        deferred.resolve(passed_data);
+    }
+    return deferred.promise;
+  },    
   process: function(data) {
     logger.log();
 
@@ -267,6 +318,18 @@ var unfollow_processor = {
 };
 
 var feedback_processor = {
+  check: function(data) {
+    logger.log();
+    var deferred = Q.defer();
+    var passed_data = data;
+
+    if (!_.get(passed_data, 'event_data.event_outlet')) {
+        deferred.reject('Giving feedback requires an outlet to be passed');
+    } else {
+        deferred.resolve(passed_data);
+    }
+    return deferred.promise;
+  },    
   process: function(data) {
     logger.log();
     var deferred = Q.defer();
@@ -276,6 +339,18 @@ var feedback_processor = {
 };
 
 var checkin_processor = {
+  check: function(data) {
+    logger.log();
+    var deferred = Q.defer();
+    var passed_data = data;
+
+    if (!_.get(passed_data, 'event_data.event_outlet')) {
+        deferred.reject('Checkin requires an outlet to be passed');
+    } else {
+        deferred.resolve(passed_data);
+    }
+    return deferred.promise;
+  },    
   process: function(data) {
     var deferred = Q.defer();
     deferred.resolve(true);
@@ -284,6 +359,21 @@ var checkin_processor = {
 };
 
 var submit_offer_processor = {
+  check: function(data) {
+    logger.log();
+    var deferred = Q.defer();
+    var passed_data = data;
+    var offer = _.get(passed_data, 'event_data.event_meta.offer');
+    var outlet = _.get(passed_data, 'event_data.event_meta.outlet');
+    var location = _.get(passed_data, 'event_data.event_meta.location');
+
+    if (!offer || !outlet || !location) {
+        deferred.reject('Submit offer information needs to have offer, outlet & location.');
+    } else {
+        deferred.resolve(passed_data);
+    }
+    return deferred.promise;
+  },
   process: function(data) {
     var deferred = Q.defer();
     deferred.resolve(true);
@@ -291,8 +381,21 @@ var submit_offer_processor = {
   }
 };
 
-
 var offer_like_processor = {
+  check: function(data) {
+    logger.log();
+    var deferred = Q.defer();
+    var passed_data = data;
+    var offer = _.get(passed_data, 'event_data.event_meta.offer');
+    var outlet = _.get(passed_data, 'event_data.event_meta.outlet');
+
+    if (!offer || !outlet) {
+        deferred.reject('Like offer information needs to have offer & outlet.');
+    } else {
+        deferred.resolve(passed_data);
+    }
+    return deferred.promise;
+  },    
   process: function(data) {
     logger.log();
 
@@ -329,8 +432,22 @@ var offer_like_processor = {
   }
 };
 
-
 var upload_bill_processor = {
+  check: function(data) {
+    logger.log();
+    var deferred = Q.defer();
+    var passed_data = data;
+    var bill_date = _.get(passed_data, 'event_data.event_meta.bill_date');
+    var photo = _.get(passed_data, 'event_data.event_meta.photo');
+    var outlet = _.get(passed_data, 'event_data.event_outlet');
+
+    if (!bill_date || !photo || !outlet) {
+        deferred.reject('Submit bill needs to have bill date, photo & outlet.');
+    } else {
+        deferred.resolve(passed_data);
+    }
+    return deferred.promise;
+  },    
   process: function(data) {
     var deferred = Q.defer();
     deferred.resolve(true);
@@ -339,6 +456,20 @@ var upload_bill_processor = {
 };
 
 var share_offer_processor = {
+  check: function(data) {
+    logger.log();
+    var deferred = Q.defer();
+    var passed_data = data;
+    var offer = _.get(passed_data, 'event_data.event_meta.offer');
+    var outlet = _.get(passed_data, 'event_data.event_meta.outlet');
+
+    if (!offer || !outlet) {
+        deferred.reject('Share offer information needs to have offer & outlet.');
+    } else {
+        deferred.resolve(passed_data);
+    }
+    return deferred.promise;
+  },     
   process: function(data) {
     var deferred = Q.defer();
     deferred.resolve(true);
@@ -369,6 +500,18 @@ var share_offer_processor = {
 };
 
 var share_outlet_processor = {
+  check: function(data) {
+    logger.log();
+    var deferred = Q.defer();
+    var passed_data = data;
+
+    if (!_.get(passed_data, 'event_data.event_outlet')) {
+        deferred.reject('Sharing an outlet requires an outlet to be passed');
+    } else {
+        deferred.resolve(passed_data);
+    }
+    return deferred.promise;
+  },    
   process: function(data) {
     var deferred = Q.defer();
     deferred.resolve(true);
@@ -400,50 +543,23 @@ var share_outlet_processor = {
 };
 
 var suggestion_processor = {
+  check: function(data) {
+    logger.log();
+    var deferred = Q.defer();
+    var passed_data = data;
+    var offer = _.get(passed_data, 'event_data.event_meta.offer');
+    var location = _.get(passed_data, 'event_data.event_meta.location');
+
+    if (!offer || !location) {
+        deferred.reject('Suggestion needs to have offer & location.');
+    } else {
+        deferred.resolve(passed_data);
+    }
+    return deferred.promise;
+  },    
   process: function(data) {
     var deferred = Q.defer();
     deferred.resolve(true);
     return deferred.promise;
   }
 };
-
-function event_processor(event_type) {
-  var processors = {
-    'follow': follow_processor,
-    'checkin': checkin_processor,
-    'unfollow': unfollow_processor,
-    'feedback': feedback_processor,
-    'submit_offer': submit_offer_processor,
-    'offer_like_event': offer_like_processor,
-    'upload_bill': upload_bill_processor,
-    'share_offer': share_offer_processor,
-    'share_outlet': share_outlet_processor,
-    'suggestion': suggestion_processor
-  };
-
-  return processors[event_type] || null;
-}
-
-function process_event(data) {
-  logger.log();
-
-  var deferred = Q.defer();
-  var passed_data = data;
-
-  var event_type = passed_data.event_data.event_type;
-
-  var processor = event_processor(event_type);
-
-  if (!processor) {
-    deferred.reject('I don\'t know this type of event - ' + event_type);
-  } else {
-    processor.process(passed_data).then(function(data) {
-      deferred.resolve(passed_data);
-    }, function(err) {
-      deferred.reject('Could not process the event');
-    });
-  }
-
-  deferred.resolve(passed_data);
-  return deferred.promise;
-}
