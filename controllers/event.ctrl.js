@@ -10,6 +10,21 @@ module.exports.new = function(req, res) {
   create_new(res, setup_event(req, req.body.event_type || ''));
 };
 
+module.exports.checkin = function(req, res) {
+  logger.log();
+  create_new(res, setup_event(req, 'checkin'));
+};
+
+module.exports.gift = function(req, res) {
+  logger.log();
+  create_new(res, setup_event(req, 'gift'));
+};
+
+module.exports.grab = function(req, res) {
+  logger.log();
+  create_new(res, setup_event(req, 'grab'));
+};
+
 module.exports.follow = function(req, res) {
   logger.log();
   create_new(res, setup_event(req, 'follow'));
@@ -32,7 +47,7 @@ module.exports.submit_offer = function(req, res) {
 
 module.exports.like_offer = function(req, res) {
   logger.log();
-  create_new(res, setup_event(req, 'offer_like_event'));
+  create_new(res, setup_event(req, 'like_offer'));
 };
 
 module.exports.upload_bill = function(req, res) {
@@ -161,7 +176,7 @@ function process_event(data) {
     'unfollow': require('./processors/unfollow'),
     'feedback': require('./processors/feedback'),
     'submit_offer': require('./processors/submit_offer'),
-    'offer_like_event': require('./processors/offer_like'),
+    'like_offer': require('./processors/like_offer'),
     'upload_bill': require('./processors/upload_bill'),
     'share_offer': require('./processors/share_offer'),
     'share_outlet': require('./processors/share_outlet'),

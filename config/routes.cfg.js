@@ -37,17 +37,22 @@ module.exports = function(app) {
       });
     });
     app.post('/api/v4/events', EventCtrl.new);
-    // PROXIES -- DO VERIFICATION INLINE
-    app.post('/api/v4/checkin', EventCtrl.new);
-    app.post('/api/v4/upload_bill', EventCtrl.upload_bill);
-    app.post('/api/v4/gift', EventCtrl.new);
+
+    // TO BE IMPLEMENTED
+    app.post('/api/v4/gift', EventCtrl.gift);
+    app.post('/api/v4/checkin', EventCtrl.checkin);
+    app.post('/api/v4/grab', EventCtrl.grab);
+
+
+    // IMPLEMENTED
+    app.post('/api/v4/bill', EventCtrl.upload_bill);
     app.post('/api/v4/follow', EventCtrl.follow);
     app.post('/api/v4/unfollow', EventCtrl.unfollow);
     app.post('/api/v4/feedback', EventCtrl.feedback);
-    app.post('/api/v4/submit_offer', EventCtrl.submit_offer);
-    app.post('/api/v4/like_offer', EventCtrl.like_offer);
-    app.post('/api/v4/share_offer', EventCtrl.share_offer);
-    app.post('/api/v4/share_outlet', EventCtrl.share_outlet);
+    app.post('/api/v4/offer/submit', EventCtrl.submit_offer);
+    app.post('/api/v4/offer/like', EventCtrl.like_offer);
+    app.post('/api/v4/offer/share', EventCtrl.share_offer);
+    app.post('/api/v4/outlet/share', EventCtrl.share_outlet);
     app.post('/api/v4/suggestion', EventCtrl.suggestion);
   })();
 
