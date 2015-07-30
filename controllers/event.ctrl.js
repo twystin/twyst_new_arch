@@ -1,17 +1,7 @@
 'use strict';
 /*jslint node: true */
 
-var mongoose = require('mongoose');
-require('../models/event.mdl.js');
-var Event = mongoose.model('Event');
-var Outlet = mongoose.model('Outlet');
-var HttpHelper = require('../common/http.hlpr.js');
-var AuthHelper = require('../common/auth.hlpr.js');
-var OutletHelper = require('./helpers/outlet.hlpr.js');
-var User = mongoose.model('User');
 var logger = require('tracer').colorConsole();
-var RecoHelper = require('./helpers/reco.hlpr.js');
-
 var _ = require('lodash');
 var Q = require('q');
 
@@ -76,6 +66,8 @@ function setup_event(req, type) {
 }
 
 function create_new(res, passed_data) {
+  var HttpHelper = require('../common/http.hlpr.js');
+
   logger.log();
 
   basic_checks(passed_data)
@@ -119,6 +111,7 @@ function basic_checks(data) {
 }
 
 function get_user(data) {
+  var AuthHelper = require('../common/auth.hlpr.js');
   logger.log();
 
   var deferred = Q.defer();
@@ -137,6 +130,7 @@ function get_user(data) {
 }
 
 function get_outlet(data) {
+  var OutletHelper = require('./helpers/outlet.hlpr.js');
   logger.log();
 
   var deferred = Q.defer();
@@ -161,11 +155,23 @@ function get_outlet(data) {
 function process_event(data) {
   logger.log();
 
+  var processors = {
+    'follow': require('./processors/follow'),
+    'checkin': require('./processors/checkin'),
+    'unfollow': require('./processors/unfollow'),
+    'feedback': require('./processors/feedback'),
+    'submit_offer': require('./processors/submit_offer'),
+    'offer_like_event': require('./processors/offer_like'),
+    'upload_bill': require('./processors/upload_bill'),
+    'share_offer': require('./processors/share_offer'),
+    'share_outlet': require('./processors/share_outlet'),
+    'suggestion': require('./processors/suggestion')
+  };
+
   var deferred = Q.defer();
   var passed_data = data;
-
   var event_type = passed_data.event_data.event_type;
-  var processor = event_processor(event_type);
+  var processor = processors[event_type] || null;
 
   if (!processor) {
     deferred.reject('I don\'t know this type of event - ' + event_type);
@@ -186,6 +192,10 @@ function process_event(data) {
 }
 
 function create_event(data) {
+  var mongoose = require('mongoose');
+  require('../models/event.mdl.js');
+  var Event = mongoose.model('Event');
+
   logger.log();
 
   var deferred = Q.defer();
@@ -209,21 +219,4 @@ function create_event(data) {
   });
 
   return deferred.promise;
-}
-
-function event_processor(event_type) {
-  var processors = {
-    'follow': require('./processors/follow'),
-    'checkin': require('./processors/checkin'),
-    'unfollow': require('./processors/unfollow'),
-    'feedback': require('./processors/feedback'),
-    'submit_offer': require('./processors/submit_offer'),
-    'offer_like_event': require('./processors/offer_like'),
-    'upload_bill': require('./processors/upload_bill'),
-    'share_offer': require('./processors/share_offer'),
-    'share_outlet': require('./processors/share_outlet'),
-    'suggestion': require('./processors/suggestion')
-  };
-
-  return processors[event_type] || null;
 }
