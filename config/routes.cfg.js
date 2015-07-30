@@ -38,13 +38,10 @@ module.exports = function(app) {
     });
     app.post('/api/v4/events', EventCtrl.new);
 
-    // TO BE IMPLEMENTED
     app.post('/api/v4/coupon/gift', EventCtrl.gift);
     app.post('/api/v4/coupon/grab', EventCtrl.grab);
     app.post('/api/v4/coupon/redeem', EventCtrl.redeem);
 
-
-    // IMPLEMENTED
     app.post('/api/v4/checkin/bill', EventCtrl.upload_bill);
     app.post('/api/v4/checkin/qr', EventCtrl.checkin);
     app.post('/api/v4/checkin/panel', EventCtrl.checkin);
