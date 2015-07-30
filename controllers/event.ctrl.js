@@ -12,7 +12,7 @@ var User = mongoose.model('User');
 var logger = require('tracer').colorConsole();
 var RecoHelper = require('./helpers/reco.hlpr.js');
 
-var _ = require('underscore');
+var _ = require('lodash');
 var Q = require('q');
 
 function check_event(data) {
@@ -27,7 +27,6 @@ function check_event(data) {
     if (!passed_data.event_data.event_type) {
         deferred.reject('No event type - please pass event_type');
     }
-
 
     if (passed_data.event_data && passed_data.event_data.event_type === 'submit_offer') {
         if (!passed_data.event_data.event_meta ||
@@ -385,129 +384,60 @@ function create_new(res, passed_data) {
 
 module.exports.new = function(req, res) {
     logger.log();
-
-    var passed_data = {};
-
-    passed_data.event_data = req.body || {};
-    passed_data.user_token = req.query.token || null;
-    passed_data.query_params = req.params || null;
-    create_new(res, passed_data);
+    create_new(res, setup_event(req, req.body.event_type || ''));
 };
-
 
 module.exports.follow = function(req, res) {
     logger.log();
-
-    var passed_data = {};
-
-    passed_data.event_data = req.body || {};
-    passed_data.event_data.event_type = 'follow';
-    passed_data.user_token = req.query.token || null;
-    passed_data.query_params = req.params || null;
-
-    create_new(res, passed_data);
-
+    create_new(res, setup_event(req, 'follow'));
 };
 
 module.exports.feedback = function(req, res) {
     logger.log();
-    var passed_data = {};
-
-    passed_data.event_data = req.body || {};
-    passed_data.event_data.event_type = 'feedback';
-    passed_data.user_token = req.query.token || null;
-    passed_data.query_params = req.params || null;
-
-    create_new(res, passed_data);
+    create_new(res, setup_event(req, 'feedback'));
 };
 
 module.exports.unfollow = function(req, res) {
     logger.log();
-
-    var passed_data = {};
-
-    passed_data.event_data = req.body || {};
-    passed_data.event_data.event_type = 'unfollow';
-    passed_data.user_token = req.query.token || null;
-    passed_data.query_params = req.params || null;
-
-    create_new(res, passed_data);
-
+    create_new(res, setup_event(req, 'unfollow'));
 };
 
 module.exports.submit_offer = function(req, res) {
     logger.log();
-    var passed_data = {};
-
-    passed_data.event_data = req.body || {};
-    passed_data.event_data.event_type = 'submit_offer';
-    passed_data.user_token = req.query.token || null;
-    passed_data.query_params = req.params || null;
-
-    create_new(res, passed_data);
+    create_new(res, setup_event(req, 'submit_offer'));
 };
 
 module.exports.like_offer = function(req, res) {
     logger.log();
-
-    var passed_data = {};
-
-    passed_data.event_data = req.body || {};
-    passed_data.event_data.event_type = 'offer_like_event';
-    passed_data.user_token = req.query.token || null;
-    passed_data.query_params = req.params || null;
-    create_new(res, passed_data);
-
+    create_new(res, setup_event(req, 'offer_like_event'));
 };
 
 module.exports.upload_bill = function(req, res) {
     logger.log();
-
-    var passed_data = {};
-
-    passed_data.event_data = req.body || {};
-    passed_data.event_data.event_type = 'upload_bill';
-    passed_data.user_token = req.query.token || null;
-    passed_data.query_params = req.params || null;
-    create_new(res, passed_data);
-
+    create_new(res, setup_event(req, 'upload_bill'));
 };
 
 module.exports.share_offer = function(req, res) {
     logger.log();
-
-    var passed_data = {};
-
-    passed_data.event_data = req.body || {};
-    passed_data.event_data.event_type = 'share_offer';
-    passed_data.user_token = req.query.token || null;
-    passed_data.query_params = req.params || null;
-    create_new(res, passed_data);
-
+    create_new(res, setup_event(req, 'share_offer'));
 };
 
 module.exports.share_outlet = function(req, res) {
     logger.log();
-
-    var passed_data = {};
-
-    passed_data.event_data = req.body || {};
-    passed_data.event_data.event_type = 'share_outlet';
-    passed_data.user_token = req.query.token || null;
-    passed_data.query_params = req.params || null;
-    create_new(res, passed_data);
-
+    create_new(res, setup_event(req, 'share_outlet'));
 };
 
 module.exports.suggestion = function(req, res) {
     logger.log();
-
-    var passed_data = {};
-
-    passed_data.event_data = req.body || {};
-    passed_data.event_data.event_type = 'suggestion';
-    passed_data.user_token = req.query.token || null;
-    passed_data.query_params = req.params || null;
-    create_new(res, passed_data);
-
+    create_new(res, setup_event(req, 'suggestion'));
 };
+
+function setup_event(req, type) {
+    logger.log();
+    var passed_data = {};
+    passed_data.event_data = req.body || {};
+    passed_data.event_data.event_type = type;
+    passed_data.user_token = (req.query && req.query.token) || null;
+    passed_data.query_params = req.params || null;
+    return passed_data;
+}
