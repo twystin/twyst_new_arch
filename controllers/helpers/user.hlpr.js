@@ -16,23 +16,32 @@ module.exports.update_user = function(token, updated_user) {
     var user = data.data;
     user = _.extend(user, updated_user);
     console.log(user);
-    User.findOneAndUpdate(
-      {_id: user._id},
-      {$set: user},
-      {
-        upsert: false,
-        overwrite: true
-      }).exec(function(err, u) {
-        console.log(err);
-        if (err || !u) {
-          deferred.reject({err: err || true, message: "Couldn\'t update user"});
-        } else {
-          deferred.resolve({data: user, message: 'Updated user'});
-        }
+    User.findOneAndUpdate({
+      _id: user._id
+    }, {
+      $set: user
+    }, {
+      upsert: false,
+      overwrite: true
+    }).exec(function(err, u) {
+      console.log(err);
+      if (err || !u) {
+        deferred.reject({
+          err: err || true,
+          message: "Couldn\'t update user"
+        });
+      } else {
+        deferred.resolve({
+          data: user,
+          message: 'Updated user'
+        });
       }
-    );
+    });
   }, function(err) {
-    deferred.reject({err: err || true, message: "Couldn\'t find user"});
+    deferred.reject({
+      err: err || true,
+      message: "Couldn\'t find user"
+    });
   });
 
   return deferred.promise;
@@ -43,23 +52,35 @@ module.exports.update_friends = function(token, friend_list) {
 
   AuthHelper.get_user(token).then(function(data) {
     var user = data.data;
-    User.findOneAndUpdate(
-      {_id: user._id},
-      {$set: {
-        friend_source: friend_list.source,
-        friend_list: friend_list.list
-      }},
-      {upsert: true},
+    User.findOneAndUpdate({
+        _id: user._id
+      }, {
+        $set: {
+          friend_source: friend_list.source,
+          friend_list: friend_list.list
+        }
+      }, {
+        upsert: true
+      },
       function(err, u) {
         if (err || !u) {
-          deferred.reject({err: err || true, message: "Couldn\'t update user"});
+          deferred.reject({
+            err: err || true,
+            message: "Couldn\'t update user"
+          });
         } else {
-          deferred.resolve({data: u, message: 'Updated user'});
+          deferred.resolve({
+            data: u,
+            message: 'Updated user'
+          });
         }
       }
     );
   }, function(err) {
-    deferred.reject({err: err || true, message: "Couldn\'t find user"});
+    deferred.reject({
+      err: err || true,
+      message: "Couldn\'t find user"
+    });
   });
 
   return deferred.promise;
@@ -70,21 +91,39 @@ module.exports.update_voucher_lapse_date = function(token, voucher_id, new_lapse
 
   AuthHelper.get_user(token).then(function(data) {
     var user = data.data;
-    User.findOneAndUpdate(
-      {_id: user._id,
-      coupons: {$elemMatch: {'_id': voucher_id}}},
-      {$set: {'coupons.$.lapse_date': new_lapse_date }},
-      {upsert: true},
+    User.findOneAndUpdate({
+        _id: user._id,
+        coupons: {
+          $elemMatch: {
+            '_id': voucher_id
+          }
+        }
+      }, {
+        $set: {
+          'coupons.$.lapse_date': new_lapse_date
+        }
+      }, {
+        upsert: true
+      },
       function(err, u) {
         if (err || !u) {
-          deferred.reject({err: err || true, message: "Couldn\'t  extend voucher validity"});
+          deferred.reject({
+            err: err || true,
+            message: "Couldn\'t  extend voucher validity"
+          });
         } else {
-          deferred.resolve({data: u, message: 'Updated user'});
+          deferred.resolve({
+            data: u,
+            message: 'Updated user'
+          });
         }
       }
     );
   }, function(err) {
-    deferred.reject({err: err || true, message: "Couldn\'t find user"});
+    deferred.reject({
+      err: err || true,
+      message: "Couldn\'t find user"
+    });
   });
 
   return deferred.promise;

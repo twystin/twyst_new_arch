@@ -54,7 +54,10 @@ function get_outlet(query, params) {
       if (!outlets[query.outlet_id]) {
         deferred.reject('Could not find outlet');
       } else {
-        deferred.resolve({query: params, outlet: outlets[query.outlet_id]});
+        deferred.resolve({
+          query: params,
+          outlet: outlets[query.outlet_id]
+        });
       }
     }
   });
@@ -111,10 +114,10 @@ function set_user_coupons(params) {
       } else {
         var cmap = JSON.parse(reply);
         params.outlet.recco = params.outlet.recco || {};
-        if(cmap[params.outlet._id]) {
-          params.outlet.recco.coupons = cmap[params.outlet._id].length;  
+        if (cmap[params.outlet._id]) {
+          params.outlet.recco.coupons = cmap[params.outlet._id].length;
         }
-        
+
         deferred.resolve(params);
       }
     });
@@ -145,8 +148,8 @@ function set_open_closed(params) {
   if (params.query.date && params.query.time) {
     params.outlet.recco = params.outlet.recco || {};
     params.outlet.recco.closed = RecoHelper.isClosed(params.query.date,
-                                         params.query.time,
-                                         params.outlet.business_hours);
+      params.query.time,
+      params.outlet.business_hours);
 
   }
   deferred.resolve(params);
@@ -157,42 +160,42 @@ function pick_outlet_fields(params) {
   var deferred = Q.defer();
   var fmap = null;
   var user = params.user && params.user._id || null;
-    Cache.hget(user, 'favourite_map', function(err, reply) {
-      if (reply) {
-        fmap = JSON.parse(reply);
-      }
-      params.outlet.recco = params.outlet.recco || {};
-      var massaged_item = {};
-      massaged_item._id = params.outlet._id;
-      massaged_item.name = params.outlet.basics.name;
-      massaged_item.city = params.outlet.contact.location.city;
-      massaged_item.address = params.outlet.contact.location.address;
-      massaged_item.locality_1 = params.outlet.contact.location.locality_1[0];
-      massaged_item.locality_2 = params.outlet.contact.location.locality_2[0];
-      massaged_item.lat = params.outlet.contact.location.coords.latitude || null;
-      massaged_item.long = params.outlet.contact.location.coords.longitude || null;
-      massaged_item.distance = params.outlet.recco.distance || null;
-      massaged_item.open = !params.outlet.recco.closed;
-      massaged_item.phone = params.outlet.contact.phones.mobile[0] && params.outlet.contact.phones.mobile[0].num;
-      massaged_item.offers = params.outlet.offers;
-      massaged_item.attributes = params.outlet.attributes;
-      if (fmap && fmap[params.outlet._id]) {
-        massaged_item.following = true;
-      } else {
-        massaged_item.following = false;
-      }
+  Cache.hget(user, 'favourite_map', function(err, reply) {
+    if (reply) {
+      fmap = JSON.parse(reply);
+    }
+    params.outlet.recco = params.outlet.recco || {};
+    var massaged_item = {};
+    massaged_item._id = params.outlet._id;
+    massaged_item.name = params.outlet.basics.name;
+    massaged_item.city = params.outlet.contact.location.city;
+    massaged_item.address = params.outlet.contact.location.address;
+    massaged_item.locality_1 = params.outlet.contact.location.locality_1[0];
+    massaged_item.locality_2 = params.outlet.contact.location.locality_2[0];
+    massaged_item.lat = params.outlet.contact.location.coords.latitude || null;
+    massaged_item.long = params.outlet.contact.location.coords.longitude || null;
+    massaged_item.distance = params.outlet.recco.distance || null;
+    massaged_item.open = !params.outlet.recco.closed;
+    massaged_item.phone = params.outlet.contact.phones.mobile[0] && params.outlet.contact.phones.mobile[0].num;
+    massaged_item.offers = params.outlet.offers;
+    massaged_item.attributes = params.outlet.attributes;
+    if (fmap && fmap[params.outlet._id]) {
+      massaged_item.following = true;
+    } else {
+      massaged_item.following = false;
+    }
 
-      if (params.outlet.photos && params.outlet.photos.logo) {
-        massaged_item.logo = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + params.outlet._id + '/'+ params.outlet.photos.logo;
-      }
-      if (params.outlet.photos && params.outlet.photos.background) {
-        massaged_item.background = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + params.outlet._id + '/'+ params.outlet.photos.background;
-      }
-      massaged_item.open_next = RecoHelper.opensAt(params.outlet.business_hours);
-      params.outlet = massaged_item;
+    if (params.outlet.photos && params.outlet.photos.logo) {
+      massaged_item.logo = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + params.outlet._id + '/' + params.outlet.photos.logo;
+    }
+    if (params.outlet.photos && params.outlet.photos.background) {
+      massaged_item.background = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + params.outlet._id + '/' + params.outlet.photos.background;
+    }
+    massaged_item.open_next = RecoHelper.opensAt(params.outlet.business_hours);
+    params.outlet = massaged_item;
 
-      deferred.resolve(params);
-    });
+    deferred.resolve(params);
+  });
 
   return deferred.promise;
 }
@@ -209,15 +212,15 @@ function massage_offers(params) {
       }
 
       params.outlet = add_user_coupons(
-                  pick_offer_fields(
-                        select_relevant_checkin_offer(params.outlet)), coupon_map && coupon_map[params.outlet._id] && coupon_map[params.outlet._id].coupons);
+        pick_offer_fields(
+          select_relevant_checkin_offer(params.outlet)), coupon_map && coupon_map[params.outlet._id] && coupon_map[params.outlet._id].coupons);
       deferred.resolve(params);
 
     });
   } else {
     params.outlet =
-                pick_offer_fields(
-                      select_relevant_checkin_offer(params.outlet));
+      pick_offer_fields(
+        select_relevant_checkin_offer(params.outlet));
     deferred.resolve(params);
     deferred.resolve(params);
   }
@@ -264,18 +267,18 @@ function massage_offers(params) {
 
   function add_user_coupons(item, coupon_map) {
     if (item.offers && item.offers.length !== 0 && coupon_map !== null) {
-        coupon_map = _.map(coupon_map, function(itemd) {
-          var coupon = {};
-          coupon.type = "coupon";
-          coupon.status = itemd && itemd.status;
-          coupon.title = itemd && itemd.title;
-          coupon.terms = itemd && itemd.detail;
-          coupon.expiry = itemd && itemd.expiry;
-          return coupon;
-        });
-        item.offers = item.offers.concat(coupon_map);
-      }
-      return item;
+      coupon_map = _.map(coupon_map, function(itemd) {
+        var coupon = {};
+        coupon.type = "coupon";
+        coupon.status = itemd && itemd.status;
+        coupon.title = itemd && itemd.title;
+        coupon.terms = itemd && itemd.detail;
+        coupon.expiry = itemd && itemd.expiry;
+        return coupon;
+      });
+      item.offers = item.offers.concat(coupon_map);
+    }
+    return item;
   }
 
   function pick_offer_fields(item) {
@@ -293,8 +296,8 @@ function massage_offers(params) {
         massaged_offer.expiry = offer.actions.reward.expiry;
         if (offer && offer.actions && offer.actions.reward && offer.actions.reward.reward_hours) {
           massaged_offer.available_now = !(RecoHelper.isClosed('dummy', 'dummy', offer.actions.reward.reward_hours));
-          if(!massaged_offer.available_now) {
-              massaged_offer.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
+          if (!massaged_offer.available_now) {
+            massaged_offer.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
           }
         }
         // massaged_offer.applicability = offer.actions.reward.applicability;
@@ -313,33 +316,33 @@ function massage_offers(params) {
 
 module.exports.get = function(req, res) {
   get_outlet(req.params, req.query)
-  .then(function(data){
-    return get_user(data);
-  })
-  .then(function(data) {
-    return set_user_checkins(data);
-  })
-  .then(function(data) {
-    return set_user_coupons(data);
-  })
-  .then(function(data) {
-    return set_distance(data);
-  })
-  .then(function(data) {
-    return set_open_closed(data);
-  })
-  .then(function(data) {
-    return massage_offers(data);
-  })
-  .then(function(data) {
-    return pick_outlet_fields(data);
-  })
-  .then(function(data) {
-    HttpHelper.success(res, data.outlet, "Got the outlet");
-  })
-  .fail(function(err) {
-    HttpHelper.error(res, err || false, "Error getting the outlet");
-  });
+    .then(function(data) {
+      return get_user(data);
+    })
+    .then(function(data) {
+      return set_user_checkins(data);
+    })
+    .then(function(data) {
+      return set_user_coupons(data);
+    })
+    .then(function(data) {
+      return set_distance(data);
+    })
+    .then(function(data) {
+      return set_open_closed(data);
+    })
+    .then(function(data) {
+      return massage_offers(data);
+    })
+    .then(function(data) {
+      return pick_outlet_fields(data);
+    })
+    .then(function(data) {
+      HttpHelper.success(res, data.outlet, "Got the outlet");
+    })
+    .fail(function(err) {
+      HttpHelper.error(res, err || false, "Error getting the outlet");
+    });
 };
 
 function filter_fields(req, data) {

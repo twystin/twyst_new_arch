@@ -27,7 +27,7 @@ module.exports.grab = function(req, res) {
 
 module.exports.redeem = function(req, res) {
   logger.log();
-  create_new(res, setup_event(req, 'grab'));
+  create_new(res, setup_event(req, 'redeem'));
 };
 
 module.exports.follow = function(req, res) {
@@ -180,6 +180,7 @@ function process_event(data) {
     'checkin': require('./processors/checkin.proc'),
     'gift': require('./processors/gift.proc'),
     'grab': require('./processors/grab.proc'),
+    'grab': require('./processors/redeem.proc'),
     'unfollow': require('./processors/unfollow.proc'),
     'feedback': require('./processors/feedback.proc'),
     'submit_offer': require('./processors/submit_offer.proc'),

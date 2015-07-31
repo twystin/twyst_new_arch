@@ -20,145 +20,174 @@ var _ = require('underscore');
 var Cache = require('../../common/cache.hlpr.js');
 
 module.exports.delete_auth_token = function(token) {
-    logger.log();
-    var deferred = Q.defer();
-    AuthToken.findOneAndRemove({token: token}, function(err, data) {
-        if (err) {
-            deferred.reject(err || null);
-        } else {
-            if (!data) {
-                deferred.resolve("User is already logged out")
-            } else {
-                deferred.resolve("Logged out the user");
-            }
-        }
-    });
+  logger.log();
+  var deferred = Q.defer();
+  AuthToken.findOneAndRemove({
+    token: token
+  }, function(err, data) {
+    if (err) {
+      deferred.reject(err || null);
+    } else {
+      if (!data) {
+        deferred.resolve("User is already logged out")
+      } else {
+        deferred.resolve("Logged out the user");
+      }
+    }
+  });
 
-    return deferred.promise;
+  return deferred.promise;
 };
 
 module.exports.save_auth_token = function(data) {
-    logger.log();
+  logger.log();
 
-    var passed_data = data;
-    var account = passed_data.account;
-    var user = passed_data.user;
+  var passed_data = data;
+  var account = passed_data.account;
+  var user = passed_data.user;
 
-    var deferred = Q.defer();
-    var token = keygen.session_id();
-    var auth_token = new AuthToken({
-        token: token,
-        expiry: moment().add(7, 'days'),
-        account: account,
-        user: user
-    });
+  var deferred = Q.defer();
+  var token = keygen.session_id();
+  var auth_token = new AuthToken({
+    token: token,
+    expiry: moment().add(7, 'days'),
+    account: account,
+    user: user
+  });
 
-    auth_token.save(function(err, saved_token) {
-        if (err || !saved_token) {
-            deferred.reject(err || true);
-        } else {
-            passed_data.token = saved_token;
-            deferred.resolve(passed_data);
-        }
-    });
+  auth_token.save(function(err, saved_token) {
+    if (err || !saved_token) {
+      deferred.reject(err || true);
+    } else {
+      passed_data.token = saved_token;
+      deferred.resolve(passed_data);
+    }
+  });
 
-    return deferred.promise;
+  return deferred.promise;
 };
 
 module.exports.populate_cache = function(data) {
-    logger.log();
-    var deferred = Q.defer();
-    var passed_data = data;
-    var user = passed_data.user;
+  logger.log();
+  var deferred = Q.defer();
+  var passed_data = data;
+  var user = passed_data.user;
 
-    Event.find({'event_user': mongoose.Types.ObjectId(user)}, function(err, events) {
-        if (!err) {
-            var event_map = _.groupBy(events, function (item) {
-                return item.event_type;
-            });
+  Event.find({
+    'event_user': mongoose.Types.ObjectId(user)
+  }, function(err, events) {
+    if (!err) {
+      var event_map = _.groupBy(events, function(item) {
+        return item.event_type;
+      });
 
-            var checkin_map = _.reduce(event_map.checkin, function (memo, item) {
-                memo[item.event_outlet] = memo[item.event_outlet] + 1 || 1;
-                return memo;
-            }, {});
+      var checkin_map = _.reduce(event_map.checkin, function(memo, item) {
+        memo[item.event_outlet] = memo[item.event_outlet] + 1 || 1;
+        return memo;
+      }, {});
 
-            Cache.hset(user, 'checkin_map', JSON.stringify(checkin_map));
-            deferred.resolve(passed_data);
-        } else {
-            deferred.reject(err);
-        }
-    });
-    return deferred.promise;
+      Cache.hset(user, 'checkin_map', JSON.stringify(checkin_map));
+      deferred.resolve(passed_data);
+    } else {
+      deferred.reject(err);
+    }
+  });
+  return deferred.promise;
 };
 
 module.exports.create_user_account = function(phone) {
-    logger.log();
-    var deferred = Q.defer();
-    var return_data = {};
+  logger.log();
+  var deferred = Q.defer();
+  var return_data = {};
 
-    User.findOne({phone: phone}, function(err, user) {
-        if (err) {
-            deferred.reject({err:err, message:'Error registering user'});
-        } else {
-            if (user) {
-                return_data.user = user;
-                return_data.account = null;
-                deferred.resolve({data: return_data, message: 'User already exists'});
-            } else {
-                var new_user = new User({
-                    phone: phone,
-                    validation: {
-                        otp: true
-                    }
-                });
-                new_user.save(function(err, saved_user) {
-                    if (err || !saved_user) {
-                        deferred.reject({err: err || true, message: 'Couldn\'t create user'});
-                    } else {
-                        var account = {
-                            username: phone,
-                            user: saved_user._id
-                        };
+  User.findOne({
+    phone: phone
+  }, function(err, user) {
+    if (err) {
+      deferred.reject({
+        err: err,
+        message: 'Error registering user'
+      });
+    } else {
+      if (user) {
+        return_data.user = user;
+        return_data.account = null;
+        deferred.resolve({
+          data: return_data,
+          message: 'User already exists'
+        });
+      } else {
+        var new_user = new User({
+          phone: phone,
+          validation: {
+            otp: true
+          }
+        });
+        new_user.save(function(err, saved_user) {
+          if (err || !saved_user) {
+            deferred.reject({
+              err: err || true,
+              message: 'Couldn\'t create user'
+            });
+          } else {
+            var account = {
+              username: phone,
+              user: saved_user._id
+            };
 
-                        Account.register(
-                            new Account(account),
-                            phone,
-                            function(err, created_account) {
-                                if (err) {
-                                    deferred.reject({err: err, message: 'Error creating account'});
-                                } else {
-                                    return_data.user = saved_user;
-                                    return_data.account = created_account;
-                                    deferred.resolve({data: return_data, message: 'Created a new account'});
-                                }
-                            }
-                        );
-                    }
-                });
-            }
-        }
-    });
+            Account.register(
+              new Account(account),
+              phone,
+              function(err, created_account) {
+                if (err) {
+                  deferred.reject({
+                    err: err,
+                    message: 'Error creating account'
+                  });
+                } else {
+                  return_data.user = saved_user;
+                  return_data.account = created_account;
+                  deferred.resolve({
+                    data: return_data,
+                    message: 'Created a new account'
+                  });
+                }
+              }
+            );
+          }
+        });
+      }
+    }
+  });
 
-    return deferred.promise;
+  return deferred.promise;
 };
 
 module.exports.generate_new_code = function(phone) {
-    var deferred = Q.defer();
+  var deferred = Q.defer();
 
-    var ac = new AuthCode({
-        phone: phone,
-        code: keygen.number({length: 4}),
-        status: 'active',
-        created_at: new Date()
-    });
+  var ac = new AuthCode({
+    phone: phone,
+    code: keygen.number({
+      length: 4
+    }),
+    status: 'active',
+    created_at: new Date()
+  });
 
-    ac.save(function(err, code) {
-        if (err || !code) {
-            deferred.reject({err: err || true, message: 'Couldn\'t save auth code'});
-        } else {
-            deferred.resolve({data: code, message: 'Saved auth code'});
-        }
-    });
+  ac.save(function(err, code) {
+    if (err || !code) {
+      deferred.reject({
+        err: err || true,
+        message: 'Couldn\'t save auth code'
+      });
+    } else {
+      deferred.resolve({
+        data: code,
+        message: 'Saved auth code'
+      });
+    }
+  });
 
-    return deferred.promise;
+  return deferred.promise;
 };

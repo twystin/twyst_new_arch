@@ -79,7 +79,7 @@ module.exports.extend_my_voucher = function(req, res) {
   }
   var date = new Date(req.body.date);
 
-  if(date.getTime() < (new Date().getTime())){
+  if (date.getTime() < (new Date().getTime())) {
     HttpHelper.error(res, null, "You can not extend to past date");
   }
 
@@ -89,4 +89,3 @@ module.exports.extend_my_voucher = function(req, res) {
     HttpHelper.error(res, err.err, err.message);
   });
 };
-
