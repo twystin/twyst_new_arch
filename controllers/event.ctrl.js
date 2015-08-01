@@ -104,7 +104,10 @@ function create_new(res, passed_data) {
       return create_event(data);
     })
     .then(function(data) {
-      return update_event_analytics(data);
+      return update_outlet_event_analytics(data);
+    })
+    .then(function(data) {
+      return update_user_event_analytics(data);
     })
     .then(function(data) {
       HttpHelper.success(res, data.outlets, "Processed the event successfully.");
@@ -217,7 +220,7 @@ function process_event(data) {
   return deferred.promise;
 }
 
-function update_event_analytics(data) {
+function update_outlet_event_analytics(data) {
   var mongoose = require('mongoose');
   require('../models/outlet.mdl.js');
   var Outlet = mongoose.model('Outlet');
@@ -229,11 +232,57 @@ function update_event_analytics(data) {
   };
   var key = 'analytics.event_analytics.' + event_type;
   update.$inc[key] = 1;
-  Outlet.findOneAndUpdate({_id: data.outlet._id}, update, function(err, outlet) {
+  Outlet.findOneAndUpdate({
+    _id: data.outlet._id
+  }, update, function(err, outlet) {
     if (err) {
-      deferred.reject('Could not update analytics' + err);
+      deferred.reject('Could not update outlet analytics' + err);
     } else {
       deferred.resolve(data);
+    }
+  });
+
+  return deferred.promise;
+}
+
+function update_user_event_analytics(data) {
+  var mongoose = require('mongoose');
+  require('../models/user.mdl.js');
+  var User = mongoose.model('User');
+  logger.log()
+  var deferred = Q.defer();
+  var event_type = data.event_data.event_type;
+  var update_total = {
+    $inc: {}
+  };
+
+  var update_total_by_outlet = {
+    $inc: {
+
+    }
+  }
+
+  var key_total = 'user_meta.total_events.' + event_type;
+  update_total.$inc[key_total] = 1;
+
+  var key_outlet = 'user_meta.total_events_by_outlet.' + data.outlet._id + '.' + event_type;
+  update_total_by_outlet.$inc[key_outlet] = 1;
+
+  User.findOneAndUpdate({
+    _id: data.user._id
+  }, update_total, function(err, user) {
+    if (err) {
+      deferred.reject('Could not update user analytics' + err);
+    } else {
+      User.findOneAndUpdate({
+        _id: data.user._id
+      }, update_total_by_outlet, function(err, user) {
+        if (err) {
+          deferred.reject('Could not update user analytics' + err);
+        } else {
+          deferred.resolve(data);
+        }
+      });
     }
   });
 

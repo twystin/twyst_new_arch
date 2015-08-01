@@ -163,20 +163,8 @@ var User = new Schema({
     calculated_cuisines: [],
     calculated_restaurant_types: [],
     calculated_attributes: [],
-    total_events: [{
-      event_type: String,
-      event_target: {
-        type: Schema.ObjectId
-      } //outlet_id/offfer_id/checkin_id etc               
-    }],
-    total_event_by_outlet: [{
-      outlet_id: {
-        type: Schema.ObjectId,
-        ref: Outlet
-      },
-      event_type: String,
-      event_count: Number
-    }]
+    total_events: {},
+    total_events_by_outlet: {}
   },
   points: Number,
   created_at: Date
