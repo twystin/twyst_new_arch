@@ -169,6 +169,7 @@ function isOutletClosed(qr) {
 function check_and_create_coupon(data) {
   logger.log();
   var deferred = Q.defer();
+  var passed_data = data;
 
   var user_id = _.get(data, 'user._id');
   var outlet_id = _.get(data, 'outlet._id');
@@ -191,7 +192,7 @@ function check_and_create_coupon(data) {
     if (matching_offer) {
       logger.log("FOUND A MATCHING OFFER!")
       create_coupon(matching_offer, user_id, outlet_id).then(function(data) {
-        deferred.resolve()
+        deferred.resolve(passed_data);
       }, function(err) {
         deferred.reject('Could not create coupon' + err);
       })
@@ -235,8 +236,8 @@ function create_coupon(offer, user, outlet) {
   User.findOneAndUpdate({
     _id: user
   }, update, function(err, user) {
-    console.log(err);
-    console.log(user);
+    // console.log(err);
+    // console.log(user);
     if (err || !user) {
       deferred.reject('Could not update user');
     } else
