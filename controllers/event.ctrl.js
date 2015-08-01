@@ -180,7 +180,7 @@ function process_event(data) {
     'checkin': require('./processors/checkin.proc'),
     'gift': require('./processors/gift.proc'),
     'grab': require('./processors/grab.proc'),
-    'grab': require('./processors/redeem.proc'),
+    'redeem': require('./processors/redeem.proc'),
     'unfollow': require('./processors/unfollow.proc'),
     'feedback': require('./processors/feedback.proc'),
     'submit_offer': require('./processors/submit_offer.proc'),
