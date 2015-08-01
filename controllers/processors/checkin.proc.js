@@ -288,7 +288,14 @@ function update_checkin_counts(data) {
 
 function update_qr_count(data) {
   var deferred = Q.defer();
-  deferred.resolve(data);
+  console.log(data);
+  QR.findOneAndUpdate({code: data.event_data.event_meta.code}, {$inc:{times_used:1}}, function(err, qr) {
+      if (err) {
+        deferred.reject(err);
+      } else {
+          deferred.resolve(data);
+      }
+  });
   return deferred.promise;
 }
 
