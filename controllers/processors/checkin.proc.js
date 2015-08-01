@@ -27,17 +27,29 @@ module.exports.check = function(data) {
 
 module.exports.process = function(data) {
   logger.log();
-
-  // UPDATE CHECKIN COUNTS
-  // CREATE COUPON IF NEEDED
-  // UPDATE QR USED COUNT
-  // SEND SMS & EMAIL
-
   var deferred = Q.defer();
-  deferred.resolve(true);
+
+  check_and_create_coupon(data)
+    .then(function(data) {
+      return update_checkin_counts(data);
+    })
+    .then(function(data) {
+      return update_qr_count(data);
+    })
+    .then(function(data) {
+      return send_sms(data);
+    })
+    .then(function(data) {
+      deferred.resolve(data);
+    })
+    .fail(function(err) {
+      deferred.reject(err);
+    })
+
   return deferred.promise;
 };
 
+// ALL THE CHECKS
 function check_outlet(data) {
   logger.log();
   var deferred = Q.defer();
@@ -95,6 +107,8 @@ function already_checked_in(data) {
   var FIVE_MINS = new Date(Date.now() - 300000);
 
   var deferred = Q.defer();
+  deferred.resolve(data); // TEMPORARY
+
   var user_id = _.get(data, 'user._id');
   var outlet_id = _.get(data, 'outlet._id');
 
@@ -146,4 +160,86 @@ function isUsedTooMany(qr) {
 function isOutletClosed(qr) {
   // CHECK IF THE OUTLET IS CURRENTLY CLOSED
   return false;
+}
+
+// ALL THE PROCESSING
+function check_and_create_coupon(data) {
+  logger.log();
+  var deferred = Q.defer();
+
+  var user_id = _.get(data, 'user._id');
+  var outlet_id = _.get(data, 'outlet._id');
+
+  var offers = _.get(data, 'outlet.offers');
+  var sorted_checkin_offers = _.sortBy(_.filter(offers, {'offer_type':'checkin'}),'rule.event_count');
+  
+  Event.find({
+    'event_user': user_id,
+    'event_type': 'checkin',
+    'event_outlet': outlet_id
+  }, function(err, events) {
+    if (err) {
+      deferred.reject(err);
+    }
+
+    var matching_offer = find_matching_offer(events, sorted_checkin_offers);
+    if (matching_offer) {
+      // CREATE THE COUPON
+    } else {
+      deferred.resolve(data);
+    }
+  });
+  return deferred.promise;
+}
+
+function find_matching_offer(events, offers) {
+  var i = 0;
+  var checkins = events.length + 1; // TO COUNT THIS CHECKIN AS WELL
+  var count, match;
+
+  for (i = 0; i < offers.length; i++) {
+    count = _.get(offers[i], 'rule.event_count');
+    match = _.get(offers[i], 'rule.event_match');
+
+    if (match === 'on every') {
+      if (checkins % count === 0) {
+        return offer[i];
+      }
+    }
+
+    if (match === 'on only') {
+
+      if (checkins === count) {
+        return offers[i];
+      }
+    }
+
+    if (match === 'after') {
+
+      if (checkins > count) {
+        return offers[i];
+      }
+    }
+  }
+
+  return undefined;
+}
+
+function update_checkin_counts(data) {
+  // UPDATE CACHES?
+  var deferred = Q.defer();
+  deferred.resolve(data);
+  return deferred.promise;
+}
+
+function update_qr_count(data) {
+  var deferred = Q.defer();
+  deferred.resolve(data);
+  return deferred.promise;
+}
+
+function send_sms(data) {
+  var deferred = Q.defer();
+  deferred.resolve(data);
+  return deferred.promise;
 }
