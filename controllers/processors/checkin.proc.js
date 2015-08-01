@@ -3,11 +3,12 @@ var _ = require('lodash');
 var Q = require('q');
 
 var mongoose = require('mongoose');
-require('../../models/qr_code.mdl.js');
-require('../../models/event.mdl.js');
-
+require('../../models/qr_code.mdl');
+require('../../models/event.mdl');
+require('../../models/user.mdl');
 var QR = mongoose.model('QR');
 var Event = mongoose.model('Event');
+var User = mongoose.model('User');
 
 module.exports.check = function(data) {
   logger.log();
@@ -93,7 +94,7 @@ function validate_qr(data) {
     if (isOutletClosed(qr)) {
       deferred.reject('QR code used at a closed outlet');
     }
-    passed_data.qr = qr;  
+    passed_data.qr = qr;
     passed_data.outlet = qr.outlet_id; // SO THAT THE OUTLET IS SAVED IN THE EVENT TABLE
     deferred.resolve(passed_data);
   });
@@ -103,7 +104,7 @@ function validate_qr(data) {
 
 function already_checked_in(data) {
   logger.log();
-  var SIX_HOURS = new Date(Date.now() -  21600000);
+  var SIX_HOURS = new Date(Date.now() - 21600000);
   var FIVE_MINS = new Date(Date.now() - 300000);
 
   var deferred = Q.defer();
@@ -124,10 +125,12 @@ function already_checked_in(data) {
     }
 
     if (events.length) {
-      var same_outlet = _.filter(events, {event_outlet:outlet_id});
+      var same_outlet = _.filter(events, {
+        event_outlet: outlet_id
+      });
       if (same_outlet.length !== 0) {
         deferred.reject('Already checked in here');
-      } 
+      }
 
       var too_soon = _.find(events, function(event) {
         return event.event_date > FIVE_MINS;
@@ -136,7 +139,7 @@ function already_checked_in(data) {
       if (too_soon) {
         deferred.reject('Checked in at another outlet less than 5 minutes ago!');
       }
-    } 
+    }
     deferred.resolve(data);
   })
 
@@ -171,8 +174,10 @@ function check_and_create_coupon(data) {
   var outlet_id = _.get(data, 'outlet._id');
 
   var offers = _.get(data, 'outlet.offers');
-  var sorted_checkin_offers = _.sortBy(_.filter(offers, {'offer_type':'checkin'}),'rule.event_count');
-  
+  var sorted_checkin_offers = _.sortBy(_.filter(offers, {
+    'offer_type': 'checkin'
+  }), 'rule.event_count');
+
   Event.find({
     'event_user': user_id,
     'event_type': 'checkin',
@@ -184,11 +189,60 @@ function check_and_create_coupon(data) {
 
     var matching_offer = find_matching_offer(events, sorted_checkin_offers);
     if (matching_offer) {
-      // CREATE THE COUPON
+      logger.log("FOUND A MATCHING OFFER!")
+      create_coupon(matching_offer, user_id, outlet_id).then(function(data) {
+        deferred.resolve()
+      }, function(err) {
+        deferred.reject('Could not create coupon' + err);
+      })
     } else {
       deferred.resolve(data);
     }
   });
+  return deferred.promise;
+}
+
+function create_coupon(offer, user, outlet) {
+  logger.log();
+  logger.log("CREATING A COUPON!!");
+  var deferred = Q.defer();
+  var outlets = [];
+  outlets.push(outlet);
+  var update = {
+    $push: {
+      coupons: {
+        code: 'ABC123',
+        outlets: outlets,
+        coupon_source: {
+          type: 'qr_checkin'
+        },
+        header: offer.actions.reward.header,
+        line1: offer.actions.reward.line1,
+        line2: offer.actions.reward.line2,
+        lapse_date: new Date(),
+        expiry_date: new Date(),
+        meta: {
+          reward_type: {
+            type: 'need to fix' // to fix = where from?
+          }
+        },
+        status: 'active',
+        issued_at: new Date()
+      }
+    }
+  };
+
+  User.findOneAndUpdate({
+    _id: user
+  }, update, function(err, user) {
+    console.log(err);
+    console.log(user);
+    if (err || !user) {
+      deferred.reject('Could not update user');
+    } else
+      deferred.resolve(user);
+  });
+
   return deferred.promise;
 }
 
