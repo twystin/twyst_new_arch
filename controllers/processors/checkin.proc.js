@@ -4,7 +4,10 @@ var Q = require('q');
 
 var mongoose = require('mongoose');
 require('../../models/qr_code.mdl.js');
+require('../../models/event.mdl.js');
+
 var QR = mongoose.model('QR');
+var Event = mongoose.model('Event');
 
 module.exports.check = function(data) {
   logger.log();
@@ -24,6 +27,12 @@ module.exports.check = function(data) {
 
 module.exports.process = function(data) {
   logger.log();
+
+  // UPDATE CHECKIN COUNTS
+  // CREATE COUPON IF NEEDED
+  // UPDATE QR USED COUNT
+  // SEND SMS & EMAIL
+
   var deferred = Q.defer();
   deferred.resolve(true);
   return deferred.promise;
@@ -43,6 +52,7 @@ function check_outlet(data) {
 
 function validate_qr(data) {
   logger.log();
+  var passed_data = data;
   var deferred = Q.defer();
   var code = _.get(data, 'event_data.event_meta.code');
   if (!code) {
@@ -68,10 +78,12 @@ function validate_qr(data) {
       deferred.reject('QR code used at an outlet that is not active');
     }
 
-    if (isOutletClosed(qr) {
+    if (isOutletClosed(qr)) {
       deferred.reject('QR code used at a closed outlet');
-    })
-    deferred.resolve(data);
+    }
+    passed_data.qr = qr;  
+    passed_data.outlet = qr.outlet_id; // SO THAT THE OUTLET IS SAVED IN THE EVENT TABLE
+    deferred.resolve(passed_data);
   });
 
   return deferred.promise;
@@ -79,8 +91,41 @@ function validate_qr(data) {
 
 function already_checked_in(data) {
   logger.log();
+  var SIX_HOURS = new Date(Date.now() -  21600000);
+  var FIVE_MINS = new Date(Date.now() - 300000);
+
   var deferred = Q.defer();
-  deferred.resolve(data);
+  var user_id = _.get(data, 'user._id');
+  var outlet_id = _.get(data, 'outlet._id');
+
+  Event.find({
+    'event_user': user_id,
+    'event_type': 'checkin',
+    'event_date': {
+      $gt: SIX_HOURS
+    }
+  }, function(err, events) {
+    if (err) {
+      deferred.reject(err);
+    }
+
+    if (events.length) {
+      var same_outlet = _.filter(events, {event_outlet:outlet_id});
+      if (same_outlet.length !== 0) {
+        deferred.reject('Already checked in here');
+      } 
+
+      var too_soon = _.find(events, function(event) {
+        return event.event_date > FIVE_MINS;
+      });
+
+      if (too_soon) {
+        deferred.reject('Checked in at another outlet less than 5 minutes ago!');
+      }
+    } 
+    deferred.resolve(data);
+  })
+
   return deferred.promise;
 }
 
