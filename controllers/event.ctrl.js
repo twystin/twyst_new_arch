@@ -104,6 +104,9 @@ function create_new(res, passed_data) {
       return create_event(data);
     })
     .then(function(data) {
+      return update_event_analytics(data);
+    })
+    .then(function(data) {
       HttpHelper.success(res, data.outlets, "Processed the event successfully.");
     })
     .fail(function(err) {
@@ -210,6 +213,29 @@ function process_event(data) {
     .fail(function(err) {
       deferred.reject('Could not process the event - ' + err);
     });
+
+  return deferred.promise;
+}
+
+function update_event_analytics(data) {
+  var mongoose = require('mongoose');
+  require('../models/outlet.mdl.js');
+  var Outlet = mongoose.model('Outlet');
+  logger.log()
+  var deferred = Q.defer();
+  var event_type = data.event_data.event_type;
+  var update = {
+    $inc: {}
+  };
+  var key = 'analytics.event_analytics.' + event_type;
+  update.$inc[key] = 1;
+  Outlet.findOneAndUpdate({_id: data.outlet._id}, update, function(err, outlet) {
+    if (err) {
+      deferred.reject('Could not update analytics' + err);
+    } else {
+      deferred.resolve(data);
+    }
+  });
 
   return deferred.promise;
 }
