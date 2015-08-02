@@ -218,6 +218,7 @@ function create_coupon(offer, user, outlet) {
   var update = {
     $push: {
       coupons: {
+        _id: mongoose.Types.ObjectId(),
         code: code,
         outlets: outlets,
         coupon_source: {
