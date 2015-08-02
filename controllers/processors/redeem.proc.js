@@ -47,13 +47,11 @@ function check_user_has_coupon(data) {
   logger.log();
   var deferred = Q.defer();
   var code = _.get(data, 'event_data.event_meta.coupon');
-  logger.log("CODE " + code);
   User.findOne({
     _id: data.user._id,
   }, function(err, u) {
     var coupons = u.coupons;
-    console.log(coupons);
-    var coupon = (_.filter(coupons, {code:code}))[0];
+    var coupon = (_.filter(coupons, {code:code}))[0]; // TODO: _.find didnt work here, find out why
     logger.log(coupon);
     if (!coupon) {
       deferred.reject('Could not find this coupon for the user');
