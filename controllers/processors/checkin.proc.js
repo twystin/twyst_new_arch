@@ -190,7 +190,6 @@ function check_and_create_coupon(data) {
 
     var matching_offer = find_matching_offer(events, sorted_checkin_offers);
     if (matching_offer) {
-      logger.log("FOUND A MATCHING OFFER!")
       create_coupon(matching_offer, user_id, outlet_id).then(function(data) {
         deferred.resolve(passed_data);
       }, function(err) {
@@ -205,14 +204,21 @@ function check_and_create_coupon(data) {
 
 function create_coupon(offer, user, outlet) {
   logger.log();
-  logger.log("CREATING A COUPON!!");
+
+  var keygen = require('keygenerator');
+  var code = keygen._({
+    forceUppercase: true,
+    length: 6,
+    exclude: ['O', '0', 'L', '1']
+  });
+
   var deferred = Q.defer();
   var outlets = [];
   outlets.push(outlet);
   var update = {
     $push: {
       coupons: {
-        code: 'ABC123',
+        code: code,
         outlets: outlets,
         coupon_source: {
           type: 'qr_checkin'
@@ -290,12 +296,18 @@ function update_checkin_counts(data) {
 function update_qr_count(data) {
   var deferred = Q.defer();
   console.log(data);
-  QR.findOneAndUpdate({code: data.event_data.event_meta.code}, {$inc:{times_used:1}}, function(err, qr) {
-      if (err) {
-        deferred.reject(err);
-      } else {
-          deferred.resolve(data);
-      }
+  QR.findOneAndUpdate({
+    code: data.event_data.event_meta.code
+  }, {
+    $inc: {
+      times_used: 1
+    }
+  }, function(err, qr) {
+    if (err) {
+      deferred.reject(err);
+    } else {
+      deferred.resolve(data);
+    }
   });
   return deferred.promise;
 }
