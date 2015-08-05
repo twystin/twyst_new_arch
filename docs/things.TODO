@@ -1,7 +1,7 @@
 TODO:
   ✔ Merge dev branch @done (15-07-29 10:45)
   ☐ Complete the APIs
-  ☐ Replace with _.has
+  ✔ Replace with _.has
   ☐ Clean up reco engine, detail, event
   ☐ Merchant app
   ☐ User app

@@ -35,7 +35,7 @@ function check_coupon_code(data) {
   logger.log();
   var deferred = Q.defer();
 
-  if (!_.get(data, 'event_data.event_meta.coupon')) {
+  if (!_.has(data, 'event_data.event_meta.coupon')) {
     deferred.reject('No coupon code sent to redeem');
   }
 

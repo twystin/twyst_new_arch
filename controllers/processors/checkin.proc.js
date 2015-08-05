@@ -54,7 +54,7 @@ module.exports.process = function(data) {
 function check_outlet(data) {
   logger.log();
   var deferred = Q.defer();
-  if (!_.get(data, 'event_data.event_outlet')) {
+  if (!_.has(data, 'event_data.event_outlet')) {
     deferred.reject('Checkin requires an outlet to be passed');
   } else {
     deferred.resolve(data);
@@ -87,7 +87,7 @@ function validate_qr(data) {
       deferred.reject('QR has been used too many times');
     }
 
-    if (_.get(qr, 'outlet_id.outlet_meta.status') !== 'active') {
+    if (_.has(qr, 'outlet_id.outlet_meta.status') !== 'active') {
       deferred.reject('QR code used at an outlet that is not active');
     }
 

@@ -6,8 +6,8 @@ module.exports.check = function(data) {
   logger.log();
   var deferred = Q.defer();
   var passed_data = data;
-  var outlet = _.get(passed_data, 'event_data.event_meta.outlet');
-  var location = _.get(passed_data, 'event_data.event_meta.location');
+  var outlet = _.has(passed_data, 'event_data.event_meta.outlet');
+  var location = _.has(passed_data, 'event_data.event_meta.location');
 
   if (!outlet || !location) {
     deferred.reject('Suggestion needs to have outlet & location.');

@@ -123,11 +123,11 @@ function basic_checks(data) {
   var deferred = Q.defer();
   var passed_data = data;
 
-  if (!_.get(passed_data, 'user_token')) {
+  if (!_.has(passed_data, 'user_token')) {
     deferred.reject("Authentication error - no token passed.");
   }
 
-  if (!_.get(passed_data, 'event_data.event_type')) {
+  if (!_.has(passed_data, 'event_data.event_type')) {
     deferred.reject('No event type - please pass event_type');
   }
 

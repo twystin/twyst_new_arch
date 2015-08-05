@@ -10,7 +10,7 @@ module.exports.check = function(data) {
   var deferred = Q.defer();
   var passed_data = data;
 
-  if (!_.get(passed_data, 'event_data.event_outlet')) {
+  if (!_.has(passed_data, 'event_data.event_outlet')) {
     deferred.reject('Sharing an outlet requires an outlet to be passed');
   } else {
     deferred.resolve(passed_data);
