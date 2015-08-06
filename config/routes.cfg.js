@@ -56,7 +56,6 @@ module.exports = function(app) {
     app.post('/api/v4/offer/like', EventCtrl.like_offer);
     app.post('/api/v4/offer/unlike', EventCtrl.unlike_offer);
     app.post('/api/v4/offer/share', EventCtrl.share_offer);
-    app.post('/api/v4/offer/use', EventCtrl.use_offer);
     
   })();
 
