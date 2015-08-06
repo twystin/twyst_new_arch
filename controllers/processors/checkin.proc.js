@@ -29,7 +29,6 @@ module.exports.check = function(data) {
 module.exports.process = function(data) {
   logger.log();
   var deferred = Q.defer();
-
   check_and_create_coupon(data)
     .then(function(data) {
       return update_checkin_counts(data);
@@ -243,7 +242,7 @@ function create_coupon(offer, user, outlet) {
   User.findOneAndUpdate({
     _id: user
   }, update, function(err, user) {
-    // console.log(err);
+     console.log(err);
     // console.log(user);
     if (err || !user) {
       deferred.reject('Could not update user');
@@ -265,7 +264,7 @@ function find_matching_offer(events, offers) {
 
     if (match === 'on every') {
       if (checkins % count === 0) {
-        return offer[i];
+        return offers[i];
       }
     }
 
@@ -296,7 +295,7 @@ function update_checkin_counts(data) {
 
 function update_qr_count(data) {
   var deferred = Q.defer();
-  console.log(data);
+  //console.log(data);
   QR.findOneAndUpdate({
     code: data.event_data.event_meta.code
   }, {

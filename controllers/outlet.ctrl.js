@@ -213,14 +213,14 @@ function massage_offers(params) {
 
       params.outlet = add_user_coupons(
         pick_offer_fields(
-          select_relevant_checkin_offer(params.outlet)), coupon_map && coupon_map[params.outlet._id] && coupon_map[params.outlet._id].coupons);
+          select_relevant_checkin_offer(params.outlet), params.user._id), coupon_map && coupon_map[params.outlet._id] && coupon_map[params.outlet._id].coupons);
       deferred.resolve(params);
 
     });
   } else {
     params.outlet =
       pick_offer_fields(
-        select_relevant_checkin_offer(params.outlet));
+        select_relevant_checkin_offer(params.outlet), params.user._id);
     deferred.resolve(params);
     deferred.resolve(params);
   }
@@ -281,12 +281,13 @@ function massage_offers(params) {
     return item;
   }
 
-  function pick_offer_fields(item) {
+  function pick_offer_fields(item, user_id) {
     item.offers = _.map(item.offers, function(offer) {
       if (offer.type) {
         return offer;
       } else {
         var massaged_offer = {};
+        massaged_offer._id = offer._id;
         massaged_offer.type = offer.offer_type;
         massaged_offer.title = offer.actions && offer.actions.reward && offer.actions.reward.title;
         massaged_offer.terms = offer.actions && offer.actions.reward && offer.actions.reward.terms;
@@ -305,7 +306,25 @@ function massage_offers(params) {
         massaged_offer.header = offer.actions.reward.header;
         massaged_offer.line1 = offer.actions.reward.line1;
         massaged_offer.line2 = offer.actions.reward.line2;
-        massaged_offer.offer_likes = offer.offer_likes;
+        massaged_offer.description = offer.actions && offer.actions.reward && offer.actions.reward.description;
+        massaged_offer.terms = offer.actions && offer.actions.reward && offer.actions.reward.terms;
+        if(offer.offer_likes && offer.offer_likes.length) {
+          massaged_offer.offer_likes = offer.offer_likes.length;  
+        }
+        else{
+          massaged_offer.offer_likes = 0;
+        }
+
+        var offer_like = _.map(offer.offer_likes, function(user) {
+            if(user.toString() === user_id.toString()) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        })
+        massaged_offer.is_like = offer_like[0]
+        
         return massaged_offer;
       }
 
