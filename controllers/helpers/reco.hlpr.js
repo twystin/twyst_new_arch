@@ -1,5 +1,6 @@
 var fs = require('fs'),
   _ = require('underscore'),
+  ld = require('lodash'),
   dateFormat = require('dateformat'),
   Cache = require('../../common/cache.hlpr'),
   Q = require('q');
@@ -184,61 +185,71 @@ module.exports.isClosed = function(date, tm, business_hours) {
 
 module.exports.opensAt = function(business_hours) {
   var days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  if (!business_hours) {
+
+  if(!business_hours)
     return false;
-  }
-  var opens = {
-    'day': null,
-    'time': null
-  };
-  var time = new Date(Date.now() + 19800000);
-  var minutes = time.getHours() * 60 + time.getMinutes();
-  var day = days[time.getDay()];
+
+  var time = new Date(Date.now() + 19800000),
+    minutes = time.getHours() * 60 + time.getMinutes(),
+    day = days[time.getDay()];
+
   var today = business_hours[day];
-  if (today.closed || !today.timings || !today.timings.length) {
-    return checkNextDays();
+
+  if(today.isClosed || !_.has(today, 'timings') || _.isEmpty(today.timings)) {
+    return checkTommorow(1);
   } else {
-    for (var i = 0; i < today.timings.length; i++) {
-      if (today.timings[i].open && today.timings[i].open.hr && today.timings[i].open.min) {
+    for(var i=0; i < today.timings.length; i++) {
+      if(ld.has(today, 'timings.' + i + '.open.hr') && ld.has(today, 'timings.' + i + '.open.min')) {
         var open_min = today.timings[i].open.hr * 60 + today.timings[i].open.min;
-        if (open_min > minutes) {
-          var hr = today.timings[i].open.hr;
-          var min = today.timings[i].open.min;
-          opens.time = formatTime(hr, min);
-          return opens;
+        if(open_min > minutes) {
+          return {
+            time: formatTime(today.timings[i].open.hr, today.timings[i].open.min),
+            day: 'Today'
+          };
         }
       }
     }
-    return checkNextDays();
+    return checkTommorow(1);
   }
 
-  function checkNextDays() {
-    for (var j = 1; j < 7; j++) {
-      time = new Date(time.getTime() + 86400000);
-      var minutes = 0;
-      var day = days[time.getDay()];
-      var today = business_hours[day];
-      if (today.closed || !today.timings || !today.timings.length) {} else {
-        for (var i = 0; i < today.timings.length; i++) {
-          if (today.timings[i].open && today.timings[i].open.hr && today.timings[i].open.min) {
-            var open_min = today.timings[i].open.hr * 60 + today.timings[i].open.min;
-            if (minutes < open_min) {
-              opens.day = day.substr(0, 3);
-              var hr = today.timings[i].open.hr;
-              var min = today.timings[i].open.min;
-              opens.time = formatTime(hr, min);
-              return opens;
+  function checkTommorow(counter) {
+    if (counter === 7)
+      return {
+        'time': null,
+        'day': null
+      };
+
+    minutes = 0;
+    day = days[((time.getDay() + counter)%7)];
+    today = business_hours[day];
+
+    if(today.isClosed || !_.has(today, 'timings') || _.isEmpty(today.timings)) {
+      return checkTommorow(counter + 1);
+    } else {
+      for(var i=0; i < today.timings.length; i++) {
+        if(ld.has(today, 'timings.' + i + '.open.hr') && ld.has(today, 'timings.' + i + '.open.min')) {
+          var open_min = today.timings[i].open.hr * 60 + today.timings[i].open.min;
+          if(open_min > minutes) {
+            if (counter == 1) {
+              day = 'Tommorow';
             }
+
+            return {
+              time: formatTime(today.timings[i].open.hr, today.timings[i].open.min),
+              day: day
+            };
           }
         }
       }
+      return checkTommorow(counter + 1);
     }
-    return opens;
-  }
+  };
 };
 
+
+
 function formatTime(hours, minutes) {
-  if (!hours || !minutes) {
+  if (!_.isFinite(hours) || !_.isFinite(minutes)) {
     return "";
   }
   var ampm = hours >= 12 ? 'PM' : 'AM';

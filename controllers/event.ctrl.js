@@ -226,21 +226,28 @@ function update_outlet_event_analytics(data) {
   var Outlet = mongoose.model('Outlet');
   logger.log()
   var deferred = Q.defer();
-  var event_type = data.event_data.event_type;
+
+  var event_type = _.get(data, 'event_data.event_type');
+  var outlet_id = _.get(data, 'outlet._id');
   var update = {
     $inc: {}
   };
   var key = 'analytics.event_analytics.' + event_type;
-  update.$inc[key] = 1;
-  Outlet.findOneAndUpdate({
-    _id: data.outlet._id
-  }, update, function(err, outlet) {
-    if (err) {
-      deferred.reject('Could not update outlet analytics' + err);
-    } else {
-      deferred.resolve(data);
-    }
-  });
+
+  if (outlet_id && event_type) {
+    update.$inc[key] = 1;
+    Outlet.findOneAndUpdate({
+      _id: data.outlet._id
+    }, update, function(err, outlet) {
+      if (err) {
+        deferred.reject('Could not update outlet analytics' + err);
+      } else {
+        deferred.resolve(data);
+      }
+    });
+  } else {
+    deferred.resolve(data); //TODO: Is this buggy?
+  }
 
   return deferred.promise;
 }
