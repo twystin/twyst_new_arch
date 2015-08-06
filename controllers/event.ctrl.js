@@ -234,7 +234,9 @@ function update_outlet_event_analytics(data) {
   var Outlet = mongoose.model('Outlet');
   logger.log()
   var deferred = Q.defer();
-  var event_type = data.event_data.event_type;
+
+  var event_type = _.get(data, 'event_data.event_type');
+  var outlet_id = _.get(data, 'outlet._id');
   var update = {
     $inc: {}
   };
