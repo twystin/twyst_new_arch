@@ -50,11 +50,14 @@ module.exports = function(app) {
     app.post('/api/v4/outlet/unfollow', EventCtrl.unfollow);
     app.post('/api/v4/outlet/feedback', EventCtrl.feedback);
     app.post('/api/v4/outlet/share', EventCtrl.share_outlet);
+    app.post('/api/v4/outlet/suggestion', EventCtrl.suggestion);
 
     app.post('/api/v4/offer/submit', EventCtrl.submit_offer);
     app.post('/api/v4/offer/like', EventCtrl.like_offer);
+    app.post('/api/v4/offer/unlike', EventCtrl.unlike_offer);
     app.post('/api/v4/offer/share', EventCtrl.share_offer);
-    app.post('/api/v4/offer/suggestion', EventCtrl.suggestion);
+    app.post('/api/v4/offer/use', EventCtrl.use_offer);
+    
   })();
 
 

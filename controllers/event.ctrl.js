@@ -75,6 +75,12 @@ module.exports.suggestion = function(req, res) {
   create_new(res, setup_event(req, 'suggestion'));
 };
 
+module.exports.unlike_offer = function(req, res) {
+  logger.log();
+  create_new(res, setup_event(req, 'unlike_offer'));
+};
+
+
 function setup_event(req, type) {
   logger.log();
   var passed_data = {};
@@ -191,10 +197,12 @@ function process_event(data) {
     'feedback': require('./processors/feedback.proc'),
     'submit_offer': require('./processors/submit_offer.proc'),
     'like_offer': require('./processors/like_offer.proc'),
+    'unlike_offer': require('./processors/unlike_offer.proc'),
     'upload_bill': require('./processors/upload_bill.proc'),
     'share_offer': require('./processors/share_offer.proc'),
     'share_outlet': require('./processors/share_outlet.proc'),
     'suggestion': require('./processors/suggestion.proc')
+
   };
 
   var deferred = Q.defer();
@@ -232,16 +240,19 @@ function update_outlet_event_analytics(data) {
   };
   var key = 'analytics.event_analytics.' + event_type;
   update.$inc[key] = 1;
-  Outlet.findOneAndUpdate({
+  if(data.outlet) {
+    Outlet.findOneAndUpdate({
     _id: data.outlet._id
-  }, update, function(err, outlet) {
-    if (err) {
-      deferred.reject('Could not update outlet analytics' + err);
-    } else {
-      deferred.resolve(data);
-    }
-  });
-
+      }, update, function(err, outlet) {
+      if (err) {
+        deferred.reject('Could not update outlet analytics' + err);
+      } else {
+        deferred.resolve(data);
+      }
+    });  
+  }
+  
+  deferred.resolve(data);
   return deferred.promise;
 }
 
@@ -265,27 +276,30 @@ function update_user_event_analytics(data) {
   var key_total = 'user_meta.total_events.' + event_type;
   update_total.$inc[key_total] = 1;
 
-  var key_outlet = 'user_meta.total_events_by_outlet.' + data.outlet._id + '.' + event_type;
-  update_total_by_outlet.$inc[key_outlet] = 1;
+  if(data.outlet) {
+    var key_outlet = 'user_meta.total_events_by_outlet.' + data.outlet._id + '.' + event_type;
+    update_total_by_outlet.$inc[key_outlet] = 1;
 
-  User.findOneAndUpdate({
-    _id: data.user._id
-  }, update_total, function(err, user) {
-    if (err) {
-      deferred.reject('Could not update user analytics' + err);
-    } else {
-      User.findOneAndUpdate({
-        _id: data.user._id
-      }, update_total_by_outlet, function(err, user) {
-        if (err) {
-          deferred.reject('Could not update user analytics' + err);
-        } else {
-          deferred.resolve(data);
-        }
-      });
-    }
-  });
-
+    User.findOneAndUpdate({
+      _id: data.user._id
+    }, update_total, function(err, user) {
+      if (err) {
+        deferred.reject('Could not update user analytics' + err);
+      } else {
+        User.findOneAndUpdate({
+          _id: data.user._id
+        }, update_total_by_outlet, function(err, user) {
+          if (err) {
+            deferred.reject('Could not update user analytics' + err);
+          } else {
+            deferred.resolve(data);
+          }
+        });
+      }
+    }); 
+  }
+  
+  deferred.resolve(data);
   return deferred.promise;
 }
 
