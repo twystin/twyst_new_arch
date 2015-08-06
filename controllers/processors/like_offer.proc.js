@@ -10,8 +10,8 @@ module.exports.check = function(data) {
   logger.log();
   var deferred = Q.defer();
   var passed_data = data;
-  var offer = _.has(passed_data, 'event_data.event_meta.offer');
-  var outlet = _.has(passed_data, 'event_data.event_meta.outlet');
+  var offer = _.get(passed_data, 'event_data.event_meta.offer');
+  var outlet = _.get(passed_data, 'event_data.event_meta.outlet');
 
   if (!offer || !outlet) {
     deferred.reject('Like offer information needs to have offer & outlet.');
