@@ -169,7 +169,7 @@ module.exports.isClosed = function(date, tm, business_hours) {
   for (var i = 0; i < today.timings.length; i++) {
     var timing = today.timings[i];
 
-    if(_.has(timing, 'open.hr') && _.has(timing, 'open.min') && _.has(timing, 'close.hr') && _.has(timing, 'close.min')) {
+    if(ld.has(timing, 'open.hr') && ld.has(timing, 'open.min') && ld.has(timing, 'close.hr') && ld.has(timing, 'close.min')) {
       var open_min = (timing.open.hr * 60) + timing.open.min,
         close_min = (timing.close.hr * 60) + timing.close.min;
 
