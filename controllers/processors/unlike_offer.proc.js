@@ -14,7 +14,7 @@ module.exports.check = function(data) {
   var outlet = _.get(passed_data, 'event_data.event_meta.outlet');
 
   if (!offer || !outlet) {
-    deferred.reject('Like offer information needs to have offer & outlet.');
+    deferred.reject('Unlike offer information needs to have offer & outlet.');
   } else {
     deferred.resolve(passed_data);
   }
@@ -35,7 +35,7 @@ module.exports.process = function(data) {
         }
       }
     }, {
-      $addToSet: {
+      $pull: {
         'offers.$.offer_likes': updated_user._id
       }
     },
