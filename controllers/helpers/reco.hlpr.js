@@ -150,43 +150,33 @@ module.exports.shuffleArray = function(array) {
 
 module.exports.isClosed = function(date, tm, business_hours) {
   var days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  if (!business_hours) {
-    return false;
-  }
-  var time = null;
-  //Commented for now
-  //if (date && tm) {
-  //time = new Date(date + ' ' + tm);
-  // } else {
-  //   time = new Date();
-  //}
-  time = new Date(Date.now() + 19800000);
 
-  var day = days[time.getDay()];
-  var today = business_hours[day];
-  if (!today.timings || !today.timings.length) {
+  if (!business_hours)
     return false;
-  }
-  if (today.closed) {
+
+  var time = new Date(Date.now() + 19800000),
+    day = days[time.getDay()],
+    today = business_hours[day];
+
+  if (today.closed)
     return true;
-  }
-  var minutes = time.getHours() * 60 + time.getMinutes();
-  for (var i = 0; i < today.timings.length; i++) {
-    var t = today.timings[i];
-    var open_min = 0,
-      close_min = 0;
-    if (t && t.open) {
-      open_min = t.open.hr * 60 + t.open.min;
-    } else {
-      return false;
-    }
 
-    if (t && t.close) {
-      close_min = t.close.hr * 60 + t.close.min;
+  if (!_.has(today, 'timings'))
+    return false;
+
+  var minutes = (time.getHours() * 60) + time.getMinutes();
+
+  for (var i = 0; i < today.timings.length; i++) {
+    var timing = today.timings[i];
+
+    if(_.has(timing, 'open.hr') && _.has(timing, 'open.min') && _.has(timing, 'close.hr') && _.has(timing, 'close.min')) {
+      var open_min = (timing.open.hr * 60) + timing.open.min,
+        close_min = (timing.close.hr * 60) + timing.close.min;
+
+      if( (minutes >= open_min) && (minutes <= close_min) )
+        return false;
+
     } else {
-      return false;
-    }
-    if (minutes >= open_min && minutes <= close_min) {
       return false;
     }
   }
