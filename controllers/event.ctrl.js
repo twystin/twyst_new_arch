@@ -78,7 +78,7 @@ module.exports.suggestion = function(req, res) {
 
 module.exports.unlike_offer = function(req, res) {
   logger.log();
-  
+  create_new(res, setup_event(req, 'unlike_offer'));
 };
 
 module.exports.extend_offer = function(req, res) {
