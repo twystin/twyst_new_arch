@@ -2,24 +2,30 @@
   <wizard on-finish="finishedWizard()">
     <wz-step title="Basic information">
       <form>
-      	<legend>Basic information</legend>
-      
-      	<div class="form-group">
-      		<label for="">Outlet name</label>
-      		<input type="text" class="form-control" id="" placeholder="Name of the outlet">
-      	</div>
-      	
-      	<div class="form-group">
-      		<label for="input-id">Address</label>
-      		<textarea name="" id="input" class="form-control" rows="3" required="required"></textarea>
-      	</div>
-
-      	<button type="submit" class="btn btn-primary" wz-next>Next</button>
+        <legend>Basic information</legend>
+        <div class="form-group">
+          <label for="">Outlet name</label>
+          <input type="text" class="form-control" id="" placeholder="Name of the outlet" ng-model="outlet.basics.name">
+        </div>
+        <div class="form-group">
+          <label for="input-id">Address</label>
+          <textarea name="" id="input" class="form-control" rows="3" required="required" ng-model="outlet.contact.location.address"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" wz-next>Next</button>
       </form>
     </wz-step>
     <wz-step title="Attributes">
-      <h1>Continuing</h1>
-      <p>You have continued here!</p>
+      <form>
+        <legend>Attributes</legend>
+        <div class="form-group">
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" value="">
+              Option one is this and that&mdash;be sure to include why it's great
+            </label>
+          </div>
+        </div>
+      </form>
       <input type="submit" wz-next value="Go on" />
     </wz-step>
     <wz-step title="Photos">
@@ -35,4 +41,7 @@
       <input type="submit" wz-next value="Finish now" />
     </wz-step>
   </wizard>
+  {{outlet | json}}
+
 </div>
+
