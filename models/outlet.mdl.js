@@ -391,6 +391,9 @@ var OutletSchema = new Schema({
     offer_source: {
       type: String
     },
+    offer_cost:{
+      type: Number
+    },
     rule: {
       _id: {
         type: Schema.Types.ObjectId
