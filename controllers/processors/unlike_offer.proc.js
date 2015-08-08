@@ -44,7 +44,7 @@ module.exports.process = function(data) {
         console.log(err);
         deferred.reject('Could not update offer');
       } else {
-        RecoHelper.cache_offer_likes(passed_data.event_data.event_type, passed_data.event_data.event_meta.offer, updated_user._id).then(function(data) {
+        RecoHelper.cache_offer_likes(passed_data.event_data.event_type, passed_data.event_data.event_meta.offer, updated_user._id, updated_outlet._id).then(function(data) {
           deferred.resolve(passed_data);
         }, function(err) {
           deferred.reject('Could not update outlet cache');

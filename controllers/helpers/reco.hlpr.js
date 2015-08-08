@@ -89,41 +89,84 @@ module.exports.cache_user_coupons = function(user) {
   return deferred.promise;
 };
 
-module.exports.cache_offer_likes = function(event_type, updated_offer, new_user) {
+module.exports.cache_offer_likes = function(event_type, updated_offer, new_user, updated_outlet) {
   logger.log();
   var deferred = Q.defer();
   var users = [];
+  
   Cache.hget(updated_offer, 'offer_like_map', function(err, reply) {
     if (err || !reply) {
-      users.push(JSON.stringify(new_user));
-      Cache.hset(updated_offer, 'offer_like_map', users);
-      deferred.resolve(true);
+      Cache.get('outlets', function(err, reply) {
+        if (!err && reply) { 
+          var outlets = JSON.parse(reply),
+            outlet = outlets[updated_outlet.toString()];
+
+          _.map(outlet.offers, function(offer) {
+
+            if(offer._id.toString() == updated_offer.toString()) {
+
+              if ((!_.contains(offer.offer_likes, new_user.toString())) && (event_type == 'like_offer')) {
+                offer.offer_likes.push(new_user.toString());
+                users = offer.offer_likes;
+
+                Cache.hset(updated_offer, 'offer_like_map', JSON.stringify(users));
+                Cache.set('outlets', JSON.stringify(outlets));
+              } else if (_.contains(offer.offer_likes, new_user.toString()) && (event_type == 'unlike_offer')) {
+                offer.offer_likes.pop(new_user.toString());
+                users = offer.offer_likes;
+
+                Cache.hset(updated_offer, 'offer_like_map', JSON.stringify(users));
+                Cache.set('outlets', JSON.stringify(outlets));
+              }
+            }
+          });
+          
+        }
+
+        deferred.resolve(true);
+      });
+      
     } else {
-      if(event_type == 'like_offer') {
-        users.push(JSON.parse(reply));
-        users = _.flatten(users);
-        if (!_.contains(users, JSON.stringify(new_user))) {
-          users.push(JSON.stringify(new_user));
-        }  
-      }
-      else{
-        users.push(JSON.parse(reply));
-        users = _.flatten(users);
-        if (_.contains(users, JSON.stringify(new_user))) {
-          users.pop(JSON.stringify(new_user));
+      users = JSON.parse(reply);
+
+      if (event_type == 'like_offer') {
+        if (!_.contains(users, new_user.toString())) {
+          users.push(new_user.toString());
+        }
+      } else {    
+        if (_.contains(users, new_user.toString())) {
+          users.pop(new_user.toString());
         }
       }
       
-
       Cache.hset(updated_offer, 'offer_like_map', JSON.stringify(users));
-      deferred.resolve(true);
+
+      Cache.get('outlets', function(err, reply) {
+        if(err || !reply) {
+          deferred.resolve(true);
+        } else {
+          var outlets = JSON.parse(reply),
+            outlet_id = updated_outlet.toString();
+
+          _.map(outlets[outlet_id].offers, function(offer) {
+            if(offer._id.toString() == updated_offer.toString()) {
+              offer.offer_likes = users;
+              Cache.set('outlets', JSON.stringify(outlets));
+            }
+          });
+
+          deferred.resolve(true);
+        }
+      });
+
     }
-  })
+
+  });
 
   deferred.resolve(true);
 
   return deferred.promise;
-}
+};
 
 // OLD CODE THAT SHOULD BE CLEANED UP
 

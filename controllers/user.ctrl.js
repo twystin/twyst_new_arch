@@ -14,8 +14,11 @@ module.exports.get_coupons = function(req, res) {
     HttpHelper.error(res, null, "Not authenticated");
   }
 
-  AuthHelper.get_user(req.query.token).then(function(data) {
-    HttpHelper.success(res, data.data.coupons, 'Returning users coupons');
+  AuthHelper.get_user(req.query.token).then(function(user) {
+    var data = {};
+    data.coupons = user.data.coupons;
+    data.twyst_bucks = user.data.twyst_bucks;
+    HttpHelper.success(res, data, 'Returning users coupons');
   }, function(err) {
     HttpHelper.error(res, err, 'Couldn\'t find the user');
   });
@@ -70,22 +73,3 @@ module.exports.update_friends = function(req, res) {
   });
 };
 
-
-module.exports.extend_my_voucher = function(req, res) {
-  var token = req.query.token || null;
-
-  if (!token) {
-    HttpHelper.error(res, null, "Not authenticated");
-  }
-  var date = new Date(req.body.date);
-
-  if (date.getTime() < (new Date().getTime())) {
-    HttpHelper.error(res, null, "You can not extend to past date");
-  }
-
-  UserHelper.update_voucher_lapse_date(token, req.body.voucher, date).then(function(data) {
-    HttpHelper.success(res, data.data, data.message);
-  }, function(err) {
-    HttpHelper.error(res, err.err, err.message);
-  });
-};
