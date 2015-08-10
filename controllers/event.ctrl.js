@@ -86,6 +86,11 @@ module.exports.extend_offer = function(req, res) {
   create_new(res, setup_event(req, 'extend_offer'));
 };
 
+module.exports.report_problem = function(req, res) {
+  logger.log();
+  create_new(res, setup_event(req, 'report_problem'));
+};
+
 
 function setup_event(req, type) {
   logger.log();
@@ -216,7 +221,8 @@ function process_event(data) {
     'share_offer': require('./processors/share_offer.proc'),
     'share_outlet': require('./processors/share_outlet.proc'),
     'suggestion': require('./processors/suggestion.proc'),
-    'extend_offer': require('./processors/extend_offer.proc')
+    'extend_offer': require('./processors/extend_offer.proc'),
+    'report_problem': require('./processors/report_problem.proc')
 
   };
 

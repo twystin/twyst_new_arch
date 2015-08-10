@@ -40,7 +40,7 @@ module.exports.process = function(data) {
       }
     },
     function(err, updated_outlet) {
-      if (err) {
+      if (err || !updated_outlet) {
         console.log(err);
         deferred.reject('Could not update offer');
       } else {

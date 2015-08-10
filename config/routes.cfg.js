@@ -57,6 +57,7 @@ module.exports = function(app) {
     app.post('/api/v4/offer/unlike', EventCtrl.unlike_offer);
     app.post('/api/v4/offer/share', EventCtrl.share_offer);
     app.post('/api/v4/offer/extend', EventCtrl.extend_offer);
+    app.post('/api/v4/offer/report/problem', EventCtrl.report_problem);
     
   })();
 
@@ -93,7 +94,6 @@ module.exports = function(app) {
 
 /*
  ROUTES I NEED FOR THE WEB & PHONE APP
-
  2. Discover related:
  GET /api/v4/outlets?token=123&lat=123&long=123&datetime=123 - Get outlets for me
  GET /api/v4/outlets?q=latte,coffee - Search
