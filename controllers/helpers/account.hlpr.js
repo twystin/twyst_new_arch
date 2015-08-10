@@ -121,7 +121,8 @@ module.exports.create_user_account = function(phone) {
           phone: phone,
           validation: {
             otp: true
-          }
+          },
+          twyst_bucks: 500
         });
         new_user.save(function(err, saved_user) {
           if (err || !saved_user) {

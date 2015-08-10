@@ -5,6 +5,7 @@ var Cache = require('../common/cache.hlpr');
 var mongoose = require('mongoose');
 var Outlet = mongoose.model('Outlet');
 var LocationHandler = require('../scripts/location.js');
+var BucksHandler = require('../scripts/twyst_bucks_grid.js');
 
 var _ = require('lodash');
 var logger = require('tracer').colorConsole();
@@ -35,8 +36,17 @@ function populateLocations() {
   });
 }
 
+function populateTwystBucks() {
+  Cache.hset('twyst_bucks', 'twyst_bucks_grid', JSON.stringify(BucksHandler.bucks_grid), function(err) {
+    if (!err) {
+      logger.info('Populated cache with twyst_bucks');
+    }
+  });
+}
+
 module.exports.populate = function() {
   logger.info('Trying to populate the cache');
   populateOutlets();
   populateLocations();
+  populateTwystBucks();
 };

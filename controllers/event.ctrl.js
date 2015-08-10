@@ -4,6 +4,7 @@
 var logger = require('tracer').colorConsole();
 var _ = require('lodash');
 var Q = require('q');
+var Cache = require('../common/cache.hlpr');
 
 module.exports.new = function(req, res) {
   logger.log();
@@ -80,6 +81,11 @@ module.exports.unlike_offer = function(req, res) {
   create_new(res, setup_event(req, 'unlike_offer'));
 };
 
+module.exports.extend_offer = function(req, res) {
+  logger.log();
+  create_new(res, setup_event(req, 'extend_offer'));
+};
+
 
 function setup_event(req, type) {
   logger.log();
@@ -116,7 +122,15 @@ function create_new(res, passed_data) {
       return update_user_event_analytics(data);
     })
     .then(function(data) {
-      HttpHelper.success(res, data.outlets, "Processed the event successfully.");
+      return update_twyst_bucks(data);
+    })
+    .then(function(data) {
+
+        var bucks = data.user.twyst_bucks;
+        var data = {};
+        data.twyst_bucks = bucks;
+        
+      HttpHelper.success(res, data, "Processed the event successfully.");
     })
     .fail(function(err) {
       console.log(err)
@@ -201,7 +215,8 @@ function process_event(data) {
     'upload_bill': require('./processors/upload_bill.proc'),
     'share_offer': require('./processors/share_offer.proc'),
     'share_outlet': require('./processors/share_outlet.proc'),
-    'suggestion': require('./processors/suggestion.proc')
+    'suggestion': require('./processors/suggestion.proc'),
+    'extend_offer': require('./processors/extend_offer.proc')
 
   };
 
@@ -331,4 +346,55 @@ function create_event(data) {
   });
 
   return deferred.promise;
+}
+
+function update_twyst_bucks(data) {
+    var mongoose = require('mongoose');
+    require('../models/user.mdl.js');
+    var User = mongoose.model('User');
+    logger.log();
+    var deferred = Q.defer();
+    var event_type = data.event_data.event_type;
+    var available_twyst_bucks = data.user.twyst_bucks;
+    var update_twyst_bucks = {
+        $set:{
+
+        }
+    }
+    
+    Cache.hget('twyst_bucks', "twyst_bucks_grid", function(err, reply) {
+        if (err || !reply) {
+              deferred.reject('Could not get bucks grid' + err);
+        } 
+        else {
+            
+            var bucks_grid = JSON.parse(reply);
+
+            _.find(bucks_grid, function(current_event) {
+                if(current_event.event === event_type && current_event.update_now) {
+                    if(current_event.earn){
+                        data.user.twyst_bucks = available_twyst_bucks + current_event.bucks;
+                    }
+                    else {
+                        data.user.twyst_bucks = available_twyst_bucks - current_event.bucks;
+                    }
+
+                    update_twyst_bucks.$set.twyst_bucks = data.user.twyst_bucks;
+
+                    User.findOneAndUpdate({
+                        _id: data.user._id
+                        }, update_twyst_bucks, function(err, user) {
+                        if (err) {
+                            deferred.reject('Could not update user bucks' + err);
+                        } 
+                        else {
+                            deferred.resolve(data);                                                  
+                        }
+                    }); 
+                }
+            }) 
+            deferred.resolve(data);           
+        }
+    });
+    return deferred.promise;
 }

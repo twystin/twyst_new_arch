@@ -56,6 +56,7 @@ module.exports = function(app) {
     app.post('/api/v4/offer/like', EventCtrl.like_offer);
     app.post('/api/v4/offer/unlike', EventCtrl.unlike_offer);
     app.post('/api/v4/offer/share', EventCtrl.share_offer);
+    app.post('/api/v4/offer/extend', EventCtrl.extend_offer);
     
   })();
 
@@ -80,7 +81,6 @@ module.exports = function(app) {
 
     app.get('/api/v4/coupons', UserCtrl.get_coupons);
 
-    app.post('/api/v4/extend_my_voucher', UserCtrl.extend_my_voucher);
   })();
 
   (function LocationRoutes() {

@@ -18,7 +18,7 @@ var User = new Schema({
   last_name: String,
   email: String,
   address: String,
-  twyst_bucks: Number,
+  twyst_bucks: Number, //default 500
   push_ids: [{
     push_type: String, // enum
     push_id: String,
