@@ -106,6 +106,10 @@ module.exports.cache_offer_likes = function(event_type, updated_offer, new_user,
             if(offer._id.toString() == updated_offer.toString()) {
 
               if ((!_.contains(offer.offer_likes, new_user.toString())) && (event_type == 'like_offer')) {
+                if (!_.has(offer, 'offer_likes')) {
+                  offer.offer_likes = [];
+                }
+
                 offer.offer_likes.push(new_user.toString());
                 users = offer.offer_likes;
 
@@ -127,16 +131,12 @@ module.exports.cache_offer_likes = function(event_type, updated_offer, new_user,
       });
       
     } else {
-      users = JSON.parse(reply);
+      users = JSON.parse(reply) || [];
 
-      if (event_type == 'like_offer') {
-        if (!_.contains(users, new_user.toString())) {
-          users.push(new_user.toString());
-        }
-      } else {    
-        if (_.contains(users, new_user.toString())) {
+      if (event_type == 'like_offer' && !_.contains(users, new_user.toString())) {
+        users.push(new_user.toString());
+      } else if (_.contains(users, new_user.toString())) {
           users.pop(new_user.toString());
-        }
       }
       
       Cache.hset(updated_offer, 'offer_like_map', JSON.stringify(users));
