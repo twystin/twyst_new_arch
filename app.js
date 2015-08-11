@@ -1,8 +1,7 @@
 var settings = require('./config/settings');
 var logger = require('tracer').colorConsole();
 
-
-(function () {
+(function() {
   'use strict';
   var express = require('express');
   var app = express();
@@ -20,9 +19,9 @@ var logger = require('tracer').colorConsole();
   logger.info('Port:' + settings.values.config[settings.values.env].port);
   app.listen(settings.values.config[settings.values.env].port);
   logger.info('Started the server');
-  process.on('uncaughtException', function (error) {
-      logger.info(error.stack);
-      logger.info(error);
+  process.on('uncaughtException', function(error) {
+    logger.info(error.stack);
+    logger.info(error);
   });
 
 })();

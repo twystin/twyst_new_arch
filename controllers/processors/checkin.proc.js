@@ -242,8 +242,6 @@ function create_coupon(offer, user, outlet) {
   User.findOneAndUpdate({
     _id: user
   }, update, function(err, user) {
-     console.log(err);
-    // console.log(user);
     if (err || !user) {
       deferred.reject('Could not update user');
     } else

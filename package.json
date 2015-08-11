@@ -26,7 +26,7 @@
     "memory-cache": "0.0.5",
     "method-override": "latest",
     "moment": "^2.10.3",
-    "mongoose": "latest",
+    "mongoose": "3.8.13",
     "mongoose-rbac": "~0.1.0",
     "morgan": "latest",
     "mstring": "^0.1.2",
