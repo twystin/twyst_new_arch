@@ -135,7 +135,7 @@ module.exports.cache_offer_likes = function(event_type, updated_offer, new_user,
 
       if (event_type == 'like_offer' && !_.contains(users, new_user.toString())) {
         users.push(new_user.toString());
-      } else if (_.contains(users, new_user.toString())) {
+      } else if (_.contains(users, new_user.toString()) && event_type =='unlike_offer') {
           users.pop(new_user.toString());
       }
       
