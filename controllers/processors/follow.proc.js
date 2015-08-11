@@ -35,7 +35,7 @@ module.exports.process = function(data) {
       }
     },
     function(err, u) {
-      if (err) {
+      if (err || !u) {
         deferred.reject('Could not update user');
       } else {
         RecoHelper.cache_user_favourites(updated_user).then(function(data) {

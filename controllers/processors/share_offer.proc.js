@@ -38,7 +38,7 @@ module.exports.process = function(data) {
       }
     },
     function(err, updated_user) {
-      if (err) {
+      if (err || !updated_user) {
         console.log(err);
         deferred.reject('Could not update user');
       } else {
