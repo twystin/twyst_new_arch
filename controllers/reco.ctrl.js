@@ -409,20 +409,16 @@ function massage_offers(params) {
           massaged_offer.offer_likes = 0;
         }
 
-        var offer_like = _.map(offer.offer_likes, function(user) {
+        _.find(offer.offer_likes, function(user) {
             if(user.toString() === user_id.toString()) {
-                return true;
-            }
+                massaged_offer.is_like = true;  
+                return; 
+            } 
             else {
-                return false;
-            }
+                massaged_offer.is_like = false;   
+            } 
         })
-        if(offer_like.length) {
-            massaged_item.is_like = offer_like[0];
-        }
-        else{
-             massaged_item.is_like = false;
-        }
+        
         
         if (offer && offer.actions && offer.actions.reward && offer.actions.reward.reward_hours) {
           massaged_offer.available_now = !(RecoHelper.isClosed('dummy', 'dummy', offer.actions.reward.reward_hours));

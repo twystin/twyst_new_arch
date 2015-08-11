@@ -139,43 +139,45 @@ function load_outlet_info_from_cache(data) {
                 if (reply) {
                   fmap = JSON.parse(reply);
                 }
-            })
-            massaged_item._id = outlet._id;
-            massaged_item.name = outlet.basics.name;
-            massaged_item.city = outlet.contact.location.city;
-            massaged_item.address = outlet.contact.location.address;
-            massaged_item.locality_1 = outlet.contact.location.locality_1[0];
-            massaged_item.locality_2 = outlet.contact.location.locality_2[0];
-       
-            massaged_item.phone = outlet.contact.phones.mobile[0] && outlet.contact.phones.mobile[0].num;
-            
-            if (fmap && fmap[outlet._id]) {
-            massaged_item.following = true;
-            } else {
-            massaged_item.following = false;
-            }
-
-            if (outlet.photos && outlet.photos.logo) {
-            massaged_item.logo = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + outlet._id + '/' + outlet.photos.logo;
-            }
-            if (outlet.photos && outlet.photos.background) {
-            massaged_item.background = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + outlet._id + '/' + outlet.photos.background;
-            }
-            massaged_item.open_next = RecoHelper.opensAt(outlet.business_hours);
-            _.each(outlet.offers, function(offer) {
-                if(_.has(offer, ['actions', 'reward']) && _.isEqual(offer.actions.reward.header, coupon.header) && _.isEqual(offer.actions.reward.line1, coupon.line1) && _.isEqual(offer.actions.reward.line2, coupon.line2)) {
-                    coupon.available_now = !(RecoHelper.isClosed('dummy', 'dummy', offer.actions.reward.reward_hours));
-                    if(!massaged_item.available_now) {
-                      coupon.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
-                    }
+                massaged_item._id = outlet._id;
+                massaged_item.name = outlet.basics.name;
+                massaged_item.city = outlet.contact.location.city;
+                massaged_item.address = outlet.contact.location.address;
+                massaged_item.locality_1 = outlet.contact.location.locality_1[0];
+                massaged_item.locality_2 = outlet.contact.location.locality_2[0];
+           
+                massaged_item.phone = outlet.contact.phones.mobile[0] && outlet.contact.phones.mobile[0].num;
+                
+                if (fmap && fmap[outlet._id]) {
+                    massaged_item.following = true;
+                } else {
+                    massaged_item.following = false;
                 }
-            });
-            coupon.type = 'coupon';
-            massaged_item.offers = [];
-            massaged_item.offers.push(coupon);
-            data.coupon_map.push(massaged_item); 
+
+                if (outlet.photos && outlet.photos.logo) {
+                    massaged_item.logo = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + outlet._id + '/' + outlet.photos.logo;
+                }
+                if (outlet.photos && outlet.photos.background) {
+                    massaged_item.background = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + outlet._id + '/' + outlet.photos.background;
+                }
+                massaged_item.open_next = RecoHelper.opensAt(outlet.business_hours);
+                _.each(outlet.offers, function(offer) {
+                    if(_.has(offer, ['actions', 'reward']) && _.isEqual(offer.actions.reward.header, coupon.header) && _.isEqual(offer.actions.reward.line1, coupon.line1) && _.isEqual(offer.actions.reward.line2, coupon.line2)) {
+                        coupon.available_now = !(RecoHelper.isClosed('dummy', 'dummy', offer.actions.reward.reward_hours));
+                        if(!massaged_item.available_now) {
+                          coupon.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
+                        }
+                    }
+                });
+                coupon.type = 'coupon';
+                massaged_item.offers = [];
+                massaged_item.offers.push(coupon);
+                data.coupon_map.push(massaged_item); 
+                deferred.resolve(data);
+            })
+            
         });
-        deferred.resolve(data);
+        
     }
   });
   return deferred.promise;

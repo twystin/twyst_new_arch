@@ -194,7 +194,6 @@ function pick_outlet_fields(params) {
     }
     massaged_item.open_next = RecoHelper.opensAt(params.outlet.business_hours);
     params.outlet = massaged_item;
-
     deferred.resolve(params);
   });
 
@@ -316,15 +315,15 @@ function massage_offers(params) {
           massaged_offer.offer_likes = 0;
         }
 
-        var offer_like = _.map(offer.offer_likes, function(user) {
+        _.find(offer.offer_likes, function(user) {
             if(user.toString() === user_id.toString()) {
-                return true;
-            }
+                massaged_offer.is_like = true;  
+                return; 
+            } 
             else {
-                return false;
-            }
+                massaged_offer.is_like = false;   
+            } 
         })
-        massaged_offer.is_like = offer_like[0]
 
         if(offer.offer_type === 'offer' || offer.offer_type === 'deal' || offer.offer_type === 'bank_deal') {
           massaged_offer.offer_cost =  offer.offer_cost;  
@@ -361,10 +360,11 @@ module.exports.get = function(req, res) {
       return pick_outlet_fields(data);
     })
     .then(function(data) {
-        var outlets = data.outlets;
+        var outlet = data.outlet;
         var twyst_bucks = data.twyst_bucks;
         var data = {};
-        data.outlets = outlets;
+        data.outlet = outlet;
+        
         data.twyst_bucks = twyst_bucks;
         HttpHelper.success(res, data, "Got the outlet");
     })
