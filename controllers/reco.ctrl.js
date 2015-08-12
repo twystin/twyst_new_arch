@@ -37,6 +37,7 @@ function get_user(params) {
   if (params.query.token) {
     AuthHelper.get_user(params.query.token).then(function(data) {
       params.user = data.data;
+      params.twyst_bucks = data.data.twyst_bucks;
       RecoHelper.cache_user_coupons(params.user).then(function(data) {
         RecoHelper.cache_user_favourites(params.user).then(function(data) {
           deferred.resolve(params);
@@ -371,6 +372,8 @@ function massage_offers(params) {
         coupon.expiry = itemd && itemd.expiry;
         coupon.meta = {};
         coupon.meta.reward_type = itemd && itemd.meta && itemd.meta.reward_type;
+        coupon.description = itemd.actions && itemd.actions.reward && itemd.actions.reward.description;
+        coupon.terms = itemd.actions && itemd.actions.reward && itemd.actions.reward.terms;
         return coupon;
       });
       item.offers = item.offers.concat(coupon_map);
@@ -406,15 +409,16 @@ function massage_offers(params) {
           massaged_offer.offer_likes = 0;
         }
 
-        var offer_like = _.map(offer.offer_likes, function(user) {
+        _.find(offer.offer_likes, function(user) {
             if(user.toString() === user_id.toString()) {
-                return true;
-            }
+                massaged_offer.is_like = true;  
+                return; 
+            } 
             else {
-                return false;
-            }
+                massaged_offer.is_like = false;   
+            } 
         })
-        massaged_offer.is_like = offer_like[0]
+        
         
         if (offer && offer.actions && offer.actions.reward && offer.actions.reward.reward_hours) {
           massaged_offer.available_now = !(RecoHelper.isClosed('dummy', 'dummy', offer.actions.reward.reward_hours));
@@ -423,6 +427,10 @@ function massage_offers(params) {
           }
 
         }
+        if(offer.offer_type === 'offer' || offer.offer_type === 'deal' || offer.offer_type ==='bank_deal') {
+          massaged_offer.offer_cost =  offer.offer_cost;  
+        }
+        
         // massaged_offer.applicability = offer.actions.reward.applicability;
         // massaged_offer.valid_days = offer.actions.reward.valid_days;
         return massaged_offer;
@@ -478,7 +486,12 @@ module.exports.get = function(req, res) {
       return paginate(data);
     })
     .then(function(data) {
-      HttpHelper.success(res, data.outlets, "Got the recos");
+        var outlets = data.outlets;
+        var twyst_bucks = data.twyst_bucks;
+        var data = {};
+        data.outlets = outlets;
+        data.twyst_bucks = twyst_bucks;
+      HttpHelper.success(res, data, "Got the recos");
     })
     .fail(function(err) {
       HttpHelper.error(res, err || false, "Error getting reccos");

@@ -71,6 +71,7 @@ function get_user(params) {
   if (params.query.token) {
     AuthHelper.get_user(params.query.token).then(function(data) {
       params.user = data.data;
+      params.twyst_bucks = data.data.twyst_bucks;
       RecoHelper.cache_user_coupons(params.user);
       deferred.resolve(params);
     }, function(err) {
@@ -193,7 +194,6 @@ function pick_outlet_fields(params) {
     }
     massaged_item.open_next = RecoHelper.opensAt(params.outlet.business_hours);
     params.outlet = massaged_item;
-
     deferred.resolve(params);
   });
 
@@ -315,16 +315,19 @@ function massage_offers(params) {
           massaged_offer.offer_likes = 0;
         }
 
-        var offer_like = _.map(offer.offer_likes, function(user) {
+        _.find(offer.offer_likes, function(user) {
             if(user.toString() === user_id.toString()) {
-                return true;
-            }
+                massaged_offer.is_like = true;  
+                return; 
+            } 
             else {
-                return false;
-            }
+                massaged_offer.is_like = false;   
+            } 
         })
-        massaged_offer.is_like = offer_like[0]
-        
+
+        if(offer.offer_type === 'offer' || offer.offer_type === 'deal' || offer.offer_type === 'bank_deal') {
+          massaged_offer.offer_cost =  offer.offer_cost;  
+        }
         return massaged_offer;
       }
 
@@ -357,7 +360,13 @@ module.exports.get = function(req, res) {
       return pick_outlet_fields(data);
     })
     .then(function(data) {
-      HttpHelper.success(res, data.outlet, "Got the outlet");
+        var outlet = data.outlet;
+        var twyst_bucks = data.twyst_bucks;
+        var data = {};
+        data.outlet = outlet;
+        
+        data.twyst_bucks = twyst_bucks;
+        HttpHelper.success(res, data, "Got the outlet");
     })
     .fail(function(err) {
       HttpHelper.error(res, err || false, "Error getting the outlet");

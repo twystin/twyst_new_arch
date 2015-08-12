@@ -58,7 +58,7 @@ module.exports.cache_user_coupons = function(user) {
         var coupon_map = _.reduce(user.coupons, function(memo, item) {
           //TODO: see where else this problem occurs
           //TODO: also fix up coupon migration map
-          if (item.outlets.length) {
+          if (item.outlets && item.outlets.length) {
             _.each(item.outlets, function(outlet) {
               memo[outlet] = memo[outlet] || {};
               memo[outlet].coupons = memo[outlet].coupons || [];
@@ -135,7 +135,7 @@ module.exports.cache_offer_likes = function(event_type, updated_offer, new_user,
 
       if (event_type == 'like_offer' && !_.contains(users, new_user.toString())) {
         users.push(new_user.toString());
-      } else if (_.contains(users, new_user.toString())) {
+      } else if (_.contains(users, new_user.toString()) && event_type =='unlike_offer') {
           users.pop(new_user.toString());
       }
       
