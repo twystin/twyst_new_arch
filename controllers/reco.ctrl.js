@@ -363,17 +363,31 @@ function massage_offers(params) {
     if (item.offers && item.offers.length !== 0 && coupon_map !== null) {
       coupon_map = _.map(coupon_map, function(itemd) {
         var coupon = {};
+        coupon._id = itemd && itemd._id;
         coupon.type = "coupon";
         coupon.code = itemd && itemd.code;
         coupon.status = itemd && itemd.status;
         coupon.header = itemd && itemd.title || itemd && itemd.header;
         coupon.line1 = itemd && itemd.detail || itemd && itemd.line1;
         coupon.line2 = itemd && itemd.line2;
-        coupon.expiry = itemd && itemd.expiry;
+        coupon.expiry = itemd && itemd.lapse_date;
         coupon.meta = {};
         coupon.meta.reward_type = itemd && itemd.meta && itemd.meta.reward_type;
         coupon.description = itemd.actions && itemd.actions.reward && itemd.actions.reward.description;
         coupon.terms = itemd.actions && itemd.actions.reward && itemd.actions.reward.terms;
+
+        _.each(item.offers, function(offer) {
+            if(_.isEqual(offer.header, coupon.header) && _.isEqual(offer.line1, coupon.line1) && _.isEqual(offer.line2, coupon.line2)) {
+                coupon.available_now = offer.available_now;
+                if(!coupon.available_now) {
+                  coupon.available_next = offer.available_next;
+                }
+                coupon.meta = {};
+                coupon.meta.reward_type = offer.meta.reward_type;
+
+            }
+        });
+        
         return coupon;
       });
       item.offers = item.offers.concat(coupon_map);
