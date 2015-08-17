@@ -4,8 +4,8 @@
 var Cache = require('../common/cache.hlpr');
 var mongoose = require('mongoose');
 var Outlet = mongoose.model('Outlet');
-var LocationHandler = require('../scripts/location.js');
-var BucksHandler = require('../scripts/twyst_bucks_grid.js');
+var LocationHandler = require('./locations.cfg.js');
+var BucksHandler = require('./twyst_bucks.cfg.js');
 
 var _ = require('lodash');
 var logger = require('tracer').colorConsole();
