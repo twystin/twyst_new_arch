@@ -58,7 +58,7 @@ module.exports.cache_user_coupons = function(user) {
         var coupon_map = _.reduce(user.coupons, function(memo, item) {
           //TODO: see where else this problem occurs
           //TODO: also fix up coupon migration map
-          if (item.outlets.length) {
+          if (item.outlets && item.outlets.length) {
             _.each(item.outlets, function(outlet) {
               memo[outlet] = memo[outlet] || {};
               memo[outlet].coupons = memo[outlet].coupons || [];

@@ -21,21 +21,20 @@ module.exports.get_coupons = function(req, res) {
 
   AuthHelper.get_user(req.query.token).then(function(user) {
     var data = {};
-    logger.info(user.data)
     data.query = req.query;
     data.coupons = user.data.coupons;
+    data.user = user;
     data.twyst_bucks = user.data.twyst_bucks;
-    filter_out_inactive_coupons(data)
+    filter_out_expired_and_used_coupons(data)
       .then(function(data) {
         return load_outlet_info_from_cache(data)
       })
       .then(function(data) {
-        return filter_out_fields(data)
-      })
-      .then(function(data) {
-        return clean_up_fields(data)
-      })
-      .then(function(data) {
+        var coupons = data.coupon_map;
+        var twyst_bucks = data.twyst_bucks;
+        var data = {};
+        data.coupons = coupons;
+        data.twyst_bucks = twyst_bucks;
         HttpHelper.success(res, data, 'Returning users coupons');
       })
       .fail(function(err) {
@@ -95,14 +94,14 @@ module.exports.update_friends = function(req, res) {
   });
 };
 
-function filter_out_inactive_coupons(data) {
+function filter_out_expired_and_used_coupons(data) {
   logger.log();
   var deferred = Q.defer();
 
   data.coupons_mapped = [];
 
   data.coupons = _.filter(data.coupons, function(coupon) {
-    if(_.has(coupon, 'status') && (coupon.status == 'active')) {
+    if(_.has(coupon, 'status') && (coupon.status == 'active') && !(_.has(coupon, 'used_details'))) {
       return true;
     } else {
       return false;
@@ -125,121 +124,60 @@ function load_outlet_info_from_cache(data) {
         data: null
       });
     } else {
-      var outlets = JSON.parse(reply) || [];
+        var outlets = JSON.parse(reply) || [];
+        var outlet;
+        var massaged_item = {};
+        data.coupon_map = [];
+        
 
-      _.each(data.coupons, function(coupon) {
-        var outlet = _.cloneDeep(outlets[coupon.outlets[0].toString()]);
-
-        outlet.coupons = [];
-        outlet.coupons.push(coupon);
-        delete outlet.coupons[0].used_details;
-        _.each(outlet.offers, function(offer) {
-          if(_.has(offer, ['actions', 'reward']) && _.isEqual(offer.actions.reward.header, coupon.header) && _.isEqual(offer.actions.reward.line1, coupon.line1) && _.isEqual(offer.actions.reward.line2, coupon.line2)) {
-            outlet.coupons[0].available_now = !(RecoHelper.isClosed('dummy', 'dummy', offer.actions.reward.reward_hours));
-            if(!outlet.coupons[0].available_now) {
-              outlet.coupons[0].available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
+        var fmap = null;
+        _.map(data.coupons, function(coupon) {
+            if(coupon.outlets && coupon.outlets.length) {
+                outlet = outlets[coupon.outlets[0].toString()];        
             }
-          }
+            Cache.hget(data.user._id, 'favourite_map', function(err, reply) {
+                if (reply) {
+                  fmap = JSON.parse(reply);
+                }
+            })
+            massaged_item._id = outlet._id;
+            massaged_item.name = outlet.basics.name;
+            massaged_item.city = outlet.contact.location.city;
+            massaged_item.address = outlet.contact.location.address;
+            massaged_item.locality_1 = outlet.contact.location.locality_1[0];
+            massaged_item.locality_2 = outlet.contact.location.locality_2[0];
+       
+            massaged_item.phone = outlet.contact.phones.mobile[0] && outlet.contact.phones.mobile[0].num;
+            
+            if (fmap && fmap[outlet._id]) {
+            massaged_item.following = true;
+            } else {
+            massaged_item.following = false;
+            }
+
+            if (outlet.photos && outlet.photos.logo) {
+            massaged_item.logo = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + outlet._id + '/' + outlet.photos.logo;
+            }
+            if (outlet.photos && outlet.photos.background) {
+            massaged_item.background = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + outlet._id + '/' + outlet.photos.background;
+            }
+            massaged_item.open_next = RecoHelper.opensAt(outlet.business_hours);
+            _.each(outlet.offers, function(offer) {
+                if(_.has(offer, ['actions', 'reward']) && _.isEqual(offer.actions.reward.header, coupon.header) && _.isEqual(offer.actions.reward.line1, coupon.line1) && _.isEqual(offer.actions.reward.line2, coupon.line2)) {
+                    coupon.available_now = !(RecoHelper.isClosed('dummy', 'dummy', offer.actions.reward.reward_hours));
+                    if(!massaged_item.available_now) {
+                      coupon.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
+                    }
+                }
+            });
+            coupon.type = 'coupon';
+            massaged_item.offers = [];
+            massaged_item.offers.push(coupon);
+            data.coupon_map.push(massaged_item); 
         });
-        data.coupons_mapped.push(outlet);
-      });
-      deferred.resolve(data);
+        deferred.resolve(data);
     }
   });
   return deferred.promise;
 };
 
-function filter_out_fields(data) {
-  logger.log();
-  var deferred = Q.defer();
-
-  async.each(data.coupons_mapped, function(entry, callback) {
-    if(_.has(entry, 'basics')) {
-      entry.name = entry.basics.name || '';  
-    } else {
-      entry.name = '';
-    }
-    
-    if(_.has(entry, ['contact', 'location'])) {
-      entry.city = entry.contact.location.city || '';
-      entry.address = entry.contact.location.address || '';
-      if(entry.contact.location.locality_1) {
-        entry.locality_1 = entry.contact.location.locality_1[0] || '';  
-      } else {
-        entry.locality_1 = '';
-      }
-      
-      if(entry.contact.location.locality_2) {
-        entry.locality_2 = entry.contact.location.locality_2[0] || '';
-      } else {
-        entry.locality_2 = '';
-      }
-    } else {
-      entry.city = '';
-      entry.address = '';
-      entry.locality_1 = '';
-      entry.locality_2 = ''
-    }
-    
-    if(_.has(entry, ['contact', 'phones', 'mobile']) && entry.contact.phones.mobile.length) {
-      entry.phone = entry.contact.phones.mobile[0] && entry.contact.phones.mobile[0].num;  
-    } else {
-      entry.phone = '';
-    }
-    
-    entry.distance = RecoHelper.distance({
-      latitude: parseFloat(data.query.lat || 77.044028),
-      longitude: parseFloat(data.query.long || 28.457984)
-      }, entry.contact.location.coords);
-
-    var days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'],
-      now = new Date((new Date()).getTime() + 19800000),
-      day = days[now.getDay()],
-      now_min = (now.getHours() * 60) + now.getMinutes();
-
-    entry.open = !RecoHelper.isClosed(data.query.date,
-      data.query.time,
-      entry.business_hours);
-
-    if (entry.photos && entry.photos.logo) {
-      entry.logo = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + entry._id + '/' + entry.photos.logo;
-    }
-    if (entry.photos && entry.photos.background) {
-      entry.background = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + entry._id + '/' + entry.photos.background;
-    }
-    if(!entry.open) {
-      entry.open_next = RecoHelper.opensAt(entry.business_hours);
-    }
-
-    callback();
-  }, function(err) {
-    deferred.resolve(data);
-  });
-  
-  return deferred.promise;
-};
-
-function clean_up_fields(data) {
-  logger.log();
-  var deferred = Q.defer();
-
-  _.each(data.coupons_mapped, function(entry) {
-    delete entry.basics;
-    delete entry.contact;
-    delete entry.links;
-    delete entry.business_hours;
-    delete entry.attributes;
-    delete entry.photos;
-    delete entry.outlet_meta;
-    delete entry.twyst_meta;
-    delete entry.sms_off; 
-    delete entry.offers;
-    delete entry.coupons[0].outlets;
-  });
-  delete data.query;
-  data.coupons = _.cloneDeep(data.coupons_mapped);
-  delete data.coupons_mapped;
-  
-  deferred.resolve(data);
-  return deferred.promise;
-};
