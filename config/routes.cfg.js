@@ -40,7 +40,9 @@ module.exports = function(app) {
 
     app.post('/api/v4/coupon/gift', EventCtrl.gift);
     app.post('/api/v4/coupon/grab', EventCtrl.grab);
-    app.post('/api/v4/coupon/redeem', EventCtrl.redeem);
+    app.post('/api/v4/coupon/redeem', EventCtrl.redeem); // FOR COUPON TYPE
+    app.post('/api/v4/offer/generate/coupon', EventCtrl.generate_coupon); // FOR OFFER TYPE
+    app.post('/api/v4/deal/log', EventCtrl.deal_log); // FOR DEAL TYPE
 
     app.post('/api/v4/checkin/bill', EventCtrl.upload_bill);
     app.post('/api/v4/checkin/qr', EventCtrl.checkin);

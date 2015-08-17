@@ -96,6 +96,15 @@ module.exports.comments = function(req, res) {
   create_new(res, setup_event(req, 'write_to_twyst'));
 };
 
+module.exports.generate_coupon = function(req, res) {
+  logger.log();
+  create_new(res, setup_event(res, 'generate_coupon'));
+};
+
+module.exports.deal_log = function(req, res) {
+  logger.log();
+  create_new(res, setup_event(res, 'deal_log'));
+};
 
 function setup_event(req, type) {
   logger.log();
@@ -228,7 +237,9 @@ function process_event(data) {
     'suggestion': require('./processors/suggestion.proc'),
     'extend_offer': require('./processors/extend_offer.proc'),
     'report_problem': require('./processors/report_problem.proc'),
-    'write_to_twyst': require('./processors/comments.proc')
+    'write_to_twyst': require('./processors/comments.proc'),
+    'generate_coupon': require('./processors/generate_coupon.proc'),
+    'deal_log': require('./processors/deal_log.proc')
 
   };
 
