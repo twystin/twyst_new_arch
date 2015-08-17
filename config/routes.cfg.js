@@ -58,6 +58,8 @@ module.exports = function(app) {
     app.post('/api/v4/offer/share', EventCtrl.share_offer);
     app.post('/api/v4/offer/extend', EventCtrl.extend_offer);
     app.post('/api/v4/offer/report/problem', EventCtrl.report_problem);
+
+    app.post('/api/v4/comments/', EventCtrl.comments);
     
   })();
 
@@ -79,6 +81,7 @@ module.exports = function(app) {
     app.get('/api/v4/profile', UserCtrl.get_profile);
     app.put('/api/v4/profile', UserCtrl.update_profile);
     app.put('/api/v4/friends', UserCtrl.update_friends);
+    //app.post('/api/v4/referral/join', UserCtrl.referral_join);
 
     app.get('/api/v4/coupons', UserCtrl.get_coupons);
 
@@ -91,38 +94,3 @@ module.exports = function(app) {
   })();
 };
 
-
-/*
- ROUTES I NEED FOR THE WEB & PHONE APP
- 2. Discover related:
- GET /api/v4/outlets?token=123&lat=123&long=123&datetime=123 - Get outlets for me
- GET /api/v4/outlets?q=latte,coffee - Search
- GET /api/v4/users/me - Get my user account
- GET /api/v4/users/123 - Get a user account info
- POST /api/v4/events - Post an event
- GET /api/v4/events?token=123&lat=123&long=123 - Get events
- GET /api/v4/events/123 - Get a particular event
- GET /api/v4/outlets/123
- POST /api/v4/friends
- GET /api/v4/friends
- PROFILE routes
-
- 3. Proxies:
- GET /api/v4/wallet - Return the coupons for this user
- POST /api/v4/checkin
- POST /api/v4/follow
- POST /api/v4/share
- POST /api/v4/gift
-
- 4. Other than this -
- - Event processors
- - Job framework
- - Mail / SMS framework
- */
-
-/*
- ROUTES I NEED FOR THE MERCHANT APP
-
- POST /api/v4/outlets
-
- */
