@@ -98,17 +98,18 @@ module.exports.comments = function(req, res) {
 
 module.exports.generate_coupon = function(req, res) {
   logger.log();
-  create_new(res, setup_event(res, 'generate_coupon'));
+  create_new(res, setup_event(req, 'generate_coupon'));
 };
 
 module.exports.deal_log = function(req, res) {
   logger.log();
-  create_new(res, setup_event(res, 'deal_log'));
+  create_new(res, setup_event(req, 'deal_log'));
 };
 
 function setup_event(req, type) {
   logger.log();
   var passed_data = {};
+  logger.info(req.body);
   passed_data.event_data = req.body || {};
   passed_data.event_data.event_type = type;
   passed_data.user_token = (req.query && req.query.token) || null;
@@ -162,6 +163,7 @@ function basic_checks(data) {
   var deferred = Q.defer();
   var passed_data = data;
 
+  logger.info(data);
   if (!_.get(passed_data, 'user_token')) {
     deferred.reject("Authentication error - no token passed.");
   }

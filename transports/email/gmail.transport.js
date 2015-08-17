@@ -1,7 +1,11 @@
-var nodemailer = require('nodemailer');
+'use strict';
+/*jslint node: true */
+
 var logger = require('tracer').colorConsole();
 var _ = require('lodash');
 var Q = require('q');
+
+var nodemailer = require('nodemailer');
 
 var transporter = nodemailer.createTransport({
     service: 'Gmail',

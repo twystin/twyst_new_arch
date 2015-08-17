@@ -13,7 +13,7 @@ var jobs = [
 ];
 
 module.exports.start = function(app) {
-	var agenda = new Agenda({db: { address: 'localhost:27017/twyst_agend'}});
+	var agenda = new Agenda({db: { address: 'localhost:27017/twyst_agenda'}});
 	// app.use('/jobs', agenda_web(agenda, {poll: 1000}));
 
 	var job = null;
