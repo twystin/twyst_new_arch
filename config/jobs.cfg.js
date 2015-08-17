@@ -9,7 +9,7 @@ var _ = require('lodash');
 var logger = require('tracer').colorConsole();
 
 var jobs = [
-	{name: 'test', schedule: 'in 1 minute'}
+	// {name: 'test', schedule: 'in 1 minute'}
 ];
 
 module.exports.start = function(app) {
