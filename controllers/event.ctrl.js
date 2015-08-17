@@ -93,7 +93,7 @@ module.exports.report_problem = function(req, res) {
 
 module.exports.comments = function(req, res) {
   logger.log();
-  create_new(res, setup_event(req, 'comments'));
+  create_new(res, setup_event(req, 'write_to_twyst'));
 };
 
 
@@ -228,7 +228,7 @@ function process_event(data) {
     'suggestion': require('./processors/suggestion.proc'),
     'extend_offer': require('./processors/extend_offer.proc'),
     'report_problem': require('./processors/report_problem.proc'),
-    'comments': require('./processors/comments.proc')
+    'write_to_twyst': require('./processors/comments.proc')
 
   };
 
