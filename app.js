@@ -11,6 +11,7 @@ var logger = require('tracer').colorConsole();
   require('./config/models.cfg')();
   require('./config/routes.cfg')(app);
   require('./config/cache.cfg').populate();
+  require('./config/jobs.cfg').start();
 
   // START THE SERVER
   logger.info('STARTING THE TWYST SERVER');
