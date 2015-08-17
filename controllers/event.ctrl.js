@@ -91,6 +91,11 @@ module.exports.report_problem = function(req, res) {
   create_new(res, setup_event(req, 'report_problem'));
 };
 
+module.exports.comments = function(req, res) {
+  logger.log();
+  create_new(res, setup_event(req, 'comments'));
+};
+
 
 function setup_event(req, type) {
   logger.log();
@@ -222,7 +227,8 @@ function process_event(data) {
     'share_outlet': require('./processors/share_outlet.proc'),
     'suggestion': require('./processors/suggestion.proc'),
     'extend_offer': require('./processors/extend_offer.proc'),
-    'report_problem': require('./processors/report_problem.proc')
+    'report_problem': require('./processors/report_problem.proc'),
+    'comments': require('./processors/comments.proc')
 
   };
 

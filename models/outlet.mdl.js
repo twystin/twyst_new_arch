@@ -409,18 +409,6 @@ var OutletSchema = new Schema({
         _id: {
           type: Schema.Types.ObjectId
         },
-        title: {
-          type: String
-        },
-        terms: {
-          type: String
-        },
-        detail: {
-          type: String
-        },
-        expiry: {
-          type: String
-        },
         reward_meta: {}, // the structured rewards
         reward_hours: hours.hours,
         applicability: {},
@@ -448,9 +436,6 @@ var OutletSchema = new Schema({
         push: {
           type: String
         }
-      },
-      points: {
-        type: Number
       }
     }
   }],

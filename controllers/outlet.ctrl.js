@@ -269,14 +269,16 @@ function massage_offers(params) {
     if (item.offers && item.offers.length !== 0 && coupon_map !== null) {
         coupon_map = _.map(coupon_map, function(itemd) {
         var coupon = {};
-        
+
+        coupon._id = itemd && itemd._id;
         coupon.type = "coupon";
         coupon.code = itemd && itemd.code;
         coupon.status = itemd && itemd.status;
         coupon.header = itemd && itemd.title || itemd && itemd.header;
         coupon.line1 = itemd && itemd.detail || itemd && itemd.line1;
         coupon.line2 = itemd && itemd.line2;
-        coupon.expiry = itemd && itemd.lapse_date;
+        coupon.lapse_date = itemd && itemd.lapse_date;
+        coupon.expiry = itemd && itemd.expiry_date;
         coupon.meta = {};
         coupon.meta.reward_type = itemd && itemd.meta && itemd.meta.reward_type;
         coupon.description = itemd.actions && itemd.actions.reward && itemd.actions.reward.description;
