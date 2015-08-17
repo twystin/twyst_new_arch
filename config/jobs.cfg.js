@@ -9,7 +9,7 @@ var _ = require('lodash');
 var logger = require('tracer').colorConsole();
 
 var jobs = [
-	{name: 'test', every: '1 minute'}
+	{name: 'test', schedule: 'in 1 minute'}
 ];
 
 module.exports.start = function(app) {
@@ -20,7 +20,7 @@ module.exports.start = function(app) {
 	_.each(jobs, function(item) {
 		job = require('../jobs/' + item.name + '.job');
 		job.runner(agenda);
-		agenda.every(item.every, item.name);
+		agenda.schedule(item.schedule, item.name);
 	})
 
 	agenda.start();

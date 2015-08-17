@@ -1,4 +1,8 @@
 var nodemailer = require('nodemailer');
+var logger = require('tracer').colorConsole();
+var _ = require('lodash');
+var Q = require('q');
+
 var transporter = nodemailer.createTransport({
     service: 'Gmail',
     auth: {
@@ -20,12 +24,17 @@ var transporter = nodemailer.createTransport({
 //     }]
 // }
 
-module.exports.send = function(to, payload, success, error) {
+module.exports.send = function(payload) {
+    logger.log();
+
+    var deferred = Q.defer();
     transporter.sendMail(payload, function(err, info){
         if (err) {
-            error(err);
+            deferred.reject(err);
         } else{
-            success(info);
+            deferred.resolve(info);
         }
     });
+
+    return deferred.promise;
 }
