@@ -1,6 +1,8 @@
+var logger = require('tracer').colorConsole();
+
 exports.runner = function(agenda) {
   agenda.define('test', function(job, done) {
-    console.log("Test message.");
+    logger.log("Test message.");
     done();
   });
 }
