@@ -12,6 +12,7 @@ module.exports.send = function(payload) {
   logger.log();
   var deferred = Q.defer();
 
+  // MOVE THE SERVER KEY TO SETTINGS
   var sender = new gcm.Sender(payload.server_key);
   var message = new gcm.Message();
   message.addData('message', payload.body);
