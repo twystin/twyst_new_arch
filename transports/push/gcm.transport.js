@@ -13,7 +13,8 @@ module.exports.send = function(payload) {
   var deferred = Q.defer();
 
   // MOVE THE SERVER KEY TO SETTINGS
-  var sender = new gcm.Sender(payload.server_key);
+  var server_key = "ABC"; // TO FIX
+  var sender = new gcm.Sender(server_key);
   var message = new gcm.Message();
   message.addData('message', payload.body);
   message.addData('title', payload.head);

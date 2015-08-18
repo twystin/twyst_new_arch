@@ -12,10 +12,10 @@ module.exports.notify = function(what, when, who, campaign) {
   logger.log();
 
   var deferred = Q.defer();
-  var notify_text = "Your voucher for " + what.coupon.header + " at " + what.coupon.issued_by + " is now available.";
+  var notify_text = "You have " + what.count + " unused vouchers on Twyst. Redeem them now!";
   var payload = {
   	body: notify_text,
-  	head: 'Coupon unlocked',
+  	head: 'Unused vouchers',
   	gcms: who
   };
 
