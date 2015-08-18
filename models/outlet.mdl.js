@@ -230,11 +230,6 @@ var OutletSchema = new Schema({
       min: Number,
       max: Number
     },
-    timings: {
-      type: String,
-      default: '',
-      trim: true
-    },
     cuisines: [String],
     payment_options: [{
       type: String,

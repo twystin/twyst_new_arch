@@ -49,7 +49,7 @@ module.exports.update_user = function(token, updated_user) {
 
 module.exports.update_friends = function(token, friend_list) {
   var deferred = Q.defer();
-
+  
   AuthHelper.get_user(token).then(function(data) {
     var user = data.data;
     User.findOneAndUpdate({
