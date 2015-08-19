@@ -128,7 +128,7 @@ var User = new Schema({
     line2: String,
     lapse_date: Date,
     expiry_date: Date,
-    voucher_valid_days: Number,
+    coupon_valid_days: Number,
     meta: {
       reward_type: {
         type: String

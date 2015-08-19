@@ -32,7 +32,7 @@ module.exports.bucks_grid = [
 
 	{"event": "extend_offer", "bucks": 150, "earn": false, "update_now": true},
 
-	{"event": "redeem", "bucks": 100, "earn": false, "update_now": true}, //not true for checkin type offer we will handle this 
+	{"event": "generate_coupon", "bucks": 100, "earn": false, "update_now": true}, //not true for checkin type offer we will handle this 
 	
 	{"event": "unfollow", "bucks": 20, "earn": false, "update_now": true},
 
