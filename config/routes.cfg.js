@@ -83,7 +83,7 @@ module.exports = function(app) {
     app.get('/api/v4/profile', UserCtrl.get_profile);
     app.put('/api/v4/profile', UserCtrl.update_profile);
     app.put('/api/v4/friends', UserCtrl.update_friends);
-    //app.post('/api/v4/referral/join', UserCtrl.referral_join);
+    app.post('/api/v4/referral/join', UserCtrl.referral_join);
 
     app.get('/api/v4/coupons', UserCtrl.get_coupons);
 

@@ -11,6 +11,7 @@ var RecoHelper = require('./helpers/reco.hlpr.js');
 var Q = require('q');
 var async = require('async');
 var logger = require('tracer').colorConsole();
+var User = mongoose.model('User');
 
 module.exports.get_coupons = function(req, res) {
   var token = req.query.token || null;
@@ -93,6 +94,44 @@ module.exports.update_friends = function(req, res) {
     HttpHelper.error(res, err.err, err.message);
   });
 };
+
+module.exports.referral_join = function(req, res) {
+    var token = req.query.token || null;
+    var source = req.body.source || null;
+    var referrar = req.body.referral_code;
+
+    if (!token ) {
+        HttpHelper.error(res, null, "Not authenticated");
+    }
+
+    if ( !source || !referrar) {
+        HttpHelper.error(res, null, " No referral code or source");
+    }
+    
+    User.find({phone: referrar}, function(err, user) {
+        if(err || !user) {
+            HttpHelper.error(res, err, 'referral code is not valid');
+        }
+        else{
+            var friend_list_id;
+            if(user[0] &&  user[0].friends) {
+                friend_list_id = user[0].friends;
+            }
+            else{
+                friend_list_id = null;
+            }
+            UserHelper.update_referral(token, friend_list_id, user[0], source).then(function(data) {
+                HttpHelper.success(res, data.data, data.message);
+                }, function(err) {
+                HttpHelper.error(res, err.err, err.message);
+            });    
+        }
+    })
+        
+    
+};
+
+
 
 function filter_out_expired_and_used_coupons(data) {
   logger.log();
@@ -181,7 +220,10 @@ function load_outlet_info_from_cache(data) {
             });    
         }
         else {
-            deferred.reject('You do not have any coupon'); 
+            deferred.resolve({
+                message: 'You do not have any coupon',
+                data: null
+            });
         }  
     }
     

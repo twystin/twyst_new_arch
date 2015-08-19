@@ -211,6 +211,11 @@ function create_coupon(offer, user, outlet) {
     exclude: ['O', '0', 'L', '1']
   });
 
+  var lapse_date = new Date();
+  lapse_date.setDate(lapse_date.getDate() + offer.offer_lapse_days);
+  var expiry_date = new Date();
+  expiry_date.setDate(expiry_date.getDate() + offer.actions.reward.valid_days);
+
   var deferred = Q.defer();
   var outlets = [];
   outlets.push(outlet);
@@ -226,15 +231,16 @@ function create_coupon(offer, user, outlet) {
         header: offer.actions.reward.header,
         line1: offer.actions.reward.line1,
         line2: offer.actions.reward.line2,
-        lapse_date: new Date(),
-        expiry_date: new Date(),
+        lapse_date: lapse_date,
+        expiry_date: expiry_date,
         meta: {
           reward_type: {
             type: 'need to fix' // to fix = where from?
           }
         },
         status: 'active',
-        issued_at: new Date()
+        issued_at: new Date(),
+        issued_by: outlet
       }
     }
   };

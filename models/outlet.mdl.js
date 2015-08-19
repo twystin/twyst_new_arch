@@ -376,8 +376,8 @@ var OutletSchema = new Schema({
     offer_end_date: {
       type: Date
     },
-    offer_lapse_date: {
-      type: Date
+    offer_lapse_days: {
+      type: Number
     },
     offer_likes: [{
       type: Schema.ObjectId,
