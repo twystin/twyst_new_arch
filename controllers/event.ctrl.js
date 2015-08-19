@@ -91,6 +91,20 @@ module.exports.report_problem = function(req, res) {
   create_new(res, setup_event(req, 'report_problem'));
 };
 
+module.exports.comments = function(req, res) {
+  logger.log();
+  create_new(res, setup_event(req, 'write_to_twyst'));
+};
+
+module.exports.generate_coupon = function(req, res) {
+  logger.log();
+  create_new(res, setup_event(req, 'generate_coupon'));
+};
+
+module.exports.deal_log = function(req, res) {
+  logger.log();
+  create_new(res, setup_event(req, 'deal_log'));
+};
 
 function setup_event(req, type) {
   logger.log();
@@ -222,7 +236,10 @@ function process_event(data) {
     'share_outlet': require('./processors/share_outlet.proc'),
     'suggestion': require('./processors/suggestion.proc'),
     'extend_offer': require('./processors/extend_offer.proc'),
-    'report_problem': require('./processors/report_problem.proc')
+    'report_problem': require('./processors/report_problem.proc'),
+    'write_to_twyst': require('./processors/comments.proc'),
+    'generate_coupon': require('./processors/generate_coupon.proc'),
+    'deal_log': require('./processors/deal_log.proc')
 
   };
 

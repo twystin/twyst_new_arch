@@ -230,11 +230,6 @@ var OutletSchema = new Schema({
       min: Number,
       max: Number
     },
-    timings: {
-      type: String,
-      default: '',
-      trim: true
-    },
     cuisines: [String],
     payment_options: [{
       type: String,
@@ -381,8 +376,8 @@ var OutletSchema = new Schema({
     offer_end_date: {
       type: Date
     },
-    offer_lapse_date: {
-      type: Date
+    offer_lapse_days: {
+      type: Number
     },
     offer_likes: [{
       type: Schema.ObjectId,
@@ -408,18 +403,6 @@ var OutletSchema = new Schema({
       reward: {
         _id: {
           type: Schema.Types.ObjectId
-        },
-        title: {
-          type: String
-        },
-        terms: {
-          type: String
-        },
-        detail: {
-          type: String
-        },
-        expiry: {
-          type: String
         },
         reward_meta: {}, // the structured rewards
         reward_hours: hours.hours,
@@ -448,9 +431,6 @@ var OutletSchema = new Schema({
         push: {
           type: String
         }
-      },
-      points: {
-        type: Number
       }
     }
   }],
