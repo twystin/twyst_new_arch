@@ -14,10 +14,11 @@ var express = require('express'),
   multer = require('multer'),
   MongoStore = require('connect-mongo')(session),
   passport = require('passport'),
-  LocalStrategy = require('passport-local').Strategy;
+  LocalStrategy = require('passport-local').Strategy,
+  logger = require('tracer').colorConsole();
 
-var logger = require('tracer').colorConsole();
 
+var redis = require('../common/cache.hlpr');
 
 var Account = require('../models/account.mdl');
 
@@ -28,8 +29,8 @@ var session_store = new MongoStore({
   clear_interval: env_config.clear_interval
 });
 
-var mustBe = require("mustbe");
-var mustBeConfig = require("./mustbe.cfg");
+var mustBe = require('mustbe');
+var mustBeConfig = require('./mustbe.cfg');
 mustBe.configure(mustBeConfig);
 
 module.exports = function(app) {
@@ -40,9 +41,9 @@ module.exports = function(app) {
   }));
   app.use(bodyParser.json());
   app.use(multer());
-  app.use(cookieParser('Twyst_2014_Sessions'));
+  app.use(cookieParser('Twyst_Sessions'));
   app.use(session({
-    secret: "Twyst_2014_Sessions",
+    secret: "Twyst_Sessions",
     cookie: {
       maxAge: 31536000000
     },
@@ -89,6 +90,25 @@ module.exports = function(app) {
   // When the connection is disconnected
   mongoose.connection.on('disconnected', function() {
     logger.warn('Mongoose default connection disconnected');
+  });
+
+  redis.on('ready', function() {
+    logger.info('REDIS is ready');
+  });
+
+  redis.on('error', function(err) {
+    logger.error('Error from REDIS - ' + err);
+  });
+
+  redis.on('end', function() {
+    logger.warn('Could not connect to REDIS - ending!');
+    process.exit(1);
+  });
+
+  redis.flushall(function(err) {
+    if (!err) {
+      logger.info('Cleared the cache');
+    }
   });
 
   // If the Node process ends, close the Mongoose connection

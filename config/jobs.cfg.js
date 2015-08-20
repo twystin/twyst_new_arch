@@ -10,6 +10,7 @@ var logger = require('tracer').colorConsole();
 
 var jobs = [
 	// {name: 'test', schedule: 'in 1 minute'}
+	{name: 'unredeemed', schedule: '10 minutes from now'}
 ];
 
 module.exports.start = function(app) {
