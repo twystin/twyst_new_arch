@@ -30,10 +30,12 @@ module.exports.process = function(data) {
     var passed_data = data;
     var user = _.get(passed_data, 'user._id');
     var offer_id = _.get(passed_data, 'event_data.event_meta.offer');
-    var outlet = _.get(passed_data, 'event_data.event_outlet'); 
+    var outlet_id = _.get(passed_data, 'event_data.event_outlet');
+    var available_twyst_bucks =  _.get(passed_data, 'user.twyst_bucks');
 
-    Outlet.findOne({_id: outlet }, function(err, outlet){
+    Outlet.findOne({_id: outlet_id }, function(err, outlet){
         if(err || !outlet) {
+            console.log( 'error '+ err);
             deferred.reject('Could not find outlet to generate coupon');
         }
         else if(isOutletClosed(outlet)) {            
@@ -42,12 +44,18 @@ module.exports.process = function(data) {
         else if(outlet && outlet.offers && outlet.offers.length){
             var matching_offer = getMatchingOffer(outlet.offers, offer_id);
             if(matching_offer){
-
-                create_coupon(matching_offer, user, outlet).then(function(data) {
-                    deferred.resolve(passed_data);
-                }, function(err) {
-                    deferred.reject('Could not create coupon');
-                })    
+                var is_enough_bucks = check_enough_twyst_buck(matching_offer, available_twyst_bucks);
+                if(is_enough_bucks){
+                    create_coupon(matching_offer, user, outlet_id).then(function(data) {
+                    deferred.resolve(data);
+                    }, function(err) {
+                        deferred.reject('Could not create coupon');
+                    })      
+                }
+                else{
+                    deferred.reject('Not enough twyst bucks');
+                }
+                  
             }
             else {
               deferred.reject('Offer is not valid at this outlet');
@@ -79,6 +87,15 @@ function getMatchingOffer(offers, offer_id){
         }
     }
     return null;
+}
+
+function check_enough_twyst_buck (offer, bucks) {
+    if(offer.offer_cost <= bucks) {
+        return true;
+    }
+    else{
+        return false;
+    }
 }
 
 
@@ -120,11 +137,11 @@ function create_coupon(offer, user, outlet) {
   };
   User.findOneAndUpdate({
     _id: user
-  }, update, function(err, user) {
+  }, update, function(err, updated_user) {
     if (err || !user) {
       deferred.reject('Could not update user');
     } else
-      deferred.resolve(user);
+      deferred.resolve(updated_user);
   });
 
   return deferred.promise;
