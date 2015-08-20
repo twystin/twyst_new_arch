@@ -4,7 +4,9 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 require('./outlet.mdl');
+require('./friend.mdl');
 var Outlet = mongoose.model('Outlet');
+var Friend = mongoose.model('Friend');
 
 var User = new Schema({
   activities: [],
@@ -114,6 +116,10 @@ var User = new Schema({
       type: Schema.ObjectId,
       ref: 'Outlet'
     }],
+    issued_by: {
+      type: Schema.ObjectId,
+      ref: 'Outlet'
+    },
     coupon_source: {
       type: String
     },
@@ -122,6 +128,7 @@ var User = new Schema({
     line2: String,
     lapse_date: Date,
     expiry_date: Date,
+    coupon_valid_days: Number,
     meta: {
       reward_type: {
         type: String
@@ -131,7 +138,7 @@ var User = new Schema({
       used_time: Date,
       used_by: {
         type: Schema.ObjectId,
-        ref: 'Customer'
+        ref: 'User'
       },
       used_at: {
         type: Schema.ObjectId,
@@ -144,23 +151,19 @@ var User = new Schema({
       action_type: String, // gift, share
       action_source: {
         type: Schema.ObjectId,
-        ref: 'Customer'
+        ref: 'User'
       },
       action_destination: {
         type: Schema.ObjectId,
-        ref: 'Customer'
+        ref: 'User'
       }
     },
     issued_at: Date
-  }],
-  friends: [{
-    friend_source: String,
-    friend_add_date: Date,
-    friend: {
+    }],
+    friends: {
       type: Schema.ObjectId,
-      ref: 'Customer'
-    }
-  }],
+      ref: 'Friend'
+    },
   user_meta: {
     calculated_cuisines: [],
     calculated_restaurant_types: [],
@@ -168,7 +171,6 @@ var User = new Schema({
     total_events: {},
     total_events_by_outlet: {}
   },
-  points: Number,
   created_at: Date
 });
 
