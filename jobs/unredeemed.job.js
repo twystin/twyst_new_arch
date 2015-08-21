@@ -21,8 +21,10 @@ exports.runner = function(agenda) {
       }
     }).lean().exec(function(err, users) {
       if (err || users.length === 0) {
+        logger.log("ERROR");
         done(err || false);
       } else {
+        logger.log("GOT USERS");
         _.each(users, function(item) { 
             process_user(item)
         });

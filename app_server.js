@@ -12,10 +12,6 @@ var logger = require('tracer').colorConsole();
   require('./config/routes.cfg')(app);
   require('./config/cache.cfg').populate();
 
-  // SEPARATE THE JOBS SERVER
-  // COMMENTING IT OUT FOR NOW
-  // require('./config/jobs.cfg').start(app);
-
   // START THE SERVER
   logger.info('STARTING THE TWYST SERVER');
   logger.info('Environment:' + settings.values.env);
