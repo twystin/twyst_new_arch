@@ -62,9 +62,7 @@ module.exports = function(app) {
     app.post('/api/v4/offer/report/problem', EventCtrl.report_problem);
 
     app.post('/api/v4/comments/', EventCtrl.comments);
-    
   })();
-
 
   (function OutletRoutes() {
     var OutletCtrl = require('../controllers/outlet.ctrl');
@@ -75,7 +73,6 @@ module.exports = function(app) {
     app.get('/api/v4/outlets/:outlet_id', OutletCtrl.get);
     app.get('/api/v4/outlets', mustBe.authorized('outlet.view', OutletCtrl.all));
     app.delete('/api/v4/outlets/:outlet_id', mustBe.authorized('outlet.remove', OutletCtrl.remove));
-
   })();
 
   (function UserRoutes() {
@@ -84,15 +81,12 @@ module.exports = function(app) {
     app.put('/api/v4/profile', UserCtrl.update_profile);
     app.put('/api/v4/friends', UserCtrl.update_friends);
     app.post('/api/v4/referral/join', UserCtrl.referral_join);
-
     app.get('/api/v4/coupons', UserCtrl.get_coupons);
-
   })();
 
   (function LocationRoutes() {
     var LocationCtrl = require('../controllers/location.ctrl');
     app.get('/api/v4/locations', LocationCtrl.get_locations);
-
   })();
 };
 

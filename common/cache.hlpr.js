@@ -22,23 +22,4 @@ var redis = new Redis({
   }
 });
 
-redis.on('ready', function() {
-  logger.info('REDIS is ready');
-});
-
-redis.on('error', function(err) {
-  logger.error('Error from REDIS - ' + err);
-});
-
-redis.on('end', function() {
-  logger.warn('Could not connect to REDIS - ending!');
-  process.exit(1);
-});
-
-redis.flushall(function(err) {
-  if (!err) {
-    logger.info('Cleared the cache');
-  }
-}); 
-
 module.exports = redis;
