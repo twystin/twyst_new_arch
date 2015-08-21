@@ -14,25 +14,31 @@ var User = mongoose.model('User');
 exports.runner = function(agenda) {
   agenda.define('unredeemed', function(job, done) {
     logger.log();
-    
-    User.find({coupons:{$ne:null}}).lean().exec(function(err, users) {
-    	if (err || users.length === 0) {
-    		done(err || false);
-    	} else {
-    		_.each(users, process_user(item));
-    	}
+
+    User.find({
+      coupons: {
+        $ne: null
+      }
+    }).lean().exec(function(err, users) {
+      if (err || users.length === 0) {
+        done(err || false);
+      } else {
+        _.each(users, function(item) { 
+            process_user(item)
+        });
+        done();
+      }
     });
-    
-    done();
+
   });
 }
 
 function process_user(user) {
-	// CHECK IF USER HAS UNUSED COUPONS
-	// SEND A MESSAGE IF YES
-    // var count = 0;
-    // var what = {};
-    // var what.count = count;
-    // notification.notify(what, null, user, null);
-    logger.log(user);
+  // CHECK IF USER HAS UNUSED COUPONS
+  // SEND A MESSAGE IF YES
+  // var count = 0;
+  // var what = {};
+  // var what.count = count;
+  // notification.notify(what, null, user, null);
+  logger.log(user);
 }
