@@ -49,7 +49,7 @@ module.exports.update_user = function(token, updated_user) {
 
 module.exports.update_friends = function(token, friend_list) {
   var deferred = Q.defer();
-  
+
   AuthHelper.get_user(token).then(function(data) {
     var user = data.data;
     User.findOneAndUpdate({
@@ -88,93 +88,87 @@ module.exports.update_friends = function(token, friend_list) {
 
 
 module.exports.update_referral = function(friend_token, friend_list_id, friend_referred_by, friend_source) {
-    var deferred = Q.defer();
-    
-    AuthHelper.get_user(friend_token).then(function(data) {
-        var user = data.data;
+  var deferred = Q.defer();
 
-        var friend = new Friend({
-            
-        })
+  AuthHelper.get_user(friend_token).then(function(data) {
+    var user = data.data;
+    var friend = new Friend({
 
-        var update_referral = {
-            $push: {
-                friends: {
-                    _id: mongoose.Types.ObjectId(),
-                    source: friend_source,
-                    add_date: new Date(),
-                    phone: user.phone,
-                    email: user.email,
-                    user: user._id
-                }
-            }
+    })
+
+    var update_referral = {
+      $push: {
+        friends: {
+          _id: mongoose.Types.ObjectId(),
+          source: friend_source,
+          add_date: new Date(),
+          phone: user.phone,
+          email: user.email,
+          user: user._id
         }
+      }
+    }
 
-        var update_user = {
-            $push: {
-                friends: {
-                    _id: mongoose.Types.ObjectId(),
-                    source: friend_source,
-                    add_date: new Date(),
-                    phone: friend_referred_by.phone,
-                    email: friend_referred_by.email,
-                    user: friend_referred_by._id
-                }
-            }
-
+    var update_user = {
+      $push: {
+        friends: {
+          _id: mongoose.Types.ObjectId(),
+          source: friend_source,
+          add_date: new Date(),
+          phone: friend_referred_by.phone,
+          email: friend_referred_by.email,
+          user: friend_referred_by._id
         }
-        if(friend_list_id) {
-            Friend.findOneAndUpdate({
-                _id:friend_list_id
-                }, 
-                update_referral,
-                function(err, u) {
-                if (err || !u) {
-                  deferred.reject({
-                    err: err || true,
-                    message: "Couldn\'t update user"
-                  });
-                } else {
-                  deferred.resolve({
-                    data: u,
-                    message: 'Updated user'
-                  });
-                }
+      }
+
+    }
+    if (friend_list_id) {
+      Friend.findOneAndUpdate({
+          _id: friend_list_id
+        },
+        update_referral,
+        function(err, u) {
+          if (err || !u) {
+            deferred.reject({
+              err: err || true,
+              message: "Couldn\'t update user"
+            });
+          } else {
+            deferred.resolve({
+              data: u,
+              message: 'Updated user'
+            });
+          }
+        });
+    } else {
+      friend.save(function(err, code) {
+        if (err || !code) {
+          deferred.reject({
+            err: err || true,
+            message: 'Couldn\'t save referral '
+          });
+        } else {
+          Friend.findOneAndUpdate({
+              _id: friend._id
+            },
+            update_referral,
+            function(err, u) {
+              if (err || !u) {
+                deferred.reject({
+                  err: err || true,
+                  message: "Couldn\'t save Referral"
+                });
+              } else {
+                deferred.resolve({
+                  data: u,
+                  message: 'Saved Referral'
+                });
+              }
             });
         }
-        else{
-            friend.save(function(err, code) {
-                if (err || !code) {
-                  deferred.reject({
-                    err: err || true,
-                    message: 'Couldn\'t save referral '
-                  });
-                } else {
-                    Friend.findOneAndUpdate({
-                        _id: friend._id
-                        }, 
-                        update_referral,
-                        function(err, u) {
-                        if (err || !u) {
-                          deferred.reject({
-                            err: err || true,
-                            message: "Couldn\'t save Referral"
-                          });
-                        } else {
-                          deferred.resolve({
-                            data: u,
-                            message: 'Saved Referral'
-                          });
-                        }
-                    });
+      });
+    }
+  });
 
-                  
-                }
-              });
-        }
-    });
-
-    
-
-    return deferred.promise;
+  return deferred.promise;
 };

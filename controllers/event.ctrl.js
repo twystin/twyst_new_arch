@@ -144,12 +144,12 @@ function create_new(res, passed_data) {
       return update_twyst_bucks(data);
     })
     .then(function(data) {
-        var bucks = data.user.twyst_bucks;
-        var code = data.user.coupons[data.user.coupons.length-1].code;
-        var data = {};
-        data.twyst_bucks = bucks;
-        data.code = code;
-        
+      var bucks = data.user.twyst_bucks;
+      var code = data.user.coupons[data.user.coupons.length - 1].code;
+      var data = {};
+      data.twyst_bucks = bucks;
+      data.code = code;
+
       HttpHelper.success(res, data, "Processed the event successfully.");
     })
     .fail(function(err) {
@@ -280,18 +280,18 @@ function update_outlet_event_analytics(data) {
   };
   var key = 'analytics.event_analytics.' + event_type;
   update.$inc[key] = 1;
-  if(data.outlet) {
+  if (data.outlet) {
     Outlet.findOneAndUpdate({
-    _id: data.outlet._id
-      }, update, function(err, outlet) {
+      _id: data.outlet._id
+    }, update, function(err, outlet) {
       if (err) {
         deferred.reject('Could not update outlet analytics' + err);
       } else {
         deferred.resolve(data);
       }
-    });  
+    });
   }
-  
+
   deferred.resolve(data);
   return deferred.promise;
 }
@@ -316,7 +316,7 @@ function update_user_event_analytics(data) {
   var key_total = 'user_meta.total_events.' + event_type;
   update_total.$inc[key_total] = 1;
 
-  if(data.outlet) {
+  if (data.outlet) {
     var key_outlet = 'user_meta.total_events_by_outlet.' + data.outlet._id + '.' + event_type;
     update_total_by_outlet.$inc[key_outlet] = 1;
 
@@ -336,9 +336,9 @@ function update_user_event_analytics(data) {
           }
         });
       }
-    }); 
+    });
   }
-  
+
   deferred.resolve(data);
   return deferred.promise;
 }
@@ -374,52 +374,49 @@ function create_event(data) {
 }
 
 function update_twyst_bucks(data) {
-    var mongoose = require('mongoose');
-    require('../models/user.mdl.js');
-    var User = mongoose.model('User');
-    logger.log();
-    var deferred = Q.defer();
-    var event_type = data.event_data.event_type;
-    var available_twyst_bucks = data.user.twyst_bucks;
-    var update_twyst_bucks = {
-        $set:{
+  var mongoose = require('mongoose');
+  require('../models/user.mdl.js');
+  var User = mongoose.model('User');
+  logger.log();
+  var deferred = Q.defer();
+  var event_type = data.event_data.event_type;
+  var available_twyst_bucks = data.user.twyst_bucks;
+  var update_twyst_bucks = {
+    $set: {
 
-        }
     }
-    
-    Cache.hget('twyst_bucks', "twyst_bucks_grid", function(err, reply) {
-        if (err || !reply) {
-              deferred.reject('Could not get bucks grid' + err);
-        } 
-        else {
-            
-            var bucks_grid = JSON.parse(reply);
+  }
 
-            _.find(bucks_grid, function(current_event) {
-                if(current_event.event === event_type && current_event.update_now) {
-                    if(current_event.earn){
-                        data.user.twyst_bucks = available_twyst_bucks + current_event.bucks;
-                    }
-                    else {
-                        data.user.twyst_bucks = available_twyst_bucks - current_event.bucks;
-                    }
+  Cache.hget('twyst_bucks', "twyst_bucks_grid", function(err, reply) {
+    if (err || !reply) {
+      deferred.reject('Could not get bucks grid' + err);
+    } else {
 
-                    update_twyst_bucks.$set.twyst_bucks = data.user.twyst_bucks;
+      var bucks_grid = JSON.parse(reply);
 
-                    User.findOneAndUpdate({
-                        _id: data.user._id
-                        }, update_twyst_bucks, function(err, user) {
-                        if (err) {
-                            deferred.reject('Could not update user bucks' + err);
-                        } 
-                        else {
-                            deferred.resolve(data);                                                  
-                        }
-                    }); 
-                }
-            }) 
-            deferred.resolve(data);           
+      _.find(bucks_grid, function(current_event) {
+        if (current_event.event === event_type && current_event.update_now) {
+          if (current_event.earn) {
+            data.user.twyst_bucks = available_twyst_bucks + current_event.bucks;
+          } else {
+            data.user.twyst_bucks = available_twyst_bucks - current_event.bucks;
+          }
+
+          update_twyst_bucks.$set.twyst_bucks = data.user.twyst_bucks;
+
+          User.findOneAndUpdate({
+            _id: data.user._id
+          }, update_twyst_bucks, function(err, user) {
+            if (err) {
+              deferred.reject('Could not update user bucks' + err);
+            } else {
+              deferred.resolve(data);
+            }
+          });
         }
-    });
-    return deferred.promise;
+      })
+      deferred.resolve(data);
+    }
+  });
+  return deferred.promise;
 }
