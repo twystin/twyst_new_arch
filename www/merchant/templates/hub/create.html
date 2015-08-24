@@ -1,44 +1,566 @@
-<div>
+<div style='height:100vh;'>
   <wizard on-finish="finishedWizard()">
     <wz-step title="Basic information">
-      <form>
+      <form name="myForm">
         <legend>Basic information</legend>
-        <div class="form-group">
-          <label for="">Outlet name</label>
-          <input type="text" class="form-control" id="" placeholder="Name of the outlet" ng-model="outlet.basics.name">
+        <div class="form-group" ng-class="{'has-success': outlet.basics.name, 'has-warning': !outlet.basics.name, 'has-error': !outlet.basics.name && formFailure}">
+          <label for="outlet_name">Outlet name</label>
+          <input type="text" class="form-control" id="" placeholder="Name of the outlet" ng-model="outlet.basics.name" ng-change='updateSlug()' required>
         </div>
-        <div class="form-group">
+        <div class='form-group' ng-class="{'has-warning': !outlet.basics.main_type, 'has-error': !outlet.basics.main_type && formFailure}">
+          <label for='outlet_type'>Outlet Type</label>
+          <select ng-model='outlet.basics.main_type' class='form-control'>
+            <option value='fnb'>fnb</option>
+            <option value='spa'>spa</option>
+            <option value='retail'>retail</option>
+            <option value='other'>other</option>
+          </select>
+        </div>
+        <div class='form-group' ng-class="{'has-warning': !outlet.basics.is_a, 'has-error': !outlet.basics.is_a && formFailure}">
+          <label for='outlet_descriptors'>What describes this outlet best?</label>
+          <select ng-model='outlet.basics.is_a' class='form-control' ng-change='updateIcon()'>
+            <option ng-repeat='tag in tag_set' value='{{tag}}'>{{tag}}</option>
+          </select>
+        </div>
+        <div class='form-group'>
+          <label class='control-label' for='icon'>Icon</label>
+          <img ng-src='/common/images/transparent/{{outlet.basics.icon}}.png' style='max-width:50px;' />
+        </div>
+        <!-- <div class="form-group">
           <label for="input-id">Address</label>
           <textarea name="" id="input" class="form-control" rows="3" required="required" ng-model="outlet.contact.location.address"></textarea>
+        </div> -->
+        <div class='form-group'>
+          <label class='control-label' for='attributes'>Attributes</label>
+          <div class='customradio' ng-repeat='attribute in attribute_set'>
+            <div class='customradio-success'>
+              <input type='checkbox' ng-model='outlet.attributes[attribute.class_name]' />
+              <label for='radio_current'>{{attribute.text}}</label>
+            </div>
+          </div>
+          <div class='form-group' ng-class="{'has-warning': !outlet.attributes.air_conditioning, 'has-error': formFailure && !outlet.attributes.air_conditioning}">
+            <label class='control-label' for='air_conditioning'>Air Conditioning?</label>
+            <select class='form-control' ng-model='outlet.attributes.air_conditioning'>
+              <option value="available">Available</option>
+              <option value="not_available">Unavailable</option>
+              <option value="partial">Partial</option>
+              <option value="unknown">Unknown</option>
+            </select>
+          </div>
+          <div class='form-group' ng-class="{'has-warning': !outlet.attributes.parking, 'has-error': formFailure && !outlet.attributes.parking}">
+            <label class='control-label' for='parking'>Parking</label>
+            <select class='form-control' ng-model='outlet.attributes.parking'>
+              <option value="available">Available</option>
+              <option value="not_available">Unavailable</option>
+              <option value="valet">Valet</option>
+              <option value="unknown">Unknown</option>
+            </select>
+          </div>
+          <div class='form-group' ng-class="{'has-warning': !outlet.attributes.reservation, 'has-error': formFailure && !outlet.attributes.reservation}">
+            <label class='control-label' for='reservation'>Reservation</label>
+            <select class='form-control' ng-model='outlet.attributes.reservation'>
+              <option value="suggested">Suggested</option>
+              <option value="not_required">Not required</option>
+              <option value="unknown">Unknown</option>
+            </select>
+          </div>
+          <div class='form-group' ng-class="{'has-warning': !outlet.attributes.wifi, 'has-error': formFailure && !outlet.attributes.wifi}">
+            <label class='control-label' for='wi-fi'>Wi-Fi</label>
+            <select class='form-control' ng-model='outlet.attributes.wifi'>
+              <option value="not_available">Unavailable</option>
+              <option value="free">Free</option>
+              <option value="paid">Paid</option>
+              <option value="unknown">Unknown</option>
+            </select>
+          </div>
+          <div class='form-group'>
+            <label class='control-label' for='cost_for_two'>Cost for Two</label>
+            <div class='clearfix'></div>
+            <div class='col-sm-6' ng-class="{'has-warning': !outlet.attributes.cost_for_two.min , 'has-error': !outlet.attributes.cost_for_two.min && formFailure}">
+              <label class='control-label' for='min_cost'>From</label>
+              <div class='input-group'>
+                <div class='input-group-addon'>Rs. 
+                </div>
+                <input class='form-control' type='number' ng-model='outlet.attributes.cost_for_two.min' steps='1' min='1' />  
+              </div>
+            </div>
+            <div class='col-sm-6' ng-class="{'has-warning': !outlet.attributes.cost_for_two.max, 'has-error': !outlet.attributes.cost_for_two.max && formFailure}">
+              <label class='control-label' for='max_cost'>Upto</label>
+              <div class='input-group'>
+                <div class='input-group-addon'>Rs. 
+                </div>
+                <input class='form-control' type='number' ng-model='outlet.attributes.cost_for_two.max' steps='1' min='1' />  
+              </div>
+            </div>
+          </div>
+          <div class='form-group' ng-class="{'has-warning': !outlet.attributes.cuisines.length, 'has-error': !outlet.attributes.cuisines.length && formFailure}">
+            <label class='control-label' for='cuisines'>Cuisines</label>
+            <input class='form-control' ng-model='outlet.attributes.cuisines' ng-list placeholder='Eg. Thai, American' />
+          </div>
+          <div class='form-group' ng-class="{'has-warning': !outlet.attributes.timings, 'has-error': !outlet.attributes.timings && formFailure}">
+            <label class='control-label' for='timings'>Timings</label>
+            <input class='form-control' type='text' ng-model='outlet.attributes.timings' placeholder='Eg. 8 AM to 11 PM' />
+          </div>
+          <div class='form-group'>
+            <label class='control-label' for='payment_modes'>Payment Modes: </label>
+            <div class='col-xs-12'>
+              <div class="btn-group">
+                <label class="btn btn-success" ng-repeat='choice in payment_options' ng-model="checkModel[choice]" btn-checkbox>{{choice}}</label>
+              </div>
+            </div>
+          </div>
+          <div class='form-group' ng-class="{'has-warning': !outlet.attributes.tags.length, 'has-error': !outlet.attributes.tags.length && formFailure}">
+            <label class='control-label' for='tags'>Tags</label>
+            <input class='form-control' ng-model='outlet.attributes.tags' ng-list />
+          </div>
+        </div>
+        <div class='form-group'>
+          <label for='control-label' for='sms_off'>
+            <input type='checkbox' ng-model='outlet.sms_off.value' ng-change='updateSMSOff()' />
+            SMS Off
+          </label>
+          <div class='form-group' ng-show='outlet.sms_off.value'>
+            <div class='form-group'>
+              <label for='off_start'>Starting</label>
+              <input type='number' min='0' max='23' steps='1' ng-model='outlet.sms_off.time.start.hr'> : <input type='number' min='0' max='59' steps='1' ng-model='outlet.sms_off.time.start.min'>
+              <!-- <timepicker class='timepicker' ng-model='timing.open' hour-step='1' minute-step='15' show-spinners='isSpinnerVisible' mousewheel='false'/> -->
+            </div>
+            <div class='form-group'>
+              <label for='closing_time'>Closes</label>
+              <input type='number' min='0' max='23' steps='1' ng-model='outlet.sms_off.time.end.hr'> : <input type='number' min='0' max='59' steps='1' ng-model='outlet.sms_off.time.end.min'>
+              <!-- <timepicker class='timepicker' ng-model='timing.close' hour-step='1' minute-step='15' show-spinners='isSpinnerVisible' mousewheel='false'/> -->
+            </div>
+          </div>
+          <div class='alert alert-danger' role='alert' ng-if='outlet.sms_off && ((outlet.sms_off.time.start.hr * 60) + outlet.sms_off.time.start.min) == ((outlet.sms_off.time.end.hr * 60) + outlet.sms_off.time.end.min)'>
+            <p>Timings cannot be the same.</p>
+          </div>
         </div>
         <button type="submit" class="btn btn-primary" wz-next>Next</button>
       </form>
     </wz-step>
-    <wz-step title="Attributes">
-      <form>
-        <legend>Attributes</legend>
+    <wz-step title='Contact'>
+      <legand>Contact Info</legand>
+      <form name='step2'>
+        <legand>Contact Details</legand>
+        <div class='form-group'>
+          <div class='col-sm-6'>
+            <ui-gmap-google-map center="map.center" zoom="map.zoom" draggable="true" options="options">
+                <ui-gmap-marker coords="marker.coords" options="marker.options" events="marker.events" idkey="marker.id">
+                </ui-gmap-marker>
+            </ui-gmap-google-map>
+          </div>
+          <div class='col-sm-6'>
+            <div class='form-group' ng-if='outlet.contact.location.coords.longitude && outlet.contact.location.coords.latitude'>
+              <label class='control-label' for='geo_data'>Geographical Coordinates</label>
+              <p>Longitude: {{outlet.contact.location.coords.longitude}} </p>
+              <p>Latitide: {{outlet.contact.location.coords.latitude}}</p>
+              <p><a href='{{outlet.contact.location.map_url}}' target='_blank'> Click here to view map link</a>
+              </p>
+            </div>
+            <div class='alert alert-warning' ng-if='!outlet.contact.location.coords.longitude || !outlet.contact.location.coords.latitude'>
+              <p>Drag the marker to the outlet location to get location details</p>
+            </div>
+          </div>
+        </div>
+        <div class='clearfix'></div>
+        <div class='h3'></div>
+        <div class='form-group' ng-class="{'has-warning': !outlet.contact.emails.person, 'has-error': formFailure && !outlet.contact.emails.person}">
+          <label for='outlet_contact'>Contact Name</label>
+          <input class='form-control' type='text' ng-model='outlet.contact.emails.person' />
+        </div>
+        <div class='form-group' ng-class="{'has-warning': !outlet.contact.emails.email, 'has-error': formFailure && !outlet.contact.emails.email}">
+          <label for='outlet_email'>Email</label>
+          <input class='form-control' type='email' ng-model='outlet.contact.emails.email'>
+        </div>
+        <div class='form-group' ng-class="{'has-warning': !outlet.contact.emails.type, 'has-error': formFailure && !outlet.contact.emails.type}">
+          <label for='email_type'>Type</label>
+          <select ng-molde='outlet.contact.emails.type' class='form-control'>
+            <option value='personal'>Personal</option>
+            <option value='work'>Work</option>
+          </select>
+        </div>
+        <div class="form-group" ng-class="{'has-warning': !outlet.contact.location.address, 'has-error': formFailure && !outlet.contact.location.address}">
+          <label for="outlet_address">Address</label>
+          <textarea name="" id="input" class="form-control" rows="3" required="required" ng-model="outlet.contact.location.address"></textarea>
+        </div>
+        <div class='row'>
+          <div class='form-group col-sm-6' ng-class="{'has-warning': !outlet.contact.location.locality_1[0], 'has-error': formFailure && !outlet.contact.location.locality_1[0]}">
+            <label for='locality_1'>Locality 1: </label>
+            <input class='form-control' type='text' ng-model='outlet.contact.location.locality_1[0]' placeholder='Locality 1' />
+          </div>
+          <div class='form-group col-sm-6' ng-class="{'has-warning': !outlet.contact.location.locality_2[0], 'has-error': formFailure && !outlet.contact.location.locality_2[0]}">
+            <label for='locality_2'>Locality 2: </label>
+            <input class='form-control' type='text'  ng-model='outlet.contact.location.locality_2[0]' placeholder='Locality 2' />
+          </div>
+        </div>
+        <div class='row'>
+          <div class='form-group col-sm-6' ng-class="{'has-warning': !outlet.contact.location.city, 'has-error': formFailure && !outlet.contact.location.city}">
+            <label for='city'>City: </label>
+            <input class='form-control' type='text' ng-model='outlet.contact.location.city' placeholder='City' />
+          </div>
+          <div class='form-group col-sm-6' ng-class="{'has-warning': !outlet.contact.location.pin, 'has-error': formFailure && !outlet.contact.location.pin}">
+            <label for='pincode'>Pincode: </label>
+            <input class='form-control' type='text' ng-model='outlet.contact.location.pin' placeholder='PIN Code' />
+          </div>
+        </div>
+        <div class='form-group'>
+          <label class='control-label'>Landmarks</label>
+          <div class='clearfix'></div>
+          <div class='form-group col-sm-6' ng-repeat='landmark in outlet.contact.location.landmarks track by $index' ng-class="{'has-warning': !outlet.contact.location.landmarks[$index], 'has-error': formFailure && !outlet.contact.location.landmarks[$index]}"> 
+            <label class='control-label'>Landmark #{{$index + 1}}</label>
+            <div class='input-group'>
+              <input class='form-control' type='text' ng-model='outlet.contact.location.landmarks[$index]' />
+              <div class='input-group-addon mob-num-addon' ng-click='removeLandmark(outlet.contact.location.landmarks, $index)'>
+                <button class='btn btn-danger'>
+                  <span class='glyphicon glyphicon-trash' />
+                </button>
+              </div>  
+            </div>
+          </div>
+          <div class='clearfix'></div>
+          <div class='form-group'>
+            <button class='btn btn-success' ng-click='addLandmark("landmarks")'>Add Landmark</button>
+          </div>
+        </div>
+        <div class='form-group'>
+          <label class='control-label' for='phone nos.'>Contact Numbers</label>
+          <div class='form-group'>
+            <label class='control-label'>Landline phone: </label>
+            <input class='form-control' type='text' ng-model='outlet.contact.phones.landline' />
+          </div>
+          <div class='form-group'>
+            <label class='control-label'>Mobile Numbers</label>
+            <div class='clearfix'></div>
+            <div class='form-group col-sm-6' ng-repeat='number in outlet.contact.phones.mobile' ng-class="{'has-warning': !outlet.contact.phones.mobile[$index].num, 'has-error': formFailure && !outlet.contact.phones.mobile[$index].num}"> 
+              <label class='control-label'>Mobile #{{$index + 1}}</label>
+              <div class='input-group'>
+                <input class='form-control' type='text' ng-model='number.num' />
+                <div class='input-group-addon mob-num-addon' ng-click='removeNumber(outlet.contact.phones.mobile, index)'>
+                  <button class='btn btn-danger'>
+                    <span class='glyphicon glyphicon-trash' />
+                  </button>
+                </div>  
+              </div>
+            </div>
+            <div class='clearfix'></div>
+            <div class='form-group'>
+              <button class='btn btn-success' ng-click='addNumber("mobile")'>Add mobile</button>
+            </div>
+          </div>
+          <div class='form-group'>
+            <label class='control-label'>Registered Mobile Numbers</label>
+            <div class='clearfix'></div>
+            <div class='form-group col-sm-6' ng-repeat='number in outlet.contact.phones.reg_mobile' ng-class="{'has-warning': !outlet.contact.phones.reg_mobile[$index].num, 'has-error': formFailure && !outlet.contact.phones.reg_mobile[$index].num}"> 
+              <label class='control-label'>Registered Number #{{$index + 1}}</label>
+              <div class='input-group'>
+                <input class='form-control' type='text' ng-model='number.num' />
+                <div class='input-group-addon mob-num-addon' ng-click='removeNumber(outlet.contact.phones.reg_mobile, index)'>
+                  <button class='btn btn-danger'>
+                    <span class='glyphicon glyphicon-trash' />
+                  </button>
+                </div>  
+              </div>
+            </div>
+            <div class='clearfix'></div>
+            <div class='form-group'>
+              <button class='btn btn-success' ng-click='addNumber("reg_mobile")'>Add mobile</button>
+            </div>
+          </div>
+        </div>
+        <div class='clearfix'></div>
+        <button type="submit" class="btn btn-default" wz-previous>Prev</button>
+        <button type="submit" class="btn btn-primary" wz-next>Next</button>
+      </form>
+    </wz-step>
+    <wz-step title="Social Links">
+      <form name='step3'>
+        <legend>Social Links</legend>
         <div class="form-group">
-          <div class="checkbox">
+          <label class='control-label' for='website_uri'>Website URL</label>
+          <input class='form-control' type='url' ng-model='outlet.links.website_url' />
+          <!-- <div class="checkbox">
             <label>
               <input type="checkbox" value="">
               Option one is this and that&mdash;be sure to include why it's great
             </label>
+          </div> -->
+        </div>
+        <div class='form-group'>
+          <label class='control-label' for='facebook_uri'>Facebook</label>
+          <input class='form-control' type='url' ng-model='outlet.links.facebook_url' />
+        </div>
+        <div class='form-group'>
+          <label class='control-label' for='twitter_uri'>Twitter</label>
+          <input class='form-control' type='url' ng-model='outlet.links.twitter_url' />
+        </div>
+        <div class='form-group'>
+          <label class='control-label' for='youtube_uri'>Youtube</label>
+          <input class='form-control' type='url' ng-model='outlet.links.youtube_url' />
+        </div>
+        <div class='form-group'>
+          <label class='control-label' for='zomato_uri'>Zomato</label>
+          <input class='form-control' type='url' ng-model='outlet.links.zomato_url' />
+        </div>
+        <div class='form-group'>
+          <label class='control-label' for='foodpanda_uri'>Foodpanda</label>
+          <input class='form-control' type='url' ng-model='outlet.links.foodpanda_url' />
+        </div>
+        <div class='form-group'>
+          <label class='control-label' for='short_uri'>Short URi</label>
+          <input class='form-control' type='url' ng-model='outlet.links.short_url' />
+        </div>
+        <div class='form-group'>
+          <label class='control-label' for='other_links'>Other Links</label>
+          <div class='form-group' ng-repeat='link in outlet.links.other_links'>
+            <label class='control-label' for='other_link'> Other Link # {{$index + 1}} </label>
+            <button class='btn btn-sm btn-danger pull-right' ng-click='removeLink($index)'>
+              <span class='glyphicon glyphicon-trash' />
+            </button>
+            <div class='form-group'>
+              <label class='control-label' for='link_name'>Link Name</label>
+              <input class='form-control' type='text' ng-model='link.link_name' />
+            </div>
+            <div class='form-group'>
+              <label class='control-label' for='link url'>Link Url</label>
+              <input class='form-control' type='url' ng-model='link.link_url' />
+            </div>
+          </div>
+          <div class='form-group'>
+            <button class='btn btn-sm btn-success' ng-click='addLink()'>Add Link</button>
           </div>
         </div>
+        <div class='clearfix'></div>
+        <button type="submit" class="btn btn-default" wz-previous>Prev</button>
+        <button type="submit" class="btn btn-primary" wz-next>Next</button>
       </form>
-      <input type="submit" wz-next value="Go on" />
     </wz-step>
     <wz-step title="Photos">
-      <p>Even more steps!!</p>
-      <input type="submit" wz-next value="Finish now" />
+      <form name='step4'>
+        <legend>Social Links</legend>
+        <div class='form-group col-sm-6'>
+          <label class='control-label' for='logo'>Logo </label>
+          <imagereader ng-image-folder='outlet._id' ng-image-class='logo' ng-model='outlet.photos.logo'>
+        </div>
+        <div class='clearfix'></div>
+        <div class='form-group col-sm-6'>
+          <label class='control-label' for='logo_gray'>Logo Grey</label>
+          <imagereader ng-image-folder='outlet._id' ng-image-class='logo_gray' ng-model='outlet.photos.logo_gray'>
+        </div>
+        <div class='clearfix'></div>
+        <div class='form-group col-sm-6'>
+          <label class='control-label' for='background_img'>Background</label>
+          <imagereader class='background' ng-image-folder='outlet._id' ng-image-class='background' ng-model='outlet.photos.background'>
+        </div>
+        <div class='clearfix'></div>
+        <div class='form-group'>
+          <label class='control-label' for='other_images'>Other images</label>
+          <div class='row'>
+            <div class='form-group col-sm-6' ng-repeat='otherImage in outlet.photos.others'>
+              <label class='control-label' for='other_photo'>Photo # {{$index + 1}}</label>
+              <div class='form-group' ng-class="{'has-warning': !otherImage.title, 'has-error': formFailure && !otherImage.title}">
+                <label class='control-label' for='image_title'>Title</label>
+                <input class='form-control' type='text' ng-model='otherImage.title' />
+              </div>
+              <button class='btn btn-sm btn-danger pull-right' ng-click='removeImage($index)'>X</button>
+              <imagereader ng-model='otherImage.image' ng-image-folder='outlet._id' ng-image-class='others' />
+            </div>
+            <div class='clearfix'></div>
+            <div class='form-group'>
+              <button class='btn btn-success' ng-click='addImage()'>Add image</button>
+            </div>
+          </div>
+        </div>
+        <div class='clearfix'></div>
+        <button type="submit" class="btn btn-default" wz-previous>Prev</button>
+        <button type="submit" class="btn btn-primary" wz-next>Next</button>
+      </form>
     </wz-step>
-    <wz-step title="Offers">
-      <p>Even more steps!!</p>
-      <input type="submit" wz-next value="Finish now" />
+    <wz-step title="Timings" cannext='validateStep5'>
+      <form name='step5'>
+        <legend>Timings</legend>
+        <div class='form-group' ng-repeat='(day, schedule) in outlet.business_hours' style='padding-top:10px;padding-bottom:40px;'>
+          <label class='control-label' for='{{day}}'>{{day}}</label>
+          <div class='form-group'>
+            <input bs-switch ng-model='schedule.closed' type='checkbox' ng-change='updateTiming(day, outlet.business_hours)'/>
+            <span> <b>isClosed?</b></span>
+            <p class='h4' for='timings'>Timings</p>
+            <div class='col-xs-12 col-sm-6' ng-repeat='timing in schedule.timings' ng-init='initalizeTiming(day, $index, outlet.business_hours)'>
+              <label class='control-label' for='timing_instance'>Timing # {{$index + 1}} </label>
+              <button class='btn btn-danger pull-right' ng-click='removeTiming(day, $index, outlet.business_hours)' ng-hide='schedule.timings.length<2'>
+                <span class='glyphicon glyphicon-trash' />
+              </button>
+              <div class='clearfix'></div>
+              <div class='form-group'>
+                <label for='opening_time'>Opens</label>
+                <input type='number' min='0' max='23' steps='1' ng-model='timing.open.hr'> : <input type='number' min='0' max='59' steps='1' ng-model='timing.open.min'>
+                <!-- <timepicker class='timepicker' ng-model='timing.open' hour-step='1' minute-step='15' show-spinners='isSpinnerVisible' mousewheel='false'/> -->
+              </div>
+              <div class='form-group'>
+                <label for='closing_time'>Closes</label>
+                <input type='number' min='0' max='23' steps='1' ng-model='timing.close.hr'> : <input type='number' min='0' max='59' steps='1' ng-model='timing.close.min'>
+                <!-- <timepicker class='timepicker' ng-model='timing.close' hour-step='1' minute-step='15' show-spinners='isSpinnerVisible' mousewheel='false'/> -->
+              </div>
+              <div class='alert alert-danger' role='alert' ng-if='((timing.open.hr * 60) + timing.open.min + 60) > ((timing.close.hr * 60) + timing.close.min)'>
+                <p>Outlet open duration must be atleast one hour</p>
+              </div>
+            </div>
+            <div class='clearfix'></div>
+            <div class='col-xm-12 col-sm-6'>
+              <button class='btn btn-success' ng-click='addNewTiming(day, outlet.business_hours)' ng-hide='schedule.closed'>Add timing</button>
+            </div>
+            <div class='col-xm-12 col-sm-6'>
+              <button class='btn btn-success' ng-click='cloneToAllDays(day, outlet.business_hours)'>Apply to all days</button>
+            </div>
+
+          </div>
+        </div>
+        <div class='clearfix'></div>
+        <button type="submit" class="btn btn-default" wz-previous>Prev</button>
+        <button type="submit" class="btn btn-primary" wz-next>Next</button>
+      </form>
+    </wz-step>
+    <wz-step title="Menu">
+      <form name='step6'>
+        <legend>Menu</legend>
+        <div class='form-group col-xs-12' ng-repeat='menu in outlet.menu'>
+          <label class='h2'>Menu # {{$index + 1}} :: {{menu.name}}</label>
+          <button class='btn btn-sm btn-danger pull-right' ng-click='removeInstance(outlet, $index, "menu")'>
+            <span class='glyphicon glyphicon-trash' />
+          </button>
+          <div class='form-group' ng-class="{'has-warning': !menu.name, 'has-error': formFailure && !menu.name}">
+            <label class='control-label' for='menu_name'>Menu Name</label>
+            <input class='form-control' ng-model='menu.name' type='text' />
+          </div>
+          <div class='form-group' ng-class="{'has-warning': !menu.description, 'has-error': formFailure && !menu.description}">
+            <label class='control-label' for='menu_description'>Description</label>
+            <textarea class='form-control' ng-model='menu.description' rows='4'></textarea>
+          </div>
+          <div class='form-group col-xs-12'>
+            <label class='control-label h3' for='menu_sections'>Sections</label>
+            <div class='form-group' ng-repeat='section in menu.sections'>
+              <label class='control-label h4' for='section'>Section # {{$index + 1}} :: {{section.section_name}}</label>
+              <button class='btn btn-sm btn-danger pull-right' ng-click='removeInstance(menu, $index, "sections")'>
+                <span class='glyphicon glyphicon-trash' />
+              </button>
+              <div class='form-group' ng-class="{'has-warning': !section.section_name, 'has-error': formFailure && !section.section_name}">
+                <label class='control-label' for='section_name'>Section Name</label>
+                <input class='form-control' type='text' ng-model='section.section_name' />
+              </div>
+              <div class='form-group' ng-class="{'has-warning': !section.section_description, 'has-error': formFailure && !section.section_description}">
+                <label class='control-label' for='section_description'>Description</label>
+                <textarea class='form-control' ng-model='section.section_description' rows='3'></textarea>
+              </div>
+              <div class='form-group col-xs-12'>
+                <label class='control-label' for='items'>Items</label>
+                <div class='form-group' ng-repeat='item in section.items'>
+                  <label class='control-label' for='item'>Item # {{$index + 1}} :: {{item.item_name}} </label>
+                  <button class='btn btn-sm btn-danger pull-right' ng-click='removeInstance(section, $index, "items")'>
+                    <span class='glyphicon glyphicon-trash' />
+                  </button>
+                    <div class='form-group' ng-class="{'has-warning': !item.item_name , 'has-error': formFailure && !item.item_name}">
+                      <label class='control-label' for='item_name'>Item Name</label>
+                      <input class='form-control' ng-model='item.item_name' type='text' />
+                    </div>
+                    <div class='form-group' ng-class="{'has-warning': !item.item_description , 'has-error': formFailure && !item.item_description}">
+                      <label class='control-label' for='item_description'>Item Description</label>
+                      <textarea class='form-control' ng-model='item.item_description' rows='3'></textarea>
+                    </div>
+                    <div class='form-group'>
+                      <label class='control-label' for='item_photo'>Item Photo</label>
+                      <imagereader ng-model='item.item_photo' ng-image-folder='outlet._id' ng-image-class='tbd'/>
+                    </div>
+                    <div class='form-group' ng-class="{'has-warning': !item.item_tags , 'has-error': formFailure && !item.item_tags }">
+                      <label class='control-label' for='item_tags'>Item Tags</label>
+                      <input ng-model='item.item_tags' ng-list />
+                    </div>
+                    <div class='form-group' ng-class="{'has-warning': !item.item_cost , 'has-error': formFailure && !item.item_cost }">
+                      <label class='control-label' for='item_cost'>Item Cost</label>
+                      <input ng-model='item.item_cost' type='text' />
+                    </div>
+                </div>
+                <div class='form-group'>
+                  <button class='btn btn-sm btn-success' ng-click='addItem(section)'>Add Item</button>
+                </div>
+              </div>
+            </div>
+            <div class='form-group'>
+              <button class='btn btn-success' ng-click='addSection($index)'>Add Section</button>
+            </div>
+          </div>
+        </div>
+        <div class='form-group'>
+          <button class='btn btn-lg btn-success' ng-click='addMenu()'>Add Menu</button>
+        </div>
+        <div class='clearfix'></div>
+        <button type="submit" class="btn btn-default" wz-previous>Prev</button>
+        <button type="submit" class="btn btn-primary" wz-next>Next</button>
+      </form>
+    </wz-step>
+    <wz-step title='Delivery Info'>
+      <form name='step7'>
+        <legand>Delivery Info</legand>
+        <div class='form-group'>
+          <div class='form-group' ng-class='{"has-warning": !outlet.attributes.delivery.delivery_area , "has-error": formFailure && !outlet.attributes.delivery.delivery_area}'>
+            <label class='control-label' for='del_area'>Delivery Area</label>
+            <input class='form-control' type='text' ng-model='outlet.attributes.delivery.delivery_area' />
+          </div>
+          <div class='form-group' ng-class='{"has-warning": !outlet.attributes.delivery.delivery_estimated_time , "has-error": formFailure && !outlet.attributes.delivery.delivery_estimated_time}'>
+            <label class='control-label' for='del_est_time'>Estimate Time</label>
+            <input class='form-control' type='text' ng-model='outlet.attributes.delivery.delivery_estimated_time' />
+          </div>
+          <div class='form-group' ng-class='{"has-warning": !outlet.attributes.delivery.delivery_conditions , "has-error": formFailure && !outlet.attributes.delivery.delivery_conditions}'>
+            <label class='control-label' for='del_cond'>Conditions</label>
+            <input class='form-control' type='text' ng-model='outlet.attributes.delivery.delivery_conditions' />
+          </div>
+        </div>
+        <div class='form-group' ng-repeat='(day, schedule) in outlet.attributes.delivery.delivery_timings'>
+          <label class='control-label' for='{{day}}'>{{day}}</label>
+          <div class='form-group'>
+            <input bs-switch ng-model='schedule.closed' type='checkbox' ng-change='updateTiming(day, outlet.attributes.delivery.delivery_timings)'/>
+            <span> <b>isClosed?</b></span>
+            <p class='h4' for='timings'>Timings</p>
+            <div class='col-xs-12 col-sm-6' ng-repeat='timing in schedule.timings' ng-init='initalizeTiming(day, $index, outlet.attributes.delivery.delivery_timings)'>
+              <label class='control-label' for='timing_instance'>Timing # {{$index + 1}} </label>
+              <button class='btn btn-danger pull-right' ng-click='removeTiming(day, $index, outlet.attributes.delivery.delivery_timings)' ng-hide='schedule.timings.length<2'>
+                <span class='glyphicon glyphicon-trash' />
+              </button>
+              <div class='clearfix'></div>
+              <div class='form-group'>
+                <label for='opening_time'>Opens</label>
+                <input type='number' min='0' max='23' steps='1' ng-model='timing.open.hr'> : <input type='number' min='0' max='59' steps='1' ng-model='timing.open.min'>
+                <!-- <timepicker class='timepicker' ng-model='timing.open' hour-step='1' minute-step='15' show-spinners='isSpinnerVisible' mousewheel='false'/> -->
+              </div>
+              <div class='form-group'>
+                <label for='closing_time'>Closes</label>
+                <input type='number' min='0' max='23' steps='1' ng-model='timing.close.hr'> : <input type='number' min='0' max='59' steps='1' ng-model='timing.close.min'>
+                <!-- <timepicker class='timepicker' ng-model='timing.close' hour-step='1' minute-step='15' show-spinners='isSpinnerVisible' mousewheel='false'/> -->
+              </div>
+              <div class='alert alert-danger' role='alert' ng-if='((timing.open.hr * 60) + timing.open.min + 60) > ((timing.close.hr * 60) + timing.close.min)'>
+                <p>Delivery time period must be atleast one hour</p>
+              </div>
+            </div>
+            <div class='clearfix'></div>
+            <div class='col-xm-12 col-sm-6'>
+              <button class='btn btn-success' ng-click='addNewTiming(day, outlet.attributes.delivery.delivery_timings)' ng-hide='schedule.closed'>Add timing</button>
+            </div>
+            <div class='col-xm-12 col-sm-6'>
+              <button class='btn btn-success' ng-click='cloneToAllDays(day, outlet.attributes.delivery.delivery_timings)'>Apply to all days</button>
+            </div>
+
+          </div>
+        </div>
+        <div class='clearfix'></div>
+        <button type="submit" class="btn btn-default" wz-previous>Prev</button>
+        <button type="submit" class="btn btn-primary" wz-next>Next</button>
+      </form>
     </wz-step>
     <wz-step title="Review and Save">
-      <p>Even more steps!!</p>
-      <input type="submit" wz-next value="Finish now" />
+      <form>
+        <legend>Review</legend>
+        <div class='clearfix'></div>
+        <button type="submit" class="btn btn-warning" wz-previous>Revise</button>
+        <button type="submit" class="btn btn-success" wz-next>Create</button>
+      </form>
     </wz-step>
   </wizard>
   {{outlet | json}}
