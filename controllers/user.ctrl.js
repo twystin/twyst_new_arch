@@ -31,12 +31,12 @@ module.exports.get_coupons = function(req, res) {
         return load_outlet_info_from_cache(data)
       })
       .then(function(data) {
-        var coupons = data.coupon_map;
-        var twyst_bucks = data.twyst_bucks;
+        var coupons = data.data.coupon_map;
+        var twyst_bucks = data.data.twyst_bucks;
         var data = {};
         data.coupons = coupons;
         data.twyst_bucks = twyst_bucks;
-        HttpHelper.success(res, data, 'Returning users coupons');
+        HttpHelper.success(res, data, data.message);
       })
       .fail(function(err) {
         HttpHelper.error(res, err, 'Couldn\'t find the user');
@@ -131,6 +131,8 @@ module.exports.referral_join = function(req, res) {
     
 };
 
+
+
 function filter_out_expired_and_used_coupons(data) {
   logger.log();
   var deferred = Q.defer();
@@ -220,7 +222,7 @@ function load_outlet_info_from_cache(data) {
         else {
             deferred.resolve({
                 message: 'You do not have any coupon',
-                data: null
+                data: data
             });
         }  
     }
@@ -228,3 +230,4 @@ function load_outlet_info_from_cache(data) {
   });
   return deferred.promise;
 };
+
