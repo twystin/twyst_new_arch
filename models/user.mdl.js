@@ -120,9 +120,7 @@ var User = new Schema({
       type: Schema.ObjectId,
       ref: 'Outlet'
     },
-    coupon_source: {
-      type: String
-    },
+    coupon_source: String,
     header: String,
     line1: String,
     line2: String,

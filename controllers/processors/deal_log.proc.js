@@ -32,7 +32,6 @@ module.exports.process = function(data) {
     var outlet = _.get(passed_data, 'event_data.event_outlet'); 
     Outlet.findOne({_id: outlet }, function(err, outlet){
         if(err || !outlet) {
-            console.log('oaksdfoijsgio')
             deferred.reject('Could not find outlet to redeem coupon');
         }
         else if(isOutletClosed(outlet)) {            

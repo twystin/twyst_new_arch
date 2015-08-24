@@ -144,11 +144,14 @@ function create_new(res, passed_data) {
       return update_twyst_bucks(data);
     })
     .then(function(data) {
-      var bucks = data.user.twyst_bucks;
-      var code = data.user.coupons[data.user.coupons.length - 1].code;
-      var data = {};
-      data.twyst_bucks = bucks;
-      data.code = code;
+        var bucks = data.user.twyst_bucks;
+        var code = data.user.coupons[data.user.coupons.length-1].code;
+        var event_type = data.event_data.event_type;
+        var data = {};
+        data.twyst_bucks = bucks;
+        if(event_type ===  'generate_coupon') {
+            data.code = code;    
+        }
 
       HttpHelper.success(res, data, "Processed the event successfully.");
     })
@@ -258,7 +261,6 @@ function process_event(data) {
       return processor.process(passed_data);
     })
     .then(function(data) {
-      passed_data.user.coupons = data.coupons;
       deferred.resolve(passed_data);
     })
     .fail(function(err) {
