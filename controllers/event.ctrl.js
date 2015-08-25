@@ -145,12 +145,26 @@ function create_new(res, passed_data) {
     })
     .then(function(data) {
         var bucks = data.user.twyst_bucks;
-        var code = data.user.coupons[data.user.coupons.length-1].code;
         var event_type = data.event_data.event_type;
+        var code, header, line1, line2, outlet, checkin_left;
+        if(data.user.coupons.length) {
+            code = data.user.coupons[data.user.coupons.length-1].code;    
+        }
+        if(event_type === 'checkin') {
+            header = data.user.coupons[data.user.coupons.length-1].header;
+            line1 = data.user.coupons[data.user.coupons.length-1].line1;
+            line2 = data.user.coupons[data.user.coupons.length-1].line2;
+            outlet = data.user.coupons[data.user.coupons.length-1].issued_by;
+        }
+        
         var data = {};
         data.twyst_bucks = bucks;
-        if(event_type ===  'generate_coupon') {
+        if(event_type ===  'generate_coupon' || event_type == 'checkin') {
             data.code = code;    
+            data.header = header;
+            data.line1 = line1;
+            data.line2 = line2;
+            data.outlet = outlet;
         }
 
       HttpHelper.success(res, data, "Processed the event successfully.");

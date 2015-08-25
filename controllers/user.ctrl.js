@@ -31,14 +31,16 @@ module.exports.get_coupons = function(req, res) {
         return load_outlet_info_from_cache(data)
       })
       .then(function(data) {
-        var coupons = data.data.coupon_map;
-        var twyst_bucks = data.data.twyst_bucks;
+
+        var coupons = data.coupons;
+        var twyst_bucks = data.twyst_bucks;
         var data = {};
         data.coupons = coupons;
         data.twyst_bucks = twyst_bucks;
         HttpHelper.success(res, data, data.message);
       })
       .fail(function(err) {
+        console.log(err)
         HttpHelper.error(res, err, 'Couldn\'t find the user');
       });
   }, function(err) {
@@ -136,11 +138,9 @@ module.exports.referral_join = function(req, res) {
 function filter_out_expired_and_used_coupons(data) {
   logger.log();
   var deferred = Q.defer();
-
-  data.coupons_mapped = [];
-
+  
   data.coupons = _.filter(data.coupons, function(coupon) {
-    if(_.has(coupon, 'status') && (coupon.status == 'active') && (coupon.coupon_source ==='checkin')) {
+    if(_.has(coupon, 'status') && (coupon.status === 'active') && (coupon.coupon_source === 'qr_checkin')) {
       return true;
     } else {
       return false;
@@ -165,18 +165,19 @@ function load_outlet_info_from_cache(data) {
     } else {
         var outlets = JSON.parse(reply) || [];
         var outlet;
-        var massaged_item = {};
-        data.coupon_map = [];
         var fmap = null;
-        if(data.coupons && data.coupons.length) {
-            _.map(data.coupons, function(coupon) {
-                if(coupon.outlets && coupon.outlets.length) {
-                    outlet = outlets[coupon.outlets[0].toString()];        
-                }
-                Cache.hget(data.user._id, 'favourite_map', function(err, reply) {
-                    if (reply) {
-                      fmap = JSON.parse(reply);
+    
+        Cache.hget(data.user._id, 'favourite_map', function(err, reply) {
+            if (reply) {
+              fmap = JSON.parse(reply);
+            }
+            if(data.coupons && data.coupons.length) {
+                data.coupons = _.map(data.coupons, function(coupon) {
+                    var massaged_item = {};
+                    if(coupon.outlets && coupon.outlets.length) {
+                        outlet = outlets[coupon.outlets[0].toString()];        
                     }
+                    
                     massaged_item._id = outlet._id;
                     massaged_item.name = outlet.basics.name;
                     massaged_item.city = outlet.contact.location.city;
@@ -213,18 +214,19 @@ function load_outlet_info_from_cache(data) {
                     coupon.expiry = coupon.expiry_date;
                     massaged_item.offers = [];
                     massaged_item.offers.push(coupon);
-                    data.coupon_map.push(massaged_item); 
-                    deferred.resolve(data);
-                })
+                    return massaged_item; 
+                })         
+                
+                deferred.resolve(data);   
             
-            });    
-        }
-        else {
-            deferred.resolve({
-                message: 'You do not have any coupon',
-                data: data
-            });
-        }  
+            }
+            else {
+                deferred.resolve({
+                    message: 'You do not have any coupon',
+                    data: data
+                });
+            }  
+        })
     }
     
   });
