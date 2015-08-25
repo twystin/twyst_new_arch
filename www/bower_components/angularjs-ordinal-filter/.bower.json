@@ -1,0 +1,22 @@
+{
+  "name": "angularjs-ordinal-filter",
+  "main": "ordinal-browser.js",
+  "license": "MIT",
+  "authors": [
+    "John Dennis Pedrie <john@pedrie.com> (http://johnpedrie.com)"
+  ],
+  "dependencies": {
+    "angular": "*"
+  },
+  "homepage": "https://github.com/jdpedrie/angularjs-ordinal-filter",
+  "_release": "874738eaed",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "874738eaed3167f0f4756447739944686834476f"
+  },
+  "_source": "git://github.com/jdpedrie/angularjs-ordinal-filter.git",
+  "_target": "*",
+  "_originalSource": "angularjs-ordinal-filter",
+  "_direct": true
+}

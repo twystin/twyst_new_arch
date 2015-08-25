@@ -1,0 +1,19 @@
+<div ng-init='get_offers()'>
+	<div ng-show='offers.length'>
+		<div class='well'>
+			<p>You have reated {{offers.length}} offers.</p>
+			<button class='btn btn-info' ng-click='new_outlet()'>Create more offers!</button>
+		</div>
+    <div class='row' ng-repeat='rows in chunkedOffers'>
+      <div class='panel panel-info'>
+
+      </div>
+    </div>
+	</div>
+  <div ng-hide='offers.length'>
+    <div class='well'>
+      <p>You haven't yet created any offers.</p>
+      <a class='btn btn-info' ui-sref='hub.create_offer'>Create your first offer!</a>
+    </div>
+  </div>
+</div>

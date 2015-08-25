@@ -1,0 +1,79 @@
+<nav class='navbar' role='navigation'>
+	<form class='navbar-form navbar-right' role='search'>
+		<div class='form-group'>
+			<input class='search' type='text' ng-model='billFitler' placeholder='search here...' ng-change='updateList(true)' />
+		</div>
+	</form>
+	<ul class='breadcrumb pull-right'>
+		<li ng-class='{active: showing=="pending"}'>
+			<a ng-click='filterBills("pending")'>Pending</a>
+		</li>
+		<li ng-class='{active: showing=="all"}'>
+			<a ng-click='filterBills("all")'>All</a>
+		</li>
+		<li ng-class='{active: showing=="approved"}'>
+			<a ng-click='filterBills("approved")'>Approved</a>
+		</li>
+		<li ng-class='{active: showing=="rejected"}'>
+			<a ng-click='filterBills("rejected")'>Rejected</a>
+		</li>
+	</ul>
+	<!-- <ul class='breadcrumb pull-right'>
+		<li>
+			<a><b>Show</b></a>
+		</li>
+	</ul> -->
+	<ol class='breadcrumb'>
+		<li>
+			<a ui-sref='hub.list_bill_uploads'>Bill Uploads</a>
+		</li>
+		<li class='active'>List</li>
+	</ol>
+	<div class='clearfix'></div>
+</nav>
+<div class='container-fluid'>
+	<h4 class='pull-left'><b>Sort By:</b></h4>
+	<ul class='breadcrumb pull-left'>
+		<li ng-class='{active: filtering=="-created_at"}'>
+			<a ng-click='filterBills("approved")'>default</a>
+		</li>
+		<li ng-class='{active: filtering=="created_at"}'>
+			<a ng-click='filterBills("rejected")'>oldest first</a>
+		</li>
+	</ul>
+	<!-- <ul class='nav nav-pills'>
+		<li ng-class='{active: filtering=="-created_at"}'>
+			<a>default</a>
+		</li>
+		<li ng-class='{active: filtering=="created_at"}'>
+			<a>oldest first</a>
+		</li>
+	</ul> -->	
+</div>
+<div class='panel panel-default'>
+	<table class='table'>
+		<thead>
+			<tr>
+				<th>S.No.</th>
+				<th>User ID</th>
+				<th>Outlet Name</th>
+				<th>Upload Date</th>
+				<th>Status</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat='bill in uploaded_bills'>
+				<td>{{$index + 1}}</td>
+				<td>
+					<a ui-sref='hub.view_bill_upload({id: bill._id})'>{{bill.user}}</a>
+				</td>
+				<td>{{bill.outlet}}</td>
+				<td>{{bill.created_at | date : 'dd-mm-yy'}}</td>
+				<td>
+					{{bill.status}}
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+<pagination class='pagination-sm' total-items='totalBills' ng-model='currentPage' max-size='maxSize' boundary-links='true' rotate='false' items-per-page='billsPerPage' ng-change='updateList()'></pagination>

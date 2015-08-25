@@ -1,3 +1,54 @@
 .border-right {
 	border-right:1px solid;
 }
+
+.angular-google-map-container {
+	min-height: 300px;
+	min-width: 200px;
+	width: 100%;
+}
+
+.input-group-addon.mob-num-addon {
+	border: 0;
+	padding: 0;
+}
+
+imagereader {
+  display: block;
+  min-width: 100px;
+  min-height: 100px;
+  max-width: 300px;
+  max-height: 300px;
+}
+
+
+imagereader img.img-polaroid {
+  min-width: 150px;
+  min-height: 150px;
+  max-width: 100%;
+  max-height: 300px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+
+imagereader.background img.img-polaroid {
+  min-width: 450px;
+  min-height: 150px;
+  max-width: 100%;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.timepicker .btn.btn-link {
+	display: none;
+}
+
+wz-step form {
+  margin-top: 32px;
+  margin-bottom: 32px;
+}
+
+table .btn.btn-link {
+  display: none;
+}
