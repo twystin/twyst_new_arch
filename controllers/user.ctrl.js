@@ -31,14 +31,16 @@ module.exports.get_coupons = function(req, res) {
         return load_outlet_info_from_cache(data)
       })
       .then(function(data) {
-        var coupons = data.coupon_map;
+
+        var coupons = data.coupons;
         var twyst_bucks = data.twyst_bucks;
         var data = {};
         data.coupons = coupons;
         data.twyst_bucks = twyst_bucks;
-        HttpHelper.success(res, data, 'Returning users coupons');
+        HttpHelper.success(res, data, data.message);
       })
       .fail(function(err) {
+        console.log(err)
         HttpHelper.error(res, err, 'Couldn\'t find the user');
       });
   }, function(err) {
@@ -96,47 +98,49 @@ module.exports.update_friends = function(req, res) {
 };
 
 module.exports.referral_join = function(req, res) {
-  var token = req.query.token || null;
-  var source = req.body.source || null;
-  var referrar = req.body.referral_code;
+    var token = req.query.token || null;
+    var source = req.body.source || null;
+    var referrar = req.body.referral_code;
 
-  if (!token) {
-    HttpHelper.error(res, null, "Not authenticated");
-  }
-
-  if (!source || !referrar) {
-    HttpHelper.error(res, null, " No referral code or source");
-  }
-
-  User.find({
-    phone: referrar
-  }, function(err, user) {
-    if (err || !user) {
-      HttpHelper.error(res, err, 'referral code is not valid');
-    } else {
-      var friend_list_id;
-      if (user[0] && user[0].friends) {
-        friend_list_id = user[0].friends;
-      } else {
-        friend_list_id = null;
-      }
-      UserHelper.update_referral(token, friend_list_id, user[0], source).then(function(data) {
-        HttpHelper.success(res, data.data, data.message);
-      }, function(err) {
-        HttpHelper.error(res, err.err, err.message);
-      });
+    if (!token ) {
+        HttpHelper.error(res, null, "Not authenticated");
     }
-  })
+
+    if ( !source || !referrar) {
+        HttpHelper.error(res, null, " No referral code or source");
+    }
+    
+    User.findOne({phone: referrar}, function(err, user) {
+        if(err || !user) {
+            HttpHelper.error(res, err, 'referral code is not valid');
+        }
+        else{
+            var friend_list_id;
+            if(user &&  user.friends) {
+                friend_list_id = user.friends;
+            }
+            else{
+                friend_list_id = null;
+            }
+            UserHelper.update_referral(token, friend_list_id, user, source).then(function(data) {
+                HttpHelper.success(res, data.data, data.message);
+                }, function(err) {
+                HttpHelper.error(res, err.err, err.message);
+            });    
+        }
+    })
+        
+    
 };
+
+
 
 function filter_out_expired_and_used_coupons(data) {
   logger.log();
   var deferred = Q.defer();
-
-  data.coupons_mapped = [];
-
+  
   data.coupons = _.filter(data.coupons, function(coupon) {
-    if (_.has(coupon, 'status') && (coupon.status == 'active') && !(_.has(coupon, 'used_details'))) {
+    if(_.has(coupon, 'status') && (coupon.status === 'active') && (coupon.coupon_source === 'qr_checkin')) {
       return true;
     } else {
       return false;
@@ -153,75 +157,79 @@ function load_outlet_info_from_cache(data) {
 
   Cache.get('outlets', function(err, reply) {
 
-    if (err || !reply) {
+    if(err || !reply) {
       deferred.reject({
         message: 'Outlet info unavailable',
         data: null
       });
     } else {
-      var outlets = JSON.parse(reply) || [];
-      var outlet;
-      var massaged_item = {};
-      data.coupon_map = [];
-      var fmap = null;
-      if (data.coupons && data.coupons.length) {
-        _.map(data.coupons, function(coupon) {
-          if (coupon.outlets && coupon.outlets.length) {
-            outlet = outlets[coupon.outlets[0].toString()];
-          }
-          Cache.hget(data.user._id, 'favourite_map', function(err, reply) {
+        var outlets = JSON.parse(reply) || [];
+        var outlet;
+        var fmap = null;
+    
+        Cache.hget(data.user._id, 'favourite_map', function(err, reply) {
             if (reply) {
               fmap = JSON.parse(reply);
             }
-            massaged_item._id = outlet._id;
-            massaged_item.name = outlet.basics.name;
-            massaged_item.city = outlet.contact.location.city;
-            massaged_item.address = outlet.contact.location.address;
-            massaged_item.locality_1 = outlet.contact.location.locality_1[0];
-            massaged_item.locality_2 = outlet.contact.location.locality_2[0];
+            if(data.coupons && data.coupons.length) {
+                data.coupons = _.map(data.coupons, function(coupon) {
+                    var massaged_item = {};
+                    if(coupon.outlets && coupon.outlets.length) {
+                        outlet = outlets[coupon.outlets[0].toString()];        
+                    }
+                    
+                    massaged_item._id = outlet._id;
+                    massaged_item.name = outlet.basics.name;
+                    massaged_item.city = outlet.contact.location.city;
+                    massaged_item.address = outlet.contact.location.address;
+                    massaged_item.locality_1 = outlet.contact.location.locality_1[0];
+                    massaged_item.locality_2 = outlet.contact.location.locality_2[0];
+               
+                    massaged_item.phone = outlet.contact.phones.mobile[0] && outlet.contact.phones.mobile[0].num;
+                    
+                    if (fmap && fmap[outlet._id]) {
+                        massaged_item.following = true;
+                    } else {
+                        massaged_item.following = false;
+                    }
 
-            massaged_item.phone = outlet.contact.phones.mobile[0] && outlet.contact.phones.mobile[0].num;
-
-            if (fmap && fmap[outlet._id]) {
-              massaged_item.following = true;
-            } else {
-              massaged_item.following = false;
+                    if (outlet.photos && outlet.photos.logo) {
+                        massaged_item.logo = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + outlet._id + '/' + outlet.photos.logo;
+                    }
+                    if (outlet.photos && outlet.photos.background) {
+                        massaged_item.background = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + outlet._id + '/' + outlet.photos.background;
+                    }
+                    massaged_item.open_next = RecoHelper.opensAt(outlet.business_hours);
+                    _.each(outlet.offers, function(offer) {
+                        if(_.has(offer, ['actions', 'reward']) && _.isEqual(offer.actions.reward.header, coupon.header) && _.isEqual(offer.actions.reward.line1, coupon.line1) && _.isEqual(offer.actions.reward.line2, coupon.line2)) {
+                            coupon.available_now = !(RecoHelper.isClosed('dummy', 'dummy', offer.actions.reward.reward_hours));
+                            if(!coupon.available_now) {
+                              coupon.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
+                            }
+                            coupon.meta = {};
+                            coupon.meta.reward_type = offer.actions.reward.reward_meta.reward_type;
+                        }
+                    });
+                    coupon.type = 'coupon';
+                    coupon.expiry = coupon.expiry_date;
+                    massaged_item.offers = [];
+                    massaged_item.offers.push(coupon);
+                    return massaged_item; 
+                })         
+                
+                deferred.resolve(data);   
+            
             }
-
-            if (outlet.photos && outlet.photos.logo) {
-              massaged_item.logo = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + outlet._id + '/' + outlet.photos.logo;
-            }
-            if (outlet.photos && outlet.photos.background) {
-              massaged_item.background = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + outlet._id + '/' + outlet.photos.background;
-            }
-            massaged_item.open_next = RecoHelper.opensAt(outlet.business_hours);
-            _.each(outlet.offers, function(offer) {
-              if (_.has(offer, ['actions', 'reward']) && _.isEqual(offer.actions.reward.header, coupon.header) && _.isEqual(offer.actions.reward.line1, coupon.line1) && _.isEqual(offer.actions.reward.line2, coupon.line2)) {
-                coupon.available_now = !(RecoHelper.isClosed('dummy', 'dummy', offer.actions.reward.reward_hours));
-                if (!coupon.available_now) {
-                  coupon.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
-                }
-                coupon.meta = {};
-                coupon.meta.reward_type = offer.actions.reward.reward_meta.reward_type;
-              }
-            });
-            coupon.type = 'coupon';
-            coupon.expiry = coupon.expiry_date;
-            massaged_item.offers = [];
-            massaged_item.offers.push(coupon);
-            data.coupon_map.push(massaged_item);
-            deferred.resolve(data);
-          })
-
-        });
-      } else {
-        deferred.resolve({
-          message: 'You do not have any coupon',
-          data: null
-        });
-      }
+            else {
+                deferred.resolve({
+                    message: 'You do not have any coupon',
+                    data: data
+                });
+            }  
+        })
     }
-
+    
   });
   return deferred.promise;
 };
+

@@ -190,6 +190,9 @@ function check_and_create_coupon(data) {
     var matching_offer = find_matching_offer(events, sorted_checkin_offers);
     if (matching_offer) {
       create_coupon(matching_offer, user_id, outlet_id).then(function(data) {
+        if(data.coupons && data.coupons.length) {
+            passed_data.user.coupons.push(data.coupons[data.coupons.length-1]);
+        }
         deferred.resolve(passed_data);
       }, function(err) {
         deferred.reject('Could not create coupon' + err);
@@ -225,9 +228,7 @@ function create_coupon(offer, user, outlet) {
         _id: mongoose.Types.ObjectId(),
         code: code,
         outlets: outlets,
-        coupon_source: {
-          type: 'qr_checkin'
-        },
+        coupon_source:  'qr_checkin',
         header: offer.actions.reward.header,
         line1: offer.actions.reward.line1,
         line2: offer.actions.reward.line2,
@@ -299,7 +300,6 @@ function update_checkin_counts(data) {
 
 function update_qr_count(data) {
   var deferred = Q.defer();
-  //console.log(data);
   QR.findOneAndUpdate({
     code: data.event_data.event_meta.code
   }, {

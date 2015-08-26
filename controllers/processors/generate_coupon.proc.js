@@ -47,7 +47,12 @@ module.exports.process = function(data) {
                 var is_enough_bucks = check_enough_twyst_buck(matching_offer, available_twyst_bucks);
                 if(is_enough_bucks){
                     create_coupon(matching_offer, user, outlet_id).then(function(data) {
-                    deferred.resolve(data);
+                        
+                        if(data.coupons && data.coupons.length) {
+                            passed_data.user.coupons.push(data.coupons[data.coupons.length-1]);
+                        }
+
+                        deferred.resolve(passed_data);
                     }, function(err) {
                         deferred.reject('Could not create coupon');
                     })      
@@ -117,13 +122,10 @@ function create_coupon(offer, user, outlet) {
         _id: mongoose.Types.ObjectId(),
         code: code,
         outlets: outlets,
-        coupon_source: {
-          type: 'exclusive_offer'
-        },
+        coupon_source: 'exclusive_offer',
         header: offer.actions.reward.header,
         line1: offer.actions.reward.line1,
         line2: offer.actions.reward.line2,
-        lapse_date: new Date(),
         expiry_date: new Date(),
         meta: {
           reward_type: {
@@ -131,7 +133,8 @@ function create_coupon(offer, user, outlet) {
           }
         },
         status: 'active',
-        issued_at: new Date()
+        issued_at: new Date(),
+        issued_by: outlet
       }
     }
   };
