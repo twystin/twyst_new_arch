@@ -24,8 +24,8 @@ exports.runner = function(agenda) {
       if (err || users.length === 0) {
         done(err || false);
       } else {
-        _.each(users, function(item) { 
-            process_user(item)
+        _.each(users, function(item) {
+          process_user(item);
         });
         done();
       }
@@ -34,16 +34,18 @@ exports.runner = function(agenda) {
 }
 
 function process_user(user) {
-  // CHECK IF USER HAS UNUSED COUPONS
-  // SEND A MESSAGE IF YES
-  // var count = 0;
-  var what = {count:1};
-  // var what.count = count;
-  // notification.notify(what, null, user, null);
+  var count = 0;
   _.each(user.coupons, function(coupon) {
     if (!coupon.used_details.used_phone) {
-      notification.notify(what, null, user, null);
-      //logger.log("Notify this user - " + user._id);
+      count = count + 1;
     }
-  })
+  });
+  var what = {
+    count: count
+  };
+  notification.notify(what, null, user, null).then(function(data) {
+    logger.log(data);
+  }, function(err) {
+    logger.log(err);
+  });
 }
