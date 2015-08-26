@@ -1,0 +1,10 @@
+{
+  "name": "twyst",
+  "subdomain": "twyst",
+  "version": "0.0.1",
+  "description": "Own version of the MEAN stack",
+  "main": "app_server.js",
+  "dependencies": {
+    "angular": "1.4.1"
+  }
+}

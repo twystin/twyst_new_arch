@@ -21,6 +21,11 @@ module.exports.values = {
     	'port': 80,
     	'db_uri': 'mongodb://db.twyst.in/retwyst',
     	'clear_interval': 3600
+    },
+    'aws': {
+      region: 'ap-southeast-1',
+      accessKeyId: process.env.ACCESS_KEY_ID || '<default-here>',
+      secretAccessKey: process.env.SECRET_KEY || '<dummy-here>'
     }
   }
 };
