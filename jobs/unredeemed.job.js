@@ -37,12 +37,13 @@ function process_user(user) {
   // CHECK IF USER HAS UNUSED COUPONS
   // SEND A MESSAGE IF YES
   // var count = 0;
-  // var what = {};
+  var what = {count:1};
   // var what.count = count;
   // notification.notify(what, null, user, null);
   _.each(user.coupons, function(coupon) {
     if (!coupon.used_details.used_phone) {
-      logger.log("Notify this user - " + user._id);
+      notification.notify(what, null, user, null);
+      //logger.log("Notify this user - " + user._id);
     }
   })
 }
