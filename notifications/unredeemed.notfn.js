@@ -15,18 +15,17 @@ module.exports.notify = function(what, when, who, campaign) {
   var notify_text = "You have " + what.count + " unused vouchers on Twyst. Redeem them now!";
   var payload = {
   	body: notify_text,
-  	head: 'Unused vouchers',
-  	gcms: who
+  	head: 'Unused vouchers'
   };
 
   if (when) {
-    transporter.schedule("push", "gcm", when, payload).then(function(data) {
+    Transporter.schedule("other", "debug", when, payload).then(function(data) {
       deferred.resolve(data);
     }, function(err) {
       deferred.reject(err);
     })
   } else {
-    transporter.send("push", "gcm", payload).then(function(data) {
+    Transporter.send("other", "debug", payload).then(function(data) {
       deferred.resolve(data);
     }, function(err) {
       deferred.reject(err);

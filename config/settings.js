@@ -7,7 +7,7 @@ module.exports.values = {
     'LOCAL': {
       'server': 'http://localhost',
       'port': 3000,
-      'db_uri': 'mongodb://localhost/retwyst_dummy',
+      'db_uri': 'mongodb://localhost/retwyst',
       'clear_interval': 3600
     },
     'TEST': {

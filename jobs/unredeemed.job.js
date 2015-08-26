@@ -20,27 +20,32 @@ exports.runner = function(agenda) {
         $ne: null
       }
     }).lean().exec(function(err, users) {
+      logger.log();
       if (err || users.length === 0) {
-        logger.log("ERROR");
         done(err || false);
       } else {
-        logger.log("GOT USERS");
-        _.each(users, function(item) { 
-            process_user(item)
+        _.each(users, function(item) {
+          process_user(item);
         });
         done();
       }
     });
-
   });
 }
 
 function process_user(user) {
-  // CHECK IF USER HAS UNUSED COUPONS
-  // SEND A MESSAGE IF YES
-  // var count = 0;
-  // var what = {};
-  // var what.count = count;
-  // notification.notify(what, null, user, null);
-  logger.log(user);
+  var count = 0;
+  _.each(user.coupons, function(coupon) {
+    if (!coupon.used_details.used_phone) {
+      count = count + 1;
+    }
+  });
+  var what = {
+    count: count
+  };
+  notification.notify(what, null, user, null).then(function(data) {
+    logger.log(data);
+  }, function(err) {
+    logger.log(err);
+  });
 }
