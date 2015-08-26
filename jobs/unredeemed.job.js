@@ -20,18 +20,16 @@ exports.runner = function(agenda) {
         $ne: null
       }
     }).lean().exec(function(err, users) {
+      logger.log();
       if (err || users.length === 0) {
-        logger.log("ERROR");
         done(err || false);
       } else {
-        logger.log("GOT USERS");
         _.each(users, function(item) { 
             process_user(item)
         });
         done();
       }
     });
-
   });
 }
 
@@ -42,5 +40,9 @@ function process_user(user) {
   // var what = {};
   // var what.count = count;
   // notification.notify(what, null, user, null);
-  logger.log(user);
+  _.each(user.coupons, function(coupon) {
+    if (!coupon.used_details.used_phone) {
+      logger.log("Notify this user - " + user._id);
+    }
+  })
 }
