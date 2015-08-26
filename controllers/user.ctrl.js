@@ -31,17 +31,24 @@ module.exports.get_coupons = function(req, res) {
         return load_outlet_info_from_cache(data)
       })
       .then(function(data) {
-
-        var coupons = data.coupons;
-        var twyst_bucks = data.twyst_bucks;
+        var twyst_bucks
+        if(data.coupons && data.coupons.length){ 
+            twyst_bucks = data.twyst_bucks;
+        }
+        else{
+            twyst_bucks = data.data.twyst_bucks;
+        }
+        var coupons = data.coupons;   
+        
+        var message = data.message;
         var data = {};
         data.coupons = coupons;
         data.twyst_bucks = twyst_bucks;
-        HttpHelper.success(res, data, data.message);
+        HttpHelper.success(res, data, message);
       })
       .fail(function(err) {
         console.log(err)
-        HttpHelper.error(res, err, 'Couldn\'t find the user');
+        HttpHelper.error(res, err, 'Couldn\'t find the user coupons');
       });
   }, function(err) {
     HttpHelper.error(res, err, 'Couldn\'t find the user');

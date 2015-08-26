@@ -150,7 +150,7 @@ function create_new(res, passed_data) {
         if(data.user.coupons.length) {
             code = data.user.coupons[data.user.coupons.length-1].code;    
         }
-        if(event_type === 'checkin') {
+        if(event_type === 'checkin' && data.user.coupons.length) {
             header = data.user.coupons[data.user.coupons.length-1].header;
             line1 = data.user.coupons[data.user.coupons.length-1].line1;
             line2 = data.user.coupons[data.user.coupons.length-1].line2;
