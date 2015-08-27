@@ -320,7 +320,10 @@ function update_user_event_analytics(data) {
   var deferred = Q.defer();
   var event_type = data.event_data.event_type;
   var update_total = {
-    $inc: {}
+    $inc: {},
+    $set : {
+     'last_event.when': new Date() 
+    }
   };
 
   var update_total_by_outlet = {
