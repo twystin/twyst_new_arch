@@ -348,6 +348,9 @@ function massage_offers(params) {
         if(offer.offer_type === 'offer' || offer.offer_type === 'deal' || offer.offer_type === 'bank_deal') {
           massaged_offer.offer_cost =  offer.offer_cost;  
         }
+        if(offer.offer_type === 'bank_deal') {
+          massaged_offer.offer_source = offer.offer_source;
+        }
         return massaged_offer;
       }
 
