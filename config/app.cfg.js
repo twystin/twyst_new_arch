@@ -39,7 +39,7 @@ module.exports = function(app) {
   app.use(bodyParser.urlencoded({
     extended: true
   }));
-  app.use(bodyParser.json());
+  app.use(bodyParser.json({limit: '50mb'}));
   app.use(multer());
   app.use(cookieParser('Twyst_Sessions'));
   app.use(session({
