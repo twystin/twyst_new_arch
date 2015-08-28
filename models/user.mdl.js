@@ -55,7 +55,7 @@ var User = new Schema({
   },
   user_acquisition_source: String,
   app_acquisition_source: String,
-  last_logged_in: {
+  last_event: {
     from: String,
     when: Date
   },

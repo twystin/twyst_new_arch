@@ -12,21 +12,20 @@ module.exports.notify = function(what, when, who, campaign) {
   logger.log();
 
   var deferred = Q.defer();
-  var notify_text = "Your voucher for " + what.coupon.header + " at " + what.coupon.issued_by + " is now available.";
+  var notify_text = "We haven't seent you on Twyst in a while. Come back to earn more rewards!";
   var payload = {
   	body: notify_text,
-  	head: 'Coupon unlocked',
-  	gcms: who
+  	head: 'Come back to Twyst'
   };
 
   if (when) {
-    Transporter.schedule("push", "gcm", when, payload).then(function(data) {
+    Transporter.schedule("other", "debug", when, payload).then(function(data) {
       deferred.resolve(data);
     }, function(err) {
       deferred.reject(err);
     })
   } else {
-    Transporter.send("push", "gcm", payload).then(function(data) {
+    Transporter.send("other", "debug", payload).then(function(data) {
       deferred.resolve(data);
     }, function(err) {
       deferred.reject(err);

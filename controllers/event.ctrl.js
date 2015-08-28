@@ -5,6 +5,10 @@ var logger = require('tracer').colorConsole();
 var _ = require('lodash');
 var Q = require('q');
 var Cache = require('../common/cache.hlpr');
+var mongoose = require('mongoose');
+var User = mongoose.model('User');
+var Outlet = mongoose.model('Outlet');
+var Event = mongoose.model('Event');
 
 module.exports.new = function(req, res) {
   logger.log();
@@ -106,6 +110,11 @@ module.exports.deal_log = function(req, res) {
   create_new(res, setup_event(req, 'deal_log'));
 };
 
+module.exports.referral_join = function(req, res) {
+  logger.log();
+  create_new(res, setup_event(req, 'referral_join'));
+};
+
 function setup_event(req, type) {
   logger.log();
   var passed_data = {};
@@ -144,6 +153,9 @@ function create_new(res, passed_data) {
       return update_twyst_bucks(data);
     })
     .then(function(data) {
+        if(data && data.event_data && data.event_data.event_type === 'referral_join'){
+            update_from_user_twyst_bucks(data.from_user);
+        }
         var bucks = data.user.twyst_bucks;
         var event_type = data.event_data.event_type;
         var code, header, line1, line2, outlet, checkin_left;
@@ -257,7 +269,8 @@ function process_event(data) {
     'report_problem': require('./processors/report_problem.proc'),
     'write_to_twyst': require('./processors/comments.proc'),
     'generate_coupon': require('./processors/generate_coupon.proc'),
-    'deal_log': require('./processors/deal_log.proc')
+    'deal_log': require('./processors/deal_log.proc'),
+    'referral_join': require('./processors/referral_join.proc')
 
   };
 
@@ -285,9 +298,6 @@ function process_event(data) {
 }
 
 function update_outlet_event_analytics(data) {
-  var mongoose = require('mongoose');
-  require('../models/outlet.mdl.js');
-  var Outlet = mongoose.model('Outlet');
   logger.log()
   var deferred = Q.defer();
   var event_type = data.event_data.event_type;
@@ -313,14 +323,14 @@ function update_outlet_event_analytics(data) {
 }
 
 function update_user_event_analytics(data) {
-  var mongoose = require('mongoose');
-  require('../models/user.mdl.js');
-  var User = mongoose.model('User');
   logger.log()
   var deferred = Q.defer();
   var event_type = data.event_data.event_type;
   var update_total = {
-    $inc: {}
+    $inc: {},
+    $set : {
+     'last_event.when': new Date() 
+    }
   };
 
   var update_total_by_outlet = {
@@ -360,10 +370,6 @@ function update_user_event_analytics(data) {
 }
 
 function create_event(data) {
-  var mongoose = require('mongoose');
-  require('../models/event.mdl.js');
-  var Event = mongoose.model('Event');
-
   logger.log();
 
   var deferred = Q.defer();
@@ -390,9 +396,6 @@ function create_event(data) {
 }
 
 function update_twyst_bucks(data) {
-  var mongoose = require('mongoose');
-  require('../models/user.mdl.js');
-  var User = mongoose.model('User');
   logger.log();
   var deferred = Q.defer();
   var event_type = data.event_data.event_type;
@@ -435,4 +438,29 @@ function update_twyst_bucks(data) {
     }
   });
   return deferred.promise;
+}
+
+
+function update_from_user_twyst_bucks(user) {
+    logger.log();
+    var deferred = Q.defer();
+    var available_twyst_bucks = user.twyst_bucks;
+    user.twyst_bucks = available_twyst_bucks + 100;
+    var update_twyst_bucks = {
+        $set: {
+
+        }
+    }
+    update_twyst_bucks.$set.twyst_bucks = user.twyst_bucks;
+    User.findOneAndUpdate({
+        _id: user._id
+        }, update_twyst_bucks, function(err, user) {
+        if (err) {
+          deferred.reject('Could not update form user bucks' + err);
+        } 
+        else {
+          deferred.resolve(user);
+        }
+    });   
+    return deferred.promise; 
 }

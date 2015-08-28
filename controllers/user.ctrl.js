@@ -104,43 +104,6 @@ module.exports.update_friends = function(req, res) {
   });
 };
 
-module.exports.referral_join = function(req, res) {
-    var token = req.query.token || null;
-    var source = req.body.source || null;
-    var referrar = req.body.referral_code;
-
-    if (!token ) {
-        HttpHelper.error(res, null, "Not authenticated");
-    }
-
-    if ( !source || !referrar) {
-        HttpHelper.error(res, null, " No referral code or source");
-    }
-    
-    User.findOne({phone: referrar}, function(err, user) {
-        if(err || !user) {
-            HttpHelper.error(res, err, 'referral code is not valid');
-        }
-        else{
-            var friend_list_id;
-            if(user &&  user.friends) {
-                friend_list_id = user.friends;
-            }
-            else{
-                friend_list_id = null;
-            }
-            UserHelper.update_referral(token, friend_list_id, user, source).then(function(data) {
-                HttpHelper.success(res, data.data, data.message);
-                }, function(err) {
-                HttpHelper.error(res, err.err, err.message);
-            });    
-        }
-    })
-        
-    
-};
-
-
 
 function filter_out_expired_and_used_coupons(data) {
   logger.log();

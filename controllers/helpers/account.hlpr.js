@@ -18,6 +18,7 @@ var User = mongoose.model('User');
 var Event = mongoose.model('Event');
 var _ = require('underscore');
 var Cache = require('../../common/cache.hlpr.js');
+var Friend = mongoose.model('Friend');
 
 module.exports.delete_auth_token = function(token) {
   logger.log();
@@ -124,39 +125,54 @@ module.exports.create_user_account = function(phone) {
           },
           twyst_bucks: 500
         });
-        new_user.save(function(err, saved_user) {
-          if (err || !saved_user) {
-            deferred.reject({
-              err: err || true,
-              message: 'Couldn\'t create user'
-            });
-          } else {
-            var account = {
-              username: phone,
-              user: saved_user._id
-            };
+        var friend = new Friend();
+        friend.save(function(err, user_friend){
+            if (err || !user_friend) {
+              deferred.reject({
+                err: err || true,
+                message: 'Couldn\'t create user'
+              });
+            }
+            else{
+                new_user.friends = user_friend._id;   
+                new_user.save(function(err, saved_user) {
+                    if (err || !saved_user) {
+                        deferred.reject({
+                          err: err || true,
+                          message: 'Couldn\'t create user'
+                        });
+                    } 
+                    else {
+                        var account = {
+                          username: phone,
+                          user: saved_user._id
+                        };
 
-            Account.register(
-              new Account(account),
-              phone,
-              function(err, created_account) {
-                if (err) {
-                  deferred.reject({
-                    err: err,
-                    message: 'Error creating account'
-                  });
-                } else {
-                  return_data.user = saved_user;
-                  return_data.account = created_account;
-                  deferred.resolve({
-                    data: return_data,
-                    message: 'Created a new account'
-                  });
-                }
-              }
-            );
-          }
-        });
+                        Account.register(
+                          new Account(account),
+                          phone,
+                          function(err, created_account) {
+                            if (err) {
+                              deferred.reject({
+                                err: err,
+                                message: 'Error creating account'
+                              });
+                            } else {
+                              return_data.user = saved_user;
+                              return_data.account = created_account;
+                              deferred.resolve({
+                                data: return_data,
+                                message: 'Created a new account'
+                              });
+                            }
+                          }
+                        );
+                    }
+                  
+                });
+            }
+        })
+        
       }
     }
   });
