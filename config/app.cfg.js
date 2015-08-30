@@ -11,7 +11,6 @@ var express = require('express'),
   session = require('express-session'),
   favicon = require('serve-favicon'),
   errorhandler = require('errorhandler'),
-  multer = require('multer'),
   MongoStore = require('connect-mongo')(session),
   passport = require('passport'),
   LocalStrategy = require('passport-local').Strategy,
@@ -40,7 +39,6 @@ module.exports = function(app) {
     extended: true
   }));
   app.use(bodyParser.json({limit: '50mb'}));
-  app.use(multer());
   app.use(cookieParser('Twyst_Sessions'));
   app.use(session({
     secret: "Twyst_Sessions",

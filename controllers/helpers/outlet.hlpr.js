@@ -194,3 +194,30 @@ module.exports.remove_outlet = function(token, outlet_id) {
 
   return deferred.promise;
 };
+
+
+module.exports.retrieve = function(token, outlet_id) {
+  var deferred = Q.defer();
+  AuthHelper.get_user(token).then(function(data) {
+    Outlet.findById(outlet_id)
+      .exec(function(err, outlet) {
+        if(err || !outlet) {
+          deferred.reject({
+            err: err || true,
+            message: 'Couldn\' find the outlet',
+          });
+        } else {
+          deferred.resolve({
+            data: outlet,
+            message: 'Successfully retrieved the outlet'
+          });
+        }
+      });
+  }, function(err) {
+    deferred.reject({
+      err: err || true,
+      message: 'Couldn\'t find the user'
+    });
+  });
+  return deferred.promise;
+}

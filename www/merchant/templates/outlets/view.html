@@ -1,0 +1,38 @@
+<div class='container'>
+	<div class='well well-lg'>
+		<img ng-src='{{outlet.background}}' style='max-width:100%;height:auto;'>
+		<h2>{{outlet.name}}</h2>
+		<p>{{outlet.address}}</p>
+		<p><span class='glyphicon glyphicon-map-marker'></span> {{outlet.locality_1}}, {{outlet.locality_2}}, {{outlet.city}}</p>
+		<p><span class='glyphicon glyphicon-phone-alt'></span> {{outlet.phone}}</p>
+	</div>
+	<div class='well well-lg'>
+		<legend>Attributes</legend>
+		<div class='col-md-6'>
+			<p>Cost for two: Rs.{{outlet.attributes.cost_for_two.min}} to Rs.{{outlet.attributes.cost_for_two.max}}</p>
+			<p>Timings: {{outlet.attributes.timings}}</p>
+			<p>Cuisines:
+				<div class='list-group list-group-horizontal'>
+					<a ng-repeat='cuisine in outlet.attributes.cuisines' class='list-group-item'>{{cuisine}}</a>
+				</div>
+			</p>
+			<p>Payment Options: 
+				<div class='list-group list-group-horizontal'>
+					<a ng-repeat='payment_option in outlet.attributes.payment_options' class='list-group-item'>{{payment_option}}</a>
+				</div>
+			</p>
+		</div>
+		<div class='col-md-6'>
+			<div ng-repeat='attr in attribute_set'><span class='glyphicon' ng-class='{"glyphicon-ok": outlet.attributes[attr.class_name], "glyphicon-remove": !outlet.attributes[attr.class_name]}'></span> {{attr.text}}</div>
+			<div>Parking: {{parkingStatus[outlet.attributes.parking]}}</div>
+			<div>Reservation: {{reservationStatus[outlet.attributes.reservation]}}</div>
+			<div>WiFi: {{wifiStatus[outlet.attributes.wifi]}}</div>
+			<div>Air Conditioning: {{acStatus[outlet.attributes.air_conditioning]}}</div>
+		</div>
+		<div class='clearfix'></div>
+
+	</div>
+	<div class='well well-lg'>
+		{{outlet}}
+	</div>
+</div>

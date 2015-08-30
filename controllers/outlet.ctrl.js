@@ -399,7 +399,6 @@ module.exports.get = function(req, res) {
 function filter_fields(req, data) {
   if (req.query.lat && req.query.long) {
     data.recco = data.recco || {};
-    console.log(data.data.contact.location.coords);
     data.recco.distance = RecoHelper.distance({
       latitude: req.query.lat,
       longitude: req.query.long
@@ -436,4 +435,22 @@ module.exports.remove = function(req, res) {
   }, function(err) {
     HttpHelper.error(res, err.data, err.message);
   });
+};
+
+module.exports.retrieve = function(req, res) {
+  var token = req.query.token || null;
+
+  if (!token) {
+    HttpHelper.error(res, null, "Not authenticated");
+  }
+
+  OutletHelper.retrieve(token, req.params.outlet_id).then(function(data) {
+    HttpHelper.success(res, data.data, data.message);
+  }, function(err) {
+    HttpHelper.error(res, null, "Not authenticated");
+  })
+}
+
+module.exports.dummy = function(req, res) {
+  HttpHelper.success(res, new Outlet(), "Dummy Outlet");
 };

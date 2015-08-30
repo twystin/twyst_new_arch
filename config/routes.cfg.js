@@ -8,6 +8,7 @@ var passport = require('passport');
 module.exports = function(app) {
   (function AccountRoutes() {
     var AccountCtrl = require('../controllers/account.ctrl');
+    app.post('/api/v4/auth/register', AccountCtrl.register_merchant);
     app.post('/api/v4/accounts/login', function(req, res, next) {
         next();
       }, passport.authenticate('account'),
@@ -66,15 +67,29 @@ module.exports = function(app) {
     app.post('/api/v4/comments/', EventCtrl.comments);
   })();
 
+  (function ImageRoutes() {
+    var ImageCtrl = require('../controllers/image.ctrl');
+    var multer = require('multer');
+    var upload = multer({ dest: 'uploads/' });
+    app.put('/api/v4/images', upload.array('file'), ImageCtrl.uploadImage);
+  })();
+
   (function OutletRoutes() {
     var OutletCtrl = require('../controllers/outlet.ctrl');
     app.post('/api/v4/outlets', mustBe.authorized('outlet.create', OutletCtrl.new));
     app.put('/api/v4/outlets/:outlet_id', mustBe.authorized('outlet.update', OutletCtrl.update));
-
+    app.get('/api/v4/outlets/dummy', OutletCtrl.dummy);
+    app.get('/api/v4/outlets/retrieve/:outlet_id', OutletCtrl.retrieve);
+    
     // Anonymous route
     app.get('/api/v4/outlets/:outlet_id', OutletCtrl.get);
     app.get('/api/v4/outlets', mustBe.authorized('outlet.view', OutletCtrl.all));
     app.delete('/api/v4/outlets/:outlet_id', mustBe.authorized('outlet.remove', OutletCtrl.remove));
+  })();
+
+  (function OfferRoutes() {
+    var OfferCtrl = require('../controllers/offer.ctrl');
+    app.post('/api/v4/offers', OfferCtrl.new);
   })();
 
   (function UserRoutes() {

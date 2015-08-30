@@ -3,6 +3,8 @@
 
 var mongoose = require('mongoose');
 require('../models/auth_code.mdl.js');
+require('../models/account.mdl.js');
+var Account = mongoose.model('Account');
 var AuthCode = mongoose.model('AuthCode');
 var Event = mongoose.model('Event');
 
@@ -132,6 +134,20 @@ module.exports.verify_authcode_and_create_account = function(req, res) {
     HttpHelper.error(res, null, 'Please send authcode and phone number for verification!');
   }
 };
+
+// Register a new merchant
+module.exports.register_merchant = function(req, res) {
+  var user = req.body,
+    password = req.body.password;
+
+  Account.register(new Account(user), password, function(err, account) {
+    if(err) {
+      HttpHelper.error(res, err || null, 'Unable to register the merchant at the moment');
+    } else {
+      HttpHelper.success(res, account, 'Merchant successfully registered');
+    }
+  });
+}
 
 // Helper functions
 function get_code_and_send(res, phone) {
