@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang='en' ng-app='merchantApp'>
+<html lang='en' ng-app='consoleApp'>
 <head>
 	<meta name='viewport' content='width=device-width,initial-scale=1,maximum-scale=1' />
 	<meta charset="UTF-8">
-	<title>Twyst Merchant</title>
+	<title>Twyst Console</title>
 	<script src="../bower_components/angular/angular.js"></script>
 	<script src="../bower_components/angular-cookies/angular-cookies.js"></script>
 	<script src="../bower_components/angular-aria/angular-aria.js"></script>
@@ -32,20 +32,11 @@
 	<script type='text/javascript' src='../bower_components/angular-loading-bar/build/loading-bar.min.js'></script>
 
 	<script src="app.js"></script>
-	<script src="directives/imagereader.js"></script>
-	<script src="services/imageSvc.js"></script>
-	<script src="services/merchantRESTSvc.js"></script>
+	<script src="services/consoleRESTSvc.js"></script>
+	<script src="controllers/root.ctrl.js"></script>
 	<script src="controllers/base.ctrl.js"></script>
 	<script src="controllers/login.ctrl.js"></script>
-	<script src="controllers/offer.create.ctrl.js"></script>
-	<script src="controllers/offer.edit.ctrl.js"></script>
-	<script src="controllers/offer.manage.ctrl.js"></script>
-	<script src="controllers/offer.view.ctrl.js"></script>
-	<script src="controllers/outlet.create.ctrl.js"></script>
-	<script src="controllers/outlet.edit.ctrl.js"></script>
-	<script src="controllers/outlet.manage.ctrl.js"></script>
-	<script src="controllers/outlet.view.ctrl.js"></script>
-	<script src="controllers/root.ctrl.js"></script>
+	<script src='controllers/merchant.reg.ctrl.js'></script>
 	
 	<link href="style.css" rel="stylesheet">
 	<link href="../bower_components/bootstrap/dist/css/bootstrap.css" rel="stylesheet">

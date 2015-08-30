@@ -1,0 +1,28 @@
+<div class='container' ng-init="get_outlets()">
+  <div ng-show="outlets.length">
+    <div class="well">
+      <p>You have created {{outlets.length}} outlet(s).</p>
+      <button class="btn btn-info" ui-sref='merchant.create_outlet'>Create more outlets!</button>
+    </div>
+    <div class="col-md-4" ng-repeat="outlet in outlets">
+      <div class="panel panel-info">
+        <div class="panel-heading">{{outlet.basics.name}}</div>
+        <div class="panel-body" style='min-height:120px;'>
+          <p>{{outlet.contact.location.address}}</p>
+        </div>
+        <div class="panel-footer">
+          <a class="btn btn-link" ui-sref='merchant.view_outlet({outletId: outlet._id})'>View</a>
+          <a class="btn btn-link" ui-sref='merchant.edit_outlet({outletId: outlet._id})'>Edit</a>
+          <a class="btn btn-link" ng-click='removeOutlet($index)'>Delete</a>
+        </div>
+      </div>
+    </div>
+    <div class='clearfix'></div>
+  </div>
+  <div ng-hide="outlets.length">
+    <div class="well">
+      <p>You haven't yet created any outlets.</p>
+      <a class="btn btn-info" ui-sref='merchant.create_outlet'>Create your first outlet!</a>
+    </div>
+  </div>
+</div>

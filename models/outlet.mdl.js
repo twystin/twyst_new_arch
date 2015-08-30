@@ -330,14 +330,8 @@ var OutletSchema = new Schema({
       type: Boolean
     },
     time: {
-      start: {
-        type: Number,
-        default: 23
-      },
-      end: {
-        type: Number,
-        default: 9
-      }
+      start: hours.hours,
+      end: hours.hours
     }
   },
   analytics: {
