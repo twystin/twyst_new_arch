@@ -1,1 +1,3 @@
 node_modules/
+.bower-temporary/
+www/bower_components/

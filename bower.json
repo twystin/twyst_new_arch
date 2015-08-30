@@ -1,0 +1,27 @@
+{
+  "name": "twyst",
+  "subdomain": "twyst",
+  "version": "0.0.1",
+  "description": "Own version of the MEAN stack",
+  "main": "app_server.js",
+  "dependencies": {
+    "angular": "1.4.1",
+    "angular-animate": "1.4.1",
+    "angular-aria": "1.4.1",
+    "angular-bootstrap": "0.13.0",
+    "angular-cookies": "1.4.1",
+    "angular-loading-bar": "0.8.0",
+    "angular-material": "0.10.0",
+    "angular-moment": "0.10.1",
+    "angular-toastr": "1.4.1",
+    "angular-ui-router": "0.2.15",
+    "angular-wizard": "0.5.3",
+    "bootstrap": "3.3.5",
+    "jquery": "2.1.4",
+    "lodash": "3.9.3",
+    "ngstorage": "0.3.7"
+  },
+  "resolutions": {
+    "lodash": "3.9.3"
+  }
+}
