@@ -1,6 +1,7 @@
 var logger = require('tracer').colorConsole();
 var _ = require('lodash');
 var Q = require('q');
+var ImageUploader = require('../helpers/image.hlpr.js');
 
 module.exports.check = function(data) {
   logger.log();
@@ -21,6 +22,22 @@ module.exports.check = function(data) {
 
 module.exports.process = function(data) {
   var deferred = Q.defer();
-  deferred.resolve(true);
+  
+  
+  var img_obj = {
+    bucketName: 'retwyst',
+    image: data.event_data.event_meta.photo
+  }
+
+  ImageUploader.uploadImage(img_obj).then(function(data){
+    deferred.resolve(true);  
+  },function(err) {
+        deferred.reject({
+            err: err || true,
+            message: "Couldn\'t upload bill"
+        });
+        
+    })
+
   return deferred.promise;
 };
