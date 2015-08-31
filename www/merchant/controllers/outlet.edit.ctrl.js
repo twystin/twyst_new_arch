@@ -1,11 +1,8 @@
 angular.module('merchantApp')
-    .controller('OutletCreateController', ['$scope', '$log', '$state', '$http', '$rootScope', 'toastr', '$timeout', '$stateParams',
-        function($scope, $log, $state, $http, $rootScope, toastr, $timeout, $stateParams) {
+	.controller('OutletEditController', ['$scope', 'merchantRESTSvc', '$stateParams', '$log', '$http', '$rootScope', 'toastr', '$timeout', '$state',
+		function($scope, merchantRESTSvc, $stateParams, $log, $http, $rootScope, toastr, $timeout, $state) {
 
-            
-            $scope.isCollapsed = false;
-
-            $scope.tag_set = ['desserts', 'restaurant', 'biryani', 'chinese', 'conntinental', 'north_indian', 'fast_food', 'burgers', 'pizza', 'wraps', 'pub', 'beer', 'bakery', 'cake', 'cafe', 'bistro', 'takeaway', 'other'];
+			$scope.tag_set = ['desserts', 'restaurant', 'biryani', 'chinese', 'conntinental', 'north_indian', 'fast_food', 'burgers', 'pizza', 'wraps', 'pub', 'beer', 'bakery', 'cake', 'cafe', 'bistro', 'takeaway', 'other'];
             $scope.weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
             $scope.payment_options = ['cash', 'visa', 'master', 'amex', 'sodexho'];
             $scope.checkModel = {};
@@ -14,20 +11,26 @@ angular.module('merchantApp')
 
             $scope.attribute_set = [{ class_name: 'home_delivery', text: 'Home Delivery?' }, { class_name: 'dine_in', text: 'Dine-in Available?' }, { class_name: 'veg', text: 'Pure Vegitarian?' }, { class_name: 'alcohol', text: 'Serves alcohol' }, { class_name: 'outdoor', text: 'Outdoor sitting' }, { class_name: 'foodcourt', text: 'Inside a food court' }, { class_name: 'smoking', text: 'Smoking allowed?' }, { class_name: 'chain', text: 'Part of a chain?' }];
 
-            $http.get('/api/v4/outlets/dummy')
-                .success(function(res) {
-                    $scope.outlet = _.extend($scope.outlet, res.data);
-                })
-                .error(function(err) {
-                    $log.log('error', err);
-                })
-
-            $scope.outlet = { attributes: { payment_options: [], delivery: { delivery_timings: { monday: { closed: false, timings: [{ }] }, tuesday: { closed: false, timings: [{ }] }, wednesday: { closed: false, timings: [{ }] }, thursday: { closed: false, timings: [{ }] }, friday: { closed: false, timings: [{ }] }, saturday: { closed: false, timings: [{ }] }, sunday: { closed: false, timings: [{ }] } } } }, contact: { location: { coords: { }, locality_1: [''], locality_2: [''], landmarks: [] }, phones: { }, emails: { type: 'work' } }, photos: { others: [] }, menus: [], links: { other_links: [] }, business_hours: { monday: { closed: false, timings: [{ }] }, tuesday: { closed: false, timings: [{ }] }, wednesday: { closed: false, timings: [{ }] }, thursday: { closed: false, timings: [{ }] }, friday: { closed: false, timings: [{ }] }, saturday: { closed: false, timings: [{ }] }, sunday: { closed: false, timings: [{ }] } } };
-
             $scope.isSpinnerVisible = false;
             $scope.marker = { id: 0, coords: { latitude: 28.6078341976, longitude: 77.2465642784 }, options: { draggable: true }, events: { dragend: function(marker, eventName, args) { var lat = marker.getPosition().lat(); var lon = marker.getPosition().lng(); $scope.outlet.contact.location.coords.longitude = lon; $scope.outlet.contact.location.coords.latitude = lat; $scope.outlet.contact.location.map_url = 'https://maps.google.com/maps/?q=' + lat + ',' + lon + '&z=' + $scope.map.zoom; $scope.marker.options = { draggable: true, labelAnchor: "100 0", labelClass: "marker-labels" }; } } };
 
-            $scope.addNumber = function(field_name) {
+			merchantRESTSvc.retrieveOutlet($stateParams.outletId)
+				.then(function(res) {
+					if(res.response) {
+						var temp = {};
+						_.each(res.data.attributes.payment_options, function(option) {
+							temp[option] = true;
+						});
+						$scope.checkModel = temp;
+						$scope.outlet = res.data;
+					} else {
+						$log.log('err', err);
+					}
+				}, function(err) {
+					$log.log('err', err);
+				});
+
+			$scope.addNumber = function(field_name) {
                 if (!$scope.outlet.contact.phones[field_name]) {
                     $scope.outlet.contact.phones[field_name] = [];
                 }
@@ -101,19 +104,8 @@ angular.module('merchantApp')
                 $scope.outlet.basics.icon = $scope.outlet.basics.is_a;
             };
 
-            $scope.getErrorMessage = function(timing) {
-                var open_min = (timing.open.hr * 60) + timing.open.min,
-                    close_min = (timing.close.hr * 60) + timing.close.min;
 
-                if ((open_min + 60) < (close_min)) { // outlet must be open for atleast one hour
-                    return "Duration must be atleast 1 hour long";
-                } else {
-                    return "";
-                }
-            };
-
-
-            $scope.addMenu = function() {
+           $scope.addMenu = function() {
                 if (!$scope.outlet.menu || !$scope.outlet.menu.length) {
                     $scope.outlet.menu = [];
                 }
@@ -145,6 +137,10 @@ angular.module('merchantApp')
             };
 
             $scope.$watchCollection('checkModel', function() {
+            	if(!$scope.outlet || !$scope.outlet.attributes) {
+            		return;
+            	}
+
                 $scope.checkResults = [];
                 $scope.outlet.attributes.payment_options = Object.keys(_.pick($scope.checkModel, function(val, key) {
                     return val;
@@ -160,10 +156,10 @@ angular.module('merchantApp')
             }
 
             $scope.finishedWizard = function() {
-                $http.post('/api/v4/outlets?token=' + $rootScope.token, $scope.outlet)
+                $http.put('/api/v4/outlets/' + $scope.outlet._id + '?token=' + $rootScope.token, $scope.outlet)
                     .success(function(data) {
                         if(data.response) {
-                        	toastr.success('Outlet created successfully');
+                        	toastr.success('Outlet updated successfully');
                         	$scope.outlet = {};
                         	$timeout(function() {
                         		$state.go('merchant.outlets');
@@ -281,18 +277,5 @@ angular.module('merchantApp')
                 });
                 return true;
             };
-
-            $scope.validateContactInfo = function() {
-                if (!_.has($scope.outlet, 'contact.location.coords.longitude') || !_.has($scope.outlet, 'contact.location.coords.latitude') || !_.has($scope.outlet, 'contact.location.map_url')) {
-                    $scope.handleErrors('Geo Location data missing');
-                    return false;
-                } else if (!_.has($scope.outlet, 'contact.location.address') || !_.has($scope.outlet, 'contanct.location.locality_1.0') || !_.has($scope.outlet, 'contact.location.locality_2.0') || !_.has($scope.outlet, 'contact.location.city') || !_.has($scope.outlet, 'contanct.location.pin')) {
-                    $scope.handleErrors('Address information is incomplete. Please rectify to continue');
-                    return false;
-                } else if (!_.has($scope, outlet, '')) {
-                    $scope.handleErrors('');
-                    return false;
-                }
-            }
-        }
-    ])
+		}
+	])

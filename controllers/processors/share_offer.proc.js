@@ -22,7 +22,7 @@ module.exports.check = function(data) {
 
 module.exports.process = function(data) {
   var deferred = Q.defer();
-  deferred.resolve(true);
+  logger.log();
 
   var passed_data = data;
   var updated_user = passed_data.user;
