@@ -5,20 +5,16 @@ var logger = require('tracer').colorConsole();
 var _ = require('lodash');
 var Q = require('q');
 var async = require('async');
-var AWSHelper = require('./helpers/aws.hlpr');
+var AWSHelper = require('./aws.hlpr');
 var fs = require('fs');
 
-
-/*============================================
-=            Image upload handler            =
-============================================*/
 
 module.exports.uploadImage = function(image_obj) {
 	logger.log();
     var deferred = Q.defer();
 	var img_obj = {
 		bucketName: image_obj.bucketName,
-		image: img_obj.image
+		image: image_obj.image
 	};
 
 		
@@ -36,7 +32,7 @@ module.exports.uploadImage = function(image_obj) {
             });
 		}
 	});
-		
+	return deferred.promise;
 	
 
 };
