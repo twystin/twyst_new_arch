@@ -1,0 +1,28 @@
+<div class='container' ng-init="get_offers()">
+  <div ng-show="offers.length">
+    <div class="well">
+      <p>You have created {{offers.length}} offer(s).</p>
+      <button class="btn btn-info" ui-sref='merchant.create_outlet'>Create more offers!</button>
+    </div>
+    <div class="col-md-4" ng-repeat="offer in offers">
+      <div class="panel panel-info">
+        <div class="panel-heading">{{offer.basics.name}}</div>
+        <div class="panel-body" style='min-height:120px;'>
+          <p>{{offer.contact.location.address}}</p>
+        </div>
+        <div class="panel-footer">
+          <a class="btn btn-link" ui-sref='merchant.view_offer({offerId: offer._id})'>View</a>
+          <a class="btn btn-link" ui-sref='merchant.edit_offer({offerId: offer._id})'>Edit</a>
+          <a class="btn btn-link" ng-click='removeOffer($index)'>Delete</a>
+        </div>
+      </div>
+    </div>
+    <div class='clearfix'></div>
+  </div>
+  <div ng-hide="offers.length">
+    <div class="well">
+      <p>You haven't yet created any offers.</p>
+      <a class="btn btn-info" ui-sref='merchant.create_offer'>Create your first offer!</a>
+    </div>
+  </div>
+</div>

@@ -19,7 +19,12 @@
     "bootstrap": "3.3.5",
     "jquery": "2.1.4",
     "lodash": "3.9.3",
-    "ngstorage": "0.3.7"
+    "ngstorage": "0.3.7",
+    "async": "1.4.2",
+    "angular-google-maps": "2.1.5",
+    "ng-file-upload": "6.2.1",
+    "ng-file-upload-shim": "6.2.1",
+    "angularjs-ordinal-filter": "*"
   },
   "resolutions": {
     "lodash": "3.9.3"

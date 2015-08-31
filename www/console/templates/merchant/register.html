@@ -1,0 +1,37 @@
+<div class='col-lg-8 col-lg-offset-2'>
+	<form class='form-horizontal' role='form' ng-submit='registerMerchant()'>
+		<div class='form-group'>
+			<label for='username' class='col-sm-3 control-label'>Username</label>
+			<div class='col-sm-9'>
+				<input class='form-control' type='text' placeholder='Username' ng-model='merchant.username' />
+			</div>
+		</div>
+		<div class='form-group'>
+			<label for='password' class='col-sm-3 control-label'>Password</label>
+			<div class='col-sm-9'>
+				<input class='form-control' type='password' placeholder='Password' ng-model='merchant.password'>
+			</div>
+		</div>
+		<div class='form-group'>
+			<label for='repPassword' class='col-sm-3 control-label'>Repeat Password</label>
+			<div class='col-sm-9'>
+				<input class='form-control' type='password' placeholder='Retype password' ng-model='merchant.rePassword'>
+			</div>
+		</div>
+		<div class='form-group'>
+			<label for='isPaying' class='col-sm-3 control-label'>Paying Outlet?</label>
+			<div class='col-sm-9'>
+				<input class='form-control' type='checkbox' ng-model='merchant.isPaying' ng-change='isPayingUpdated()'>
+			</div>
+		</div>
+		<div class='form-group' ng-if='merchant.isPaying'>
+			<label for='email' class='col-sm-3 control-label'>Email Id</label>
+			<div class='col-sm-9'>
+				<input class='form-control' type='email' placeholder='Email Address' ng-model='merchant.email'>
+			</div>
+		</div>
+		<div class='form-group'>
+			<button class='btn btn-primary pull-right' type='submit'>Register</button>
+		</div>
+	</form>
+</div>
