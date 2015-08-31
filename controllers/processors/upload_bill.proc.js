@@ -1,7 +1,7 @@
 var logger = require('tracer').colorConsole();
 var _ = require('lodash');
 var Q = require('q');
-var ImageUploader = require('./helpers/image.hlpr.js');
+var ImageUploader = require('../helpers/image.hlpr.js');
 
 module.exports.check = function(data) {
   logger.log();
