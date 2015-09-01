@@ -63,7 +63,7 @@ module.exports.get_profile = function(req, res) {
   }
 
   AuthHelper.get_user(req.query.token).then(function(data) {
-    HttpHelper.success(res, data, "Found user");
+    HttpHelper.success(res, data.data, "Found user");
   }, function(err) {
     HttpHelper.error(res, err, "Could not find user");
   });
