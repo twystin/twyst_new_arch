@@ -3,7 +3,8 @@
 
 var mongoose = require('mongoose'),
   Schema = mongoose.Schema,
-  hours = require("./partials/hours.mdl");
+  hours = require("./partials/hours.mdl")
+    , textSearch = require('mongoose-search-plugin');
 
 var OutletSchema = new Schema({
   basics: {
@@ -22,16 +23,16 @@ var OutletSchema = new Schema({
       type: String,
       trim: true,
       required: true,
-      enum: ['fnb', 'spa', 'retail', 'other'],
+      //enum: ['fnb', 'spa', 'retail', 'other'],
       default: "other"
     },
     is_a: {
       type: String,
-      enum: ['desserts', 'restaurant', 'biryani', 'chinese', 'continental', 'north_indian', 'fast_food', 'burgers', 'pizza', 'wraps', 'pub', 'beer', 'bakery', 'cake', 'cafe', 'bistro', 'takeaway', 'other']
+      //enum: ['desserts', 'restaurant', 'biryani', 'chinese', 'continental', 'north_indian', 'fast_food', 'burgers', 'pizza', 'wraps', 'pub', 'beer', 'bakery', 'cake', 'cafe', 'bistro', 'takeaway', 'other']
     },
     icon: {
       type: String,
-      enum: ['desserts', 'restaurant', 'biryani', 'chinese', 'continental', 'north_indian', 'fast_food', 'burgers', 'pizza', 'wraps', 'pub', 'beer', 'bakery', 'cake', 'cafe', 'bistro', 'takeaway', 'other']
+      //enum: ['desserts', 'restaurant', 'biryani', 'chinese', 'continental', 'north_indian', 'fast_food', 'burgers', 'pizza', 'wraps', 'pub', 'beer', 'bakery', 'cake', 'cafe', 'bistro', 'takeaway', 'other']
     },
     created_at: {
       type: Date,
@@ -111,7 +112,7 @@ var OutletSchema = new Schema({
       },
       type: {
         type: String,
-        enum: ['landline', 'mobile', 'other']
+        //enum: ['landline', 'mobile', 'other']
       },
       number: {
         type: String,
@@ -132,7 +133,7 @@ var OutletSchema = new Schema({
       },
       type: {
         type: String,
-        enum: ['personal', 'work']
+        //enum: ['personal', 'work']
       }
     }
   },
@@ -212,19 +213,19 @@ var OutletSchema = new Schema({
     },
     air_conditioning: {
       type: String,
-      enum: ["available", "not_available", "partial", "unknown"]
+      //enum: ["available", "not_available", "partial", "unknown"]
     },
     parking: {
       type: String,
-      enum: ["available", "not_available", "valet", "unknown"]
+      //enum: ["available", "not_available", "valet", "unknown"]
     },
     reservation: {
       type: String,
-      enum: ["suggested", "not_required", "unknown"]
+      //enum: ["suggested", "not_required", "unknown"]
     },
     wifi: {
       type: String,
-      enum: ["not_available", "free", "paid", "unknown"]
+      //enum: ["not_available", "free", "paid", "unknown"]
     },
     cost_for_two: {
       min: Number,
@@ -233,7 +234,7 @@ var OutletSchema = new Schema({
     cuisines: [String],
     payment_options: [{
       type: String,
-      enum: ['cash', 'visa', 'master', 'amex', 'sodexho']
+      //enum: ['cash', 'visa', 'master', 'amex', 'sodexho']
     }],
     tags: [{
       type: String,
@@ -291,7 +292,7 @@ var OutletSchema = new Schema({
   outlet_meta: {
     status: {
       type: String,
-      enum: ['active', 'archived', 'draft'],
+      //enum: ['active', 'archived', 'draft'],
       default: 'draft'
     },
     links: [{
@@ -479,6 +480,12 @@ OutletSchema.pre('validate', function(next) {
   if (!this.basics.name) next();
   this.basics.slug = slugify(this.basics.name);
   next();
+});
+
+OutletSchema.plugin(textSearch, {
+    fields: ['basics.name', 'basics.slug', 'basics.main_type', 'basics.is_a', 
+    'contact.location', 'contact.location.address', 'contact.location.landmarks',
+    'contact.location.locality_1', 'contact.location.locality_2', 'offers']
 });
 
 function slugify(created_outlet) {
