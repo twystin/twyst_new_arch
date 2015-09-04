@@ -31,11 +31,8 @@ module.exports = function(app) {
         message: 'Not yet implemented'
       });
     });
-    app.get('/api/v4/events/:event_id', function(req, res) {
-      res.status(405).send({
-        message: 'Not yet implemented'
-      });
-    });
+    var NotifCtrl = require('../controllers/notif.ctrl');
+    app.get('/api/v4/events/:event_id', NotifCtrl.get_notif);
     app.post('/api/v4/events', EventCtrl.new);
 
     app.post('/api/v4/coupon/gift', EventCtrl.gift);
@@ -83,11 +80,17 @@ module.exports = function(app) {
     app.put('/api/v4/profile', UserCtrl.update_profile);
     app.put('/api/v4/friends', UserCtrl.update_friends);
     app.get('/api/v4/coupons', UserCtrl.get_coupons);
+    //app.post('/api/v4/user/location', UserCtrl.update_location);
   })();
 
   (function LocationRoutes() {
     var LocationCtrl = require('../controllers/location.ctrl');
     app.get('/api/v4/locations', LocationCtrl.get_locations);
+  })();
+
+  (function SearchRoutes() {
+    var SearchCtrl = require('../controllers/search.ctrl');
+    app.get('/api/v4/search', SearchCtrl.search);
   })();
 };
 
