@@ -2,7 +2,7 @@
 /*jslint node: true */
 
 
-var _ = require('lodash');
+var _ = require('underscore');
 var mongoose = require('mongoose');
 var Q = require('q');
 var logger = require('tracer').colorConsole();
@@ -15,7 +15,6 @@ var Outlet = mongoose.model('Outlet');
 
 function get_outlets(params) {
     logger.log();
-    console.log(params)
     var deferred = Q.defer();
     Outlet.search(params.text,  {}, function(err, data) {
         if(err || data.results.length === 0){
@@ -23,10 +22,11 @@ function get_outlets(params) {
         }
         else{
             var reduced_outlets = _.reduce(data.results, function(memo, item) {
+                item = item.toJSON();
                 memo[item._id] = item;
                 return memo;
             }, {});
-            console.log(reduced_outlets)
+            
             deferred.resolve({
                 query: params,
                 outlets:  reduced_outlets 
@@ -522,7 +522,6 @@ module.exports.search = function(req, res) {
       return paginate(data);
     })
     .then(function(data) {
-        console.log(data)
         var outlets = data.outlets;
         var twyst_bucks = data.twyst_bucks;
         var data = {};
