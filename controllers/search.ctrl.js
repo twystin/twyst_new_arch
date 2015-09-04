@@ -2,7 +2,7 @@
 /*jslint node: true */
 
 
-var _ = require('underscore');
+var _ = require('lodash');
 var mongoose = require('mongoose');
 var Q = require('q');
 var logger = require('tracer').colorConsole();
@@ -132,7 +132,7 @@ function set_distance(params) {
 
   var deferred = Q.defer();
   if (params.query.lat && params.query.long) {
-    params.outlets = _.mapObject(params.outlets, function(val, key) {
+    params.outlets = _.mapValues(params.outlets, function(val, key) {
       val.recco = val.recco || {};
       val.recco.distance = RecoHelper.distance({
         latitude: params.query.lat,
@@ -150,7 +150,7 @@ function set_open_closed(params) {
 
   var deferred = Q.defer();
   if (params.query.date && params.query.time) {
-    params.outlets = _.mapObject(params.outlets, function(val, key) {
+    params.outlets = _.mapValues(params.outlets, function(val, key) {
       val.recco = val.recco || {};
       val.recco.closed = RecoHelper.isClosed(params.query.date,
         params.query.time,
@@ -166,7 +166,7 @@ function calculate_relevance(params) {
   logger.log();
 
   var deferred = Q.defer();
-  params.outlets = _.mapObject(params.outlets, function(val, key) {
+  params.outlets = _.mapValues(params.outlets, function(val, key) {
     var relevance = 0;
     val.recco = val.recco || {};
 
