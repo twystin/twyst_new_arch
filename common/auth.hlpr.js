@@ -27,7 +27,7 @@ module.exports.get_user = function(token) {
     if (found_token) {
       User.findOne({
         '_id': found_token.user
-      }).lean().populate('friends').exec(function(err, user) {
+      }).populate('friends').exec(function(err, user) {
         if (err) {
           deferred.reject({
             response: false,
@@ -37,6 +37,7 @@ module.exports.get_user = function(token) {
         }
 
         if (user) {
+            user = user.toJSON();
           deferred.resolve({
             response: true,
             message: 'User found',

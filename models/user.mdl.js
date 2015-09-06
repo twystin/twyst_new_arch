@@ -10,24 +10,24 @@ var Friend = mongoose.model('Friend');
 
 var User = new Schema({
   activities: [],
-  contact_person: String,
-  company_name: String,
-  job_title: String,
-  website: String,
-  phone: String,
-  first_name: String,
-  middle_name: String,
-  last_name: String,
-  email: String,
-  address: String,
+  contact_person: {type: String, default: ''},
+  company_name: {type: String, default: ''},
+  job_title: {type: String, default: ''},
+  website: {type: String, default: ''},
+  phone: {type: String, default: ''},
+  first_name: {type: String, default: ''},
+  middle_name: {type: String, default: ''},
+  last_name: {type: String, default: ''},
+  email: {type: String, default: ''},
+  address: {type: String, default: ''},
   twyst_bucks: Number, //default 500
   push_ids: [{
-    push_type: String, // enum
-    push_id: String,
+    push_type: {type: String, default: ''}, // enum
+    push_id: {type: String, default: ''},
     push_meta: {}
   }],
   life_events: [{
-    event_type: String, // enum
+    event_type: {type: String, default: ''}, // enum
     event_meta: {},
     event_date: {
       d: Number,
@@ -36,33 +36,33 @@ var User = new Schema({
     }
   }],
   device: {
-    id: String,
-    model: String,
-    os: String
+    id: {type: String, default: ''},
+    model: {type: String, default: ''},
+    os: {type: String, default: ''}  
   },
-  locations: [{
-    location_type: String, // home, office, last, most_often, favourite
+  locations: {
+    location_type: {type: String, default: ''}, // home, office, last, most_often, favourite
     coords: {
       lat: Number,
       long: Number
     },
-    name: String,
+    name: {type: String, default: ''},
     when: Date
-  }],
+  },
   validation: {
     email: Boolean,
     otp: Boolean
   },
-  user_acquisition_source: String,
-  app_acquisition_source: String,
+  user_acquisition_source: {type: String, default: ''},
+  app_acquisition_source: {type: String, default: ''},
   last_event: {
-    from: String,
+    from: {type: String, default: ''},
     when: Date
   },
   facebook: {},
   google: {},
   blacklisted: {
-    reason: String,
+    reason: {type: String, default: ''},
     when: Date,
     is_blacklisted: Boolean
   },
@@ -86,7 +86,7 @@ var User = new Schema({
         type: Schema.ObjectId,
         ref: Outlet
       },
-      handle: String,
+      handle: {type: String, default: ''},
       sms: {
         promo: Boolean,
         trans: Boolean
@@ -111,7 +111,7 @@ var User = new Schema({
   }],
   coupons: [{
     _id: Schema.ObjectId,
-    code: String,
+    code: {type: String, default: ''},
     outlets: [{
       type: Schema.ObjectId,
       ref: 'Outlet'
@@ -120,17 +120,16 @@ var User = new Schema({
       type: Schema.ObjectId,
       ref: 'Outlet'
     },
-    coupon_source: String,
-    header: String,
-    line1: String,
-    line2: String,
+    coupon_source: {type: String, default: ''},
+    header: {type: String, default: ''},
+    line1: {type: String, default: ''},
+    line2: {type: String, default: ''},
     lapse_date: Date,
     expiry_date: Date,
     coupon_valid_days: Number,
     meta: {
       reward_type: {
-        type: String
-      }
+        type: {type: String, default: ''}      }
     },
     used_details: {
       used_time: Date,
@@ -142,11 +141,10 @@ var User = new Schema({
         type: Schema.ObjectId,
         ref: 'Outlet'
       },
-      used_phone: String
-    },
-    status: String,
+      used_phone: {type: String, default: ''}    },
+    status: {type: String, default: ''},
     actions: {
-      action_type: String, // gift, share
+      action_type: {type: String, default: ''}, // gift, share
       action_source: {
         type: Schema.ObjectId,
         ref: 'User'

@@ -15,7 +15,6 @@ var Outlet = mongoose.model('Outlet');
 
 function get_outlets(params) {
     logger.log();
-    console.log(params)
     var deferred = Q.defer();
     Outlet.search(params.text,  {}, function(err, data) {
         if(err || data.results.length === 0){
@@ -23,10 +22,11 @@ function get_outlets(params) {
         }
         else{
             var reduced_outlets = _.reduce(data.results, function(memo, item) {
+                item = item.toJSON();
                 memo[item._id] = item;
                 return memo;
             }, {});
-            console.log(reduced_outlets)
+            
             deferred.resolve({
                 query: params,
                 outlets:  reduced_outlets 
@@ -132,7 +132,7 @@ function set_distance(params) {
 
   var deferred = Q.defer();
   if (params.query.lat && params.query.long) {
-    params.outlets = _.mapObject(params.outlets, function(val, key) {
+    params.outlets = _.mapValues(params.outlets, function(val, key) {
       val.recco = val.recco || {};
       val.recco.distance = RecoHelper.distance({
         latitude: params.query.lat,
@@ -150,7 +150,7 @@ function set_open_closed(params) {
 
   var deferred = Q.defer();
   if (params.query.date && params.query.time) {
-    params.outlets = _.mapObject(params.outlets, function(val, key) {
+    params.outlets = _.mapValues(params.outlets, function(val, key) {
       val.recco = val.recco || {};
       val.recco.closed = RecoHelper.isClosed(params.query.date,
         params.query.time,
@@ -166,7 +166,7 @@ function calculate_relevance(params) {
   logger.log();
 
   var deferred = Q.defer();
-  params.outlets = _.mapObject(params.outlets, function(val, key) {
+  params.outlets = _.mapValues(params.outlets, function(val, key) {
     var relevance = 0;
     val.recco = val.recco || {};
 
@@ -522,7 +522,6 @@ module.exports.search = function(req, res) {
       return paginate(data);
     })
     .then(function(data) {
-        console.log(data)
         var outlets = data.outlets;
         var twyst_bucks = data.twyst_bucks;
         var data = {};
