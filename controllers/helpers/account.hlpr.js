@@ -180,6 +180,27 @@ module.exports.create_user_account = function(phone) {
   return deferred.promise;
 };
 
+module.exports.create_merchant = function(merchant) {
+  var deferred = Q.defer();
+
+  var acc = new Account(merchant);
+  acc.save(function(err) {
+    if(err) {
+      deferred.reject({
+        error: err || true,
+        message: 'Unable to register the merchant'
+      });
+    } else {
+      deferred.resolve({
+        data: acc,
+        message: 'Merchant registered successfully'
+      });
+    }
+  });
+
+  return deferred.promise;
+}
+
 module.exports.generate_new_code = function(phone) {
   var deferred = Q.defer();
 
