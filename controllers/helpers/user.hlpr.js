@@ -41,12 +41,14 @@ module.exports.update_user = function(token, updated_user) {
         os: user.os_version,
         model: user.model    
     }  
+    user.friends = user.friends._id;
 
     delete user.os_version;
     delete user.model;
     delete user.gcmId;
     delete user.lat;
     delete user.long;
+    delete user.__v;
 
     
     User.findOneAndUpdate({
@@ -65,7 +67,7 @@ module.exports.update_user = function(token, updated_user) {
         });
       } else {
         deferred.resolve({
-          data: user,
+          data: u,
           message: 'Updated user'
         });
       }
