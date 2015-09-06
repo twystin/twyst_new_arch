@@ -12,6 +12,7 @@ var Q = require('q');
 var async = require('async');
 var logger = require('tracer').colorConsole();
 var User = mongoose.model('User');
+var Outlet = mongoose.model('Outlet');
 
 module.exports.get_coupons = function(req, res) {
   var token = req.query.token || null;
@@ -170,16 +171,38 @@ function load_outlet_info_from_cache(data) {
                         massaged_item.background = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + outlet._id + '/' + outlet.photos.background;
                     }
                     massaged_item.open_next = RecoHelper.opensAt(outlet.business_hours);
+                    
                     _.each(outlet.offers, function(offer) {
                         if(_.has(offer, ['actions', 'reward']) && _.isEqual(offer.actions.reward.header, coupon.header) && _.isEqual(offer.actions.reward.line1, coupon.line1) && _.isEqual(offer.actions.reward.line2, coupon.line2)) {
                             coupon.available_now = !(RecoHelper.isClosed('dummy', 'dummy', offer.actions.reward.reward_hours));
                             if(!coupon.available_now) {
                               coupon.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
                             }
+                            console.log(offer.offer_group)
                             coupon.meta = {};
                             coupon.meta.reward_type = offer.actions.reward.reward_meta.reward_type;
+                                            
                         }
+                        
                     });
+                    Outlet.find({'offers.offer_group': 'test_offer'}).then(function (all_outlets) {
+                        var outlets = [];
+                        if(all_outlets.length > 1){
+                            _.each(all_outlets, function(outlet){
+                                var obj = {
+                                    _id: outlet._id,
+                                    name: outlet.basics.name,
+                                    location_1: outlet.contact.location.locality_1,
+                                    location_2: outlet.contact.location.locality_2,
+                                    city: outlet.contact.location.city
+                                }
+                                outlets.push(obj);
+                            });
+                            coupon.outlets = outlets;
+                        }
+                           
+                    })
+                    
                     coupon.type = 'coupon';
                     coupon.expiry = coupon.expiry_date;
                     massaged_item.offers = [];
@@ -203,3 +226,16 @@ function load_outlet_info_from_cache(data) {
   return deferred.promise;
 };
 
+module.exports.update_location = function(req, res) {
+  var token = req.query.token || null;
+
+  if (!token) {
+    HttpHelper.error(res, null, "Not authenticated");
+  }
+
+  UserHelper.update_user(req.query.token, req.body).then(function(data) {
+    HttpHelper.success(res, data.data, "user location updated");
+  }, function(err) {
+    HttpHelper.error(res, err, "Could not find user");
+  });
+};
