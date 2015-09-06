@@ -86,7 +86,7 @@ module.exports = function(app) {
     app.put('/api/v4/profile', UserCtrl.update_profile);
     app.put('/api/v4/friends', UserCtrl.update_friends);
     app.get('/api/v4/coupons', UserCtrl.get_coupons);
-    //app.post('/api/v4/user/location', UserCtrl.update_location);
+    app.post('/api/v4/user/location', UserCtrl.update_location);
   })();
 
   (function LocationRoutes() {
