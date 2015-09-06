@@ -8,6 +8,7 @@ var passport = require('passport');
 module.exports = function(app) {
   (function AccountRoutes() {
     var AccountCtrl = require('../controllers/account.ctrl');
+    app.post('/api/v4/auth/register', AccountCtrl.register_merchant);
     app.post('/api/v4/accounts/login', function(req, res, next) {
         next();
       }, passport.authenticate('account'),
@@ -72,6 +73,11 @@ module.exports = function(app) {
     app.get('/api/v4/outlets/:outlet_id', OutletCtrl.get);
     app.get('/api/v4/outlets', mustBe.authorized('outlet.view', OutletCtrl.all));
     app.delete('/api/v4/outlets/:outlet_id', mustBe.authorized('outlet.remove', OutletCtrl.remove));
+  })();
+
+  (function OfferRoutes() {
+    var OfferCtrl = require('../controllers/offer.ctrl');
+    app.post('/api/v4/offers', OfferCtrl.new);
   })();
 
   (function UserRoutes() {
