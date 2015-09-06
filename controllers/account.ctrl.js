@@ -133,6 +133,23 @@ module.exports.verify_authcode_and_create_account = function(req, res) {
   }
 };
 
+module.exports.register_merchant = function(req, res) {
+  logger.info();
+
+  var merchant = req.body;
+  if (!_.has(merchant, 'username') || !_.has(merchant, 'password')) {
+    HttpHelper.error(res, null, "Username and password are mandatory");
+  } else if (merchant.isPaying && !_.has(merchant, 'email')) {
+    HttpHelper.error(res, null, "Email is mandatory for paying merchant"); 
+  } else {
+    AccountHelper.create_merchant(merchant).then(function(data) {
+      HttpHelper.success(res, data.data, data.message);
+    }, function(err) {
+      HttpHelper.error(res, err.error, err.message);
+    });
+  }
+}
+
 // Helper functions
 function get_code_and_send(res, phone) {
   logger.info();
