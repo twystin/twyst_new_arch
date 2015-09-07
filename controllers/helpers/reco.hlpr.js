@@ -193,11 +193,17 @@ module.exports.shuffleArray = function(array) {
 
 module.exports.isClosed = function(date, tm, business_hours) {
   var days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-
+  var timeHr, timeMin, timeMins;
+  if(tm) {
+    var index = tm.indexOf(':');
+    timeHr = parseInt(tm.slice(0, index));
+    timeMin = parseInt(tm.slice(index + 1, 5));
+    timeMins = (timeHr*60) + timeMin;
+  }
   if (!business_hours)
     return false;
 
-  var time = new Date(Date.now() + 19800000),
+  var time = date? new Date((new Date(date).getTime())): new Date(Date.now() + 19800000),
     day = days[time.getDay()],
     today = business_hours[day];
 
@@ -207,7 +213,7 @@ module.exports.isClosed = function(date, tm, business_hours) {
   if (today.closed)
     return true;
 
-  var minutes = (time.getHours() * 60) + time.getMinutes();
+  var minutes = timeMins? timeMins: ((time.getHours() * 60) + time.getMinutes());
 
   for (var i = 0; i < today.timings.length; i++) {
     var timing = today.timings[i];
