@@ -18,24 +18,37 @@ module.exports.update_user = function(token, updated_user) {
   AuthHelper.get_user(token).then(function(data) {
     var user = data.data;
     user = _.extend(user, updated_user);
-   
-    var push_info = {
-        push_type: 'gcm',
-        push_id: user.gcmId,
-        push_meta: {} 
-        
-    };
-
-    user.push_ids.push(push_info) ;
-    user.device = {
+    
+    if(user.gcmId) {
+        var push_info = {
+            push_type: 'gcm',
+            push_id: user.gcmId,
+            push_meta: {} 
+            
+        };   
+        user.push_ids.push(push_info);
+    }
+    if(user.lat && user.long) {
+        user.locations = {};
+        user.locations.coords ={};
+        user.locations.coords.lat = user.lat;
+        user.locations.coords.log = user.long;
+        user.locations.when = new Date();
+    }
+    
+    user.device_info = {
         id: user.device,
         os: user.os_version,
         model: user.model    
     }  
+    user.friends = user.friends._id;
 
     delete user.os_version;
-    delete user.model,
-    delete user.gcmId,
+    delete user.model;
+    delete user.gcmId;
+    delete user.lat;
+    delete user.long;
+    delete user.__v;
 
     
     User.findOneAndUpdate({
@@ -46,15 +59,15 @@ module.exports.update_user = function(token, updated_user) {
       upsert: false,
       overwrite: true
     }).exec(function(err, u) {
-      console.log(err);
       if (err || !u) {
+        console.log(err);
         deferred.reject({
           err: err || true,
           message: "Couldn\'t update user"
         });
       } else {
         deferred.resolve({
-          data: user,
+          data: u,
           message: 'Updated user'
         });
       }

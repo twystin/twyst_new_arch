@@ -21,6 +21,7 @@ var User = new Schema({
   email: {type: String, default: ''},
   address: {type: String, default: ''},
   twyst_bucks: Number, //default 500
+  image: {type: String, default: ''},
   push_ids: [{
     push_type: {type: String, default: ''}, // enum
     push_id: {type: String, default: ''},
@@ -35,7 +36,7 @@ var User = new Schema({
       y: Number
     }
   }],
-  device: {
+  device_info: {
     id: {type: String, default: ''},
     model: {type: String, default: ''},
     os: {type: String, default: ''}  
