@@ -11,12 +11,17 @@ var mongoose = require('mongoose');
 var User = mongoose.model('User');
 var Outlet = mongoose.model('Outlet');
 var Event = mongoose.model('Event');
+var Notification = mongoose.model('Notification');
 
 module.exports.get_notif = function(req, res) {
-    logger.log();
-    var deferred = Q.defer();
+  logger.log();
+  var deferred = Q.defer();
 
-    get_user(req.query.token)
+  if(req.params.event_id !== 'notifications') {
+    HttpHelper.error(res, false, "Error in getting notifications");
+  } 
+
+  get_user(req.query.token)
     .then(function(data) {
       return get_user_events(data);
     })
@@ -32,33 +37,30 @@ module.exports.get_notif = function(req, res) {
 };
 
 function get_user(token) {
-    logger.log();
+  logger.log();
 
-    var deferred = Q.defer();
+  var deferred = Q.defer();
 
-    AuthHelper.get_user(token).then(function(data) {
-        deferred.resolve(data);
-    }, function(err) {
-        deferred.reject("Could not find the user for token - " + token);
-    });
+  AuthHelper.get_user(token).then(function(data) {
+    deferred.resolve(data);
+  }, function(err) {
+    deferred.reject("Could not find the user for token - " + token);
+  });
 
-    return deferred.promise;
+  return deferred.promise;
 }
 
-function get_user_events(passed_data){
-    logger.log();
-    var deferred = Q.defer(); 
-    Event.find({event_user: passed_data.data._id}, {}, function(err, events){
-        if(err){
-            deferred.reject(err);
-        }
-        else{
-            deferred.resolve(events)
-            
-        }
-    })  
-    return deferred.promise;
+function get_user_events(passed_data) {
+  logger.log();
+  var deferred = Q.defer();
+  Notification.find({
+    user: passed_data.data._id
+  }, {}, function(err, events) {
+    if (err) {
+      deferred.reject(err);
+    } else {
+      deferred.resolve(events)
+    }
+  })
+  return deferred.promise;
 }
-
-
-
