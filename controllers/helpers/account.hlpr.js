@@ -184,16 +184,39 @@ module.exports.create_merchant = function(merchant) {
   var deferred = Q.defer();
 
   var acc = new Account(merchant);
-  acc.save(function(err) {
+  var user = new User({activities: ['outlet.create','outlet.update' ,'outlet.view' , 'outlet.remove'], is_paying: merchant.is_paying || false });
+  if(merchant.email) {
+    user.email = merchant.email;
+  }
+  user.save(function(err) {
     if(err) {
       deferred.reject({
         error: err || true,
         message: 'Unable to register the merchant'
       });
     } else {
-      deferred.resolve({
-        data: acc,
-        message: 'Merchant registered successfully'
+      acc.setPassword(merchant.password, function(err) {
+        if(err) {
+          deferred.reject({
+            error: err || true,
+            message: 'Unable to register the merchant'
+          });
+        } else {
+          acc.user = user._id;
+          acc.save(function(err) {
+            if(err) {
+              deferred.reject({
+                error: err || true,
+                message: 'Unable to register the merchant'
+              });
+            } else {
+              deferred.resolve({
+                data: acc,
+                message: 'Merchant registered successfully'
+              });
+            }
+          });
+        }
       });
     }
   });

@@ -12,8 +12,9 @@ var AuthHelper = require('../../common/auth.hlpr');
 module.exports.create_offer = function(token, new_offer) {
     var deferred = Q.defer();
     var offer = _.clone(new_offer);
+    offer.offer_group = new ObjectId();
+    var outletIds = _.map(offer.offer_outlets, function(obj) { return ObjectId(obj); });
     var primary_outlet = new_offer.primary_outlet;
-    delete offer.outlets;
 
     AuthHelper.get_user(token).then(function(data) {
         Cache.get('outlets', function(err, reply) {
@@ -21,7 +22,9 @@ module.exports.create_offer = function(token, new_offer) {
                 deferred.reject('Could not find outlets');
             } else {
                 Outlet.update({
-                        '_id': ObjectId(primary_outlet)
+                        '_id': {
+                            $in: outletIds
+                        }
                     }, {
                         $push: {
                             "offers": offer
@@ -35,8 +38,14 @@ module.exports.create_offer = function(token, new_offer) {
                             });
                         } else {
                             var outlets = JSON.parse(reply);
-                            if(_.has(outlets, primary_outlet + '.offers'))
-                                outlets[primary_outlet].offers.push(offer);
+                            _.each(outletIds, function(outletId) {
+                                if(outlets[outletId.toString()]) {
+                                    if (!outlets[outletId.toString()].offers) {
+                                        outlets[outletId.toString()].offers = [];
+                                    }
+                                    outlets[outletId.toString()].offers.push(offer);
+                                }
+                            });
                             Cache.set('outlets', JSON.stringify(outlets), function(err) {
                                 if(err) {
                                     logger.error("Error setting outlets ", err);
