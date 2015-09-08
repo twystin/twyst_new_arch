@@ -7,6 +7,7 @@ var mongoose = require('mongoose'),
     , textSearch = require('mongoose-search-plugin');
 
 var OutletSchema = new Schema({
+
   basics: {
     name: {
       type: String,
@@ -42,7 +43,8 @@ var OutletSchema = new Schema({
       type: Date,
       default: Date.now
     },
-    featured: Boolean
+    featured: Boolean,
+    is_paying: {type: Boolean, required: true, default: false }
   },
   contact: {
     location: {
@@ -369,7 +371,7 @@ var OutletSchema = new Schema({
       type: String
     }, // job,
     offer_group: {
-      type: String
+      type: Schema.Types.ObjectId
     }, // to model the program
     offer_start_date: {
       type: Date
