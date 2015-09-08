@@ -314,7 +314,7 @@ function massage_offers(params) {
         massaged_offer.next = parseInt(offer.rule && offer.rule.event_count);
         massaged_offer.checkins = item.recco && item.recco.checkins || 0;
         massaged_offer.meta = offer.actions && offer.actions.reward && offer.actions.reward.reward_meta;
-        massaged_offer.expiry = offer.actions.reward.expiry;
+        massaged_offer.expiry = offer.offer_end_date;
         if (offer && offer.actions && offer.actions.reward && offer.actions.reward.reward_hours) {
           massaged_offer.available_now = !(RecoHelper.isClosed('dummy', 'dummy', offer.actions.reward.reward_hours));
           if (!massaged_offer.available_now) {

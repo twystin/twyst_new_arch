@@ -334,12 +334,24 @@ var OutletSchema = new Schema({
     },
     time: {
       start: {
-        type: Number,
-        default: 23
+        hr: {
+          type: Number,
+          default: 23
+        },
+        min: {
+          type: Number,
+          default: 0
+        }
       },
       end: {
-        type: Number,
-        default: 9
+        hr: {
+          type: Number,
+          default: 9
+        },
+        min: {
+          type: Number,
+          default: 0
+        }
       }
     }
   },
@@ -362,7 +374,9 @@ var OutletSchema = new Schema({
   },
   offers: [{
     _id: {
-      type: Schema.Types.ObjectId
+      type: Schema.Types.ObjectId,
+      required: true,
+      default: new mongoose.Types.ObjectId()
     },
     offer_status: {
       type: String

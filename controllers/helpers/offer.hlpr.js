@@ -7,11 +7,13 @@ var _ = require('lodash');
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Types.ObjectId;
 var Outlet = mongoose.model('Outlet');
+var logger = require('tracer').colorConsole();
 var AuthHelper = require('../../common/auth.hlpr');
 
 module.exports.create_offer = function(token, new_offer) {
     var deferred = Q.defer();
-    var offer = _.clone(new_offer);
+    var offer = {};
+    offer = _.extend(offer, new_offer);
     offer.offer_group = new ObjectId();
     var outletIds = _.map(offer.offer_outlets, function(obj) { return ObjectId(obj); });
     var primary_outlet = new_offer.primary_outlet;
@@ -29,6 +31,8 @@ module.exports.create_offer = function(token, new_offer) {
                         $push: {
                             "offers": offer
                         }
+                    }, {
+                        multi: true
                     })
                     .exec(function(err, count) {
                         if (err || !count) {
