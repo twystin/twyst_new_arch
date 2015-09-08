@@ -112,6 +112,19 @@ module.exports.create_outlet = function(token, created_outlet) {
           message: 'Couldn\'t save the outlet.'
         });
       } else {
+        Cache.get('outlets', function(err, reply) {
+          if(err || !reply) {
+            logger.error("Error retrieving outlets for adding new outlet", err);
+          } else {
+            var outlets = JSON.parse(reply);
+            outlets[outlet._id.toString] = outlet;
+            Cache.set('outlets', JSON.stringify(outlets), function(err) {
+              if(err) {
+                logger.error("Error setting updated list of outlets", err);
+              }
+            });
+          }
+        })
         User.findOne({
           _id: data.data._id
         }, function(err, user) {
@@ -122,6 +135,8 @@ module.exports.create_outlet = function(token, created_outlet) {
             });
           } else {
             user.outlets.push(o._id);
+            outlet.basics.is_paying = user.is_paying;
+            outlet.save(function(err) { logger.error('error setting paying status', err); });
             user.save(function(err, u) {
               if (err || !u) {
                 deferred.reject({

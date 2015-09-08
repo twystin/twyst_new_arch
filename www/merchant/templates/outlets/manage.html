@@ -2,7 +2,7 @@
   <div ng-show="outlets.length">
     <div class="well">
       <p>You have created {{outlets.length}} outlet(s).</p>
-      <button class="btn btn-info" ui-sref='merchant.create_outlet'>Create more outlets!</button>
+      <button class="btn btn-primary" ui-sref='merchant.create_outlet'>Create more outlets!</button>
     </div>
     <div class="col-md-4" ng-repeat="outlet in outlets">
       <div class="panel panel-info">
@@ -22,7 +22,7 @@
   <div ng-hide="outlets.length">
     <div class="well">
       <p>You haven't yet created any outlets.</p>
-      <a class="btn btn-info" ui-sref='merchant.create_outlet'>Create your first outlet!</a>
+      <a class="btn btn-primary" ui-sref='merchant.create_outlet'>Create your first outlet!</a>
     </div>
   </div>
 </div>
