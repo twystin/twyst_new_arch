@@ -185,38 +185,44 @@ function load_outlet_info_from_cache(data) {
                         }
                         
                     });
-                    Outlet.find({'offers.offer_group': coupon.offer_group}).then(function (all_outlets) {
-                        var outlets = [];
-                        if(all_outlets.length > 1){
-                            _.each(all_outlets, function(outlet){
-                                var obj = {
-                                    _id: outlet._id,
-                                    name: outlet.basics.name,
-                                    location_1: outlet.contact.location.locality_1,
-                                    location_2: outlet.contact.location.locality_2,
-                                    city: outlet.contact.location.city
-                                }
-                                outlets.push(obj);
-                            });                            
-                            coupon.outlets = outlets;
-                            coupon.type = 'coupon';
-                            coupon.expiry = coupon.expiry_date;
-                            massaged_item.offers = [];
-                            massaged_item.offers.push(coupon);
-                            
-                            _coupons.push(massaged_item);
-                            
-                            callback();
-                        } 
-                        else {
-                            coupon.type = 'coupon';
-                            coupon.expiry = coupon.expiry_date;
-                            massaged_item.offers = [];
-                            massaged_item.offers.push(coupon);
-                            _coupons.push(massaged_item);
-                            
+                    Outlet.find({'offers.offer_group': coupon.offer_group}, function (err, all_outlets) {
+                        if(err) {
+                            console.log(err);
                             callback();
                         }
+                        else {
+                            var outlets = [];
+                            if(all_outlets.length > 1){
+                                _.each(all_outlets, function(outlet){
+                                    var obj = {
+                                        _id: outlet._id,
+                                        name: outlet.basics.name,
+                                        location_1: outlet.contact.location.locality_1,
+                                        location_2: outlet.contact.location.locality_2,
+                                        city: outlet.contact.location.city
+                                    }
+                                    outlets.push(obj);
+                                });                            
+                                coupon.outlets = outlets;
+                                coupon.type = 'coupon';
+                                coupon.expiry = coupon.expiry_date;
+                                massaged_item.offers = [];
+                                massaged_item.offers.push(coupon);
+                                
+                                _coupons.push(massaged_item);
+                                
+                                callback();
+                            } 
+                            else {
+                                coupon.type = 'coupon';
+                                coupon.expiry = coupon.expiry_date;
+                                massaged_item.offers = [];
+                                massaged_item.offers.push(coupon);
+                                _coupons.push(massaged_item);
+                                
+                                callback();
+                            }
+                        }                        
                            
                     })
                                 
