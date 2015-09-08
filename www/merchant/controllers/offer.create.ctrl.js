@@ -16,6 +16,7 @@ angular.module('merchantApp')
             reward_meta: {
               min_bill: 99
             },
+            reward_hours: { sunday: { closed: false, timings: [{}] }, monday: { closed: false, timings: [{}] }, tuesday: { closed: false, timings: [{}] }, wednesday: { closed: false, timings: [{}] }, thursday: { closed: false, timings: [{}] }, friday: { closed: false, timings: [{}] }, saturday: { closed: false, timings: [{}] } },
             applicability: {
               dine_in: true,
               delivery: true
@@ -33,6 +34,71 @@ angular.module('merchantApp')
 
       var today = new Date(),
         max_date = new Date(today.getTime() + (2 * 365 * 24 * 60 * 60 * 1000));
+
+      $scope.updateTiming = function(day, list) {
+        if (list[day].closed) {
+          list[day].timings = [];
+        } else {
+          list[day].timings = [{}];
+        }
+      };
+
+      $scope.removeTiming = function(day, index, list) {
+        list[day].timings.splice(index, 1);
+      };
+
+      $scope.initalizeTiming = function(day, index, list) {
+        if(list[day].timings[index].open && list[day].timings[index].close) {
+          return;
+        }
+        var openTime = new Date();
+        openTime.setHours(9);
+        openTime.setMinutes(0);
+        openTime.setSeconds(0);
+        openTime.setMilliseconds(0);
+        var closeTime = new Date();
+        closeTime.setHours(21);
+        closeTime.setMinutes(0);
+        closeTime.setSeconds(0);
+        closeTime.setMilliseconds(0);
+        list[day].timings[index] = { 
+          open: { hr: 9, min: 0, time: openTime},
+          close: { hr: 21, min: 0, time: closeTime},
+        }
+      };
+
+      $scope.updateTime = function(day, index, list) {
+        var _timing = list[day].timings[index];
+        if(_timing.open.time) {
+          _timing.open.hr  = _timing.open.time.getHours();
+          _timing.open.min = _timing.open.time.getMinutes();
+        } 
+        if(_timing.close.time) {
+          _timing.close.hr  = _timing.close.time.getHours();
+          _timing.close.min = _timing.close.time.getMinutes();
+        }
+      }
+
+      $scope.addNewTiming = function(day, list) {
+        console.log(day, list);
+        list[day].timings.push({});
+      };
+
+      $scope.cloneToAllDays = function(the_day, list) {
+        _.each(list, function(schedule, day) {
+          if (day !== the_day) {
+            schedule.timings = _.cloneDeep(list[the_day].timings);
+            schedule.closed = list[the_day].closed;
+          }
+        });
+      };
+
+      $scope.getMaxRange = function() {
+        return new Array(_.reduce($scope.offer.actions.reward.reward_hours, function(obj1, obj2) {
+          if(!_.has(obj1, 'timings')) { return obj1 >= obj2.timings.length? obj1: obj2.timings.length; }
+          else { return obj1.timings.length>obj2.timings.length? obj1.timings.length:obj2.timings.length; }
+        }));
+      }
 
       $scope.$watchCollection('offer.actions.reward.reward_meta', function(newVal, oldVal) {
         if (!newVal.reward_type) {
@@ -196,6 +262,9 @@ angular.module('merchantApp')
         };
 
         $scope.validateOfferTerms()
+          .then(function() {
+            return $scope.validateOfferTimings();
+          }, _handleErrors)
           .then(function() {
             return $scope.validateOfferValidity();
           }, _handleErrors)
@@ -387,6 +456,54 @@ angular.module('merchantApp')
         } else {
           def.resolve();
         }
+        return def.promise;
+      }
+
+      $scope.validateOfferTimings = function() {
+        var def = Q.defer();
+        async.each(Object.keys($scope.offer.actions.reward.reward_hours), function(day, callback) {
+            var schedule = $scope.offer.actions.reward.reward_hours[day];
+            if(schedule.closed) {
+                callback();
+            } else {
+                async.each(schedule.timings, function(timing1, callback) {
+                    if((!timing1.open.hr && timing1.open.hr !== 0) || (!timing1.open.min && timing1.open.min !== 0) || (!timing1.close.hr && timing1.close.hr !== 0) || (!timing1.close.min && timing1.close.min !== 0)) {
+                        callback("One or more timings invalid for " + day.toUpperCase())
+                    } else {
+                        async.each(schedule.timings, function(timing2, callback) {
+                            if((!timing2.open.hr && timing2.open.hr !== 0) || (!timing2.open.min && timing2.open.min !== 0) || (!timing2.close.hr && timing2.close.hr !== 0) || (!timing2.close.min && timing2.close.min !== 0)) {
+                                callback("One or more timings invalid for " + day.toUpperCase())
+                            } else {
+                                var startMin1 = (timing1.open.hr * 60) + timing1.open.min,
+                                    closeMin1 = (timing1.close.hr * 60) + timing1.close.min,
+                                    startMin2 = (timing2.open.hr * 60) + timing2.open.min,
+                                    closeMin2 = (timing2.close.hr * 60) + timing2.close.min;
+
+                                if(timing1 == timing2) {
+                                    callback();
+                                } else if((startMin1 <= closeMin2 <= closeMin1) || (startMin1 <= closeMin2 <= closeMin1) || (startMin2<= closeMin1 <= closeMin2)) {
+                                    callback("One or more timings invalid for " + day.toUpperCase());
+                                } else {
+                                    callback();
+                                }
+                            }
+                        }, function(err) {
+                            callback(err);
+                        });
+                    }
+                }, function(err) {
+                    
+                    callback(err);
+                })
+            }
+        }, function(err) {
+            if(err) {
+                // $scope.handleErrors(err);
+                def.reject(err);
+            } else {
+                def.resolve(true);
+            }
+        });
         return def.promise;
       }
 

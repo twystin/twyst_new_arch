@@ -460,6 +460,43 @@
           <fieldset>
             <legend>Validity</legend>
             <div class='form-group'>
+              <label class='col-md-2 control-label'>Applicability</label>
+              <div class='col-md-10'>
+                <div class='form-group table-responsive'>
+                  <table class='table table-bordered table-condensed'>
+                    <thead>
+                      <th>Day</th>
+                      <th>Is Closed?</th>
+                      <th ng-repeat='i in getMaxRange() track by $index'>Timing {{$index+1}}</th>
+                      <th>Add Timing</th>
+                      <th>Apply to all days</th>
+                    </thead>
+                    <tbody>
+                      <tr ng-repeat='(day, schedule) in offer.actions.reward.reward_hours'>
+                        <th>{{day | uppercase}}</th>
+                        <td><input type='checkbox' ng-model='schedule.closed' ng-change='updateTiming(day, offer.actions.reward.reward_hours)'></td>
+                        <td ng-repeat='i in getMaxRange() track by $index'>
+                          <div class='col-md-12' ng-if='schedule.timings.length && schedule.timings[$index]' ng-click='removeTiming(day, $index, offer.actions.reward.reward_hours)' ng-show='schedule.timings.length>1' ng-init='initalizeTiming(day, $index, offer.actions.reward.reward_hours)'>
+                            <button class='btn btn-sm btn-danger pull-right' ><span class='glyphicon glyphicon-trash'></span></button>
+                          </div>
+                          <div class='col-md-12' ng-if='schedule.timings[$index]'>
+                            <input type='time' ng-model='schedule.timings[$index].open.time' placeholder="HH:MM A/P" class='form-control' ng-change='updateTime(day, $index, offer.actions.reward.reward_hours)'>
+                          </div>
+                          <div class='col-md-12 text-center' ng-if='schedule.timings[$index]'> to </div>
+                          <div class='col-md-12' ng-if='schedule.timings[$index]'>
+                            <input type='time' ng-model='schedule.timings[$index].close.time' placeholder="HH:MM A/P" class='form-control' ng-change='updateTime(day, $index, offer.actions.reward.reward_hours)'>
+                          </div>
+                        </td>
+                        <td><button class='btn btn-sm btn-default' ng-click='addNewTiming(day, offer.actions.reward.reward_hours)' ng-show='!schedule.closed'>Add Timing</button></td>
+                        <td><button class='btn btn-sm btn-default' ng-click='cloneToAllDays(day, offer.actions.reward.reward_hours)'>Apply to all days</button></td>
+                      </tr>
+                      <td>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class='form-group'>
               <label class='col-md-2 control-label'>Start Date</label>
               <div class='col-md-6'>
                 <datepicker ng-model="offer.offer_start_date" min-date="today" show-weeks="true" class="well well-sm"></datepicker>
