@@ -1,6 +1,6 @@
 angular.module('merchantApp')
-  .controller('OfferCreateController', ['$scope', '$http', '$q', 'toastr', 'merchantRESTSvc', '$rootScope', '$log', '$timeout', '$state',
-    function($scope, $http, Q, toastr, merchantRESTSvc, $rootScope, $log, $timeout, $state) {
+  .controller('OfferCreateController', ['$scope', '$http', '$q', 'toastr', 'merchantRESTSvc', '$rootScope', '$log', '$timeout', '$state', 'WizardHandler',
+    function($scope, $http, Q, toastr, merchantRESTSvc, $rootScope, $log, $timeout, $state, WizardHandler) {
       $scope.offer = {
         offer_status: 'draft',
         offer_type: '',
@@ -363,8 +363,6 @@ angular.module('merchantApp')
         } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'buyonegetone') {
           if (!$scope.offer.actions.reward.reward_meta.bogo) {
             def.reject("Buy One Get One required item");
-          } else if (!$scope.offer.actions.reward.description) {
-            def.reject("Please provide brief description for the offer");
           } else {
             def.resolve(true);
           }
@@ -373,8 +371,6 @@ angular.module('merchantApp')
             def.reject("Discount requires valid disount percentage");
           } else if (!$scope.offer.actions.reward.reward_meta.max) {
             def.reject("Discouut requires maximum discount amount");
-          } else if (!$scope.offer.actions.reward.description) {
-            def.reject("Please provide brief description for the offer");
           } else {
             def.resolve(true);
           }
@@ -383,8 +379,6 @@ angular.module('merchantApp')
             def.reject("Flatoff required off amount")
           } else if (!$scope.offer.actions.reward.reward_meta.spend) {
             def.reject("Flatoff required minimum spend");
-          } else if (!$scope.offer.actions.reward.description) {
-            def.reject("Please provide brief description for the offer");
           } else {
             def.resolve(true);
           }
@@ -393,16 +387,12 @@ angular.module('merchantApp')
             def.reject("Free offer requires item name");
           } else if (!$scope.offer.actions.reward.reward_meta._with) {
             def.reject("Free offer requires conditions");
-          } else if (!$scope.offer.actions.reward.description) {
-            def.reject("Please provide brief description for the offer");
           } else {
             def.resolve(true);
           }
         } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'happyhours') {
           if (!$scope.offer.actions.reward.reward_meta.extension) {
             def.reject("Happy hours offer requires extension duration (in hrs.)")
-          } else if (!$scope.offer.actions.reward.description) {
-            def.reject("Please provide brief description for the offer");
           } else {
             def.resolve(true);
           }
@@ -413,8 +403,6 @@ angular.module('merchantApp')
             def.reject("Reduced offer requires actual worth");
           } else if (!$scope.offer.actions.reward.reward_meta.for_what) {
             def.reject("Reduced offer requires deal price");
-          } else if (!$scope.offer.actions.reward.description) {
-            def.reject("Please provide brief description for the offer");
           } else {
             def.resolve(true);
           }
@@ -423,8 +411,6 @@ angular.module('merchantApp')
             def.reject("Custom offer requires offer details");
           } else if (!$scope.offer.actions.reward.header) {
             def.reject("Header must be filled in for custom");
-          } else if (!$scope.offer.actions.reward.description) {
-            def.reject("Please provide brief description for the offer");
           } else {
             def.resolve(true);
           }
@@ -433,8 +419,6 @@ angular.module('merchantApp')
             def.reject("Unlimited offer requires item name");
           } else if (!$scope.offer.actions.reward.reward_meta.conditions) {
             def.reject("Unlimited offer requires offer criteria");
-          } else if (!$scope.offer.actions.reward.description) {
-            def.reject("Please provide brief description for the offer");
           } else {
             def.resolve(true);
           }
@@ -443,8 +427,6 @@ angular.module('merchantApp')
             def.reject("Only happy hours offer requires deal info");
           } else if (!$scope.offer.actions.reward.reward_meta.conditions) {
             def.reject("Only happy hours offer requires deal items");
-          } else if (!$scope.offer.actions.reward.description) {
-            def.reject("Please provide brief description for the offer");
           } else {
             def.resolve(true);
           }
@@ -453,8 +435,6 @@ angular.module('merchantApp')
             def.reject("Combo offer requires deal items");
           } else if (!$scope.offer.actions.reward.reward_meta._for) {
             def.reject("Combo offer requires deal price");
-          } else if (!$scope.offer.actions.reward.description) {
-            def.reject("Please provide brief description for the offer");
           } else {
             def.resolve(true);
           }
@@ -463,8 +443,6 @@ angular.module('merchantApp')
             def.reject("Buffet offer requires deal info");
           } else if (!$scope.offer.actions.reward.reward_meta.cost) {
             def.reject("Buffet offer requires deal price");
-          } else if (!$scope.offer.actions.reward.description) {
-            def.reject("Please provide brief description for the offer");
           } else {
             def.resolve(true);
           }
@@ -560,22 +538,22 @@ angular.module('merchantApp')
         $http.post('/api/v4/offers?token=' + $rootScope.token, $scope.offer)
           .then(function(res) {
             if(res.data.response) {
-              if(res.ok) {
-                toastr.success('Offer creted successfully');
-                $timeout(function() {
-                  $state.go('merchant.offers', {}, {
-                    reload: true
-                  });
-                }, 800);
-              } else {
-                console.log('error', res);
-              }
+              toastr.success('Offer creted successfully');
+              $timeout(function() {
+                $state.go('merchant.offers', {}, {
+                  reload: true
+                });
+              }, 800);
             } else {
               console.log('err', res.data.data);
             }
           }, function(err) {
             console.log('err', err);
           })
+      }
+
+      $scope.backToStart = function() {
+        WizardHandler.wizard().goTo(0);
       }
 
 

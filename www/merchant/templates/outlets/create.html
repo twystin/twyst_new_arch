@@ -209,8 +209,11 @@
               <div class='col-md-9'>
                 <div class='form-group'>
                   <label for='delivery_est_time' class='col-md-3 control-label'>Estimate Time</label>
-                  <div class='col-md-9'>
-                    <input type='text' class='form-control' ng-model='outlet.attributes.delivery.delivery_estimated_time' placeholder='Eg. 30 min to 1 hr'>
+                  <div class='col-md-6'>
+                    <div class='input-group'>
+                      <input type='text' class='form-control text-right' ng-model='outlet.attributes.delivery.delivery_estimated_time' placeholder='Eg. 30, 40, 45, 60...'>
+                      <div class='input-group-addon'> minutes</div>
+                    </div>
                   </div>
                 </div>
               </div>
