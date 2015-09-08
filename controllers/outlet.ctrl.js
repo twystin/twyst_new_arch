@@ -187,10 +187,10 @@ function pick_outlet_fields(params) {
     }
 
     if (params.outlet.photos && params.outlet.photos.logo) {
-      massaged_item.logo = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + params.outlet._id + '/' + params.outlet.photos.logo;
+      massaged_item.logo = params.outlet.photos.logo;
     }
     if (params.outlet.photos && params.outlet.photos.background) {
-      massaged_item.background = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + params.outlet._id + '/' + params.outlet.photos.background;
+      massaged_item.background = params.outlet.photos.background;
     }
     massaged_item.open_next = RecoHelper.opensAt(params.outlet.business_hours);
     params.outlet = massaged_item;
@@ -399,7 +399,6 @@ module.exports.get = function(req, res) {
 function filter_fields(req, data) {
   if (req.query.lat && req.query.long) {
     data.recco = data.recco || {};
-    console.log(data.data.contact.location.coords);
     data.recco.distance = RecoHelper.distance({
       latitude: req.query.lat,
       longitude: req.query.long

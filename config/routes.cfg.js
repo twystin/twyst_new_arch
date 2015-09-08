@@ -80,6 +80,11 @@ module.exports = function(app) {
     app.post('/api/v4/offers', OfferCtrl.new);
   })();
 
+  (function ImageRoutes() {
+    var ImageCtrl = require('../controllers/image.ctrl');
+    app.post('/api/v4/images', ImageCtrl.uploadImage);
+  })();
+
   (function UserRoutes() {
     var UserCtrl = require('../controllers/user.ctrl');
     app.get('/api/v4/profile', UserCtrl.get_profile);

@@ -3,19 +3,18 @@ angular.module('merchantApp')
 		function($http, $q, $cookies, Upload) {
 			var imageSvc = {};
 
-			imageSvc.uploadImage = function(image_file, image_meta) {
+			imageSvc.uploadImage = function(request_object) {
 				var deferred = $q.defer();
-				Upload.upload({
-					url: '/api/v4/images',
-					method: 'PUT',
-					file: image_file,
-					data: image_meta,
-					fields: image_meta
-				}).success(function(data) {
-					deferred.resolve(data);
-				}).error(function(data) {
-					deferred.reject(data);
-				});
+				$http.post('/api/v4/images', request_object)
+					.then(function(data) {
+						if(data.data.response) {
+							deferred.resolve(data.data.data);
+						} else {
+							deferred.reject(data.data.data);
+						}
+					}, function(err) {
+						deferred.reject(err);
+					})
 				return deferred.promise;
 			};
 
