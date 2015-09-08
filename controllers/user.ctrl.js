@@ -111,7 +111,7 @@ function filter_out_expired_and_used_coupons(data) {
   var deferred = Q.defer();
   
   data.coupons = _.filter(data.coupons, function(coupon) {
-    if(_.has(coupon, 'status') && (coupon.status === 'active') && (coupon.coupon_source === 'qr_checkin')) {
+    if(_.has(coupon, 'status') && (coupon.status === 'active')) {
       return true;
     } else {
       return false;
@@ -143,7 +143,9 @@ function load_outlet_info_from_cache(data) {
               fmap = JSON.parse(reply);
             }
             if(data.coupons && data.coupons.length) {
-                data.coupons = _.map(data.coupons, function(coupon) {
+                var _coupons = [];
+                // data.coupons = _.map(data.coupons, function(coupon) {
+                async.each(data.coupons, function(coupon, callback) {
                     var massaged_item = {};
                     if(coupon.outlets && coupon.outlets.length) {
                         outlet = outlets[coupon.outlets[0].toString()];        
@@ -178,14 +180,12 @@ function load_outlet_info_from_cache(data) {
                             if(!coupon.available_now) {
                               coupon.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
                             }
-                            console.log(offer.offer_group)
                             coupon.meta = {};
-                            coupon.meta.reward_type = offer.actions.reward.reward_meta.reward_type;
-                                            
+                            coupon.meta.reward_type = offer.actions.reward.reward_meta.reward_type;                                        
                         }
                         
                     });
-                    Outlet.find({'offers.offer_group': 'test_offer'}).then(function (all_outlets) {
+                    Outlet.find({'offers.offer_group': coupon.offer_group}).then(function (all_outlets) {
                         var outlets = [];
                         if(all_outlets.length > 1){
                             _.each(all_outlets, function(outlet){
@@ -197,20 +197,34 @@ function load_outlet_info_from_cache(data) {
                                     city: outlet.contact.location.city
                                 }
                                 outlets.push(obj);
-                            });
+                            });                            
                             coupon.outlets = outlets;
+                            coupon.type = 'coupon';
+                            coupon.expiry = coupon.expiry_date;
+                            massaged_item.offers = [];
+                            massaged_item.offers.push(coupon);
+                            
+                            _coupons.push(massaged_item);
+                            
+                            callback();
+                        } 
+                        else {
+                            coupon.type = 'coupon';
+                            coupon.expiry = coupon.expiry_date;
+                            massaged_item.offers = [];
+                            massaged_item.offers.push(coupon);
+                            _coupons.push(massaged_item);
+                            
+                            callback();
                         }
                            
                     })
-                    
-                    coupon.type = 'coupon';
-                    coupon.expiry = coupon.expiry_date;
-                    massaged_item.offers = [];
-                    massaged_item.offers.push(coupon);
-                    return massaged_item; 
-                })         
-                
-                deferred.resolve(data);   
+                                
+                }, function() {
+                  data.coupons = _coupons;
+                  deferred.resolve(data);
+                });         
+                // deferred.resolve(data);   
             
             }
             else {
