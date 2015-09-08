@@ -13,7 +13,7 @@ angular.module('merchantApp')
             $scope.attribute_set = [{class_name: 'dine_in', text: 'Dine-in' }, { class_name: 'home_delivery', text: 'Home Delivery?' }, { class_name: 'veg', text: 'Pure Vegitarian?' }, { class_name: 'alcohol', text: 'Serves alcohol' }, { class_name: 'outdoor', text: 'Outdoor sitting' }, { class_name: 'foodcourt', text: 'Inside a food court' }, { class_name: 'smoking', text: 'Smoking allowed?' }, { class_name: 'chain', text: 'Part of a chain?' }];
 
             var sampleTiming = {open: {hr: 0, min: 0}, close: {hr: 0, min: 0}};
-            $scope.outlet = { attributes: { payment_options: [], delivery: { delivery_timings: { monday: { closed: false, timings: [{}] }, tuesday: { closed: false, timings: [{}] }, wednesday: { closed: false, timings: [{}] }, thursday: { closed: false, timings: [{}] }, friday: { closed: false, timings: [{}] }, saturday: { closed: false, timings: [{}] }, sunday: { closed: false, timings: [{}] } } } }, contact: { location: { coords: { }, locality_1: [''], locality_2: [''], landmarks: [] }, phones: { mobile: [{num: '', num_type: 'mobile'}], reg_mobile: [{num: '', num_type: 'mobile'}] }, emails: { type: 'work' } }, photos: { others: [] }, menus: [], links: { other_links: [] }, business_hours: { sunday: { closed: false, timings: [{}] }, monday: { closed: false, timings: [{}] }, tuesday: { closed: false, timings: [{}] }, wednesday: { closed: false, timings: [{}] }, thursday: { closed: false, timings: [{}] }, friday: { closed: false, timings: [{}] }, saturday: { closed: false, timings: [{}] } } };
+            $scope.outlet = { sms_off: {}, attributes: { payment_options: [], delivery: { delivery_timings: { monday: { closed: false, timings: [{}] }, tuesday: { closed: false, timings: [{}] }, wednesday: { closed: false, timings: [{}] }, thursday: { closed: false, timings: [{}] }, friday: { closed: false, timings: [{}] }, saturday: { closed: false, timings: [{}] }, sunday: { closed: false, timings: [{}] } } } }, contact: { location: { coords: { }, locality_1: [''], locality_2: [''], landmarks: [] }, phones: { mobile: [{num: '', num_type: 'mobile'}], reg_mobile: [{num: '', num_type: 'mobile'}] }, emails: { type: 'work' } }, photos: { others: [] }, menus: [], links: { other_links: [] }, business_hours: { sunday: { closed: false, timings: [{}] }, monday: { closed: false, timings: [{}] }, tuesday: { closed: false, timings: [{}] }, wednesday: { closed: false, timings: [{}] }, thursday: { closed: false, timings: [{}] }, friday: { closed: false, timings: [{}] }, saturday: { closed: false, timings: [{}] } } };
 
             $scope.isSpinnerVisible = false;
             $scope.marker = { id: 0, coords: { latitude: 28.6078341976, longitude: 77.2465642784 }, options: { draggable: true }, events: { dragend: function(marker, eventName, args) { var lat = marker.getPosition().lat(); var lon = marker.getPosition().lng(); $scope.outlet.contact.location.coords.longitude = lon; $scope.outlet.contact.location.coords.latitude = lat; $scope.outlet.contact.location.map_url = 'https://maps.google.com/maps/?q=' + lat + ',' + lon + '&z=' + $scope.map.zoom; $scope.marker.options = { draggable: true, labelAnchor: "100 0", labelClass: "marker-labels" }; } } };
@@ -214,7 +214,7 @@ angular.module('merchantApp')
             $scope.validateStep1 = function() {
                 var deferred = Q.defer();
                 if (!_.has($scope.outlet, 'basics.name')) {
-                    $scope.handleErrors('Outname name is mandatory');
+                    $scope.handleErrors('Outlet name is mandatory');
                     deferred.reject();
                 } else if (!_.has($scope.outlet, 'contact.location.address')) {
                     $scope.handleErrors('Complete outlet address is mandatory');
@@ -283,13 +283,13 @@ angular.module('merchantApp')
                 if (!_.has($scope.outlet, 'basics.main_type')) {
                     $scope.handleErrors("Outlet type required");
                     deferred.reject();
-                } else if ($scope.outlet.attributes.home_delivery && (!_.has($scope.outlet, 'attributes.delivery.delivery_estimated_time') || /^[0-9]{1,3}$/i.test($scope.outlet.attributes.delivery.delivery_estimated_time))) {
+                } else if ($scope.outlet.attributes.home_delivery && (!_.has($scope.outlet, 'attributes.delivery.delivery_estimated_time') || !/^[0-9]{1,3}$/i.test($scope.outlet.attributes.delivery.delivery_estimated_time))) {
                     $scope.handleErrors("Valid estimate delivery time required");
                     deferred.reject();
                 } else if (!$scope.outlet.attributes.cuisines || !$scope.outlet.attributes.cuisines.length) {
                     $scope.handleErrors("Atleast one cuisine must be specified");
                     deferred.reject();
-                } else if ($scope.outlet.sms_off.value) {
+                } else if ($scope.outlet && $scope.outlet.sms_off && $scope.outlet.sms_off.value) {
                     if((!$scope.outlet.sms_off.time.start.hr && $scope.outlet.sms_off.time.start.hr!==0) || (!$scope.outlet.sms_off.time.start.min && $scope.outlet.sms_off.time.start.min!==0)) {
                         $scope.handleErrors("SMS OFF start time invalid");
                         deferred.reject();

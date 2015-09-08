@@ -117,7 +117,7 @@ module.exports.create_outlet = function(token, created_outlet) {
             logger.error("Error retrieving outlets for adding new outlet", err);
           } else {
             var outlets = JSON.parse(reply);
-            outlets[outlet._id.toString] = outlet;
+            outlets[outlet._id.toString()] = outlet;
             Cache.set('outlets', JSON.stringify(outlets), function(err) {
               if(err) {
                 logger.error("Error setting updated list of outlets", err);
