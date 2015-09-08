@@ -303,7 +303,7 @@ function massage_offers(params) {
       params.outlets = _.map(params.outlets, function(item) {
         item = add_user_coupons(
           pick_offer_fields(
-            select_relevant_checkin_offer(item), params.user._id), coupon_map && coupon_map[item._id] && coupon_map[item._id].coupons);
+            select_relevant_checkin_offer(item), params.user._id, params.query.date, params.query.time), coupon_map && coupon_map[item._id] && coupon_map[item._id].coupons);
         return item;
       });
       deferred.resolve(params);
@@ -311,7 +311,7 @@ function massage_offers(params) {
     });
   } else {
     params.outlets = _.map(params.outlets, function(item) {
-      item = pick_offer_fields(select_relevant_checkin_offer(item), params.user._id);
+      item = pick_offer_fields(select_relevant_checkin_offer(item), params.user._id, params.query.date, params.query.time);
       return item;
     });
     deferred.resolve(params);
@@ -396,7 +396,7 @@ function massage_offers(params) {
     return item;
   }
 
-  function pick_offer_fields(item, user_id) {
+  function pick_offer_fields(item, user_id, date, time) {
 
     item.offers = _.map(item.offers, function(offer) {
       if (offer.type) {
@@ -436,7 +436,7 @@ function massage_offers(params) {
         
         
         if (offer && offer.actions && offer.actions.reward && offer.actions.reward.reward_hours) {
-          massaged_offer.available_now = !(RecoHelper.isClosed('dummy', 'dummy', offer.actions.reward.reward_hours));
+          massaged_offer.available_now = !(RecoHelper.isClosed(date, time, offer.actions.reward.reward_hours));
           if (!massaged_offer.available_now) {
             massaged_offer.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
           }
