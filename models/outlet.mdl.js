@@ -382,6 +382,9 @@ var OutletSchema = new Schema({
     offer_lapse_days: {
       type: Number
     },
+    offer_valid_days: {
+      type: Number
+    },
     offer_likes: [{
       type: Schema.ObjectId,
       ref: 'User'
@@ -392,12 +395,17 @@ var OutletSchema = new Schema({
     offer_cost:{
       type: Number
     },
+    minimum_bill_value: {
+      type: Number
+    },
     rule: {
       _id: {
         type: Schema.Types.ObjectId
       },
       event_type: String,
       event_count: Number,
+      event_start: Number,
+      event_end: Number,
       event_match: String,
       friendly_text: String,
       event_params: {}
@@ -421,6 +429,12 @@ var OutletSchema = new Schema({
           type: String
         },
         line2: {
+          type: String
+        },
+        description: {
+          type: String
+        },
+        terms: {
           type: String
         }
       },

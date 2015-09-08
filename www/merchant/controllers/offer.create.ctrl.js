@@ -4,18 +4,14 @@ angular.module('merchantApp')
       $scope.offer = {
         offer_status: 'draft',
         offer_type: '',
-        offer_start_date: new Date(),
-        offer_end_date: new Date(Date.now() + (2 * 30 * 24 * 60 * 60 * 1000)),
-        offer_lapse_days: 1,
-        offer_valid_days: 15,
         rule: {
 
         },
         actions: {
           reward: {
             reward_meta: {
-              min_bill: 99
             },
+            reward_hours: { sunday: { closed: true, timings: [] }, monday: { closed: true, timings: [] }, tuesday: { closed: true, timings: [] }, wednesday: { closed: true, timings: [] }, thursday: { closed: true, timings: [] }, friday: { closed: true, timings: [] }, saturday: { closed: true, timings: [] } },
             applicability: {
               dine_in: true,
               delivery: true
@@ -34,19 +30,122 @@ angular.module('merchantApp')
       var today = new Date(),
         max_date = new Date(today.getTime() + (2 * 365 * 24 * 60 * 60 * 1000));
 
+      $scope.updateTiming = function(day, list) {
+        if (list[day].closed) {
+          list[day].timings = [];
+        } else {
+          list[day].timings = [{}];
+        }
+      };
+
+      $scope.removeTiming = function(day, index, list) {
+        list[day].timings.splice(index, 1);
+      };
+
+      $scope.initalizeTiming = function(day, index, list) {
+        if(list[day].timings[index].open && list[day].timings[index].close) {
+          return;
+        }
+        var openTime = new Date();
+        openTime.setHours(9);
+        openTime.setMinutes(0);
+        openTime.setSeconds(0);
+        openTime.setMilliseconds(0);
+        var closeTime = new Date();
+        closeTime.setHours(21);
+        closeTime.setMinutes(0);
+        closeTime.setSeconds(0);
+        closeTime.setMilliseconds(0);
+        list[day].timings[index] = { 
+          open: { hr: 9, min: 0, time: openTime},
+          close: { hr: 21, min: 0, time: closeTime},
+        }
+      };
+
+      $scope.updateTime = function(day, index, list) {
+        var _timing = list[day].timings[index];
+        if(_timing.open.time) {
+          _timing.open.hr  = _timing.open.time.getHours();
+          _timing.open.min = _timing.open.time.getMinutes();
+        } 
+        if(_timing.close.time) {
+          _timing.close.hr  = _timing.close.time.getHours();
+          _timing.close.min = _timing.close.time.getMinutes();
+        }
+      }
+
+      $scope.addNewTiming = function(day, list) {
+        console.log(day, list);
+        list[day].timings.push({});
+      };
+
+      $scope.cloneToAllDays = function(the_day, list) {
+        _.each(list, function(schedule, day) {
+          if (day !== the_day) {
+            schedule.timings = _.cloneDeep(list[the_day].timings);
+            schedule.closed = list[the_day].closed;
+          }
+        });
+      };
+
+      $scope.getMaxRange = function() {
+        return new Array(_.reduce($scope.offer.actions.reward.reward_hours, function(obj1, obj2) {
+          if(!_.has(obj1, 'timings')) { return obj1 >= obj2.timings.length? obj1: obj2.timings.length; }
+          else { return obj1.timings.length>obj2.timings.length? obj1.timings.length:obj2.timings.length; }
+        }));
+      }
+
+      $scope.$watchCollection('offer.offer_type', function(newVal, oldVal) {
+        if(!newVal) {
+          return;
+        } else if(newVal=='offer') {
+          if(Object.keys($scope.offer.rule).length) {
+            $scope.offer.rule = {};
+          }
+        } else if(newVal=='deal' || newVal=='bank_deal') {
+          if($scope.offer.minimum_bill_value) {
+            delete $scope.offer.minimum_bill_value;
+          }
+        }
+      });
+
+      $scope.$watchCollection('offer.rule', function(newVal, oldVal) {
+        if(newVal.event_type != oldVal.event_type) {
+          $scope.offer.friendly_text = '';
+          $scope.offer.rule = { event_type: newVal.event_type };
+        } else if($scope.offer.rule.event_type) {
+          if($scope.offer.rule.event_type=='every' && $scope.offer.rule.event_count && ($scope.offer.rule.event_start || $scope.offer.rule.event_start==0) && $scope.offer.rule.event_end) {
+            var startOrdinal, endOrdinal, countOrdinal;
+            startOrdinal = ($scope.offer.rule.event_start>3 || $scope.offer.rule.event_start==0)? 'th': ($scope.offer.rule.event_start==3)? 'rd': ($scope.offer.rule.event_start==2)? 'nd': ($scope.offer.rule.event_start==1)? 'st': 'th';
+            endOrdinal = ($scope.offer.rule.event_end>3 || $scope.offer.rule.event_end==0)? 'th': ($scope.offer.rule.event_end==3)? 'rd': ($scope.offer.rule.event_end==2)? 'nd': ($scope.offer.rule.event_end==1)? 'st': 'th';
+            countOrdinal = ($scope.offer.rule.event_count>3 || $scope.offer.rule.event_count==0)? 'th': ($scope.offer.rule.event_count==3)? 'rd': ($scope.offer.rule.event_count==2)? 'nd': ($scope.offer.rule.event_count==1)? 'st': 'th';
+            $scope.offer.rule.friendly_text = 'Application on every ' + $scope.offer.rule.event_count + countOrdinal + ' checkin from ' + $scope.offer.rule.event_start + startOrdinal + ' to ' + $scope.offer.rule.event_end + endOrdinal + ' checkin';
+          } else if($scope.offer.rule.event_type=='after' && ($scope.offer.rule.event_start || $scope.offer.rule.event_start==0) && $scope.offer.rule.event_end) {
+            var startOrdinal, endOrdinal;
+            startOrdinal = ($scope.offer.rule.event_start>3 || $scope.offer.rule.event_start==0)? 'th': ($scope.offer.rule.event_start==3)? 'rd': ($scope.offer.rule.event_start==2)? 'nd': ($scope.offer.rule.event_start==1)? 'st': 'th';
+            endOrdinal = ($scope.offer.rule.event_end>3 || $scope.offer.rule.event_end==0)? 'th': ($scope.offer.rule.event_end==3)? 'rd': ($scope.offer.rule.event_end==2)? 'nd': ($scope.offer.rule.event_end==1)? 'st': 'th';
+            $scope.offer.rule.friendly_text = 'Application on every checkin starts from ' + $scope.offer.rule.event_start + startOrdinal + ' to ' + $scope.offer.rule.event_end + endOrdinal + ' checkin';
+          } else if($scope.offer.rule.event_type=='only' && ($scope.offer.rule.event_count || $scope.offer.rule.event_count==0)) {
+            var ordinal;
+            ordinal = ($scope.offer.rule.event_count>3 || $scope.offer.rule.event_count==0)? 'th': ($scope.offer.rule.event_count==3)? 'rd': ($scope.offer.rule.event_count==2)? 'nd': ($scope.offer.rule.event_count==1)? 'st': 'th';
+            $scope.offer.rule.friendly_text = 'Application on the ' + $scope.offer.rule.event_count + ordinal + 'checkin';
+          } else {
+            $scope.offer.rule.friendly_text = '';
+          }
+        }
+      })
+
       $scope.$watchCollection('offer.actions.reward.reward_meta', function(newVal, oldVal) {
         if (!newVal.reward_type) {
           if (Object.keys($scope.offer.actions.reward.reward_meta).length) {
             $scope.offer.actions.reward.reward_meta = {
-              min_bill: newVal.min_bill
             };
           }
         }
         
         if (newVal.reward_type != oldVal.reward_type) {
           $scope.offer.actions.reward.reward_meta = {
-            reward_type: newVal.reward_type,
-            min_bill: newVal.min_bill
+            reward_type: newVal.reward_type
           };
           if (newVal.reward_type == 'custom') {
             $scope.offer.actions.reward.header = '';
@@ -197,6 +296,9 @@ angular.module('merchantApp')
 
         $scope.validateOfferTerms()
           .then(function() {
+            return $scope.validateOfferTimings();
+          }, _handleErrors)
+          .then(function() {
             return $scope.validateOfferValidity();
           }, _handleErrors)
           .then(function() {
@@ -261,7 +363,7 @@ angular.module('merchantApp')
         } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'buyonegetone') {
           if (!$scope.offer.actions.reward.reward_meta.bogo) {
             def.reject("Buy One Get One required item");
-          } else if (!$scope.offer.rule.friendly_text) {
+          } else if (!$scope.offer.actions.reward.description) {
             def.reject("Please provide brief description for the offer");
           } else {
             def.resolve(true);
@@ -271,7 +373,7 @@ angular.module('merchantApp')
             def.reject("Discount requires valid disount percentage");
           } else if (!$scope.offer.actions.reward.reward_meta.max) {
             def.reject("Discouut requires maximum discount amount");
-          } else if (!$scope.offer.rule.friendly_text) {
+          } else if (!$scope.offer.actions.reward.description) {
             def.reject("Please provide brief description for the offer");
           } else {
             def.resolve(true);
@@ -281,7 +383,7 @@ angular.module('merchantApp')
             def.reject("Flatoff required off amount")
           } else if (!$scope.offer.actions.reward.reward_meta.spend) {
             def.reject("Flatoff required minimum spend");
-          } else if (!$scope.offer.rule.friendly_text) {
+          } else if (!$scope.offer.actions.reward.description) {
             def.reject("Please provide brief description for the offer");
           } else {
             def.resolve(true);
@@ -291,7 +393,7 @@ angular.module('merchantApp')
             def.reject("Free offer requires item name");
           } else if (!$scope.offer.actions.reward.reward_meta._with) {
             def.reject("Free offer requires conditions");
-          } else if (!$scope.offer.rule.friendly_text) {
+          } else if (!$scope.offer.actions.reward.description) {
             def.reject("Please provide brief description for the offer");
           } else {
             def.resolve(true);
@@ -299,7 +401,7 @@ angular.module('merchantApp')
         } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'happyhours') {
           if (!$scope.offer.actions.reward.reward_meta.extension) {
             def.reject("Happy hours offer requires extension duration (in hrs.)")
-          } else if (!$scope.offer.rule.friendly_text) {
+          } else if (!$scope.offer.actions.reward.description) {
             def.reject("Please provide brief description for the offer");
           } else {
             def.resolve(true);
@@ -311,7 +413,7 @@ angular.module('merchantApp')
             def.reject("Reduced offer requires actual worth");
           } else if (!$scope.offer.actions.reward.reward_meta.for_what) {
             def.reject("Reduced offer requires deal price");
-          } else if (!$scope.offer.rule.friendly_text) {
+          } else if (!$scope.offer.actions.reward.description) {
             def.reject("Please provide brief description for the offer");
           } else {
             def.resolve(true);
@@ -321,7 +423,7 @@ angular.module('merchantApp')
             def.reject("Custom offer requires offer details");
           } else if (!$scope.offer.actions.reward.header) {
             def.reject("Header must be filled in for custom");
-          } else if (!$scope.offer.rule.friendly_text) {
+          } else if (!$scope.offer.actions.reward.description) {
             def.reject("Please provide brief description for the offer");
           } else {
             def.resolve(true);
@@ -331,7 +433,7 @@ angular.module('merchantApp')
             def.reject("Unlimited offer requires item name");
           } else if (!$scope.offer.actions.reward.reward_meta.conditions) {
             def.reject("Unlimited offer requires offer criteria");
-          } else if (!$scope.offer.rule.friendly_text) {
+          } else if (!$scope.offer.actions.reward.description) {
             def.reject("Please provide brief description for the offer");
           } else {
             def.resolve(true);
@@ -341,7 +443,7 @@ angular.module('merchantApp')
             def.reject("Only happy hours offer requires deal info");
           } else if (!$scope.offer.actions.reward.reward_meta.conditions) {
             def.reject("Only happy hours offer requires deal items");
-          } else if (!$scope.offer.rule.friendly_text) {
+          } else if (!$scope.offer.actions.reward.description) {
             def.reject("Please provide brief description for the offer");
           } else {
             def.resolve(true);
@@ -351,7 +453,7 @@ angular.module('merchantApp')
             def.reject("Combo offer requires deal items");
           } else if (!$scope.offer.actions.reward.reward_meta._for) {
             def.reject("Combo offer requires deal price");
-          } else if (!$scope.offer.rule.friendly_text) {
+          } else if (!$scope.offer.actions.reward.description) {
             def.reject("Please provide brief description for the offer");
           } else {
             def.resolve(true);
@@ -361,7 +463,7 @@ angular.module('merchantApp')
             def.reject("Buffet offer requires deal info");
           } else if (!$scope.offer.actions.reward.reward_meta.cost) {
             def.reject("Buffet offer requires deal price");
-          } else if (!$scope.offer.rule.friendly_text) {
+          } else if (!$scope.offer.actions.reward.description) {
             def.reject("Please provide brief description for the offer");
           } else {
             def.resolve(true);
@@ -372,7 +474,7 @@ angular.module('merchantApp')
 
       $scope.validateOfferTerms = function() {
         var def = Q.defer();
-        if (!$scope.offer.actions.reward.reward_meta.min_bill && ($scope.offer.offer_type == 'checkin' || $scope.offer.offer_type == 'offer')) {
+        if (!$scope.offer.minimum_bill_value && ($scope.offer.offer_type == 'checkin' || $scope.offer.offer_type == 'offer')) {
           def.reject("Minimum bill amount required for offer type '" + $scope.offer.offer_type + "'");
         } else if (!$scope.offer.actions.reward.applicability.dine_in && !$scope.offer.actions.reward.applicability.delivery) {
           def.reject("Offer cannot be invalid for both dine-in and delivery")
@@ -387,6 +489,54 @@ angular.module('merchantApp')
         } else {
           def.resolve();
         }
+        return def.promise;
+      }
+
+      $scope.validateOfferTimings = function() {
+        var def = Q.defer();
+        async.each(Object.keys($scope.offer.actions.reward.reward_hours), function(day, callback) {
+            var schedule = $scope.offer.actions.reward.reward_hours[day];
+            if(schedule.closed) {
+                callback();
+            } else {
+                async.each(schedule.timings, function(timing1, callback) {
+                    if((!timing1.open.hr && timing1.open.hr !== 0) || (!timing1.open.min && timing1.open.min !== 0) || (!timing1.close.hr && timing1.close.hr !== 0) || (!timing1.close.min && timing1.close.min !== 0)) {
+                        callback("One or more timings invalid for " + day.toUpperCase())
+                    } else {
+                        async.each(schedule.timings, function(timing2, callback) {
+                            if((!timing2.open.hr && timing2.open.hr !== 0) || (!timing2.open.min && timing2.open.min !== 0) || (!timing2.close.hr && timing2.close.hr !== 0) || (!timing2.close.min && timing2.close.min !== 0)) {
+                                callback("One or more timings invalid for " + day.toUpperCase())
+                            } else {
+                                var startMin1 = (timing1.open.hr * 60) + timing1.open.min,
+                                    closeMin1 = (timing1.close.hr * 60) + timing1.close.min,
+                                    startMin2 = (timing2.open.hr * 60) + timing2.open.min,
+                                    closeMin2 = (timing2.close.hr * 60) + timing2.close.min;
+
+                                if(timing1 == timing2) {
+                                    callback();
+                                } else if((startMin1 <= closeMin2 <= closeMin1) || (startMin1 <= closeMin2 <= closeMin1) || (startMin2<= closeMin1 <= closeMin2)) {
+                                    callback("One or more timings invalid for " + day.toUpperCase());
+                                } else {
+                                    callback();
+                                }
+                            }
+                        }, function(err) {
+                            callback(err);
+                        });
+                    }
+                }, function(err) {
+                    
+                    callback(err);
+                })
+            }
+        }, function(err) {
+            if(err) {
+                // $scope.handleErrors(err);
+                def.reject(err);
+            } else {
+                def.resolve(true);
+            }
+        });
         return def.promise;
       }
 
