@@ -7,6 +7,7 @@ var _ = require('lodash');
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Types.ObjectId;
 var Outlet = mongoose.model('Outlet');
+var logger = require('tracer').colorConsole();
 var AuthHelper = require('../../common/auth.hlpr');
 
 module.exports.create_offer = function(token, new_offer) {

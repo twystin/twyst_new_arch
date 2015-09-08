@@ -1,6 +1,6 @@
 angular.module('merchantApp')
-  .controller('OfferCreateController', ['$scope', '$http', '$q', 'toastr', 'merchantRESTSvc', '$rootScope', '$log', '$timeout', '$state',
-    function($scope, $http, Q, toastr, merchantRESTSvc, $rootScope, $log, $timeout, $state) {
+  .controller('OfferCreateController', ['$scope', '$http', '$q', 'toastr', 'merchantRESTSvc', '$rootScope', '$log', '$timeout', '$state', 'WizardHandler',
+    function($scope, $http, Q, toastr, merchantRESTSvc, $rootScope, $log, $timeout, $state, WizardHandler) {
       $scope.offer = {
         offer_status: 'draft',
         offer_type: '',
@@ -363,8 +363,6 @@ angular.module('merchantApp')
         } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'buyonegetone') {
           if (!$scope.offer.actions.reward.reward_meta.bogo) {
             def.reject("Buy One Get One required item");
-          } else if (!$scope.offer.actions.reward.description) {
-            def.reject("Please provide brief description for the offer");
           } else {
             def.resolve(true);
           }
@@ -373,8 +371,6 @@ angular.module('merchantApp')
             def.reject("Discount requires valid disount percentage");
           } else if (!$scope.offer.actions.reward.reward_meta.max) {
             def.reject("Discouut requires maximum discount amount");
-          } else if (!$scope.offer.actions.reward.description) {
-            def.reject("Please provide brief description for the offer");
           } else {
             def.resolve(true);
           }
@@ -560,22 +556,22 @@ angular.module('merchantApp')
         $http.post('/api/v4/offers?token=' + $rootScope.token, $scope.offer)
           .then(function(res) {
             if(res.data.response) {
-              if(res.ok) {
-                toastr.success('Offer creted successfully');
-                $timeout(function() {
-                  $state.go('merchant.offers', {}, {
-                    reload: true
-                  });
-                }, 800);
-              } else {
-                console.log('error', res);
-              }
+              toastr.success('Offer creted successfully');
+              $timeout(function() {
+                $state.go('merchant.offers', {}, {
+                  reload: true
+                });
+              }, 800);
             } else {
               console.log('err', res.data.data);
             }
           }, function(err) {
             console.log('err', err);
           })
+      }
+
+      $scope.backToStart = function() {
+        WizardHandler.wizard().goTo(0);
       }
 
 

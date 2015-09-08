@@ -264,9 +264,6 @@ angular.module('merchantApp')
                                     if(!_.has($scope.outlet, 'contact.emails.person')) {
                                         $scope.handleErrors("Contact person's name required");
                                         deferred.reject();
-                                    } else if (!_.has($scope.outlet, 'contact.emails.designation')) {
-                                        $scope.handleErrors("Contact person's designation required");
-                                        deferred.reject();
                                     } else if (!_.has($scope.outlet, 'contact.emails.email')) {
                                         $scope.handleErrors("Contact person's Email ID required");
                                         deferred.reject();
@@ -286,8 +283,8 @@ angular.module('merchantApp')
                 if (!_.has($scope.outlet, 'basics.main_type')) {
                     $scope.handleErrors("Outlet type required");
                     deferred.reject();
-                } else if ($scope.outlet.attributes.home_delivery && !_.has($scope.outlet, 'attributes.delivery.delivery_estimated_time')) {
-                    $scope.handleErrors("Estimate delivery time required");
+                } else if ($scope.outlet.attributes.home_delivery && (!_.has($scope.outlet, 'attributes.delivery.delivery_estimated_time') || /^[0-9]{1,3}$/i.test($scope.outlet.attributes.delivery.delivery_estimated_time))) {
+                    $scope.handleErrors("Valid estimate delivery time required");
                     deferred.reject();
                 } else if (!$scope.outlet.attributes.cuisines || !$scope.outlet.attributes.cuisines.length) {
                     $scope.handleErrors("Atleast one cuisine must be specified");

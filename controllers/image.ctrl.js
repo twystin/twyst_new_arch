@@ -14,7 +14,6 @@ module.exports.uploadImage = function(req, res) {
 		id: req.body.id || ObjectId(),
 		image: req.body.image || ''
 	}
-	console.log(!img_obj.id, !img_obj.image)
 	if(!img_obj.id || !img_obj.image) {
 		HttpHelper.error(res, null, "Request object invalid.");
 	} else {
