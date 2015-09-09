@@ -16,7 +16,6 @@ module.exports.create_offer = function(token, new_offer) {
     offer = _.extend(offer, new_offer);
     offer.offer_group = new ObjectId();
     var outletIds = _.map(offer.offer_outlets, function(obj) { return ObjectId(obj); });
-    var primary_outlet = new_offer.primary_outlet;
 
     AuthHelper.get_user(token).then(function(data) {
         Cache.get('outlets', function(err, reply) {
