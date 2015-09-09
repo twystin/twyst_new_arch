@@ -1,9 +1,26 @@
 angular.module('merchantApp')
   .controller('OfferCreateController', ['$scope', '$http', '$q', 'toastr', 'merchantRESTSvc', '$rootScope', '$log', '$timeout', '$state', 'WizardHandler',
     function($scope, $http, Q, toastr, merchantRESTSvc, $rootScope, $log, $timeout, $state, WizardHandler) {
+
+      merchantRESTSvc.getOutlets().then(function(data) {
+        $scope.outlets = _.indexBy(data.data.outlets, '_id');
+      }, function(err) {
+        $log.log('Could not get outlets - ' + err.message);
+        $scope.outlets = [];
+      });
+
+      $scope.today = new Date(),
+        max_date = new Date($scope.today.getTime() + (2 * 365 * 24 * 60 * 60 * 1000));
+      $scope.today.setMinutes(0);
+      $scope.today.setHours(0);
+      $scope.today.setSeconds(0);
+      $scope.today.setMilliseconds(0);
+
       $scope.offer = {
         offer_status: 'draft',
         offer_type: '',
+        offer_start_date: _.clone($scope.today),
+        offer_end_date: new Date($scope.today.getTime() + (2 * 30 * 24 * 60 * 60 * 1000)),
         rule: {
 
         },
@@ -11,7 +28,7 @@ angular.module('merchantApp')
           reward: {
             reward_meta: {
             },
-            reward_hours: { sunday: { closed: true, timings: [] }, monday: { closed: true, timings: [] }, tuesday: { closed: true, timings: [] }, wednesday: { closed: true, timings: [] }, thursday: { closed: true, timings: [] }, friday: { closed: true, timings: [] }, saturday: { closed: true, timings: [] } },
+            reward_hours: { monday: { closed: true, timings: [] }, tuesday: { closed: true, timings: [] }, wednesday: { closed: true, timings: [] }, thursday: { closed: true, timings: [] }, friday: { closed: true, timings: [] }, saturday: { closed: true, timings: [] }, sunday: { closed: true, timings: [] } },
             applicability: {
               dine_in: true,
               delivery: true
@@ -19,16 +36,6 @@ angular.module('merchantApp')
           }
         }
       }
-
-      merchantRESTSvc.getOutlets().then(function(data) {
-        $scope.outlets = data.data.outlets;
-      }, function(err) {
-        $log.log('Could not get outlets - ' + err.message);
-        $scope.outlets = [];
-      });
-
-      var today = new Date(),
-        max_date = new Date(today.getTime() + (2 * 365 * 24 * 60 * 60 * 1000));
 
       $scope.updateTiming = function(day, list) {
         if (list[day].closed) {
@@ -75,7 +82,6 @@ angular.module('merchantApp')
       }
 
       $scope.addNewTiming = function(day, list) {
-        console.log(day, list);
         list[day].timings.push({});
       };
 
@@ -88,11 +94,63 @@ angular.module('merchantApp')
         });
       };
 
+      $scope.addOutlet = function(newOutlet) {
+        if(!newOutlet)
+          return;
+
+        if(!$scope.offer.offer_outlets) {
+          $scope.offer.offer_outlets = [];
+        }
+        if($scope.offer.offer_outlets.indexOf(newOutlet) == -1) {
+          $scope.offer.offer_outlets.push(newOutlet);
+        }
+      }
+
       $scope.getMaxRange = function() {
         return new Array(_.reduce($scope.offer.actions.reward.reward_hours, function(obj1, obj2) {
           if(!_.has(obj1, 'timings')) { return obj1 >= obj2.timings.length? obj1: obj2.timings.length; }
           else { return obj1.timings.length>obj2.timings.length? obj1.timings.length:obj2.timings.length; }
         }));
+      }
+
+      $scope.filterOutlets = function(val) {
+        var regex = new RegExp(val, 'i');
+        return _.filter($scope.outlets, function(obj) {
+          return regex.test(obj.basics.name) || regex.test(obj.contact.location.address) || regex.test(obj.contact.location.locality_1[0]) || regex.test(obj.contact.location.locality_2[0]);
+        });
+      }
+
+      $scope.removeOutlet = function(index) {
+        if($scope.offer.offer_outlets) {
+          $scope.offer.offer_outlets.splice(index, 1);
+        }
+      }
+
+      $scope.cloneTimings = function(obj) {
+        if(obj._id) {
+          $scope.offer.actions.reward.reward_hours = _.indexBy(_.map(Object.keys($scope.outlets[obj._id].business_hours), function(day) {
+            var timings = _.map($scope.outlets[obj._id].business_hours[day].timings, function(timing) {
+              delete timing._id;
+              var time = new Date();
+              time.setHours(timing.open.hr);
+              time.setMinutes(timing.open.min);
+              time.setSeconds(0);
+              time.setMilliseconds(0);
+              timing.open.time = _.clone(time);
+              time.setHours(timing.close.hr);
+              time.setMinutes(timing.close.min);
+              timing.close.time = _.clone(time);
+              return timing;
+            });
+
+            return {
+              day: day,
+              timings: timings,
+              closed: $scope.outlets[obj._id].business_hours[day].closed
+            };
+          }), 'day');
+          obj._id = '';
+        }
       }
 
       $scope.$watchCollection('offer.offer_type', function(newVal, oldVal) {
@@ -281,6 +339,9 @@ angular.module('merchantApp')
             return $scope.validateRewardDetails();
           }, _handleErrors)
           .then(function() {
+            return $scope.validateRewardInfo();
+          }, _handleErrors)
+          .then(function() {
             deferred.resolve(true);
           }, _handleErrors)
         return deferred.promise;
@@ -450,6 +511,18 @@ angular.module('merchantApp')
         return def.promise;
       }
 
+      $scope.validateRewardInfo = function() {
+        var def = Q.defer();
+        if(!$scope.offer.actions.reward.header) {
+          def.reject("Header is mandatory");
+        } else if (!$scope.offer.actions.reward.line1) {
+          def.reject("Line 1 is mandatory");
+        } else {
+          def.resolve(true);
+        }
+        return def.promise;
+      }
+
       $scope.validateOfferTerms = function() {
         var def = Q.defer();
         if (!$scope.offer.minimum_bill_value && ($scope.offer.offer_type == 'checkin' || $scope.offer.offer_type == 'offer')) {
@@ -460,7 +533,7 @@ angular.module('merchantApp')
           def.reject("Offer lapse duration required.")
         } else if (!$scope.offer.offer_valid_days && $scope.offer.offer_type == 'checkin') {
           def.reject("Offer validity duration required");
-        } else if (!$scope.offer.offer_cost && $scope.offer.offer_type == 'offer') {
+        } else if (!($scope.offer.offer_cost && /^[0-9]+$/.test($scope.offer.offer_cost)) && $scope.offer.offer_type == 'offer') {
           def.reject("Offer type selected requires offer cost(in Twyst Bucks)");
         } else if (!$scope.offer.offer_source && $scope.offer.offer_type == 'bank_deal') {
           def.reject("Deal source must be specified for bank deal");
@@ -520,9 +593,9 @@ angular.module('merchantApp')
 
       $scope.validateOfferValidity = function() {
         var def = Q.defer();
-        if (!$scope.offer.offer_start_date || $scope.offer.offer_start_date < today || $scope.offer.offer_end_date > max_date) {
+        if (!$scope.offer.offer_start_date || $scope.offer.offer_start_date < $scope.today || $scope.offer.offer_end_date > max_date) {
           def.reject("Offer requires valid start date")
-        } else if (!$scope.offer.offer_end_date || $scope.offer.offer_start_date < today || $scope.offer.offer_end_date > max_date) {
+        } else if (!$scope.offer.offer_end_date || $scope.offer.offer_start_date < $scope.today || $scope.offer.offer_end_date > max_date) {
           def.reject("Offer requires valid end date");
         } else if ($scope.offer.offer_start_date >= $scope.offer.offer_end_date) {
           def.reject("Offer end date cannot be before or the same as offer end date");
