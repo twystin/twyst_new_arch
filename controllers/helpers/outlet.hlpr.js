@@ -7,6 +7,7 @@ var mongoose = require('mongoose');
 var Outlet = mongoose.model('Outlet');
 var User = mongoose.model('User');
 var AuthHelper = require('../../common/auth.hlpr.js');
+var logger = require('tracer').colorConsole();
 
 module.exports.get_outlet = function(id) {
   var deferred = Q.defer();
@@ -113,9 +114,19 @@ module.exports.create_outlet = function(token, created_outlet) {
         });
       } else {
         Cache.get('outlets', function(err, reply) {
-          if(err || !reply) {
+          if(err) {
             logger.error("Error retrieving outlets for adding new outlet", err);
-          } else {
+          }
+          else if(!reply){
+                var outlets = {};
+                outlets[outlet._id.toString()] = outlet;
+                Cache.set('outlets', JSON.stringify(outlets), function(err) {
+                  if(err) {
+                    logger.error("Error setting updated list of outlets", err);
+                  }
+                });  
+          }
+           else {
             var outlets = JSON.parse(reply);
             outlets[outlet._id.toString()] = outlet;
             Cache.set('outlets', JSON.stringify(outlets), function(err) {
