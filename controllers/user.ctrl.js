@@ -111,7 +111,7 @@ function filter_out_expired_and_used_coupons(data) {
   var deferred = Q.defer();
   
   data.coupons = _.filter(data.coupons, function(coupon) {
-    if(_.has(coupon, 'status') && (coupon.status === 'active') && (coupon.coupon_source: 'qr_checkin')) {
+    if(_.has(coupon, 'status') && (coupon.status === 'active') && (coupon.coupon_source === 'qr_checkin')) {
       return true;
     } else {
       return false;
@@ -181,7 +181,7 @@ function load_outlet_info_from_cache(data) {
                               coupon.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
                             }
                             coupon.meta = {};
-                            coupon.meta.reward_type = offer.actions.reward.reward_meta.reward_type;                                        
+                            coupon.meta.reward_type = offer.actions.reward.reward_meta.reward_type.type;                                        
                         }
                         
                     });
