@@ -11,6 +11,7 @@ angular.module('merchantApp')
             $scope.map = { center: { latitude: 28.805422897457665, longitude: 77.16647699812655 }, zoom: 10 }; $scope.options = { scrollwheel: true };
 
             $scope.attribute_set = [{class_name: 'dine_in', text: 'Dine-in' }, { class_name: 'home_delivery', text: 'Home Delivery?' }, { class_name: 'veg', text: 'Pure Vegitarian?' }, { class_name: 'alcohol', text: 'Serves alcohol' }, { class_name: 'outdoor', text: 'Outdoor sitting' }, { class_name: 'foodcourt', text: 'Inside a food court' }, { class_name: 'smoking', text: 'Smoking allowed?' }, { class_name: 'chain', text: 'Part of a chain?' }];
+            $scope.outlet_types = [{ value:'bakery', name:'Bakery'}, { value:'cafe', name:'Cafe'}, { value:'delivery', name:'Delivery Only'}, { value:'desserts', name:'Desserts'}, { value:'pub_lounge', name:'Pub/Lounge'}, { value:'fast_food', name:'QSR/Fast Food'}, { value:'restaurant', name:'Restaurant'}];
 
             var sampleTiming = {open: {hr: 0, min: 0}, close: {hr: 0, min: 0}};
             $scope.outlet = { sms_off: {}, attributes: { cost_for_two: {}, payment_options: [], delivery: { delivery_timings: { monday: { closed: false, timings: [{}] }, tuesday: { closed: false, timings: [{}] }, wednesday: { closed: false, timings: [{}] }, thursday: { closed: false, timings: [{}] }, friday: { closed: false, timings: [{}] }, saturday: { closed: false, timings: [{}] }, sunday: { closed: false, timings: [{}] } } } }, contact: { location: { coords: { }, locality_1: [''], locality_2: [''], landmarks: [] }, phones: { mobile: [{num: '', num_type: 'mobile'}], reg_mobile: [{num: '', num_type: 'mobile'}] }, emails: { type: 'work' } }, photos: { others: [] }, menus: [], links: { other_links: [] }, business_hours: { monday: { closed: false, timings: [{}] }, tuesday: { closed: false, timings: [{}] }, wednesday: { closed: false, timings: [{}] }, thursday: { closed: false, timings: [{}] }, friday: { closed: false, timings: [{}] }, saturday: { closed: false, timings: [{}] }, sunday: { closed: false, timings: [{}] } } };
@@ -337,7 +338,7 @@ angular.module('merchantApp')
 
                                         if(timing1 == timing2) {
                                             callback();
-                                        } else if((startMin1 <= closeMin2 <= closeMin1) || (startMin1 <= closeMin2 <= closeMin1) || (startMin2<= closeMin1 <= closeMin2)) {
+                                        } else if(((startMin1 <= closeMin2) && (closeMin2 <= closeMin1)) || ((startMin1 <= closeMin2) && (closeMin2 <= closeMin1)) || ((startMin2<= closeMin1) && (closeMin1 <= closeMin2)) ) {
                                             callback("One or more timings invalid for " + day.toUpperCase());
                                         } else {
                                             callback();
