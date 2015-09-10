@@ -111,7 +111,7 @@ function filter_out_expired_and_used_coupons(data) {
   var deferred = Q.defer();
   
   data.coupons = _.filter(data.coupons, function(coupon) {
-    if(_.has(coupon, 'status') && (coupon.status === 'active')) {
+    if(_.has(coupon, 'status') && (coupon.status === 'active') && (coupon.coupon_source: 'qr_checkin')) {
       return true;
     } else {
       return false;

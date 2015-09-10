@@ -10,7 +10,7 @@ module.exports.bucks_grid = [
 
 	{"event": "like_offer", "bucks": 10, "earn": true, "update_now": true},
 
-	{"event": "checkin", "bucks": 50, "earn": true, "update_now": false}, //have to handle at server side for different events	
+	{"event": "checkin", "bucks": 50, "earn": true, "update_now": true}, //have to handle at server side for different events	
 
 	{"event": "submit_offer", "bucks":50, "earn": true, "update_now": false},//not confirmed
 
@@ -26,15 +26,11 @@ module.exports.bucks_grid = [
 
 	{"event": "share_redemption", "bucks": 25, "earn": true, "update_now": true},
 
-	{"event": "unlike_offer", "bucks": 10, "earn": false, "update_now": true},
-
 	{"event": "grab", "bucks": 100, "earn": false, "update_now": true},
 
 	{"event": "extend_offer", "bucks": 150, "earn": false, "update_now": true},
 
 	{"event": "generate_coupon", "bucks": 100, "earn": false, "update_now": true}, //not true for checkin type offer we will handle this 
-	
-	{"event": "unfollow", "bucks": 20, "earn": false, "update_now": true},
 
 	{"event": "buy_checkin", "bucks": 150, "earn": false, "update_now": true}
 	
