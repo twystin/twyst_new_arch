@@ -28,7 +28,7 @@ angular.module('merchantApp')
           reward: {
             reward_meta: {
             },
-            reward_hours: { monday: { closed: true, timings: [] }, tuesday: { closed: true, timings: [] }, wednesday: { closed: true, timings: [] }, thursday: { closed: true, timings: [] }, friday: { closed: true, timings: [] }, saturday: { closed: true, timings: [] }, sunday: { closed: true, timings: [] } },
+            reward_hours: { monday: { closed: false, timings: [{}] }, tuesday: { closed: false, timings: [{}] }, wednesday: { closed: false, timings: [{}] }, thursday: { closed: false, timings: [{}] }, friday: { closed: false, timings: [{}] }, saturday: { closed: false, timings: [{}] }, sunday: { closed: false, timings: [{}] } },
             applicability: {
               dine_in: true,
               delivery: true
