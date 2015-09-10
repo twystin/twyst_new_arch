@@ -433,6 +433,10 @@ function massage_offers(params) {
                 massaged_offer.is_like = false;   
             } 
         })
+
+        if(offer.offer_likes.length === 0) {
+          massaged_offer.is_like = false;   
+        }
         
         
         if (offer && offer.actions && offer.actions.reward && offer.actions.reward.reward_hours) {

@@ -106,6 +106,8 @@ module.exports.create_outlet = function(token, created_outlet) {
   var outlet = null;
   AuthHelper.get_user(token).then(function(data) {
     outlet = new Outlet(created_outlet);
+    outlet.basics.is_paying = data.data.is_paying;
+    
     outlet.save(function(err, o) {
       if (err || !o) {
         deferred.reject({
@@ -146,8 +148,7 @@ module.exports.create_outlet = function(token, created_outlet) {
             });
           } else {
             user.outlets.push(o._id);
-            outlet.basics.is_paying = user.is_paying;
-            outlet.save(function(err) { logger.error('error setting paying status', err); });
+            
             user.save(function(err, u) {
               if (err || !u) {
                 deferred.reject({

@@ -566,7 +566,7 @@ angular.module('merchantApp')
 
                                 if(timing1 == timing2) {
                                     callback();
-                                } else if((startMin1 <= closeMin2 <= closeMin1) || (startMin1 <= closeMin2 <= closeMin1) || (startMin2<= closeMin1 <= closeMin2)) {
+                                } else if(((startMin1 <= closeMin2) && (closeMin2 <= closeMin1)) || ((startMin1 <= closeMin2) && (closeMin2 <= closeMin1)) || ((startMin2<= closeMin1) && (closeMin1 <= closeMin2))) {
                                     callback("One or more offer timings invalid for " + day.toUpperCase());
                                 } else {
                                     callback();

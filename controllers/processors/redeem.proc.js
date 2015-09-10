@@ -15,7 +15,7 @@ module.exports.check = function(data) {
   logger.log();
   var deferred = Q.defer();
 
-  check_coupon_code(data)
+  check_coupon_code_and_outlet(data)
     .then(function(data) {
       return check_user_has_coupon(data);
     })
@@ -31,12 +31,12 @@ module.exports.check = function(data) {
   return deferred.promise;
 };
 
-function check_coupon_code(data) {
+function check_coupon_code_and_outlet(data) {
   logger.log();
   var deferred = Q.defer();
 
-  if (!_.get(data, 'event_data.event_meta.coupon')) {
-    deferred.reject('No coupon code sent to redeem');
+  if (!_.get(data, 'event_data.event_meta.coupon') || !_.get(data, 'event_data.event_outlet')) {
+    deferred.reject('No coupon code or outlet sent to redeem');
   }
 
   deferred.resolve(data);
