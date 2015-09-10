@@ -153,12 +153,13 @@ function create_new(res, passed_data) {
       return update_twyst_bucks(data);
     })
     .then(function(data) {
+
         if(data && data.event_data && data.event_data.event_type === 'referral_join'){
             update_from_user_twyst_bucks(data.from_user);
         }
         var bucks = data.user.twyst_bucks;
         var event_type = data.event_data.event_type;
-        var code, header, line1, line2, outlet, checkin_left;
+        var code, header, line1, line2, outlet_id, outlet_name, checkin_left ;
         if(data.user.coupons.length) {
             code = data.user.coupons[data.user.coupons.length-1].code;    
         }
@@ -166,7 +167,8 @@ function create_new(res, passed_data) {
             header = data.user.coupons[data.user.coupons.length-1].header;
             line1 = data.user.coupons[data.user.coupons.length-1].line1;
             line2 = data.user.coupons[data.user.coupons.length-1].line2;
-            outlet = data.user.coupons[data.user.coupons.length-1].issued_by;
+            outlet_id = data.user.coupons[data.user.coupons.length-1].issued_by;
+            outlet_name = data.outlet.basics.name;
         }
         
         var data = {};
@@ -175,8 +177,8 @@ function create_new(res, passed_data) {
             data.code = code;    
             data.header = header;
             data.line1 = line1;
-            data.line2 = line2;
-            data.outlet = outlet;
+            data.outlet_id = outlet_id;
+            data.outlet_name = outlet_name;
         }
 
       HttpHelper.success(res, data, "Processed the event successfully.");

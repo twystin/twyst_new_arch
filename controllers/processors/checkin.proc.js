@@ -237,7 +237,7 @@ function create_coupon(offer, user, outlet) {
         expiry_date: expiry_date,
         meta: {
           reward_type: {
-            type: 'need to fix' // to fix = where from?
+            type: offer.actions.reward.reward_meta.type,
           }
         },
         status: 'active',
