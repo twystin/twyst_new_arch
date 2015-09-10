@@ -254,7 +254,7 @@ module.exports.opensAt = function(business_hours) {
       if(ld.has(timing, 'open.hr') && ld.has(timing, 'open.min') && ld.has(timing, 'close.hr') && ld.has(timing, 'close.min')) {
         var open_min = (timing.open.hr * 60) + timing.open.min;
         
-        if(open_min > minutes) {
+        if(open_min >= minutes) {
           return {
             time: formatTime(today.timings[i].open.hr, today.timings[i].open.min),
             day: 'Today'

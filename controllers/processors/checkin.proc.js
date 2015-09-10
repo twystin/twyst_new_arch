@@ -217,11 +217,12 @@ function create_coupon(offer, user, outlet) {
   var lapse_date = new Date();
   lapse_date.setDate(lapse_date.getDate() + offer.offer_lapse_days);
   var expiry_date = new Date();
-  expiry_date.setDate(expiry_date.getDate() + offer.actions.reward.valid_days);
+  expiry_date.setDate(expiry_date.getDate() + offer.coupon_valid_days);
 
   var deferred = Q.defer();
   var outlets = [];
   outlets.push(outlet);
+  
   var update = {
     $push: {
       coupons: {
@@ -267,7 +268,7 @@ function find_matching_offer(events, offers) {
     count = _.get(offers[i], 'rule.event_count');
     match = _.get(offers[i], 'rule.event_match');
 
-    if (match === 'on every') {
+    if (match === 'every') {
       if (checkins % count === 0) {
         return offers[i];
       }
