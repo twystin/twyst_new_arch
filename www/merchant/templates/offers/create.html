@@ -29,16 +29,16 @@
               <div class='col-md-6 col-lg-4'>
                 <select class='form-control' ng-model='offer.rule.event_match'>
                   <option value='' ng-if='!offer.rule.event_match'>--- Choose a Criteria ---</option>
-                  <option value='every'>On every</option>
+                  <option value='on every'>On every</option>
                   <option value='after'>After</option>
-                  <option value='only'>On only</option>
+                  <option value='on only'>On only</option>
                 </select>
               </div>
             </div>
             <div class='form-group' ng-if='offer.rule.event_match'>
               <div class='col-md-10 col-md-offset-2 col-lg-8'>
                 <div class='col-md-12'>Reward will be unlocked on</div>
-                <div class='row' ng-if='offer.rule.event_match=="every"'>
+                <div class='row' ng-if='offer.rule.event_match=="on every"'>
                   <div class='col-md-12'>
                     <label class='col-md-3 control-label'>Every <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                     <div class='col-md-6'>
@@ -110,7 +110,7 @@
                     </div>
                   </div>
                 </div>
-                <div class='row' ng-if='offer.rule.event_match=="only"'>
+                <div class='row' ng-if='offer.rule.event_match=="on only"'>
                   <div class='col-md-12'>
                     <label class='col-md-3 control-label'>On the <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                     <div class='col-md-6'>
