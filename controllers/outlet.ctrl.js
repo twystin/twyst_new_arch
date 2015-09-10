@@ -333,19 +333,14 @@ function massage_offers(params) {
           massaged_offer.offer_likes = 0;
         }
 
+        massaged_offer.is_like = false;
+        
         _.find(offer.offer_likes, function(user) {
             if(user.toString() === user_id.toString()) {
                 massaged_offer.is_like = true;  
                 return; 
             } 
-            else {
-                massaged_offer.is_like = false;   
-            } 
         })
-
-        if(offer.offer_likes.length === 0) {
-          massaged_offer.is_like = false;   
-        }
 
         if(offer.offer_type === 'offer' || offer.offer_type === 'deal' || offer.offer_type === 'bank_deal') {
           massaged_offer.offer_cost =  offer.offer_cost;  

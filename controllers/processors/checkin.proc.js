@@ -198,7 +198,7 @@ function check_and_create_coupon(data) {
         deferred.reject('Could not create coupon' + err);
       })
     } else {
-      deferred.resolve(data);
+      deferred.reject('No matching offer for user');
     }
   });
   return deferred.promise;
@@ -217,7 +217,7 @@ function create_coupon(offer, user, outlet) {
   var lapse_date = new Date();
   lapse_date.setDate(lapse_date.getDate() + offer.offer_lapse_days);
   var expiry_date = new Date();
-  expiry_date.setDate(expiry_date.getDate() + offer.coupon_valid_days);
+  expiry_date.setDate(expiry_date.getDate() + offer.offer_valid_days);
 
   var deferred = Q.defer();
   var outlets = [];
@@ -266,7 +266,7 @@ function find_matching_offer(events, offers) {
 
   for (i = 0; i < offers.length; i++) {
     count = _.get(offers[i], 'rule.event_count');
-    match = _.get(offers[i], 'rule.event_match');
+    match = _.get(offers[i], 'rule.event_type');
 
     if (match === 'every') {
       if (checkins % count === 0) {
