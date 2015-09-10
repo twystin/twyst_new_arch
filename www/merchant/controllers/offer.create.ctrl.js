@@ -28,7 +28,7 @@ angular.module('merchantApp')
           reward: {
             reward_meta: {
             },
-            reward_hours: { monday: { closed: true, timings: [] }, tuesday: { closed: true, timings: [] }, wednesday: { closed: true, timings: [] }, thursday: { closed: true, timings: [] }, friday: { closed: true, timings: [] }, saturday: { closed: true, timings: [] }, sunday: { closed: true, timings: [] } },
+            reward_hours: { monday: { closed: false, timings: [{}] }, tuesday: { closed: false, timings: [{}] }, wednesday: { closed: false, timings: [{}] }, thursday: { closed: false, timings: [{}] }, friday: { closed: false, timings: [{}] }, saturday: { closed: false, timings: [{}] }, sunday: { closed: false, timings: [{}] } },
             applicability: {
               dine_in: true,
               delivery: true
@@ -172,7 +172,7 @@ angular.module('merchantApp')
           $scope.offer.friendly_text = '';
           $scope.offer.rule = { event_match: newVal.event_match };
         } else if($scope.offer.rule.event_match) {
-          if($scope.offer.rule.event_match=='every' && $scope.offer.rule.event_count && ($scope.offer.rule.event_start || $scope.offer.rule.event_start==0) && $scope.offer.rule.event_end) {
+          if($scope.offer.rule.event_match=='on every' && $scope.offer.rule.event_count && ($scope.offer.rule.event_start || $scope.offer.rule.event_start==0) && $scope.offer.rule.event_end) {
             var startOrdinal, endOrdinal, countOrdinal;
             startOrdinal = ($scope.offer.rule.event_start>3 || $scope.offer.rule.event_start==0)? 'th': ($scope.offer.rule.event_start==3)? 'rd': ($scope.offer.rule.event_start==2)? 'nd': ($scope.offer.rule.event_start==1)? 'st': 'th';
             endOrdinal = ($scope.offer.rule.event_end>3 || $scope.offer.rule.event_end==0)? 'th': ($scope.offer.rule.event_end==3)? 'rd': ($scope.offer.rule.event_end==2)? 'nd': ($scope.offer.rule.event_end==1)? 'st': 'th';
@@ -183,7 +183,7 @@ angular.module('merchantApp')
             startOrdinal = ($scope.offer.rule.event_start>3 || $scope.offer.rule.event_start==0)? 'th': ($scope.offer.rule.event_start==3)? 'rd': ($scope.offer.rule.event_start==2)? 'nd': ($scope.offer.rule.event_start==1)? 'st': 'th';
             endOrdinal = ($scope.offer.rule.event_end>3 || $scope.offer.rule.event_end==0)? 'th': ($scope.offer.rule.event_end==3)? 'rd': ($scope.offer.rule.event_end==2)? 'nd': ($scope.offer.rule.event_end==1)? 'st': 'th';
             $scope.offer.rule.friendly_text = 'Application on every checkin starts from ' + $scope.offer.rule.event_start + startOrdinal + ' to ' + $scope.offer.rule.event_end + endOrdinal + ' checkin';
-          } else if($scope.offer.rule.event_match=='only' && ($scope.offer.rule.event_count || $scope.offer.rule.event_count==0)) {
+          } else if($scope.offer.rule.event_match=='on only' && ($scope.offer.rule.event_count || $scope.offer.rule.event_count==0)) {
             var ordinal;
             ordinal = ($scope.offer.rule.event_count>3 || $scope.offer.rule.event_count==0)? 'th': ($scope.offer.rule.event_count==3)? 'rd': ($scope.offer.rule.event_count==2)? 'nd': ($scope.offer.rule.event_count==1)? 'st': 'th';
             $scope.offer.rule.friendly_text = 'Application on the ' + $scope.offer.rule.event_count + ordinal + 'checkin';
@@ -388,7 +388,7 @@ angular.module('merchantApp')
           def.resolve(true)
         } else if (!$scope.offer.rule.event_match) {
           def.reject("Offer criteria required");
-        } else if ($scope.offer.rule.event_match == "every") {
+        } else if ($scope.offer.rule.event_match == "on every") {
           if (!$scope.offer.rule.event_count) {
             def.reject("Valid offer frequency required");
           } else if (!$scope.offer.rule.event_start && $scope.offer.rule.event_start !== 0) {
@@ -410,7 +410,7 @@ angular.module('merchantApp')
           } else {
             def.resolve(true);
           }
-        } else if ($scope.offer.rule.event_match == "only") {
+        } else if ($scope.offer.rule.event_match == "on only") {
           if (!$scope.offer.rule.event_count) {
             def.reject("Valid checkin number required");
           } else {

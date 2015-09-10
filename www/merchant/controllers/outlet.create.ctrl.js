@@ -15,7 +15,7 @@ angular.module('merchantApp')
 
             var sampleTiming = {open: {hr: 0, min: 0}, close: {hr: 0, min: 0}};
             $scope.outlet = { sms_off: {}, attributes: { cost_for_two: {}, payment_options: [], delivery: { delivery_timings: { monday: { closed: false, timings: [{}] }, tuesday: { closed: false, timings: [{}] }, wednesday: { closed: false, timings: [{}] }, thursday: { closed: false, timings: [{}] }, friday: { closed: false, timings: [{}] }, saturday: { closed: false, timings: [{}] }, sunday: { closed: false, timings: [{}] } } } }, contact: { location: { coords: { }, locality_1: [''], locality_2: [''], landmarks: [] }, phones: { mobile: [{num: '', num_type: 'mobile'}], reg_mobile: [{num: '', num_type: 'mobile'}] }, emails: { type: 'work' } }, photos: { others: [] }, menus: [], links: { other_links: [] }, business_hours: { monday: { closed: false, timings: [{}] }, tuesday: { closed: false, timings: [{}] }, wednesday: { closed: false, timings: [{}] }, thursday: { closed: false, timings: [{}] }, friday: { closed: false, timings: [{}] }, saturday: { closed: false, timings: [{}] }, sunday: { closed: false, timings: [{}] } } };
-
+            
             $scope.isSpinnerVisible = false;
             $scope.marker = { id: 0, coords: { latitude: 28.6078341976, longitude: 77.2465642784 }, options: { draggable: true }, events: { dragend: function(marker, eventName, args) { var lat = marker.getPosition().lat(); var lon = marker.getPosition().lng(); $scope.outlet.contact.location.coords.longitude = lon; $scope.outlet.contact.location.coords.latitude = lat; $scope.outlet.contact.location.map_url = 'https://maps.google.com/maps/?q=' + lat + ',' + lon + '&z=' + $scope.map.zoom; $scope.marker.options = { draggable: true, labelAnchor: "100 0", labelClass: "marker-labels" }; } } };
 
@@ -284,7 +284,7 @@ angular.module('merchantApp')
                 if (!_.has($scope.outlet, 'basics.main_type')) {
                     $scope.handleErrors("Outlet type required");
                     deferred.reject();
-                } else if (!$scope.outlet.attributes.cost_for_two.min || !$scope.outlets.attributes.cost_for_two.max) {
+                } else if (!$scope.outlet.attributes.cost_for_two.min || !$scope.outlet.attributes.cost_for_two.max) {
                     $scope.handleErrors("Valid cost for two range required");
                     deferred.reject();
                 } else if ($scope.outlet.attributes.home_delivery && (!_.has($scope.outlet, 'attributes.delivery.delivery_estimated_time') || !/^[0-9]{1,3}$/i.test($scope.outlet.attributes.delivery.delivery_estimated_time))) {
