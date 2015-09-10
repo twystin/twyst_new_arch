@@ -532,7 +532,10 @@
               </div>
             </div>
             <div class='form-group'>
-              <label for='add_cuisine' class='col-md-2 control-label'>Add a Cuisine</label>
+              <label for='add_outlet' class='col-md-2 control-label'>
+                <span ng-if='!offer.offer_outlets.length'>Add an Outlet</span>
+                <span ng-if='offer.offer_outlets.length'>Add another Outlet</span>
+              </label>
               <div class='col-md-6'>
                 <input class='form-control' ng-model='newOutlet' ng-list placeholder='{{offer.offer_outlets.length? "Add another outlet...": "Add your first outlet"}}' typeahead="outlet._id as (outlet.basics.name + ', ' + outlet.contact.location.locality_1[0] + ', ' + outlet.contact.location.locality_2[0]) for outlet in filterOutlets($viewValue)" typeahead-on-select="addOutlet(newOutlet)"/>
               </div>

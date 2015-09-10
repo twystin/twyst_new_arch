@@ -140,7 +140,7 @@ angular.module('merchantApp')
               time.setHours(timing.close.hr);
               time.setMinutes(timing.close.min);
               timing.close.time = _.clone(time);
-              return timing;
+              return _.cloneDeep(timing);
             });
 
             return {
@@ -360,6 +360,9 @@ angular.module('merchantApp')
             return $scope.validateOfferTimings();
           }, _handleErrors)
           .then(function() {
+            return $scope.validateAgainstOutlets();
+          }, _handleErrors)
+          .then(function() {
             return $scope.validateOfferValidity();
           }, _handleErrors)
           .then(function() {
@@ -423,7 +426,7 @@ angular.module('merchantApp')
           def.reject("Choose a reward type");
         } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'buyonegetone') {
           if (!$scope.offer.actions.reward.reward_meta.bogo) {
-            def.reject("Buy One Get One required item");
+            def.reject("'Buy One Get One' requires item names");
           } else {
             def.resolve(true);
           }
@@ -453,7 +456,7 @@ angular.module('merchantApp')
           }
         } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'happyhours') {
           if (!$scope.offer.actions.reward.reward_meta.extension) {
-            def.reject("Happy hours offer requires extension duration (in hrs.)")
+            def.reject("'Happy hours' offer requires extension duration (in hrs.)")
           } else {
             def.resolve(true);
           }
@@ -470,8 +473,6 @@ angular.module('merchantApp')
         } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'custom') {
           if (!$scope.offer.actions.reward.reward_meta.title) {
             def.reject("Custom offer requires offer details");
-          } else if (!$scope.offer.actions.reward.header) {
-            def.reject("Header must be filled in for custom");
           } else {
             def.resolve(true);
           }
@@ -485,9 +486,9 @@ angular.module('merchantApp')
           }
         } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'onlyhappyhours') {
           if (!$scope.offer.actions.reward.reward_meta.title) {
-            def.reject("Only happy hours offer requires deal info");
+            def.reject("'Only happy hours' offer requires deal info");
           } else if (!$scope.offer.actions.reward.reward_meta.conditions) {
-            def.reject("Only happy hours offer requires deal items");
+            def.reject("'Only happy hours' offer requires deal items");
           } else {
             def.resolve(true);
           }
@@ -526,17 +527,17 @@ angular.module('merchantApp')
       $scope.validateOfferTerms = function() {
         var def = Q.defer();
         if (!$scope.offer.minimum_bill_value && ($scope.offer.offer_type == 'checkin' || $scope.offer.offer_type == 'offer')) {
-          def.reject("Minimum bill amount required for offer type '" + $scope.offer.offer_type + "'");
+          def.reject("Minimum bill amount required");
         } else if (!$scope.offer.actions.reward.applicability.dine_in && !$scope.offer.actions.reward.applicability.delivery) {
           def.reject("Offer cannot be invalid for both dine-in and delivery")
         } else if (!$scope.offer.offer_lapse_days && $scope.offer.offer_type == 'checkin') {
           def.reject("Offer lapse duration required.")
         } else if (!$scope.offer.offer_valid_days && $scope.offer.offer_type == 'checkin') {
-          def.reject("Offer validity duration required");
+          def.reject("Offer expiry duration required");
         } else if (!($scope.offer.offer_cost && /^[0-9]+$/.test($scope.offer.offer_cost)) && $scope.offer.offer_type == 'offer') {
-          def.reject("Offer type selected requires offer cost(in Twyst Bucks)");
+          def.reject("offer cost required (in Twyst Bucks)");
         } else if (!$scope.offer.offer_source && $scope.offer.offer_type == 'bank_deal') {
-          def.reject("Deal source must be specified for bank deal");
+          def.reject("Deal source required for bank deal");
         } else {
           def.resolve();
         }
@@ -552,11 +553,11 @@ angular.module('merchantApp')
             } else {
                 async.each(schedule.timings, function(timing1, callback) {
                     if((!timing1.open.hr && timing1.open.hr !== 0) || (!timing1.open.min && timing1.open.min !== 0) || (!timing1.close.hr && timing1.close.hr !== 0) || (!timing1.close.min && timing1.close.min !== 0)) {
-                        callback("One or more timings invalid for " + day.toUpperCase())
+                        callback("One or more offer timings invalid for " + day.toUpperCase())
                     } else {
                         async.each(schedule.timings, function(timing2, callback) {
                             if((!timing2.open.hr && timing2.open.hr !== 0) || (!timing2.open.min && timing2.open.min !== 0) || (!timing2.close.hr && timing2.close.hr !== 0) || (!timing2.close.min && timing2.close.min !== 0)) {
-                                callback("One or more timings invalid for " + day.toUpperCase())
+                                callback("One or more offer timings invalid for " + day.toUpperCase())
                             } else {
                                 var startMin1 = (timing1.open.hr * 60) + timing1.open.min,
                                     closeMin1 = (timing1.close.hr * 60) + timing1.close.min,
@@ -566,7 +567,7 @@ angular.module('merchantApp')
                                 if(timing1 == timing2) {
                                     callback();
                                 } else if((startMin1 <= closeMin2 <= closeMin1) || (startMin1 <= closeMin2 <= closeMin1) || (startMin2<= closeMin1 <= closeMin2)) {
-                                    callback("One or more timings invalid for " + day.toUpperCase());
+                                    callback("One or more offer timings invalid for " + day.toUpperCase());
                                 } else {
                                     callback();
                                 }
@@ -588,6 +589,56 @@ angular.module('merchantApp')
                 def.resolve(true);
             }
         });
+        return def.promise;
+      }
+
+      $scope.validateAgainstOutlets = function() {
+        var def = Q.defer();
+        async.each(Object.keys($scope.offer.actions.reward.reward_hours), function(day, callback) {
+          var offer_schedule = $scope.offer.actions.reward.reward_hours[day];
+          if(offer_schedule.closed) {
+            callback();
+          } else {
+            console.log(offer_schedule.timings, day);
+            async.each(offer_schedule.timings, function(offer_timing, callback) {
+              var offerOpenMin = (offer_timing.open.hr * 60) + offer_timing.open.min,
+                offerCloseMin = (offer_timing.close.hr * 60) + offer_timing.close.min;
+              async.each($scope.outlets, function(outlet, callback) {
+                var outlet_schedule = outlet.business_hours[day];
+
+                if(outlet_schedule.closed) {
+                  callback("Offer available on " + day.toUpperCase() + " despite outlet " + outlet.basics.name + " being closed");
+                } else {
+                  async.each(outlet_schedule.timings, function(outlet_timing, callback) {
+                    var outletOpenMin = (outlet_timing.open.hr * 60) + outlet_timing.open.min,
+                      outletCloseMin = (outlet_timing.close.hr * 60) + outlet_timing.close.min;
+                    console.log(offerOpenMin, offerCloseMin);
+                    console.log(outletOpenMin, outletCloseMin);
+                    console.log((offerOpenMin < outletOpenMin), (outletCloseMin < offerCloseMin))
+                    if((offerOpenMin < outletOpenMin) || (outletCloseMin < offerCloseMin)) {
+                      callback("Offer available on " + day.toUpperCase() + " outside the timings for " + outlet.basics.name);
+                    } else {
+                      callback();
+                    }
+                  }, function(err) {
+                    callback(err);
+                  });
+                }
+              }, function(err) {
+                callback(err);
+              })
+            }, function(err) {
+              callback(err);
+            });
+          }
+        }, function(err) {
+          if(err) {
+            def.reject(err);
+          } else {
+            def.resolve(true);
+          }
+        });
+
         return def.promise;
       }
 
