@@ -19,7 +19,6 @@ module.exports.new = function(req, res) {
   if (!token) {
     HttpHelper.error(res, null, "Not authenticated");
   }
-
   created_outlet = _.extend(created_outlet, req.body);
   OutletHelper.create_outlet(token, created_outlet).then(function(data) {
     HttpHelper.success(res, data.data, data.message);
@@ -322,7 +321,6 @@ function massage_offers(params) {
           }
         }
         // massaged_offer.applicability = offer.actions.reward.applicability;
-        massaged_offer.valid_days = offer.actions.reward.valid_days;
         massaged_offer.header = offer.actions.reward.header;
         massaged_offer.line1 = offer.actions.reward.line1;
         massaged_offer.line2 = offer.actions.reward.line2;
@@ -344,6 +342,10 @@ function massage_offers(params) {
                 massaged_offer.is_like = false;   
             } 
         })
+
+        if(offer.offer_likes.length === 0) {
+          massaged_offer.is_like = false;   
+        }
 
         if(offer.offer_type === 'offer' || offer.offer_type === 'deal' || offer.offer_type === 'bank_deal') {
           massaged_offer.offer_cost =  offer.offer_cost;  

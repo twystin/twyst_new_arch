@@ -424,12 +424,15 @@ function massage_offers(params) {
           massaged_offer.checkins = item.recco && item.recco.checkins || 0;
         }
         massaged_offer.meta = offer.actions && offer.actions.reward && offer.actions.reward.reward_meta;
-        massaged_offer.expiry = offer.actions.reward.expiry;
+        massaged_offer.expiry = offer.offer_end_date;
         if(offer.offer_likes && offer.offer_likes.length) {
           massaged_offer.offer_likes = offer.offer_likes.length;  
         }
         else{
           massaged_offer.offer_likes = 0;
+        }
+        if(offer.offer_likes.length === 0) {
+          massaged_offer.is_like = false;   
         }
 
         _.find(offer.offer_likes, function(user) {
