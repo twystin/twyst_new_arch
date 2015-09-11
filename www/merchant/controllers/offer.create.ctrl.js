@@ -99,11 +99,18 @@ angular.module('merchantApp')
           return;
 
         if(!$scope.offer.offer_outlets) {
-          $scope.offer.offer_outlets = [];
+          $scope.offer.offer_outlets = [newOutlet];
+          $scope.cloneTimings({_id: newOutlet});
+        } else {
+          if($scope.offer.offer_outlets.indexOf(newOutlet) == -1) {
+            $scope.offer.offer_outlets.push(newOutlet);
+          }
         }
-        if($scope.offer.offer_outlets.indexOf(newOutlet) == -1) {
-          $scope.offer.offer_outlets.push(newOutlet);
-        }
+        
+      }
+
+      $scope.getRange = function(len) {
+        return new Array(len);
       }
 
       $scope.getMaxRange = function() {
@@ -159,6 +166,9 @@ angular.module('merchantApp')
         } else if(newVal=='offer') {
           if(Object.keys($scope.offer.rule).length) {
             $scope.offer.rule = {};
+          }
+          if(!$scope.offer.offer_cost) {
+            $scope.offer.offer_cost = '100';
           }
         } else if(newVal=='deal' || newVal=='bank_deal') {
           if($scope.offer.minimum_bill_value) {

@@ -1,6 +1,6 @@
 <div class='col-xs-12 col-sm-10 col-sm-offset-1 col-lg-8 col-lg-offset-2' style='min-height:100vh;'>
   <wizard on-finish='createOutlet()'>
-    <wz-step title='Outlet Basics' canexit='validateStep1'>
+    <wz-step title='Outlet Basics'>
       <div class='well well-lg'>
         <form class='form-horizontal'>
           <fieldset>
@@ -21,17 +21,24 @@
             <div class='form-group'>
               <label for='locality_1' class='col-md-2 control-label'>Locality 1</label>
               <div class='col-md-4'>
-                <input type='text' class='form-control' ng-model='outlet.contact.location.locality_1[0]'>
+                <input type='text' class='form-control' ng-model='outlet.contact.location.locality_1[0]' typeahead="location.location_1 as (location.location_1 + ', ' + location.location_2 + ', ' + location.city) for location in locations | filter:{location_1:$viewValue}"  typeahead-on-select='updateMapMarker($item.lat, $item.long)'>
               </div>
               <label for='locality_2' class='col-md-2 control-label'>Locality 2 <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
               <div class='col-md-4'>
-                <input type='text' class='form-control' ng-model='outlet.contact.location.locality_2[0]'>
+                <input type='text' class='form-control' ng-model='outlet.contact.location.locality_2[0]' typeahead="location.location_2 as (location.location_1 + ', ' + location.location_2 + ', ' + location.city) for location in locations | filter:{location_2:$viewValue}" typeahead-on-select='updateMapMarker($item.lat, $item.long)'>
               </div>
             </div>
             <div class='form-group'>
               <label for='city' class='col-md-2 control-label'>City <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
               <div class='col-md-4'>
-                <input type='text' class='form-control' ng-model='outlet.contact.location.city'>
+                <select class='form-control' ng-model='outlet.contact.location.city'>
+                  <option value='Faridabad'>Faridabad</option>
+                  <option value='Ghaziabad'>Ghaziabad</option>
+                  <option value='Gurgaon'>Gurgaon</option>
+                  <option value='New Delhi'>New Delhi</option>
+                  <option value='Noida'>Noida</option>
+                </select>
+                <!-- <input type='text' class='form-control' ng-model='outlet.contact.location.city' typeahead="location.city as (location.location_1 + ', ' + location.location_2 + ', ' + location.city) for location in locations | filter:{city:$viewValue}"  typeahead-on-select='updateMapMarker($item.lat, $item.long)'> -->
               </div>
               <label for='pincode' class='col-md-2 control-label'>Pincode <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
               <div class='col-md-4'>
@@ -52,6 +59,25 @@
                   <ui-gmap-marker coords="marker.coords" options="marker.options" events="marker.events" idkey="marker.id">
                   </ui-gmap-marker>
                 </ui-gmap-google-map>
+                <div class='form-group'>
+                  <br />
+                  <div class='col-md-12'>
+                    <label class='control-label'>Set location manually below</label>
+                  </div>
+                  <div class='col-md-6'>
+                    <label class='col-md-3 control-label'>Latitude</label>
+                    <div class='col-md-9'>
+                      <input type='number' ng-model='outlet.contact.location.coords.latitude' class='form-control' ng-change='updateMapMarker(outlet.contact.location.coords.latitude, outlet.contact.location.coords.longitude) '>
+                    </div>
+                  </div>
+                  <div class='col-md-6'>
+                    <label class='col-md-3 control-label'>Longitude</label>
+                    <div class='col-md-9'>
+                      <input type='number' ng-model='outlet.contact.location.coords.longitude' class='form-control' ng-change='updateMapMarker(outlet.contact.location.coords.latitude, outlet.contact.location.coords.longitude)  '>
+                    </div>
+                  </div>
+                  <button class='btn btn-default' type='button' ng-click='setLocation'>Set Location</button>
+                </div>
               </div>
             </div>
             <div class='form-group'>
@@ -80,10 +106,17 @@
               <label for='outlet_numbers' class='col-md-2 control-label'>Outlet Numbers</label>
               <div class='col-md-10'>
                 <div class='row' ng-repeat='number in outlet.contact.phones.mobile'>
-                  <div class='col-md-8'>
+                  <div class='col-md-4'>
+                    <select class='form-control' ng-model='number.num_type'>
+                      <option value='' ng-if='!number.num_type'>Choose the type</option>
+                      <option value='mobile'>Mobile</option>
+                      <option value='landline'>Landline</option>
+                    </select>
+                  </div>
+                  <div class='col-md-8' ng-if='number.num_type'>
                     <div class='input-group'>
                       <div class='input-group-addon'>#{{$index + 1}}</div>
-                      <input class='form-control' type='text' ng-model='number.num'>
+                      <input class='form-control' type='text' ng-model='number.num' placeholder='{{number.num_type=="mobile"? "Eg. 9876543210": "Eg. 01120000198"}}'>
                       <div class='input-group-addon' ng-if='$index===0'><span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></div>
                       <div class='input-group-addon mob-num-addon' ng-show='outlet.contact.phones.mobile.length>1' ng-click='removeNumber(outlet.contact.phones.mobile, $index)'>
                         <button class='btn btn-danger'>
@@ -91,12 +124,6 @@
                         </button>
                       </div>
                     </div>
-                  </div>
-                  <div class='col-md-4'>
-                    <select class='form-control' ng-model='number.num_type'>
-                      <option value='mobile'>Mobile</option>
-                      <option value='landline'>Landline</option>
-                    </select>
                   </div>
                   <div class='col-xs-12'>
                     <p />
@@ -114,7 +141,7 @@
                 <div class='col-md-8' ng-repeat='number in outlet.contact.phones.reg_mobile'>
                   <div class='input-group'>
                     <div class='input-group-addon'># {{$index + 1}}</div>
-                    <input class='form-control' type='text' ng-model='number.num'>
+                    <input class='form-control' type='text' ng-model='number.num' placeholder='Eg. 9876543210 or 01120000198'>
                     <div class='input-group-addon' ng-if='$index===0'><span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></div>
                     <div class='input-group-addon mob-num-addon' ng-show='outlet.contact.phones.reg_mobile.length>1' ng-click='removeNumber(outlet.contact.phones.reg_mobile, $index)'>
                       <button class='btn btn-danger'>
@@ -135,7 +162,7 @@
       <div class='well well-lg'>
         <form class='form-horizontal'>
           <fieldset>
-            <legend>Contact Personal</legend>
+            <legend>Contact Person</legend>
             <div class='form-group'>
               <label for='contact_name' class='col-md-2 control-label'>Contact Name <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
               <div class='col-md-10'>
@@ -145,7 +172,14 @@
             <div class='form-group'>
               <label for='designation' class='col-md-2 control-label'>Designation <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
               <div class='col-md-10'>
-                <input type='text' class='form-control' ng-model='outlet.contact.emails.designation'>
+                <select class='form-control' ng-model='outlet.contact.emails.designation'>
+                  <option value=''>Choose a designation</option>
+                  <option value='Owner'>Owner</option>
+                  <option value='General Manager'>General Manager</option>
+                  <option value='Restaurant Manager'>Restaurant Manager</option>
+                  <option value='Marketing Manager'>Marketing Manager</option>
+                  <option value='Other'>Other</option>
+                </select>
               </div>
             </div>
             <div class='form-group'>
@@ -190,7 +224,20 @@
                     <label class='control-label'>From</label>
                     <div class='input-group'>
                       <div class='input-group-addon'>Rs.</div>
-                      <input type='number' ng-model='outlet.attributes.cost_for_two.min' class='form-control'>
+                      <select class='form-control' ng-model='outlet.attributes.cost_for_two.min'>
+                        <option value='100'>100</option>
+                        <option value='300'>300</option>
+                        <option value='500'>500</option>
+                        <option value='1000'>1000</option>
+                        <option value='1500'>1500</option>
+                        <option value='2000'>2000</option>
+                        <option value='2000'>2000</option>
+                        <option value='2500'>2500</option>
+                        <option value='3000'>3000</option>
+                        <option value='3500'>3500</option>
+                        <option value='4000'>4000</option>
+                        <option value='4500'>4500</option>
+                      </select>
                     </div>
                   </div>
                 </div>
@@ -199,7 +246,20 @@
                     <label class='control-label'>Upto</label>
                     <div class='input-group'>
                       <div class='input-group-addon'>Rs.</div>
-                      <input type='number' ng-model='outlet.attributes.cost_for_two.max' class='form-control'>
+                      <select class='form-control' ng-model='outlet.attributes.cost_for_two.max'>
+                        <option value='300'>300</option>
+                        <option value='500'>500</option>
+                        <option value='1000'>1000</option>
+                        <option value='1500'>1500</option>
+                        <option value='2000'>2000</option>
+                        <option value='2000'>2000</option>
+                        <option value='2500'>2500</option>
+                        <option value='3000'>3000</option>
+                        <option value='3500'>3500</option>
+                        <option value='4000'>4000</option>
+                        <option value='4500'>4500</option>
+                        <optoin value='5000'>5000 or above</option>
+                      </select>
                     </div>
                   </div>
                 </div>
