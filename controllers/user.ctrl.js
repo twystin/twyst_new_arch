@@ -144,13 +144,11 @@ function load_outlet_info_from_cache(data) {
             }
             if(data.coupons && data.coupons.length) {
                 var _coupons = [];
-                // data.coupons = _.map(data.coupons, function(coupon) {
                 async.each(data.coupons, function(coupon, callback) {
                     var massaged_item = {};
-                    if(coupon.outlets && coupon.outlets.length) {
-                        outlet = outlets[coupon.outlets[0].toString()];        
-                    }
-                    
+
+                    outlet = outlets[coupon.issued_by.toString()];        
+                                    
                     massaged_item._id = outlet._id;
                     massaged_item.name = outlet.basics.name;
                     massaged_item.city = outlet.contact.location.city;
@@ -215,7 +213,6 @@ function load_outlet_info_from_cache(data) {
                                 callback();
                             } 
                             else {
-                                coupon.outlets = coupon.issued_by;
                                 coupon.type = 'coupon';
                                 coupon.expiry = coupon.expiry_date;
                                 massaged_item.offers = [];
@@ -231,8 +228,7 @@ function load_outlet_info_from_cache(data) {
                 }, function() {
                   data.coupons = _coupons;
                   deferred.resolve(data);
-                });         
-                // deferred.resolve(data);   
+                });           
             
             }
             else {
