@@ -111,7 +111,7 @@ function filter_out_expired_and_used_coupons(data) {
   var deferred = Q.defer();
   
   data.coupons = _.filter(data.coupons, function(coupon) {
-    if(_.has(coupon, 'status') && (coupon.status === 'active')) {
+    if(_.has(coupon, 'status') && (coupon.status === 'active') && (coupon.coupon_source === 'qr_checkin')) {
       return true;
     } else {
       return false;
@@ -144,13 +144,11 @@ function load_outlet_info_from_cache(data) {
             }
             if(data.coupons && data.coupons.length) {
                 var _coupons = [];
-                // data.coupons = _.map(data.coupons, function(coupon) {
                 async.each(data.coupons, function(coupon, callback) {
                     var massaged_item = {};
-                    if(coupon.outlets && coupon.outlets.length) {
-                        outlet = outlets[coupon.outlets[0].toString()];        
-                    }
-                    
+
+                    outlet = outlets[coupon.issued_by.toString()];        
+                                    
                     massaged_item._id = outlet._id;
                     massaged_item.name = outlet.basics.name;
                     massaged_item.city = outlet.contact.location.city;
@@ -185,7 +183,8 @@ function load_outlet_info_from_cache(data) {
                         }
                         
                     });
-                    Outlet.find({'offers.offer_group': coupon.offer_group}, function (err, all_outlets) {
+
+                    Outlet.find({'offers.offer_group': coupon.coupon_group}, function (err, all_outlets) {
                         if(err) {
                             console.log(err);
                             callback();
@@ -229,8 +228,7 @@ function load_outlet_info_from_cache(data) {
                 }, function() {
                   data.coupons = _coupons;
                   deferred.resolve(data);
-                });         
-                // deferred.resolve(data);   
+                });           
             
             }
             else {

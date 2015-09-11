@@ -198,7 +198,7 @@ function check_and_create_coupon(data) {
         deferred.reject('Could not create coupon' + err);
       })
     } else {
-      deferred.resolve(data);
+      deferred.reject('No matching offer for user');
     }
   });
   return deferred.promise;
@@ -217,18 +217,16 @@ function create_coupon(offer, user, outlet) {
   var lapse_date = new Date();
   lapse_date.setDate(lapse_date.getDate() + offer.offer_lapse_days);
   var expiry_date = new Date();
-  expiry_date.setDate(expiry_date.getDate() + offer.coupon_valid_days);
+  expiry_date.setDate(expiry_date.getDate() + offer.offer_valid_days);
 
   var deferred = Q.defer();
-  var outlets = [];
-  outlets.push(outlet);
   
   var update = {
     $push: {
       coupons: {
         _id: mongoose.Types.ObjectId(),
         code: code,
-        outlets: outlets,
+        coupon_group: offer.offer_group,
         coupon_source:  'qr_checkin',
         header: offer.actions.reward.header,
         line1: offer.actions.reward.line1,
@@ -237,7 +235,7 @@ function create_coupon(offer, user, outlet) {
         expiry_date: expiry_date,
         meta: {
           reward_type: {
-            type: 'need to fix' // to fix = where from?
+            type: offer.actions.reward.reward_meta.type,
           }
         },
         status: 'active',
@@ -268,7 +266,7 @@ function find_matching_offer(events, offers) {
     count = _.get(offers[i], 'rule.event_count');
     match = _.get(offers[i], 'rule.event_match');
 
-    if (match === 'every') {
+    if (match === 'on every') {
       if (checkins % count === 0) {
         return offers[i];
       }
