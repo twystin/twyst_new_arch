@@ -220,15 +220,13 @@ function create_coupon(offer, user, outlet) {
   expiry_date.setDate(expiry_date.getDate() + offer.offer_valid_days);
 
   var deferred = Q.defer();
-  var outlets = [];
-  outlets.push(outlet);
   
   var update = {
     $push: {
       coupons: {
         _id: mongoose.Types.ObjectId(),
         code: code,
-        outlets: outlets,
+        coupon_group: offer.offer_group,
         coupon_source:  'qr_checkin',
         header: offer.actions.reward.header,
         line1: offer.actions.reward.line1,
@@ -266,9 +264,9 @@ function find_matching_offer(events, offers) {
 
   for (i = 0; i < offers.length; i++) {
     count = _.get(offers[i], 'rule.event_count');
-    match = _.get(offers[i], 'rule.event_type');
+    match = _.get(offers[i], 'rule.event_match');
 
-    if (match === 'every') {
+    if (match === 'on every') {
       if (checkins % count === 0) {
         return offers[i];
       }

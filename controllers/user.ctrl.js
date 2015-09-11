@@ -181,11 +181,12 @@ function load_outlet_info_from_cache(data) {
                               coupon.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
                             }
                             coupon.meta = {};
-                            coupon.meta.reward_type = offer.actions.reward.reward_meta.reward_type.type;                                        
+                            coupon.meta.reward_type = offer.actions.reward.reward_meta.reward_type;                                        
                         }
                         
                     });
-                    Outlet.find({'offers.offer_group': coupon.offer_group}, function (err, all_outlets) {
+                    console.log(coupon.coupon_group)
+                    Outlet.find({'offers.offer_group': coupon.coupon_group}, function (err, all_outlets) {
                         if(err) {
                             console.log(err);
                             callback();
@@ -214,6 +215,7 @@ function load_outlet_info_from_cache(data) {
                                 callback();
                             } 
                             else {
+                                coupon.outlets = coupon.issued_by;
                                 coupon.type = 'coupon';
                                 coupon.expiry = coupon.expiry_date;
                                 massaged_item.offers = [];
