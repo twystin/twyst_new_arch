@@ -376,6 +376,7 @@
               <label class='col-md-2 control-label'>Offer Description</label>
               <div class='col-md-6'>
                 <textarea class='form-control' ng-model='offer.actions.reward.description' rows='3' style='resize:none;overflow:auto;'></textarea>
+                <div class='help-block'>Add detailed offer description here if header, line 1 and line 2 do not capture all offer details.</div>
               </div>
             </div>
           </fieldset>
@@ -415,7 +416,7 @@
               <label class='col-md-2 control-label'>Lapses in <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
               <div class='col-md-6'>
                 <div class='input-group'>
-                  <input type='number' class='form-control' ng-model='offer.offer_lapse_days' min='1' steps='1'>
+                  <input type='number' class='form-control' ng-model='offer.offer_lapse_days' min='1' steps='1' placeholder='Duration for exclusive availability'>
                   <div class='input-group-addon'> days.</div>
                 </div>
               </div>
@@ -424,15 +425,18 @@
               <label class='col-md-2 control-label'>Expires in <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
               <div class='col-md-6'>
                 <div class='input-group'>
-                  <input type='number' class='form-control' min='{{offer.offer_lapse_days + 14}}' ng-model='offer.offer_valid_days'>
+                  <input type='number' class='form-control' min='{{offer.offer_lapse_days + 14}}' ng-model='offer.offer_valid_days' placehulder='Actual offer validity duration.'>
                   <div class='input-group-addon'> days.</div>
                 </div>
+                <div class='help-block'>Expiration duration must be atleast 14 days more than lapse duration</div>
               </div>
             </div>
             <div class='form-group' ng-if='offer.offer_type=="offer"'>
               <label class='col-md-2 control-label'>Offer Cost <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
               <div class='col-md-6'>
-                <input type='number' class='form-control' ng-model='offer.offer_cost' min='1' steps='1'>
+                <select class='form-control' ng-model='offer.offer_cost'>
+                  <option ng-repeat='i in getRange(18) track by $index' value='{{100 + (25*$index)}}'>{{100 + (25*$index)}}</option>
+                </select>
                 <span class='help-block'>Cost above is defined in Twyst Bucks</span>
               </div>
             </div>
@@ -461,6 +465,35 @@
           <fieldset>
             <legend>Validity</legend>
             <div class='form-group'>
+              <label for='offer_outlets' class='col-md-2 control-label'>Outlets <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
+              <div class='col-md-9'>
+                <ul class='list-group' ng-if='offer.offer_outlets.length'>
+                  <li class='list-group-item' ng-repeat='outlet in offer.offer_outlets track by $index'>{{outlets[outlet].basics.name}}, {{outlets[outlet].contact.location.locality_1[0]}}, {{outlets[outlet].contact.location.locality_2[0]}}
+                    <button class='btn btn-sm btn-danger pull-right' ng-click='removeOutlet($index)'><span class='glyphicon glyphicon-trash'></span></button>
+                  </li>
+                </ul>
+                <div class='alert alert-warning' ng-if='!offer.offer_outlets.length'>
+                  Start adding outlets below.
+                </div>
+              </div>
+            </div>
+            <div class='form-group'>
+              <label for='add_outlet' class='col-md-2 control-label'>
+                <span ng-if='!offer.offer_outlets.length'>Pick the first Outlet</span>
+                <span ng-if='offer.offer_outlets.length'>Pick another Outlet</span>
+              </label>
+              <div class='col-md-6 table-responsive'>
+                <table class='table table-bordered table-condensed'>
+                  <tbody>
+                    <tr ng-repeat='outlet in outlets track by $index' ng-show='!offer.offer_outlets || offer.offer_outlets.indexOf(outlet._id)==-1'>
+                      <td><button class='badge pull-left' ng-click='addOutlet(outlet._id)'><span class='glyphicon glyphicon-ok'> Add</span></button></td>
+                      <td>{{outlet.basics.name}}, {{outlet.contact.location.locality_1[0]}}, {{outlet.contact.location.locality_2[0]}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class='form-group'>
               <label class='col-md-2 control-label'>Applicability <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
               <div class='col-md-10'>
                 <div class='form-group' ng-if='offer.offer_outlets.length'>
@@ -472,7 +505,10 @@
                     </select>
                   </div>
                 </div>
-                <div class='form-group table-responsive'>
+                <div class='alert alert-warning' ng-if='!offer.offer_outlets.length'>
+                  <strong>Select atleast one outlet above to set offer timings</strong>
+                </div>
+                <div class='form-group table-responsive' ng-if='offer.offer_outlets.length'>
                   <table class='table table-bordered table-condensed'>
                     <thead>
                       <th>Day</th>
@@ -516,35 +552,6 @@
               <label class='col-md-2 control-label'>End Date <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
               <div class='col-md-6'>
                 <datepicker ng-model="offer.offer_end_date" min-date="offer.offer_start_date || today" show-weeks="true" class="well well-sm"></datepicker>
-              </div>
-            </div>
-            <div class='form-group'>
-              <label for='offer_outlets' class='col-md-2 control-label'>Outlets <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
-              <div class='col-md-9'>
-                <ul class='list-group' ng-if='offer.offer_outlets.length'>
-                  <li class='list-group-item' ng-repeat='outlet in offer.offer_outlets track by $index'>{{outlets[outlet].basics.name}}, {{outlets[outlet].contact.location.locality_1[0]}}, {{outlets[outlet].contact.location.locality_2[0]}}
-                    <button class='btn btn-sm btn-danger pull-right' ng-click='removeOutlet($index)'><span class='glyphicon glyphicon-trash'></span></button>
-                  </li>
-                </ul>
-                <div class='alert alert-warning' ng-if='!offer.offer_outlets.length'>
-                  Start adding outlets below.
-                </div>
-              </div>
-            </div>
-            <div class='form-group'>
-              <label for='add_outlet' class='col-md-2 control-label'>
-                <span ng-if='!offer.offer_outlets.length'>Pick the first Outlet</span>
-                <span ng-if='offer.offer_outlets.length'>Pick another Outlet</span>
-              </label>
-              <div class='col-md-6 table-responsive'>
-                <table class='table table-bordered table-condensed'>
-                  <tbody>
-                    <tr ng-repeat='outlet in outlets track by $index' ng-show='!offer.offer_outlets || offer.offer_outlets.indexOf(outlet._id)==-1'>
-                      <td><button class='badge pull-left' ng-click='addOutlet(outlet._id)'><span class='glyphicon glyphicon-ok'> Add</span></button></td>
-                      <td>{{outlet.basics.name}}, {{outlet.contact.location.locality_1[0]}}, {{outlet.contact.location.locality_2[0]}}</td>
-                    </tr>
-                  </tbody>
-                </table>
               </div>
             </div>
             <div class='clearfix'></div>

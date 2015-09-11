@@ -9,15 +9,19 @@ angular.module('merchantApp')
 				'bank_deal': []
 			}
 
+			$scope.offer_groups = [];
 			$scope.get_offers = function() {
 				merchantRESTSvc.getOutlets().then(function(data) {
 					$scope.outlets = data.data.outlets;
 					_.each($scope.outlets, function(outlet) {
 						_.each(outlet.offers, function(offer) {
-							if(offer.offer_type) {
-								$scope.offers[offer.offer_type].push(offer);
-							} else {
-								$scope.offers['checkin'].push(offer);
+							if($scope.offer_groups.indexOf(offer.offer_group)==-1) {
+								$scope.offer_groups.push(offer.offer_group);
+								if(offer.offer_type) {
+									$scope.offers[offer.offer_type].push(offer);
+								} else {
+									$scope.offers['checkin'].push(offer);
+								}
 							}
 						})
 					})

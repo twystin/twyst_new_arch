@@ -6,7 +6,7 @@ angular.module('merchantApp')
             $scope.weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
             $scope.payment_options = ['cash', 'visa', 'master', 'amex', 'sodexho'];
             $scope.checkModel = {};
-            $scope.cuisines = ["African", "American", "Andhra", "Arabic", "Armenian", "Asian", "Assamese", "Awadhi", "Bangladeshi", "Belgian", "Bengali", "Biryani", "British", "Burmese", "Chettinad", "Chinese", "Continental", "Desserts", "European", "Fast Food", "Finger Food", "French", "German", "Goan", "Greek", "Gujarati", "Healthy Food", "Hyderabadi", "Ice creams", "Indian", "Indonesian", "Italian", "Japanese", "Kashmiri", "Malayali", "Korean", "Lebanese", "Lucknowi", "Maharashtrian", "Malaysian", "Mangalorean", "Mediterranean", "Mexican", "Moroccan", "Mughlai", "Naga", "Nepalese", "North Eastern", "North Indian", "Oriya", "Pakistani", "Parsi", "Pizza", "Portuguese", "Punjabi", "Rajasthani", "Russian", "Sri Lankan", "Sindhi", "Singaporean", "South American", "South Indian", "Spanish", "Street Food", "Sushi", "Tex-Mex", "Thai", "Tibetan", "Turkish", "Vietnamese", "Wraps", "Bakery", "Beverages", "Burgers", "Cafe", "Salads", "Sandwiches", "Seafood", "Middle Eastern", "Steaks", "Sizzlers"];
+            $scope.cuisines = ["African", "American", "Andhra", "Arabic", "Armenian", "Asian", "Assamese", "Awadhi", "Bangladeshi", "Belgian", "Bengali", "Biryani", "British", "Burmese", "Chettinad", "Chinese", "Continental", "Costal", "Desserts", "European", "Fast Food", "Finger Food", "French", "German", "Goan", "Greek", "Gujarati", "Healthy Food", "Hyderabadi", "Ice creams", "Indian", "Indonesian", "Italian", "Japanese", "Kashmiri", "Konkan", "Malayali", "Korean", "Lebanese", "Lucknowi", "Maharashtrian", "Malaysian", "Mangalorean", "Mediterranean", "Mexican", "Moroccan", "Mughlai", "Naga", "Nepalese", "North Eastern", "North Indian", "Oriya", "Pakistani", "Parsi", "Pizza", "Portuguese", "Punjabi", "Rajasthani", "Russian", "Sri Lankan", "Sindhi", "Singaporean", "South American", "South Indian", "Spanish", "Street Food", "Sushi", "Tex-Mex", "Thai", "Tibetan", "Turkish", "Vietnamese", "Wraps", "Bakery", "Beverages", "Burgers", "Cafe", "Salads", "Sandwiches", "Seafood", "Middle Eastern", "Steaks", "Sizzlers"];
 
             $scope.map = { center: { latitude: 28.805422897457665, longitude: 77.16647699812655 }, zoom: 10 }; $scope.options = { scrollwheel: true };
 
@@ -14,23 +14,42 @@ angular.module('merchantApp')
             $scope.outlet_types = [{ value:'bakery', name:'Bakery'}, { value:'cafe', name:'Cafe'}, { value:'delivery', name:'Delivery Only'}, { value:'desserts', name:'Desserts'}, { value:'pub_lounge', name:'Pub/Lounge'}, { value:'fast_food', name:'QSR/Fast Food'}, { value:'restaurant', name:'Restaurant'}];
 
             var sampleTiming = {open: {hr: 0, min: 0}, close: {hr: 0, min: 0}};
-            $scope.outlet = { sms_off: {}, attributes: { cost_for_two: {}, payment_options: [], delivery: { delivery_timings: { monday: { closed: false, timings: [{}] }, tuesday: { closed: false, timings: [{}] }, wednesday: { closed: false, timings: [{}] }, thursday: { closed: false, timings: [{}] }, friday: { closed: false, timings: [{}] }, saturday: { closed: false, timings: [{}] }, sunday: { closed: false, timings: [{}] } } } }, contact: { location: { coords: { }, locality_1: [''], locality_2: [''], landmarks: [] }, phones: { mobile: [{num: '', num_type: 'mobile'}], reg_mobile: [{num: '', num_type: 'mobile'}] }, emails: { type: 'work' } }, photos: { others: [] }, menus: [], links: { other_links: [] }, business_hours: { monday: { closed: false, timings: [{}] }, tuesday: { closed: false, timings: [{}] }, wednesday: { closed: false, timings: [{}] }, thursday: { closed: false, timings: [{}] }, friday: { closed: false, timings: [{}] }, saturday: { closed: false, timings: [{}] }, sunday: { closed: false, timings: [{}] } } };
+            $scope.outlet = { sms_off: {}, attributes: { cost_for_two: {}, payment_options: [], delivery: { delivery_timings: { monday: { closed: false, timings: [{}] }, tuesday: { closed: false, timings: [{}] }, wednesday: { closed: false, timings: [{}] }, thursday: { closed: false, timings: [{}] }, friday: { closed: false, timings: [{}] }, saturday: { closed: false, timings: [{}] }, sunday: { closed: false, timings: [{}] } } } }, contact: { location: { coords: { }, locality_1: [''], locality_2: [''], landmarks: [] }, phones: { mobile: [{num: '', num_type: ''}], reg_mobile: [{num: '', num_type: ''}] }, emails: { type: 'work' } }, photos: { others: [] }, menus: [], links: { other_links: [] }, business_hours: { monday: { closed: false, timings: [{}] }, tuesday: { closed: false, timings: [{}] }, wednesday: { closed: false, timings: [{}] }, thursday: { closed: false, timings: [{}] }, friday: { closed: false, timings: [{}] }, saturday: { closed: false, timings: [{}] }, sunday: { closed: false, timings: [{}] } } };
             
             $scope.isSpinnerVisible = false;
             $scope.marker = { id: 0, coords: { latitude: 28.6078341976, longitude: 77.2465642784 }, options: { draggable: true }, events: { dragend: function(marker, eventName, args) { var lat = marker.getPosition().lat(); var lon = marker.getPosition().lng(); $scope.outlet.contact.location.coords.longitude = lon; $scope.outlet.contact.location.coords.latitude = lat; $scope.outlet.contact.location.map_url = 'https://maps.google.com/maps/?q=' + lat + ',' + lon + '&z=' + $scope.map.zoom; $scope.marker.options = { draggable: true, labelAnchor: "100 0", labelClass: "marker-labels" }; } } };
 
             $scope.mapEvents = { click: function(binding, event_type, click_obj) { var lat = click_obj[0].latLng.A; var lon = click_obj[0].latLng.F; $scope.$apply(function() { $scope.marker.coords = { latitude: lat, longitude: lon }; $scope.outlet.contact.location.coords = { latitude: lat, longitude: lon }; $scope.outlet.contact.location.map_url = 'https://maps.google.com/maps/?q=' + lat + ',' + lon + '&z=' + $scope.map.zoom; $scope.marker.options = { draggable: true, labelAnchor: "100 0", labelClass: "marker-labels" }; });  } }
 
+            $http.get('/api/v4/locations')
+                .then(function(res) {
+                    console.log('res', res.data);
+                    if(res.data.response) {
+                        $scope.locations = res.data.data;
+                    } else {
+                        $scope.locations = [];
+                        toastr.error("Error loading location info");
+                    }
+                }, function(err) {
+                    console.log('error', err);
+                });
+
+            $scope.updateMapMarker = function(latitude, longitude) {
+                if($scope.outlet.contact.location.coords.latitude!==latitude || !$scope.outlet.contact.location.coords.longitude!==longitude) {
+                    $scope.outlet.contact.location.coords = {latitude: latitude, longitude: longitude};
+                }
+
+                $scope.map.center = {latitude: latitude, longitude: longitude};
+                $scope.marker.coords = {latitude: latitude, longitude: longitude};
+            }
+
             $scope.addNumber = function(field_name) {
                 if (!$scope.outlet.contact.phones[field_name]) {
                     $scope.outlet.contact.phones[field_name] = [];
                 }
                 var num = {
-                    num: ''
-                };
-
-                if(field_name == 'mobile') {
-                    num.num_type = 'mobile'
+                    num: '',
+                    num_type: ''
                 };
 
                 $scope.outlet.contact.phones[field_name].push(num);
@@ -239,7 +258,7 @@ angular.module('merchantApp')
                     async.each($scope.outlet.contact.phones.mobile, function(number, callback) {
                         if(!number.num) {
                             callback("One or more outlet numbers left blank");
-                        } else if(!/^[0-9]{10}$/.test(number.num)) {
+                        } else if((number.num_type=='mobile' && !/^[0-9]{10}$/.test(number.num)) || (number.num_type=='landline' && !/^[0-9]{11}$/.test(number.num))) {
                             callback("One or more outlet numbers are invalid");
                         } else {
                             callback();
@@ -252,7 +271,7 @@ angular.module('merchantApp')
                             async.each($scope.outlet.contact.phones.reg_mobile, function(number, callback) {
                                 if(!number.num) {
                                     callback("One or more registered mobile numbers left blank");
-                                } else if(!/^[0-9]{10}$/.test(number.num)) {
+                                } else if(!/^[0-9]{10,11}$/.test(number.num)) {
                                     callback("One or more registered mobile numbers are invalid");
                                 } else {
                                     callback();
