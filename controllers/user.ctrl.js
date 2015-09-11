@@ -185,7 +185,7 @@ function load_outlet_info_from_cache(data) {
                         }
                         
                     });
-                    console.log(coupon.coupon_group)
+
                     Outlet.find({'offers.offer_group': coupon.coupon_group}, function (err, all_outlets) {
                         if(err) {
                             console.log(err);
