@@ -4,9 +4,6 @@ angular.module('merchantApp')
 			return {
 				require: 'ngModel',
 				restrict: 'E',
-				scope: {
-					ngOutletId: '='
-				},
 				template: "<img class='img-polaroid'/><input id='fileInput' type='file' style='display: none;'/>",
 				link: function(scope, element, attributes, ngModel) {
 					var fileElement = $(angular.element('<input id="fileUpload" type="file" />')),
@@ -15,20 +12,22 @@ angular.module('merchantApp')
 					fileElement.on('change', function(changeEvent) {
 						var file = changeEvent.target.files[0];
 						var regex = /^image\//i;
-						
+
 						if(regex.test(file.type)) {
 							var reader = new FileReader();
 							reader.onload = function(loadEvent) {
 								var req_obj = {
-									'image': loadEvent.target.result
+									'image': loadEvent.target.result,
+									'image_class': attributes.ngImageFor,
+									'image_type': attributes.ngImageType
 								};
-								if(scope.ngOutletId) {
-									req_obj.id = scope.ngOutletId;
+								if(_id) {
+									req_obj.id = _id;
 								}
 								imageSvc.uploadImage(req_obj).then(function(res) {
-									scope.ngOutletId = res.id;
-									$(imgElement).attr('src', res.url);
-									ngModel.$setViewValue(res.url);
+									_id = res.id;
+									$(imgElement).attr('src', loadEvent.target.result);
+									ngModel.$setViewValue(res.key);
 								}, function(err) {
 									console.log('error', err);
 								});
@@ -41,42 +40,13 @@ angular.module('merchantApp')
 						fileElement.trigger('click');
 					})
 					element.css('cursor', 'pointer');
-					scope.$watch(function() {
-						return ngModel.$modelValue;
-					}, function(v) {
-						if(v)
-							$(imgElement).attr('src', v);
-					});
+					// scope.$watch(function() {
+					// 	return ngModel.$modelValue;
+					// }, function(v) {
+					// 	if(v)
+					// 		$(imgElement).attr('src', '');
+					// });
 				}
-				// link: function(scope, element, attributes, ngModel) {
-				// 	var fileElement = $(angular.element('<input id="fileUpload" type="file" />')),
-				// 		imgElement = element.find('img')[0];
-
-				// 	fileElement.on('change', function(changeEvent) {
-				// 		var file = changeEvent.target.files[0];
-				// 		if(/^image\//i.test(file.type)) {
-				// 			var reader = new FileReader();
-				// 			reader.onload = function(loadEvent) {
-				// 				scope.$apply(function() {
-				// 					$(imgElement).attr('src', loadEvent.target.result);
-				// 					ngModel.$setViewValue(loadEvent.target.result);
-				// 				});
-				// 				$(imgElement).attr('src', loadEvent.target.result);
-				// 			}
-				// 			reader.readAsDataURL(changeEvent.target.files[0]);
-				// 		}
-				// 	});
-				// 	element.bind('click', function() {
-				// 		fileElement.trigger('click');
-				// 	});
-				// 	element.css('cursor', 'pointer');
-				// 	scope.$watch(function() {
-				// 		return ngModel.$modelValue;
-				// 	}, function(v) {
-				// 		if(v)
-				// 			$(imgElement).attr('src', v);
-				// 	});
-				// }
 			}
 		}
 	]);

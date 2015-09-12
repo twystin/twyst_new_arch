@@ -207,11 +207,13 @@ angular.module('merchantApp')
             }
 
             $scope.createOutlet = function() {
+                $scope.outlet._id = _id;
                 $http.post('/api/v4/outlets?token=' + $rootScope.token, $scope.outlet)
                     .success(function(data) {
                         if(data.response) {
                         	toastr.success('Outlet created successfully');
                         	$scope.outlet = {};
+                            _id = undefined;
                         	$timeout(function() {
                         		$state.go('merchant.outlets');
                         	}, 800);

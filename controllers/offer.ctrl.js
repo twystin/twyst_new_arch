@@ -17,6 +17,6 @@ module.exports.new = function(req, res) {
 	OfferHelper.create_offer(token, new_offer).then(function(data) {
 		HttpHelper.success(res, data.data, data.message);
 	}, function(err) {
-		HttpHelper.error(res, err.data, err.message);
+		HttpHelper.error(res, err.err, err.message);
 	})
 }

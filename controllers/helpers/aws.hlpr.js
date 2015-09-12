@@ -1,7 +1,8 @@
 var AWS = require('aws-sdk'),
 	fs = require('fs'),
-    keygen = require("keygenerator");
-var logger = require('tracer').colorConsole();
+    keygen = require("keygenerator"),
+    logger = require('tracer').colorConsole(),
+	Q = require('q');
 
 AWS.config.update({
   region: 'us-west-2',
@@ -24,13 +25,25 @@ module.exports.uploadObject = function(upload_obj, callback) {
 	    Body: buff
 	  }, function(err) {
 	    if(err) {
-	    	console.log(err)
 	    callback(err, null)	
 	    }
 	    else {
 	    	var image_access_url = "https://s3-us-west-2.amazonaws.com/"+bucket+"/"+key;
-	    	console.log(image_access_url);
 	    callback(null, image_access_url) 
 	    }
   	});
+};
+
+module.exports.uploadImage = function(img_obj) {
+	logger.log();
+	var deferred = Q.defer();
+	var s3 = new AWS.S3();
+	s3.putObject(img_obj, function(err) {
+		if(err) {
+			deferred.reject(err);
+		} else {
+			deferred.resolve(true);
+		}
+	})
+	return deferred.promise;
 };
