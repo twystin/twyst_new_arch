@@ -28,16 +28,20 @@ var dimensions = [{
 	height: 1024
 }];
 
-module.exports.uploadImage = function(image_obj) {
+module.exports.uploadAppImage = function(image_obj) {
 	logger.log();
     var deferred = Q.defer();
-	var img_obj = {
-		bucketName: image_obj.bucketName,
-		image: image_obj.image
-	};
 
-		
-	AWSHelper.uploadObject(img_obj, function(err, data) {
+    var buff = new Buffer(image_obj.image.replace(/^data:image\/\w+;base64,/, ""),'base64')
+    var img_obj = {
+		Bucket: 'retwyst-app',
+		ACL: 'public-read',
+		ContentType: content_type,
+		Key: 'retwyst-user' + image_obj.user + '/'+ image_obj.event+ '/' + Date.now(),
+		Body: buff
+	};
+    
+	AWSHelper.uploadImage(img_obj, function(err, data) {
 		if(err) {
 			deferred.reject({
                 data: err,
@@ -55,18 +59,24 @@ module.exports.uploadImage = function(image_obj) {
 
 };
 
-module.exports.uploadOutletImage = function(req, res) {
+module.exports.uploadOutletImage = function(image_obj) {
+	logger.log();
 	var deferred = Q.defer();
-	if(!_.has(req.body, 'image_type') || !_.has(req.body, 'image')) {
-		deferred.reject({
-			err: new Error("Invalid request object"),
-			message: "Invalid request object"
-		});
-	} else if(req.body.image_type=='background' || req.body.image_type=='logo') {
-		uploadCoreImage();
-	} else if (req.body.image_type=='others') {
-		uploadOtherImage();
-	} else {
+	var buff = new Buffer(image_obj.image.replace(/^data:image\/\w+;base64,/, ""),'base64');
+
+	var content_type = getContentType(image_obj.image);
+
+	if(!content_type) {
+		deferred.reject({err: new Error("Invalid image type"), message: 'Image upload failed'});
+	} 
+
+	else if(image_obj.image_type=='background' || image_obj.image_type=='logo') {
+		uploadCoreImage(image_obj);
+	} 
+	else if (image_obj.image_type=='others') {
+		uploadOtherImage(image_obj);
+	} 
+	else {
 		deferred.reject({
 			err: new Error("Invalid request object"),
 			message: "Invalid request object"
@@ -74,41 +84,33 @@ module.exports.uploadOutletImage = function(req, res) {
 	}
 
 	function uploadCoreImage() {
-		var content_type = getContentType(req.body.image),
-			buff = new Buffer(req.body.image.replace(/^data:image\/\w+;base64,/, ""), 'base64'),
-			id = req.body.id || new ObjectId();
-
-		if(!content_type) {
-			deferred.reject({err: new Error("Invalid image type"), message: 'Image upload failed'});
-		} else {
-			var img_obj = {
-				Bucket: 'retwyst-merchants',
-				ACL: 'public-read',
-				ContentType: content_type,
-				Key: 'retwyst-outlets' + id + '/' + req.body.image_type,
-				Body: buff
-			};
-			AWSHelper.uploadImage(img_obj)
-				.then(function(res) {
-					deferred.resolve({data: {id: id, key: req.body.image_type}, message: "Image uploaded successfully"});
-				}, function(err) {
-					deferred.reject({err: err, message: 'Image upload failed'});
-				});
-		}
+		
+		var img_obj = {
+			Bucket: 'retwyst-merchants',
+			ACL: 'public-read',
+			ContentType: content_type,
+			Key: 'retwyst-outlets' + image_obj.id + '/' + image_obj.image_type,
+			Body: buff
+		};
+		AWSHelper.uploadImage(img_obj)
+			.then(function(res) {
+				deferred.resolve({data: {id: img_obj.id, key: img_obj.image_type}, message: "Image uploaded successfully"});
+			}, function(err) {
+				deferred.reject({err: err, message: 'Image upload failed'});
+		});
+		
 	};
 
-	function uploadOtherImage() {
+	function uploadOtherImage(image_obj) {
 		deferred.reject({err: new Error("Other image uploads currently restricted"), message: "Other image uploads currently restricted"});
 	}
 
 	return deferred.promise;
 };
 
-module.exports.uploadBillImage = function(req, res) {
-	res.jsonp({});
-};
 
 var getResizedImages = function(img_buffer) {
+	logger.log();
 	var deferred = Q.defer();
 	var images = [];
 	async.each(dimensions, function(dim, callback) {

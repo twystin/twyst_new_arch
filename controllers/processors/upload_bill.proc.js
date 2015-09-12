@@ -21,15 +21,15 @@ module.exports.check = function(data) {
 };
 
 module.exports.process = function(data) {
+  logger.log();
   var deferred = Q.defer();
-  
-  
   var img_obj = {
-    bucketName: 'retwyst',
+    user: data.user._id,
+    event: data.event_data.event_type,
     image: data.event_data.event_meta.photo
   }
 
-  ImageUploader.uploadImage(img_obj).then(function(data){
+  ImageUploader.uploadAppImage(img_obj).then(function(data){
     deferred.resolve(true);  
   },function(err) {
         deferred.reject({
