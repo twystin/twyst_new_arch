@@ -37,6 +37,11 @@ angular.module('merchantApp')
         }
       }
 
+      $scope.offer_types = { 'checkin': 'Checkin Offer', 'offer': 'Offer', 'deal': 'Deal', 'bank_deal': 'Bank Deal' }
+      $scope.reward_types = {'buyonegetone': 'Buy One Get One', 'discount': 'Discount', 'flatoff': 'Flat Off', 'free': 'Free', 'happyhours': 'Happy Hours', 'reduced': 'Reduced Price', 'custom': 'Custom', 'unlimited': 'Unlimited', 'onlyhappyhours': 'Only Happy Hours', 'combo': 'Combo', 'buffet': 'Buffet'};
+      $scope.offer_sources = { 'hdfc': 'HDFC Bank', 'sbi': 'State Bank Of India', 'hsbc': 'HSBC Bank', 'citibank': 'Citi Bank' };
+      $scope.event_matches = [{name: 'On every', value: 'on every'}, {name: 'After', value: 'after'}, {name: 'On only', value: 'on only'}]
+      
       $scope.updateTiming = function(day, list) {
         if (list[day].closed) {
           list[day].timings = [];
@@ -179,7 +184,7 @@ angular.module('merchantApp')
 
       $scope.$watchCollection('offer.rule', function(newVal, oldVal) {
         if(newVal.event_match != oldVal.event_match) {
-          $scope.offer.friendly_text = '';
+          $scope.offer.rule.friendly_text = '';
           $scope.offer.rule = { event_match: newVal.event_match };
         } else if($scope.offer.rule.event_match) {
           if($scope.offer.rule.event_match=='on every' && $scope.offer.rule.event_count && ($scope.offer.rule.event_start || $scope.offer.rule.event_start==0) && $scope.offer.rule.event_end) {
@@ -196,7 +201,7 @@ angular.module('merchantApp')
           } else if($scope.offer.rule.event_match=='on only' && ($scope.offer.rule.event_count || $scope.offer.rule.event_count==0)) {
             var ordinal;
             ordinal = ($scope.offer.rule.event_count>3 || $scope.offer.rule.event_count==0)? 'th': ($scope.offer.rule.event_count==3)? 'rd': ($scope.offer.rule.event_count==2)? 'nd': ($scope.offer.rule.event_count==1)? 'st': 'th';
-            $scope.offer.rule.friendly_text = 'Application on the ' + $scope.offer.rule.event_count + ordinal + 'checkin';
+          $scope.offer.rule.friendly_text = 'Application on the ' + $scope.offer.rule.event_count + ordinal + 'checkin';
           } else {
             $scope.offer.rule.friendly_text = '';
           }
@@ -576,7 +581,7 @@ angular.module('merchantApp')
 
                                 if(timing1 == timing2) {
                                     callback();
-                                } else if(((startMin1 <= closeMin2) && (closeMin2 <= closeMin1)) || ((startMin1 <= closeMin2) && (closeMin2 <= closeMin1)) || ((startMin2<= closeMin1) && (closeMin1 <= closeMin2))) {
+                                } else if(((startMin1 <= closeMin2) && (closeMin2 <= closeMin1)) || ((startMin1 <= startMin2) && (startMin2 <= closeMin1)) || ((startMin2<= closeMin1) && (closeMin1 <= closeMin2)) ) {
                                     callback("One or more offer timings invalid for " + day.toUpperCase());
                                 } else {
                                     callback();
@@ -613,7 +618,8 @@ angular.module('merchantApp')
             async.each(offer_schedule.timings, function(offer_timing, callback) {
               var offerOpenMin = (offer_timing.open.hr * 60) + offer_timing.open.min,
                 offerCloseMin = (offer_timing.close.hr * 60) + offer_timing.close.min;
-              async.each($scope.outlets, function(outlet, callback) {
+              async.each($scope.offer.offer_outlets, function(outletId, callback) {
+                var outlet = $scope.outlets[outletId];
                 var outlet_schedule = outlet.business_hours[day];
 
                 if(outlet_schedule.closed) {
@@ -622,16 +628,17 @@ angular.module('merchantApp')
                   async.each(outlet_schedule.timings, function(outlet_timing, callback) {
                     var outletOpenMin = (outlet_timing.open.hr * 60) + outlet_timing.open.min,
                       outletCloseMin = (outlet_timing.close.hr * 60) + outlet_timing.close.min;
-                    console.log(offerOpenMin, offerCloseMin);
-                    console.log(outletOpenMin, outletCloseMin);
-                    console.log((offerOpenMin < outletOpenMin), (outletCloseMin < offerCloseMin))
-                    if((offerOpenMin < outletOpenMin) || (outletCloseMin < offerCloseMin)) {
-                      callback("Offer available on " + day.toUpperCase() + " outside the timings for " + outlet.basics.name);
+                    if(outletOpenMin<=offerOpenMin && offerCloseMin<=outletCloseMin) {
+                      callback("found");
                     } else {
                       callback();
                     }
-                  }, function(err) {
-                    callback(err);
+                  }, function(found) {
+                    if(found) {
+                      callback();
+                    } else {
+                      callback("Offer available on " + day.toUpperCase() + " outside the timings for " + outlet.basics.name);
+                    }
                   });
                 }
               }, function(err) {
