@@ -13,36 +13,25 @@ var HttpHelper = require('../common/http.hlpr');
 ============================================*/
 
 module.exports.uploadImage = function(req, res) {
-	var img_obj = {
-		id: req.body.id || ObjectId(),
-		image: req.body.image || ''
-	}
-	if(!img_obj.id || !img_obj.image) {
-		HttpHelper.error(res, null, "Request object invalid.");
-	} else {
-		AWSHelper.uploadObject(img_obj, function(err, url) {
-			if(err || !url) {
-				HttpHelper.error(res, err || null, "File upload Failure");
-			} else {
-				HttpHelper.success(res, { id: img_obj.id, url: url }, "Image uploaded successfully");
-			}
-		})
-	}
-}
-
-module.exports.uploadImage = function(req, res) {
-	if(!_.has(req.body, 'image_class')) {
+	if(!_.has(req.body, 'image_class') || !_.has(req.body, 'image_type') || !_.has(req.body, 'image')) {
 		HttpHelper.error(res, new Error("Invalid request object"), "Invalid request object");
-	} else if (req.body.image_class=='outlet') {
-		ImageHelper.uploadOutletImage(req, res)
-			.then(function(data) {
-				HttpHelper.success(res, data.data, data.message);
-			}, function(err) {
-				HttpHelper.error(res, err.err || null, err.message);
-			});
-	} else if (req.body.image_class=='bill') {
-		HttpHelper.error(res, new Error("Other image uploads currently restricted"), "Other image uploads currently restricted");
-	} else {
+	} 
+	else if (req.body.image_class =='outlet') {
+		
+		var img_obj = {};
+		img_obj.id = req.body.id || new ObjectId();
+		img_obj.image = req.body.image;
+		img_obj.image_type = req.body.image_type;
+
+		ImageHelper.uploadOutletImage(img_obj).then(function(data) {
+			HttpHelper.success(res, data.data, data.message);
+		}, 
+		function(err) {
+			HttpHelper.error(res, err.err || null, err.message);
+		});	
+		
+	} 
+	else {
 		HttpHelper.error(res, new Error("Invalid request object"), "Invalid request object");
 	}
 }
