@@ -40,12 +40,15 @@ angular.module('merchantApp')
 						fileElement.trigger('click');
 					})
 					element.css('cursor', 'pointer');
-					// scope.$watch(function() {
-					// 	return ngModel.$modelValue;
-					// }, function(v) {
-					// 	if(v)
-					// 		$(imgElement).attr('src', '');
-					// });
+					scope.$watch(function() {
+						return ngModel.$modelValue;
+					}, function(v) {
+						if(/^http/i.test(v)) {
+							$(imgElement).attr('src', v);
+						} else {
+							$(imgElement).attr('src', 'https://s3.amazonaws.com/retwyst-merchants/retwyst-outlets/' + _id + '/' + v);
+						}
+					});
 				}
 			}
 		}

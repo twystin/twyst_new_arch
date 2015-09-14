@@ -2,22 +2,14 @@ angular.module('merchantApp')
     .controller('OutletCreateController', ['$scope', '$log', '$state', '$http', '$rootScope', 'toastr', '$timeout', '$stateParams', '$q',
         function($scope, $log, $state, $http, $rootScope, toastr, $timeout, $stateParams, Q) {
 
-            $scope.tag_set = ['desserts', 'restaurant', 'biryani', 'chinese', 'conntinental', 'north_indian', 'fast_food', 'burgers', 'pizza', 'wraps', 'pub', 'beer', 'bakery', 'cake', 'cafe', 'bistro', 'takeaway', 'other'];
-            $scope.weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-            $scope.payment_options = ['cash', 'visa', 'master', 'amex', 'sodexho'];
-            $scope.checkModel = {};
             $scope.cuisines = ["African", "American", "Andhra", "Arabic", "Armenian", "Asian", "Assamese", "Awadhi", "Bangladeshi", "Belgian", "Bengali", "Biryani", "British", "Burmese", "Chettinad", "Chinese", "Continental", "Costal", "Desserts", "European", "Fast Food", "Finger Food", "French", "German", "Goan", "Greek", "Gujarati", "Healthy Food", "Hyderabadi", "Ice creams", "Indian", "Indonesian", "Italian", "Japanese", "Kashmiri", "Konkan", "Malayali", "Korean", "Lebanese", "Lucknowi", "Maharashtrian", "Malaysian", "Mangalorean", "Mediterranean", "Mexican", "Moroccan", "Mughlai", "Naga", "Nepalese", "North Eastern", "North Indian", "Oriya", "Pakistani", "Parsi", "Pizza", "Portuguese", "Punjabi", "Rajasthani", "Russian", "Sri Lankan", "Sindhi", "Singaporean", "South American", "South Indian", "Spanish", "Street Food", "Sushi", "Tex-Mex", "Thai", "Tibetan", "Turkish", "Vietnamese", "Wraps", "Bakery", "Beverages", "Burgers", "Cafe", "Salads", "Sandwiches", "Seafood", "Middle Eastern", "Steaks", "Sizzlers"];
+            $scope.map = { center: { latitude: 28.466276810692897, longitude: 77.06915080547333 }, zoom: 14 }; $scope.options = { scrollwheel: true };
 
-            $scope.map = { center: { latitude: 28.805422897457665, longitude: 77.16647699812655 }, zoom: 10 }; $scope.options = { scrollwheel: true };
-
-            $scope.attribute_set = [{class_name: 'dine_in', text: 'Dine-in' }, { class_name: 'home_delivery', text: 'Home Delivery?' }, { class_name: 'veg', text: 'Pure Vegitarian?' }, { class_name: 'alcohol', text: 'Serves alcohol' }, { class_name: 'outdoor', text: 'Outdoor sitting' }, { class_name: 'foodcourt', text: 'Inside a food court' }, { class_name: 'smoking', text: 'Smoking allowed?' }, { class_name: 'chain', text: 'Part of a chain?' }];
             $scope.outlet_types = [{ value:'bakery', name:'Bakery'}, { value:'cafe', name:'Cafe'}, { value:'delivery', name:'Delivery Only'}, { value:'desserts', name:'Desserts'}, { value:'pub_lounge', name:'Pub/Lounge'}, { value:'fast_food', name:'QSR/Fast Food'}, { value:'restaurant', name:'Restaurant'}];
 
-            var sampleTiming = {open: {hr: 0, min: 0}, close: {hr: 0, min: 0}};
             $scope.outlet = { sms_off: {}, attributes: { cost_for_two: {}, payment_options: [], delivery: { delivery_timings: { monday: { closed: false, timings: [{}] }, tuesday: { closed: false, timings: [{}] }, wednesday: { closed: false, timings: [{}] }, thursday: { closed: false, timings: [{}] }, friday: { closed: false, timings: [{}] }, saturday: { closed: false, timings: [{}] }, sunday: { closed: false, timings: [{}] } } } }, contact: { location: { coords: { }, locality_1: [''], locality_2: [''], landmarks: [] }, phones: { mobile: [{num: '', num_type: ''}], reg_mobile: [{num: '', num_type: ''}] }, emails: { type: 'work' } }, photos: { others: [] }, menus: [], links: { other_links: [] }, business_hours: { monday: { closed: false, timings: [{}] }, tuesday: { closed: false, timings: [{}] }, wednesday: { closed: false, timings: [{}] }, thursday: { closed: false, timings: [{}] }, friday: { closed: false, timings: [{}] }, saturday: { closed: false, timings: [{}] }, sunday: { closed: false, timings: [{}] } } };
             
-            $scope.isSpinnerVisible = false;
-            $scope.marker = { id: 0, coords: { latitude: 28.6078341976, longitude: 77.2465642784 }, options: { draggable: true }, events: { dragend: function(marker, eventName, args) { var lat = marker.getPosition().lat(); var lon = marker.getPosition().lng(); $scope.outlet.contact.location.coords.longitude = lon; $scope.outlet.contact.location.coords.latitude = lat; $scope.outlet.contact.location.map_url = 'https://maps.google.com/maps/?q=' + lat + ',' + lon + '&z=' + $scope.map.zoom; $scope.marker.options = { draggable: true, labelAnchor: "100 0", labelClass: "marker-labels" }; } } };
+            $scope.marker = { id: 0, coords: { latitude: 28.466276810692897, longitude: 77.06915080547333 }, options: { draggable: true }, events: { dragend: function(marker, eventName, args) { var lat = marker.getPosition().lat(); var lon = marker.getPosition().lng(); $scope.outlet.contact.location.coords.longitude = lon; $scope.outlet.contact.location.coords.latitude = lat; $scope.outlet.contact.location.map_url = 'https://maps.google.com/maps/?q=' + lat + ',' + lon + '&z=' + $scope.map.zoom; $scope.marker.options = { draggable: true, labelAnchor: "100 0", labelClass: "marker-labels" }; } } };
 
             $scope.mapEvents = { click: function(binding, event_type, click_obj) { var lat = click_obj[0].latLng.A; var lon = click_obj[0].latLng.F; $scope.$apply(function() { $scope.marker.coords = { latitude: lat, longitude: lon }; $scope.outlet.contact.location.coords = { latitude: lat, longitude: lon }; $scope.outlet.contact.location.map_url = 'https://maps.google.com/maps/?q=' + lat + ',' + lon + '&z=' + $scope.map.zoom; $scope.marker.options = { draggable: true, labelAnchor: "100 0", labelClass: "marker-labels" }; });  } }
 
@@ -41,6 +33,8 @@ angular.module('merchantApp')
 
                 $scope.map.center = {latitude: latitude, longitude: longitude};
                 $scope.marker.coords = {latitude: latitude, longitude: longitude};
+                $scope.outlet.contact.location.coords = { latitude: latitude, longitude: longitude };
+                $scope.outlet.contact.location.map_url = 'https://maps.google.com/maps/?q=' + latitude + ',' + longitude
             }
 
             $scope.addNumber = function(field_name) {
@@ -191,13 +185,6 @@ angular.module('merchantApp')
                 $scope.outlet.links.other_links.splice(index, 1);
             };
 
-            $scope.$watchCollection('checkModel', function() {
-                $scope.checkResults = [];
-                $scope.outlet.attributes.payment_options = Object.keys(_.pick($scope.checkModel, function(val, key) {
-                    return val;
-                }));
-            });
-
             $scope.updateSMSOff = function() {
                 if (!$scope.outlet.sms_off.value) {
                     $scope.outlet.sms_off.time = {};
@@ -246,12 +233,6 @@ angular.module('merchantApp')
                     deferred.reject();
                 } else if (!_.has($scope.outlet, 'contact.location.city')) {
                     $scope.handleErrors('Please provide a city name');
-                    deferred.reject();
-                } else if (!_.has($scope.outlet, 'contact.location.pin')) {
-                    $scope.handleErrors('Please provide a pincode');
-                    deferred.reject();
-                } else if (!/^[0-9]{6}$/.test($scope.outlet.contact.location.pin)) {
-                    $scope.handleErrors("Invalid pincode provided");
                     deferred.reject();
                 } else if (!_.has($scope.outlet, 'contact.location.coords.longitude') || !_.has($scope.outlet, 'contact.location.coords.latitude') || !_.has($scope.outlet, 'contact.location.map_url')) {
                     $scope.handleErrors('Geo Location data missing');
@@ -308,6 +289,9 @@ angular.module('merchantApp')
                 } else if (!$scope.outlet.attributes.cost_for_two.min || !$scope.outlet.attributes.cost_for_two.max) {
                     $scope.handleErrors("Valid cost for two range required");
                     deferred.reject();
+                } else if (parseInt($scope.outlet.attributes.cost_for_two.min) >= parseInt($scope.outlet.attributes.cost_for_two.max)) {
+                    $scope.handleErrors("Cost for two minimum value should be lesser than maximum value");
+                    deferred.reject();
                 } else if ($scope.outlet.attributes.home_delivery && (!_.has($scope.outlet, 'attributes.delivery.delivery_estimated_time') || !/^[0-9]{1,3}$/i.test($scope.outlet.attributes.delivery.delivery_estimated_time))) {
                     $scope.handleErrors("Valid estimate delivery time required");
                     deferred.reject();
@@ -359,7 +343,7 @@ angular.module('merchantApp')
 
                                         if(timing1 == timing2) {
                                             callback();
-                                        } else if(((startMin1 <= closeMin2) && (closeMin2 <= closeMin1)) || ((startMin1 <= closeMin2) && (closeMin2 <= closeMin1)) || ((startMin2<= closeMin1) && (closeMin1 <= closeMin2)) ) {
+                                        } else if(((startMin1 <= closeMin2) && (closeMin2 <= closeMin1)) || ((startMin1 <= startMin2) && (startMin2 <= closeMin1)) || ((startMin2<= closeMin1) && (closeMin1 <= closeMin2)) ) {
                                             callback("One or more timings invalid for " + day.toUpperCase());
                                         } else {
                                             callback();
@@ -413,55 +397,6 @@ angular.module('merchantApp')
                 }
                 return deferred.promise;
             };
-
-            // $scope.validateStep5 = function() {
-            //     _.each($scope.outlet.business_hours, function(schedule, key) {
-            //         if (!schedule.closed) {
-            //             _.each(schedule.timings, function(timing) {
-            //                 if (((timing.open.hr * 60) + timing.open.min + 60) > ((timing.close.hr * 60) + timing.close.min)) {
-            //                     $scope.handleErrors("One or more timings are invalid. Please rectify to continue");
-            //                     return false;
-            //                 }
-            //             });
-            //         }
-            //     });
-            //     return true;
-            // };
-
-            // $scope.validateStep6 = function() {
-            //     _.each($scope.outlet.menus, function(menu) {
-            //         if (!_.has(menu, 'name') || !_.has(menu, 'menu_description')) {
-            //             $scope.handleErrors('One or more menu data incomplete');
-            //             return false;
-            //         }
-            //         _.each(menu.sections, function(section) {
-            //             if (!_.has(section, 'section_name') || !_.has(section, 'section_description')) {
-            //                 $scope.handleErrors('One or more section data incomplete');
-            //                 return false;
-            //             }
-            //             _.each(section.items, function(item) {
-            //                 if (!_.has(item, 'item_name') || !_.has(item, 'item_description') || !_.has(item, 'item_photo') || !_.has(item, 'item_tags.0') || !_.has(item, 'item_cost')) {
-            //                     $scope.handleErrors('One or more item data incomplete');
-            //                     return false;
-            //                 }
-            //             });
-            //         });
-            //     });
-            //     return true;
-            // };
-
-            // $scope.validateContactInfo = function() {
-            //     if (!_.has($scope.outlet, 'contact.location.coords.longitude') || !_.has($scope.outlet, 'contact.location.coords.latitude') || !_.has($scope.outlet, 'contact.location.map_url')) {
-            //         $scope.handleErrors('Geo Location data missing');
-            //         return false;
-            //     } else if (!_.has($scope.outlet, 'contact.location.address') || !_.has($scope.outlet, 'contanct.location.locality_1.0') || !_.has($scope.outlet, 'contact.location.locality_2.0') || !_.has($scope.outlet, 'contact.location.city') || !_.has($scope.outlet, 'contanct.location.pin')) {
-            //         $scope.handleErrors('Address information is incomplete. Please rectify to continue');
-            //         return false;
-            //     } else if (!_.has($scope, outlet, '')) {
-            //         $scope.handleErrors('');
-            //         return false;
-            //     }
-            // }
 
             $scope.addCuisine = function(newCuisine) {
                 if(!newCuisine)
