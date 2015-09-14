@@ -628,6 +628,11 @@ angular.module('merchantApp')
                   async.each(outlet_schedule.timings, function(outlet_timing, callback) {
                     var outletOpenMin = (outlet_timing.open.hr * 60) + outlet_timing.open.min,
                       outletCloseMin = (outlet_timing.close.hr * 60) + outlet_timing.close.min;
+
+                    if(outletCloseMin<=outletOpenMin) {
+                      outletCloseMin += (24*60);
+                    }
+                    
                     if(outletOpenMin<=offerOpenMin && offerCloseMin<=outletCloseMin) {
                       callback("found");
                     } else {
