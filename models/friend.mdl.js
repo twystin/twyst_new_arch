@@ -10,6 +10,7 @@ var Friend = new Schema({
 	    source: String,
 	    add_date: Date,
 	    phone: String,
+	    social_id: String,
 	    name: String,
 	    email: String,
 	    user: {

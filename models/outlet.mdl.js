@@ -463,7 +463,11 @@ var OutletSchema = new Schema({
           type: String
         }
       }
-    }
+    },
+    offer_outlets: [{
+      type: Schema.Types.ObjectId,
+      ref: 'Outlet'
+    }]
   }],
   menu: [{
     status: {
