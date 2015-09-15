@@ -77,7 +77,7 @@ module.exports = function(app) {
 
   (function OfferRoutes() {
     var OfferCtrl = require('../controllers/offer.ctrl');
-    app.post('/api/v4/offers', OfferCtrl.new);
+    app.post('/api/v4/offers', OfferCtrl.create_offer);
     app.put('/api/v4/offers/:offer_group', mustBe.authorized('outlet.update', OfferCtrl.update));
     app.get('/api/v4/offers/:offer_group', mustBe.authorized('outlet.view', OfferCtrl.get));
   })();

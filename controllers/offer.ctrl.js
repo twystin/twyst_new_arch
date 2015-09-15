@@ -1,7 +1,7 @@
 'use strict';
 /*jslint node: true */
 
-var Cache = require('../../common/cache.hlpr');
+var Cache = require('../common/cache.hlpr');
 var Q = require('q');
 var _ = require('lodash');
 var async = require('async');
@@ -9,7 +9,7 @@ var mongoose = require('mongoose');
 var ObjectId = mongoose.Types.ObjectId;
 var Outlet = mongoose.model('Outlet');
 var logger = require('tracer').colorConsole();
-var AuthHelper = require('../../common/auth.hlpr');
+var AuthHelper = require('../common/auth.hlpr');
 
 module.exports.create_offer = function(token, new_offer) {
     logger.log();
