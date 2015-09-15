@@ -11,6 +11,8 @@ angular.module('merchantApp')
 				merchantRESTSvc.logout().then(function(data) {
 					if(data.response) {
 						$cookies.remove('token');
+						$cookies.remove('isPaying');
+						$rootScope.isPaying = undefined;
 						$rootScope.token = undefined;
 						toastr.success("Logged out successfully");
 						$state.go('merchant.login', {}, {

@@ -185,7 +185,7 @@ module.exports.create_merchant = function(merchant) {
   var deferred = Q.defer();
 
   var acc = new Account(merchant);
-  var user = new User({activities: ['outlet.create','outlet.update' ,'outlet.view' , 'outlet.remove'], is_paying: merchant.is_paying || false, role: merchant.role });
+  var user = new User({activities: ['outlet.create','outlet.update' ,'outlet.view' , 'outlet.remove'], is_paying: merchant.isPaying || false, role: merchant.role });
   if(merchant.email) {
     user.email = merchant.email;
   }

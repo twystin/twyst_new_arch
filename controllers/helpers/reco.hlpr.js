@@ -222,6 +222,10 @@ module.exports.isClosed = function(date, tm, business_hours) {
       var open_min = (timing.open.hr * 60) + timing.open.min,
         close_min = (timing.close.hr * 60) + timing.close.min;
 
+      if(close_min<open_min) {
+        close_min += (24*60);
+      }
+
       if( (minutes >= open_min) && (minutes <= close_min) ) {
         return false;
       }

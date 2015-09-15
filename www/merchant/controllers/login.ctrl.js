@@ -10,8 +10,10 @@ angular.module('merchantApp')
 			$scope.login = function() {
 				merchantRESTSvc.login($scope.user)
 					.then(function(res) {
-						$cookies.put('token', res.data.data);
-						$rootScope.token = res.data.data;
+						$cookies.put('token', res.data.data.data.token);
+						$cookies.put('isPaying', res.data.data.data.is_paying);
+						$rootScope.token = res.data.data.data.token;
+						$rootScope.isPaying = res.data.data.data.is_paying;
 						toastr.success("Logged in successfully");
 						$timeout(function() {
 							$state.go('merchant.home', {}, {

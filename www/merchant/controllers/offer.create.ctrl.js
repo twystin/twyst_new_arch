@@ -2,6 +2,7 @@ angular.module('merchantApp')
   .controller('OfferCreateController', ['$scope', '$http', '$q', 'toastr', 'merchantRESTSvc', '$rootScope', '$log', '$timeout', '$state', 'WizardHandler',
     function($scope, $http, Q, toastr, merchantRESTSvc, $rootScope, $log, $timeout, $state, WizardHandler) {
 
+      $scope.isPaying = $rootScope.isPaying;
       merchantRESTSvc.getOutlets().then(function(data) {
         $scope.outlets = _.indexBy(data.data.outlets, '_id');
       }, function(err) {
@@ -338,6 +339,12 @@ angular.module('merchantApp')
 
       });
 
+      $scope.scrollToTop = function() {
+        $('document').ready(function() {
+            $(window).scrollTop(0);
+        });
+      }
+
       $scope.validateStep1 = function() {
         var deferred = Q.defer();
 
@@ -351,6 +358,7 @@ angular.module('merchantApp')
           $scope.validateOfferRules().then(function() {
             $scope.validateRewardDetails().then(function() {
               $scope.validateRewardInfo().then(function() {
+                $scope.scrollToTop();
                 $scope.formFailure = false;
                 deferred.resolve(true);
               }, _handleErrors)
@@ -376,6 +384,7 @@ angular.module('merchantApp')
           $scope.validateOfferTimings().then(function() {
             $scope.validateAgainstOutlets().then(function() {
               $scope.validateOfferValidity().then(function() {
+                $scope.scrollToTop();
                 $scope.formFailure = false;
                 deferred.resolve(true);
               }, _handleErrors)
@@ -560,49 +569,52 @@ angular.module('merchantApp')
 
       $scope.validateOfferTimings = function() {
         var def = Q.defer();
-        async.each(Object.keys($scope.offer.actions.reward.reward_hours), function(day, callback) {
-            var schedule = $scope.offer.actions.reward.reward_hours[day];
-            if(schedule.closed) {
-                callback();
-            } else {
-                async.each(schedule.timings, function(timing1, callback) {
-                    if((!timing1.open.hr && timing1.open.hr !== 0) || (!timing1.open.min && timing1.open.min !== 0) || (!timing1.close.hr && timing1.close.hr !== 0) || (!timing1.close.min && timing1.close.min !== 0)) {
-                        callback("One or more offer timings invalid for " + day.toUpperCase())
-                    } else {
-                        async.each(schedule.timings, function(timing2, callback) {
-                            if((!timing2.open.hr && timing2.open.hr !== 0) || (!timing2.open.min && timing2.open.min !== 0) || (!timing2.close.hr && timing2.close.hr !== 0) || (!timing2.close.min && timing2.close.min !== 0)) {
-                                callback("One or more offer timings invalid for " + day.toUpperCase())
-                            } else {
-                                var startMin1 = (timing1.open.hr * 60) + timing1.open.min,
-                                    closeMin1 = (timing1.close.hr * 60) + timing1.close.min,
-                                    startMin2 = (timing2.open.hr * 60) + timing2.open.min,
-                                    closeMin2 = (timing2.close.hr * 60) + timing2.close.min;
+        if(!$scope.offer.offer_outlets || !$scope.offer.offer_outlets.length) {
+          def.reject("Select atleast one outlet");
+        } else {
+          async.each(Object.keys($scope.offer.actions.reward.reward_hours), function(day, callback) {
+              var schedule = $scope.offer.actions.reward.reward_hours[day];
+              if(schedule.closed) {
+                  callback();
+              } else {
+                  async.each(schedule.timings, function(timing1, callback) {
+                      if((!timing1.open.hr && timing1.open.hr !== 0) || (!timing1.open.min && timing1.open.min !== 0) || (!timing1.close.hr && timing1.close.hr !== 0) || (!timing1.close.min && timing1.close.min !== 0)) {
+                          callback("One or more offer timings invalid for " + day.toUpperCase())
+                      } else {
+                          async.each(schedule.timings, function(timing2, callback) {
+                              if((!timing2.open.hr && timing2.open.hr !== 0) || (!timing2.open.min && timing2.open.min !== 0) || (!timing2.close.hr && timing2.close.hr !== 0) || (!timing2.close.min && timing2.close.min !== 0)) {
+                                  callback("One or more offer timings invalid for " + day.toUpperCase())
+                              } else {
+                                  var startMin1 = (timing1.open.hr * 60) + timing1.open.min,
+                                      closeMin1 = (timing1.close.hr * 60) + timing1.close.min,
+                                      startMin2 = (timing2.open.hr * 60) + timing2.open.min,
+                                      closeMin2 = (timing2.close.hr * 60) + timing2.close.min;
 
-                                if(timing1 == timing2) {
-                                    callback();
-                                } else if(((startMin1 <= closeMin2) && (closeMin2 <= closeMin1)) || ((startMin1 <= startMin2) && (startMin2 <= closeMin1)) || ((startMin2<= closeMin1) && (closeMin1 <= closeMin2)) ) {
-                                    callback("One or more offer timings invalid for " + day.toUpperCase());
-                                } else {
-                                    callback();
-                                }
-                            }
-                        }, function(err) {
-                            callback(err);
-                        });
-                    }
-                }, function(err) {
-                    
-                    callback(err);
-                })
-            }
-        }, function(err) {
-            if(err) {
-                // $scope.handleErrors(err);
-                def.reject(err);
-            } else {
-                def.resolve(true);
-            }
-        });
+                                  if(timing1 == timing2) {
+                                      callback();
+                                  } else if(((startMin1 <= closeMin2) && (closeMin2 <= closeMin1)) || ((startMin1 <= startMin2) && (startMin2 <= closeMin1)) || ((startMin2<= closeMin1) && (closeMin1 <= closeMin2)) ) {
+                                      callback("One or more offer timings invalid for " + day.toUpperCase());
+                                  } else {
+                                      callback();
+                                  }
+                              }
+                          }, function(err) {
+                              callback(err);
+                          });
+                      }
+                  }, function(err) {
+                      
+                      callback(err);
+                  })
+              }
+          }, function(err) {
+              if(err) {
+                  def.reject(err);
+              } else {
+                  def.resolve(true);
+              }
+          });
+        }
         return def.promise;
       }
 
@@ -703,7 +715,6 @@ angular.module('merchantApp')
       $scope.backToStart = function() {
         WizardHandler.wizard().goTo(0);
       }
-
 
     }
   ])
