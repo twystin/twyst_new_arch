@@ -37,6 +37,12 @@ angular.module('merchantApp')
                 $scope.outlet.contact.location.map_url = 'https://maps.google.com/maps/?q=' + latitude + ',' + longitude
             }
 
+            $scope.scrollToTop = function() {
+                $('document').ready(function() {
+                    $(window).scrollTop(0);
+                });
+            }
+
             $scope.addNumber = function(field_name) {
                 if (!$scope.outlet.contact.phones[field_name]) {
                     $scope.outlet.contact.phones[field_name] = [];
@@ -271,6 +277,7 @@ angular.module('merchantApp')
                                         $scope.handleErrors("Contact person's Email ID required");
                                         deferred.reject();
                                     } else {
+                                        $scope.scrollToTop();
                                         $scope.formFailure = false;
                                         deferred.resolve(true);
                                     }
@@ -313,11 +320,13 @@ angular.module('merchantApp')
                             $scope.handleErrors("SMS Off start and end time cannot be the same");
                             deferred.reject();
                         } else {
+                            $scope.scrollToTop();
                             $scope.formFailure = false;
                             deferred.resolve(true);
                         }
                     }
                 } else {
+                    $scope.scrollToTop();
                     $scope.formFailure = false;
                     deferred.resolve(true);
                 }
@@ -366,6 +375,7 @@ angular.module('merchantApp')
                         $scope.handleErrors(err);
                         deferred.reject();
                     } else {
+                        $scope.scrollToTop();
                         $scope.formFailure = false;
                         deferred.resolve(true);
                     }

@@ -338,6 +338,12 @@ angular.module('merchantApp')
 
       });
 
+      $scope.scrollToTop = function() {
+        $('document').ready(function() {
+            $(window).scrollTop(0);
+        });
+      }
+
       $scope.validateStep1 = function() {
         var deferred = Q.defer();
 
@@ -351,6 +357,7 @@ angular.module('merchantApp')
           $scope.validateOfferRules().then(function() {
             $scope.validateRewardDetails().then(function() {
               $scope.validateRewardInfo().then(function() {
+                $scope.scrollToTop();
                 $scope.formFailure = false;
                 deferred.resolve(true);
               }, _handleErrors)
@@ -376,6 +383,7 @@ angular.module('merchantApp')
           $scope.validateOfferTimings().then(function() {
             $scope.validateAgainstOutlets().then(function() {
               $scope.validateOfferValidity().then(function() {
+                $scope.scrollToTop();
                 $scope.formFailure = false;
                 deferred.resolve(true);
               }, _handleErrors)

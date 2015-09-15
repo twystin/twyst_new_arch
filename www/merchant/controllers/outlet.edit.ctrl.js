@@ -16,7 +16,7 @@ angular.module('merchantApp')
 
       $http.get('/api/v4/locations').then(function(res) {console.log('res', res.data);if(res.data.response) {$scope.locations = res.data.data;} else {$scope.locations = [];toastr.error("Error loading location info");}}, function(err) {console.log('error', err);});
 
-      merchantRESTSvc.getOutlets().then(function(res) {angular.forEach(res.data.outlets, function(outlet) {if (outlet._id == $stateParams.outletId) {$scope.outlet = angular.copy(outlet);$scope.map.center = {latitude: $scope.outlet.contact.location.coords.latitude,longitude: $scope.outlet.contact.location.coords.longitude};$scope.marker.coords = {latitude: $scope.outlet.contact.location.coords.latitude,longitude: $scope.outlet.contact.location.coords.longitude};angular.forEach($scope.outlet.business_hours, function(schedule) {angular.forEach(schedule.timings, function(timing) {var _time = new Date();_time.setHours(timing.open.hr);_time.setMinutes(timing.open.min);_time.setSeconds(0);_time.setMilliseconds(0);timing.open.time = _time;_time.setHours(timing.close.hr);_time.setMinutes(timing.close.min);timing.close.time = _time;});});}});}, function(err) {$log.log('err', err);});
+      merchantRESTSvc.getOutlets().then(function(res) {angular.forEach(res.data.outlets, function(outlet) {if (outlet._id == $stateParams.outletId) {$scope.outlet = angular.copy(outlet); $scope.outlet.attributes.cost_for_two.min=$scope.outlet.attributes.cost_for_two.min.toString(); $scope.outlet.attributes.cost_for_two.max=$scope.outlet.attributes.cost_for_two.max.toString(); $scope.map.center = {latitude: $scope.outlet.contact.location.coords.latitude,longitude: $scope.outlet.contact.location.coords.longitude};$scope.marker.coords = {latitude: $scope.outlet.contact.location.coords.latitude,longitude: $scope.outlet.contact.location.coords.longitude};angular.forEach($scope.outlet.business_hours, function(schedule) {angular.forEach(schedule.timings, function(timing) {var _time = new Date();_time.setHours(timing.open.hr);_time.setMinutes(timing.open.min);_time.setSeconds(0);_time.setMilliseconds(0);timing.open.time = _time;_time.setHours(timing.close.hr);_time.setMinutes(timing.close.min);timing.close.time = _time;});});}});}, function(err) {$log.log('err', err);});
 
       $scope.options = { scrollwheel: true };
 
@@ -28,6 +28,12 @@ angular.module('merchantApp')
         $scope.map.center = { latitude: latitude, longitude: longitude };
         $scope.marker.coords = { latitude: latitude, longitude: longitude };
         $scope.outlet.contact.location.map_url = 'https://maps.google.com/maps/?q=' + latitude + ',' + longitude + '&z=' + $scope.map.zoom;
+      }
+
+      $scope.scrollToTop = function() {
+          $('document').ready(function() {
+              $(window).scrollTop(0);
+          });
       }
 
       $scope.addNumber = function(field_name) {
@@ -249,6 +255,7 @@ angular.module('merchantApp')
                     $scope.handleErrors("Contact person's Email ID required");
                     deferred.reject();
                   } else {
+                    $scope.scrollToTop();
                     $scope.formFailure = false;
                     deferred.resolve(true);
                   }
@@ -291,11 +298,13 @@ angular.module('merchantApp')
               $scope.handleErrors("SMS Off start and end time cannot be the same");
               deferred.reject();
             } else {
+              $scope.scrollToTop();
               $scope.formFailure = false;
               deferred.resolve(true);
             }
           }
         } else {
+          $scope.scrollToTop();
           $scope.formFailure = false;
           deferred.resolve(true);
         }
@@ -344,6 +353,7 @@ angular.module('merchantApp')
             $scope.handleErrors(err);
             deferred.reject();
           } else {
+            $scope.scrollToTop();
             $scope.formFailure = false;
             deferred.resolve(true);
           }
@@ -373,6 +383,7 @@ angular.module('merchantApp')
               $scope.handleErrors(err);
               deferred.reject();
             } else {
+              $scope.scrollToTop();
               $scope.formFailure = false;
               deferred.resolve(true);
             }
