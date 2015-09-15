@@ -123,7 +123,8 @@ module.exports.create_user_account = function(phone) {
           validation: {
             otp: true
           },
-          twyst_bucks: 500
+          twyst_bucks: 500,
+          role: 6
         });
         var friend = new Friend();
         friend.save(function(err, user_friend){
