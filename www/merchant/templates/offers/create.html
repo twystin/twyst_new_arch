@@ -454,7 +454,18 @@
             <div class='form-group'>
               <label class='col-md-2 control-label'>Offer Terms</label>
               <div class='col-md-6'>
-                <textarea class='form-control' rows='6' style='resize:none;overflow:auto;' ng-model='offer.actions.reward.terms'></textarea>
+                <textarea class='form-control' rows='6' style='resize:none;overflow:auto;' ng-model='offer.actions.reward.terms' placeholder='any terms not covered in the common terms below.'></textarea>
+                <div class='help-block'>
+                  <p><b>Common terms for all offers</b></p>
+                  <ul>
+                    <li>Offers (2 or more) cannot be clubbed</li>
+                    <li>Offers are not valid on specially priced combinations e.g. any other buffet/brunch deal/corporate dining rate/happy hours etc.</li>
+                    <li>Only 1 voucher / offer can be used per bill generated</li>
+                    <li>In certain cases, specific items may be part of the offer. The avialability of the specific items is not guaranteed and must be checked with the outlet before using the offer.</li>
+                    <li>The offer are provided at the sole discretion of the merchant, and the merchant reserves the right to alter ot withdraw the offer at any time.</li>
+                    <li>Offers/vouchers consisting of alcohol/alcohol-based products will be available only to individuals above legal drinking age. The establishment reserves the right to verify the customer's age before providing such reward.</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </fieldset>
