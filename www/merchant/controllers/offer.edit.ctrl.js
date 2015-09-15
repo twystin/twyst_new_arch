@@ -337,23 +337,24 @@ angular.module('merchantApp')
         var deferred = Q.defer();
 
         var _handleErrors = function(err) {
+          $scope.formFailure = true;
           toastr.error(err, "Error");
           deferred.reject();
         };
 
-        $scope.validateOfferType()
-          .then(function() {
-            return $scope.validateOfferRules();
+        $scope.validateOfferType().then(function() {
+          $scope.validateOfferRules().then(function() {
+            $scope.validateRewardDetails().then(function() {
+              $scope.validateRewardInfo().then(function() {
+                $scope.formFailure = false;
+                deferred.resolve(true);
+              }, _handleErrors)
+            }, _handleErrors)
           }, _handleErrors)
-          .then(function() {
-            return $scope.validateRewardDetails();
-          }, _handleErrors)
-          .then(function() {
-            return $scope.validateRewardInfo();
-          }, _handleErrors)
-          .then(function() {
-            deferred.resolve(true);
-          }, _handleErrors)
+        }, _handleErrors);
+          
+          
+          
         return deferred.promise;
       }
 
@@ -361,23 +362,21 @@ angular.module('merchantApp')
         var deferred = Q.defer();
 
         var _handleErrors = function(err) {
+          $scope.formFailure = true;
           toastr.error(err, "Error");
           deferred.reject();
         };
 
-        $scope.validateOfferTerms()
-          .then(function() {
-            return $scope.validateOfferTimings();
+        $scope.validateOfferTerms().then(function() {
+          $scope.validateOfferTimings().then(function() {
+            $scope.validateAgainstOutlets().then(function() {
+              $scope.validateOfferValidity().then(function() {
+                $scope.formFailure = false;
+                deferred.resolve(true);
+              }, _handleErrors)
+            }, _handleErrors)
           }, _handleErrors)
-          .then(function() {
-            return $scope.validateAgainstOutlets();
-          }, _handleErrors)
-          .then(function() {
-            return $scope.validateOfferValidity();
-          }, _handleErrors)
-          .then(function() {
-            deferred.resolve(true);
-          }, _handleErrors)
+        }, _handleErrors)
 
         return deferred.promise;
       }
