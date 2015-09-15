@@ -4,7 +4,7 @@ angular.module('merchantApp')
 
       $scope.cuisines = ["African", "American", "Andhra", "Arabic", "Armenian", "Asian", "Assamese", "Awadhi", "Bangladeshi", "Belgian", "Bengali", "Biryani", "British", "Burmese", "Chettinad", "Chinese", "Continental", "Costal", "Desserts", "European", "Fast Food", "Finger Food", "French", "German", "Goan", "Greek", "Gujarati", "Healthy Food", "Hyderabadi", "Ice creams", "Indian", "Indonesian", "Italian", "Japanese", "Kashmiri", "Konkan", "Malayali", "Korean", "Lebanese", "Lucknowi", "Maharashtrian", "Malaysian", "Mangalorean", "Mediterranean", "Mexican", "Moroccan", "Mughlai", "Naga", "Nepalese", "North Eastern", "North Indian", "Oriya", "Pakistani", "Parsi", "Pizza", "Portuguese", "Punjabi", "Rajasthani", "Russian", "Sri Lankan", "Sindhi", "Singaporean", "South American", "South Indian", "Spanish", "Street Food", "Sushi", "Tex-Mex", "Thai", "Tibetan", "Turkish", "Vietnamese", "Wraps", "Bakery", "Beverages", "Burgers", "Cafe", "Salads", "Sandwiches", "Seafood", "Middle Eastern", "Steaks", "Sizzlers"];
       $scope.map = { center: { latitude: 28.805422897457665, longitude: 77.16647699812655 }, zoom: 14 };
-
+      $scope.isPaying = $rootScope.isPaying;
       $scope.outlet_types = [{ value: 'bakery', name: 'Bakery' }, { value: 'cafe', name: 'Cafe' }, { value: 'delivery', name: 'Delivery Only' }, { value: 'desserts', name: 'Desserts' }, { value: 'pub_lounge', name: 'Pub/Lounge' }, { value: 'fast_food', name: 'QSR/Fast Food' }, { value: 'restaurant', name: 'Restaurant' }];
 
       $scope.outlet = {};
@@ -14,7 +14,7 @@ angular.module('merchantApp')
 
       $scope.mapEvents = { click: function(binding, event_type, click_obj) { var lat = click_obj[0].latLng.A; var lon = click_obj[0].latLng.F; $scope.$apply(function() { $scope.marker.coords = { latitude: lat, longitude: lon }; $scope.outlet.contact.location.coords = { latitude: lat, longitude: lon }; $scope.outlet.contact.location.map_url = 'https://maps.google.com/maps/?q=' + lat + ',' + lon + '&z=' + $scope.map.zoom; }); } }
 
-      $http.get('/api/v4/locations').then(function(res) {console.log('res', res.data);if(res.data.response) {$scope.locations = res.data.data;} else {$scope.locations = [];toastr.error("Error loading location info");}}, function(err) {console.log('error', err);});
+      $http.get('/api/v4/locations').then(function(res) {if(res.data.response) {$scope.locations = res.data.data;} else {$scope.locations = [];toastr.error("Error loading location info");}}, function(err) {console.log('error', err);});
 
       merchantRESTSvc.getOutlets().then(function(res) {angular.forEach(res.data.outlets, function(outlet) {if (outlet._id == $stateParams.outletId) {$scope.outlet = angular.copy(outlet); $scope.outlet.attributes.cost_for_two.min=$scope.outlet.attributes.cost_for_two.min.toString(); $scope.outlet.attributes.cost_for_two.max=$scope.outlet.attributes.cost_for_two.max.toString(); $scope.map.center = {latitude: $scope.outlet.contact.location.coords.latitude,longitude: $scope.outlet.contact.location.coords.longitude};$scope.marker.coords = {latitude: $scope.outlet.contact.location.coords.latitude,longitude: $scope.outlet.contact.location.coords.longitude};angular.forEach($scope.outlet.business_hours, function(schedule) {angular.forEach(schedule.timings, function(timing) {var _time = new Date();_time.setHours(timing.open.hr);_time.setMinutes(timing.open.min);_time.setSeconds(0);_time.setMilliseconds(0);timing.open.time = _time;_time.setHours(timing.close.hr);_time.setMinutes(timing.close.min);timing.close.time = _time;});});}});}, function(err) {$log.log('err', err);});
 
@@ -104,10 +104,22 @@ angular.module('merchantApp')
           return;
         }
         var openTime = new Date();
-        openTime.setHours(9); openTime.setMinutes(0); openTime.setSeconds(0); openTime.setMilliseconds(0);
+        if($rootScope.isPaying) {
+          openTime.setHours(9); openTime.setMinutes(0); openTime.setSeconds(0); openTime.setMilliseconds(0);
+        } else {
+          openTime.setHours(0); openTime.setMinutes(1); openTime.setSeconds(0); openTime.setMilliseconds(0);
+        }
         var closeTime = new Date();
-        closeTime.setHours(21); closeTime.setMinutes(0); closeTime.setSeconds(0); closeTime.setMilliseconds(0);
-        list[day].timings[index] = { open: { hr: 9, min: 0, time: openTime }, close: { hr: 21, min: 0, time: closeTime } };
+        if($rootScope.isPaying) {
+          closeTime.setHours(21); closeTime.setMinutes(0); closeTime.setSeconds(0); closeTime.setMilliseconds(0);
+        } else {
+          closeTime.setHours(0); closeTime.setMinutes(0); closeTime.setSeconds(0); closeTime.setMilliseconds(0);
+        }
+        if($rootScope.isPaying) {
+          list[day].timings[index] = { open: { hr: 9, min: 0, time: openTime}, close: { hr: 21, min: 0, time: closeTime} };
+        } else {
+          list[day].timings[index] = { open: { hr: 0, min: 1, time: openTime}, close: { hr: 0, min: 0, time: closeTime } };
+        }
       };
 
       $scope.cloneToAllDays = function(the_day, list) {
@@ -248,10 +260,10 @@ angular.module('merchantApp')
                   $scope.handleErrors(err);
                   deferred.reject();
                 } else {
-                  if (!_.has($scope.outlet, 'contact.emails.person') || !$scope.outlet.contact.emails.person) {
+                  if (!_.has($scope.outlet, 'contact.emails.person') || !$scope.outlet.contact.emails.person && $rootScope.isPaying) {
                     $scope.handleErrors("Contact person's name required");
                     deferred.reject();
-                  } else if (!_.has($scope.outlet, 'contact.emails.email') || !$scope.outlet.contact.emails.email) {
+                  } else if (!_.has($scope.outlet, 'contact.emails.email') || !$scope.outlet.contact.emails.email && $rootScope.isPaying) {
                     $scope.handleErrors("Contact person's Email ID required");
                     deferred.reject();
                   } else {
@@ -269,19 +281,22 @@ angular.module('merchantApp')
 
       $scope.validateStep2 = function() {
         var deferred = Q.defer();
-        if (!_.has($scope.outlet, 'basics.main_type') || !$scope.outlet.basics.main_type) {
+        if (!_.has($scope.outlet, 'basics.main_type') || !$scope.outlet.basics.main_type && $rootScope.isPaying) {
           $scope.handleErrors("Outlet type required");
           deferred.reject();
-        } else if (!$scope.outlet.attributes.cost_for_two.min || !$scope.outlet.attributes.cost_for_two.max) {
+        } else if ((!$scope.outlet.attributes.cost_for_two.min || !$scope.outlet.attributes.cost_for_two.max) && $rootScope.isPaying) {
           $scope.handleErrors("Valid cost for two range required");
           deferred.reject();
         } else if (parseInt($scope.outlet.attributes.cost_for_two.min) >= parseInt($scope.outlet.attributes.cost_for_two.max)) {
           $scope.handleErrors("Cost for two minimum value should be lesser than maximum value");
           deferred.reject();
-        } else if ($scope.outlet.attributes.home_delivery && (!_.has($scope.outlet, 'attributes.delivery.delivery_estimated_time') || !/^[0-9]{1,3}$/i.test($scope.outlet.attributes.delivery.delivery_estimated_time))) {
+        } else if ($scope.outlet.attributes.home_delivery && $rootScope.isPaying && (!_.has($scope.outlet, 'attributes.delivery.delivery_estimated_time') || !/^[0-9]{1,3}$/i.test($scope.outlet.attributes.delivery.delivery_estimated_time))) {
           $scope.handleErrors("Valid estimate delivery time required");
           deferred.reject();
-        } else if (!$scope.outlet.attributes.cuisines || !$scope.outlet.attributes.cuisines.length) {
+        } else if (!$scope.outlet.attributes.dine_in && !$scope.outlet.attributes.home_delivery && $rootScope.isPaying) {
+          $scope.handleErrors("Outlet must have atleast dine-in or delivery available");
+          deferred.reject();
+        } else if ((!$scope.outlet.attributes.cuisines || !$scope.outlet.attributes.cuisines.length) && $rootScope.isPaying) {
           $scope.handleErrors("Atleast one cuisine must be specified");
           deferred.reject();
         } else if ($scope.outlet && $scope.outlet.sms_off && $scope.outlet.sms_off.value) {

@@ -10,8 +10,8 @@ angular.module('consoleApp')
 			$scope.login = function() {
 				consoleRESTSvc.login($scope.user)
 					.then(function(res) {
-						$cookies.put('token', res.data.data);
-						$rootScope.token = res.data.data;
+						$cookies.put('token', res.data.data.data.token);
+						$rootScope.token = res.data.data.data.token;
 						toastr.success("Logged in successfully");
 						$state.go('console.home', {}, {
 							reload: true

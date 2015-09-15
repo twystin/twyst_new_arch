@@ -3,6 +3,7 @@ angular.module('merchantApp')
     function($scope, $http, Q, toastr, merchantRESTSvc, $rootScope, $log, $timeout, $state, WizardHandler, $stateParams) {
       merchantRESTSvc.getOutlets().then(function(data) { $scope.outlets = _.indexBy(data.data.outlets, '_id'); }, function(err) { $log.log('Could not get outlets - ' + err.message); $scope.outlets = []; });
 
+      $scope.isPaying = $rootScope.isPaying;
       merchantRESTSvc.getOffer($stateParams.offer_group).then(function(data) {
         if(data.data.offer_cost) {
           data.data.offer_cost = data.data.offer_cost.toString();

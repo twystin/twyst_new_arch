@@ -2,6 +2,7 @@ angular.module('merchantApp')
   .controller('OfferCreateController', ['$scope', '$http', '$q', 'toastr', 'merchantRESTSvc', '$rootScope', '$log', '$timeout', '$state', 'WizardHandler',
     function($scope, $http, Q, toastr, merchantRESTSvc, $rootScope, $log, $timeout, $state, WizardHandler) {
 
+      $scope.isPaying = $rootScope.isPaying;
       merchantRESTSvc.getOutlets().then(function(data) {
         $scope.outlets = _.indexBy(data.data.outlets, '_id');
       }, function(err) {
