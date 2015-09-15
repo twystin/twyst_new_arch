@@ -36,8 +36,8 @@ module.exports.uploadAppImage = function(image_obj) {
     var img_obj = {
 		Bucket: 'retwyst-app',
 		ACL: 'public-read',
-		ContentType: content_type,
-		Key: 'retwyst-user' + image_obj.user + '/'+ image_obj.event+ '/' + Date.now(),
+		ContentType: 'image/jpg',
+		Key: 'retwyst_user' + '/' + image_obj.user + '/'+ image_obj.event+ '/' + Date.now(),
 		Body: buff
 	};
     
@@ -64,8 +64,6 @@ module.exports.uploadOutletImage = function(image_obj) {
 	var deferred = Q.defer();
 	var buff = new Buffer(image_obj.image.replace(/^data:image\/\w+;base64,/, ""),'base64');
 
-	var content_type = getContentType(image_obj.image);
-
 	if(!content_type) {
 		deferred.reject({err: new Error("Invalid image type"), message: 'Image upload failed'});
 	} 
@@ -89,12 +87,12 @@ module.exports.uploadOutletImage = function(image_obj) {
 			Bucket: 'retwyst-merchants',
 			ACL: 'public-read',
 			ContentType: content_type,
-			Key: 'retwyst-outlets' + image_obj.id + '/' + image_obj.image_type,
+			Key: 'retwyst-outlets' + '/'+ image_obj.id + '/' + image_obj.image_type,
 			Body: buff
 		};
 		AWSHelper.uploadImage(img_obj)
 			.then(function(res) {
-				deferred.resolve({data: {id: img_obj.id, key: img_obj.image_type}, message: "Image uploaded successfully"});
+				deferred.resolve({data: {id: image_obj.id, key: image_obj.image_type}, message: "Image uploaded successfully"});
 			}, function(err) {
 				deferred.reject({err: err, message: 'Image upload failed'});
 		});
