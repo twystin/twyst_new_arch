@@ -1,11 +1,12 @@
 'use strict';
 /*jslint node: true */
-
+var logger = require('tracer').colorConsole();
 var HttpHelper = require('../common/http.hlpr');
 var OfferHelper = require('./helpers/offer.hlpr');
 var _ = require('lodash');
 
 module.exports.new = function(req, res) {
+	logger.log();
 	var token = req.query.token || null;
 	var new_offer = {};
 
@@ -19,4 +20,55 @@ module.exports.new = function(req, res) {
 	}, function(err) {
 		HttpHelper.error(res, err.err, err.message);
 	})
+}
+
+module.exports.get = function(req, res) {
+	logger.log();
+	var token = req.query.token || null,
+		offer_group = req.params.offer_group;
+
+	if(!token) {
+		HttpHelper.error(res, null, "Not Authenticated");
+	}
+
+	OfferHelper.get_offer(token, offer_group).then(function(data) {
+		HttpHelper.success(res, data.data, data.message);
+	}, function(err) {
+		HttpHelper.error(res, err.err, err.message);
+	})
+}
+
+module.exports.update = function(req, res) {
+	logger.log();
+	var token = req.query.token || null,
+		offer_group = req.params.offer_group;
+
+	if(!token) {
+		HttpHelper.error(res, null, 'Not Authenticated');
+	}
+	var updated_offer = {};
+	updated_offer = _.extend(updated_offer, req.body);
+
+	OfferHelper.update_offer(token, updated_offer)
+		.then(function(data) {
+			HttpHelper.success(res, data.data, data.message);
+		}, function(err) {
+			HttpHelper.error(res, err.err || true, err.message);
+		})
+}
+
+module.exports.delete = function(req, res) {
+    logger.log();
+    var token = req.query.token || null,
+    offer_group = req.params.offer_group;
+
+    if(!token) {
+        HttpHelper.error(res, null, "Not Authenticated");
+    }
+
+    OfferHelper.delete_offer(token, offer_group).then(function(data) {
+        HttpHelper.success(res, data.data, data.message);
+    }, function(err) {
+        HttpHelper.error(res, err.err || true, err.message);
+    });
 }

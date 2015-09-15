@@ -1,6 +1,7 @@
 angular.module('merchantApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angularMoment', 'toastr', 'angular-loading-bar', 'ngAnimate', 'ngStorage', 'ordinal', 'ngFileUpload', 'uiGmapgoogle-maps', 'mgo-angular-wizard'])
 	.run(function($rootScope, $state, $cookies) {
 		$rootScope.token = $cookies.get('token');
+		$rootScope.isPaying = $cookies.get('isPaying')=='false'? false: true;
 	})
 	.config(function($stateProvider, $urlRouterProvider, uiGmapGoogleMapApiProvider) {
 
@@ -64,12 +65,12 @@ angular.module('merchantApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angula
 				controller: 'OfferCreateController'
 			})
 			.state('merchant.view_offer', {
-				url: '/offers/view/:offerId',
+				url: '/offers/view/:offer_group',
 				templateUrl: 'templates/offers/view.html',
 				controller: 'OfferViewController'
 			})
 			.state('merchant.edit_offer', {
-				url: '/offers/edit/:offerId',
+				url: '/offers/edit/:offer_group',
 				templateUrl: 'templates/offers/edit.html',
 				controller: 'OfferEditController'
 			})

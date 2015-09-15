@@ -38,6 +38,19 @@ module.exports.get_user = function(token) {
 
         if (user) {
             user = user.toJSON();
+            if(user.role === 6) {
+              var friends = [];
+              _.each(user.friends.friends, function(friend){
+                  if(friend.user){
+                      friends.push(friend)
+                  }
+              })
+              user.friends = friends;
+            }
+            else if(user.role === 3){
+              user.token = token
+            }
+            
           deferred.resolve({
             response: true,
             message: 'User found',

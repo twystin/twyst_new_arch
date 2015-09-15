@@ -1,17 +1,17 @@
-<div class='col-xs-12 col-sm-10 col-sm-offset-1 col-lg-8 col-lg-offset-2' style='min-height:100vh;'>
+<div class='col-xs-12 col-sm-10 col-sm-offset-1 col-lg-8 col-lg-offset-2' style='min-height:100vh;padding-bottom:50px;'>
   <wizard on-finish='updateOffer()'>
     <wz-step title='Offer Basics' canexit='validateStep1'>
       <div class='well well-lg'>
         <form class='form-horizontal'>
           <fieldset>
             <legend>Offer Basics</legend>
-            <div class='form-group'>
-              <label for='offer_type' class='col-md-2 control-label'>Offer Type</label>
+            <div class='form-group' ng-class='{"has-error": formFailure && !offer.offer_type}'>
+              <label for='offer_type' class='col-md-2 control-label'>Offer Type <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
               <div class='col-md-6'>
                 <select class='form-control' ng-model='offer.offer_type'>
                   <option value='' ng-if='!offer.offer_type'>Choose an offer type</option>
-                  <option value='checkin'>Checkin Offer</option>
-                  <option value='offer'>Offer</optoin>
+                  <option value='checkin' ng-if='isPaying'>Checkin Offer</option>
+                  <option value='offer' ng-if='isPaying'>Offer</option>
                   <option value='deal'>Deal</option>
                   <option value='bank_deal'>Bank Deal</option>
                 </select>
@@ -25,22 +25,22 @@
           <fieldset>
             <legend>Offer Rules</legend>
             <div class='form-group'>
-              <label for='criteria' class='col-md-2 control-label'>Criteria</label>
-              <div class='col-md-6 col-lg-4'>
-                <select class='form-control' ng-model='offer.rule.event_type'>
-                  <option value='' ng-if='!offer.rule.event_type'>--- Choose a Criteria ---</option>
-                  <option value='every'>On every</option>
+              <label for='criteria' class='col-md-2 control-label'>Criteria <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
+              <div class='col-md-6 col-lg-4' ng-class='{"has-error": formFailure && !offer.rule.event_match}'>
+                <select class='form-control' ng-model='offer.rule.event_match'>
+                  <option value='' ng-if='!offer.rule.event_match'>--- Choose a Criteria ---</option>
+                  <option value='on every'>On every</option>
                   <option value='after'>After</option>
-                  <option value='only'>On only</option>
+                  <option value='on only'>On only</option>
                 </select>
               </div>
             </div>
-            <div class='form-group' ng-if='offer.rule.event_type'>
+            <div class='form-group' ng-if='offer.rule.event_match'>
               <div class='col-md-10 col-md-offset-2 col-lg-8'>
                 <div class='col-md-12'>Reward will be unlocked on</div>
-                <div class='row' ng-if='offer.rule.event_type=="every"'>
-                  <div class='col-md-12'>
-                    <label class='col-md-3 control-label'>Every</label>
+                <div class='row' ng-if='offer.rule.event_match=="on every"'>
+                  <div class='col-md-12' ng-class="{'has-error': formFailure && !offer.rule.event_count}">
+                    <label class='col-md-3 control-label'>Every <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                     <div class='col-md-6'>
                       <div class='input-group'>
                         <input type='number' class='form-control text-right' ng-model='offer.rule.event_count' placeholder='Eg. 1, 2, 3...' min='1' steps='1' max='{{(offer.rule.event_end-offer.rule.event_start) || 1}}'>
@@ -48,8 +48,8 @@
                       </div>
                     </div>
                   </div>
-                  <div class='col-md-12'>
-                    <label class='col-md-3 control-label'>Starting from</label>
+                  <div class='col-md-12' ng-class="{'has-error': formFailure && !offer.rule.event_start}">
+                    <label class='col-md-3 control-label'>Starting from <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                     <div class='col-md-6'>
                       <div class='input-group'>
                         <input type='number' class='form-control text-right' ng-model='offer.rule.event_start' placeholder='Eg. 1, 2, 3...' min='0' steps='1'>
@@ -62,8 +62,8 @@
                       </div>
                     </div>
                   </div>
-                  <div class='col-md-12'>
-                    <label class='col-md-3 control-label'>Upto</label>
+                  <div class='col-md-12' ng-class='{"has-error": formFailure && !offer.rule.event_end}'>
+                    <label class='col-md-3 control-label'>Upto <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                     <div class='col-md-6'>
                       <div class='input-group'>
                         <input type='number' class='form-control text-right' ng-model='offer.rule.event_end' placeholder='Eg. 1, 2, 3...' min='{{(offer.rule.event_start + 1) || 1}}'>
@@ -77,12 +77,12 @@
                     </div>
                   </div>
                 </div>
-                <div class='row' ng-if='offer.rule.event_type=="after"'>
+                <div class='row' ng-if='offer.rule.event_match=="after"'>
                   <div class='col-md-12 text-center'>
                     <h4>Every checkin!</h4>
                   </div>
-                  <div class='col-md-12'>
-                    <label class='col-md-3 control-label'>Starting from</label>
+                  <div class='col-md-12' ng-class='{"has-error": formFailure && !offer.rule.event_start}'>
+                    <label class='col-md-3 control-label'>Starting from <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                     <div class='col-md-6'>
                       <div class='input-group'>
                         <input type='number' class='form-control' ng-model='offer.rule.event_start' placeholder='Eg. 1, 2, 3...' min='0' steps='1'>
@@ -95,8 +95,8 @@
                       </div>
                     </div>
                   </div>
-                  <div class='col-md-12'>
-                    <label class='col-md-3 control-label'>Upto</label>
+                  <div class='col-md-12' ng-class='{"has-error": formFailure && !offer.rule.event_end}'>
+                    <label class='col-md-3 control-label'>Upto <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                     <div class='col-md-6'>
                       <div class='input-group'>
                         <input type='number' class='form-control' ng-model='offer.rule.event_end' placeholder='Eg. 1, 2, 3...' min='{{offer.rule.event_start + 1}}'>
@@ -110,9 +110,9 @@
                     </div>
                   </div>
                 </div>
-                <div class='row' ng-if='offer.rule.event_type=="only"'>
-                  <div class='col-md-12'>
-                    <label class='col-md-3 control-label'>On the </label>
+                <div class='row' ng-if='offer.rule.event_match=="on only"'>
+                  <div class='col-md-12' ng-class='{"has-error": formFailure && !offer.rule.event_count}'>
+                    <label class='col-md-3 control-label'>On the <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                     <div class='col-md-6'>
                       <div class='input-group'>
                         <input type='number' class='form-control' ng-model='offer.rule.event_count' placeholder='Eg. 1, 2, 3...' min='1'>
@@ -136,9 +136,9 @@
           <fieldset>
             <legend>Reward Details</legend>
             <div class='form-group'>
-              <label class='col-md-2 control-label'>Reward Type</label>
-              <div class='col-md-6'>
-                <select class='form-control' ng-model='offer.actions.reward.reward_meta.reward_type' ng-change='print()'>
+              <label class='col-md-2 control-label'>Reward Type <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
+              <div class='col-md-6' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.reward_type}'>
+                <select class='form-control' ng-model='offer.actions.reward.reward_meta.reward_type'>
                   <option value='' ng-if='!offer.actions.reward.reward_meta.reward_type'>Choose a Reward Type</option>
                   <option value='buyonegetone'>Buy One Get One</option>
                   <option value='discount'>Discount</option>
@@ -157,19 +157,20 @@
             <div class='form-group' ng-if='offer.actions.reward.reward_meta.reward_type'>
               <label class='col-md-2 control-label'>Reward Specifics</label>
               <div class='col-md-10' ng-if='offer.actions.reward.reward_meta.reward_type=="buyonegetone"'>
-                <div class='form-group'>
-                  <label class='col-md-3'>BOGO Item</label>
+                <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.bogo}'>
+                  <label class='col-md-3 control-label'>BOGO Item <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                   <div class='col-md-6'>
-                    <input type='text' ng-model='offer.actions.reward.reward_meta.bogo' class='form-control'>
+                    <input type='text' ng-model='offer.actions.reward.reward_meta.bogo' class='form-control' placeholder='provide item name here'>
                   </div>
                 </div>
               </div>
               <div class='col-md-10' ng-if='offer.actions.reward.reward_meta.reward_type=="discount"'>
-                <div class='form-group'>
-                  <label class='col-md-3 control-label'>Percent Discount</label>
+                <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.percent}'>
+                  <label class='col-md-3 control-label'>Percent Discount <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                   <div class='col-md-6'>
                     <div class='input-group'>
                       <select class='form-control' ng-model='offer.actions.reward.reward_meta.percent'>
+                        <option value='' ng-if='!offer.actions.reward.reward_meta.percent'>Choose a percentage value</option>
                         <option value='5'>5</option>
                         <option value='10'>10</option>
                         <option value='15'>15</option>
@@ -194,19 +195,19 @@
                     </div>
                   </div>
                 </div>
-                <div class='form-group'>
-                  <label class='col-md-3 control-label'>Max Discount</label>
+                <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.max}'>
+                  <label class='col-md-3 control-label'>Max Discount <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                   <div class='col-md-6'>
                     <div class='input-group'>
                       <div class='input-group-addon'>Rs.</div>
-                      <input type='number' ng-model='offer.actions.reward.reward_meta.max' class='form-control'>
+                      <input type='number' ng-model='offer.actions.reward.reward_meta.max' class='form-control' placeholder='maximum discount amount'>
                     </div>
                   </div> 
                 </div>
               </div>
               <div class='col-md-10' ng-if='offer.actions.reward.reward_meta.reward_type=="flatoff"'>
-                <div class='form-group'>
-                  <label class='col-md-3 control-label'>Amount Off</label>
+                <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.off}'>
+                  <label class='col-md-3 control-label'>Amount Off <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                   <div class='col-md-6'>
                     <div class='input-group'>
                       <div class='input-group-addon'>Rs.</div>
@@ -214,8 +215,8 @@
                     </div>
                   </div>
                 </div>
-                <div class='form-group'>
-                  <label class='col-md-3 control-label'>Minimum Spend</label>
+                <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.spend}'>
+                  <label class='col-md-3 control-label'>Minimum Spend <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                   <div class='col-md-6'>
                     <div class='input-group'>
                       <div class='input-group-addon'>Rs.</div>
@@ -225,21 +226,21 @@
                 </div>
               </div>
               <div class='col-md-10' ng-if='offer.actions.reward.reward_meta.reward_type=="free"'>
-                <div class='form-group'>
-                  <label class='col-md-3 control-label'>Free Item</label>
+                <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.title}'>
+                  <label class='col-md-3 control-label'>Free Item <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                   <div class='col-md-6'>
                     <input type='text' ng-model='offer.actions.reward.reward_meta.title' class='form-control'>
                   </div>
                 </div>
-                <div class='form-group'>
-                  <label class='col-md-3 control-label'>Conditions</label>
+                <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta._with}'>
+                  <label class='col-md-3 control-label'>Conditions <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                   <div class='col-md-6'>
                     <input type='text' ng-model='offer.actions.reward.reward_meta._with' class='form-control' placeholder='Eg. min order of Rs.X or with purchase of Y'>
                   </div>
                 </div>
               </div>
-              <div class='col-md-10' ng-if='offer.actions.reward.reward_meta.reward_type=="happyhours"'>
-                <label class='col-md-3 control-label'>Extention By</label>
+              <div class='col-md-10' ng-if='offer.actions.reward.reward_meta.reward_type=="happyhours"' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.extension}'>
+                <label class='col-md-3 control-label'>Extention By <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                 <div class='col-md-6'>
                   <div class='input-group'>
                     <input type='number' ng-model='offer.actions.reward.reward_meta.extension' class='form-control'>
@@ -248,14 +249,14 @@
                 </div>
               </div>
               <div class='col-md-10' ng-if='offer.actions.reward.reward_meta.reward_type=="reduced"'>
-                <div class='form-group'>
-                  <label class='col-md-3 control-label'>Item</label>
+                <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.what}'>
+                  <label class='col-md-3 control-label'>Item <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                   <div class='col-md-6'>
                     <input type='text' ng-model='offer.actions.reward.reward_meta.what' class='form-control'>
                   </div>
                 </div>
-                <div class='form-group'>
-                  <label class='col-md-3 control-label'>Worth</label>
+                <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.worth}'>
+                  <label class='col-md-3 control-label'>Worth <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                   <div class='col-md-6'>
                     <div class='input-group'>
                       <div class='input-group-addon'>Rs.</div>                      
@@ -263,8 +264,8 @@
                     </div>
                   </div>
                 </div>
-                <div class='form-group'>
-                  <label class='col-md-3 control-label'>For</label>
+                <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.for_what}'>
+                  <label class='col-md-3 control-label'>For <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                   <div class='col-md-6'>
                     <div class='input-group'>
                       <div class='input-group-addon'>Rs.</div>
@@ -274,22 +275,22 @@
                 </div>
               </div>
               <div class='col-md-10' ng-if='offer.actions.reward.reward_meta.reward_type=="custom"'>
-                <div class='form-group'>
-                  <label class='col-md-3 control-label'>Custom Text</label>
+                <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.title}'>
+                  <label class='col-md-3 control-label'>Custom Text <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                   <div class='col-md-6'>
                     <textarea class='form-control' ng-model='offer.actions.reward.reward_meta.title' rows='5'></textarea>
                   </div>
                 </div>
               </div>
               <div class='col-md-10' ng-if='offer.actions.reward.reward_meta.reward_type=="unlimited"'>
-                <div class='form-group'>
-                  <label class='col-md-3 control-label'>Item</label>
+                <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.item}'>
+                  <label class='col-md-3 control-label'>Item <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                   <div class='col-md-6'>
                     <input type='text' ng-model='offer.actions.reward.reward_meta.item' class='form-control'>
                   </div>
                 </div>
-                <div class='form-group'>
-                  <label class='col-md-3 control-label'>For</label>
+                <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.conditions}'>
+                  <label class='col-md-3 control-label'>For <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                   <div class='col-md-6'>
                     <div class='input-group'>
                       <div class='input-group-addon'>Rs.</div>
@@ -299,42 +300,42 @@
                 </div>
               </div>
               <div class='col-md-10' ng-if='offer.actions.reward.reward_meta.reward_type=="onlyhappyhours"'>
-                <div class='form-group'>
-                  <label class='col-md-3 control-label'>Deal</label>
+                <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.title}'>
+                  <label class='col-md-3 control-label'>Deal <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                   <div class='col-md-6'>
                     <input type='text' class='form-control' ng-model='offer.actions.reward.reward_meta.title'>
                   </div>
                 </div>
-                <div class='form-group'>
-                  <label class='col-md-3 control-label'>Conditions</label>
+                <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.conditions}'>
+                  <label class='col-md-3 control-label'>Conditions <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                   <div class='col-md-6'>
                     <input type='text' class='form-control'  ng-model='offer.actions.reward.reward_meta.conditions'>
                   </div>
                 </div>
               </div>
               <div class='col-md-10' ng-if='offer.actions.reward.reward_meta.reward_type=="combo"'>
-                <div class='form-group'>
-                  <label class='col-md-3 control-label'>Items</label>
+                <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.items}'>
+                  <label class='col-md-3 control-label'>Items <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                   <div class='col-md-6'>
                     <input type='text' class='form-control' ng-model='offer.actions.reward.reward_meta.items'>
                   </div>
                 </div>
-                <div class='form-group'>
-                  <label class='col-md-3 control-label'>For</label>
+                <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta._for}'>
+                  <label class='col-md-3 control-label'>For <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                   <div class='col-md-6'>
-                    <input type='text' class='form-control' ng-model='offer.actions.reward.reward_meta._for'>
+                    <input type='number' class='form-control' ng-model='offer.actions.reward.reward_meta._for'>
                   </div>
                 </div>
               </div>
               <div class='col-md-10' ng-if='offer.actions.reward.reward_meta.reward_type=="buffet"'>
-                <div class='form-group'>
-                  <label class='col-md-3 control-label'>Deal</label>
+                <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.title}'>
+                  <label class='col-md-3 control-label'>Deal <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                   <div class='col-md-6'>
                     <textarea rows='3' ng-model='offer.actions.reward.reward_meta.title' class='form-control' ng-change='updateBuffetOffer(offer)'></textarea>
                   </div>
                 </div>
-                <div class='form-group'>
-                  <label class='col-md-3 control-label'>Cost</label>
+                <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.cost}'>
+                  <label class='col-md-3 control-label'>Cost <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                   <div class='col-md-6'>
                     <div class='input-group'>
                       <div class='input-group-addon'>Rs.</div>
@@ -350,14 +351,14 @@
                 <div class='alert alert-warning' ng-if='!offer.actions.reward.reward_meta.reward_type'>Choose a valid reward type first</div>
                 <div class='alert alert-warning' ng-if='(offer.actions.reward.reward_meta.reward_type=="buyonegetone" && !offer.actions.reward.reward_meta.bogo) || (offer.actions.reward.reward_meta.reward_type=="discount" && !(offer.actions.reward.reward_meta.percent && offer.actions.reward.reward_meta.max)) || (offer.actions.reward.reward_meta.reward_type=="flatoff" && !(offer.actions.reward.reward_meta.off && offer.actions.reward.reward_meta.spend)) || (offer.actions.reward.reward_meta.reward_type=="free" && !(offer.actions.reward.reward_meta.title && offer.actions.reward.reward_meta._with)) || (offer.actions.reward.reward_meta.reward_type=="happyhours" && !offer.actions.reward.reward_meta.extension) || (offer.actions.reward.reward_meta.reward_type=="reduced" && !(offer.actions.reward.reward_meta.what && offer.actions.reward.reward_meta.worth && offer.actions.reward.reward_meta.for_what)) || (offer.actions.reward.reward_meta.reward_type=="unlimited" && !(offer.actions.reward.reward_meta.item && offer.actions.reward.reward_meta.conditions)) || (offer.actions.reward.reward_meta.reward_type=="onlyhappyhours" && !(offer.actions.reward.reward_meta.title && offer.actions.reward.reward_meta.conditions)) || (offer.actions.reward.reward_meta.reward_type=="combo" && !(offer.actions.reward.reward_meta.items && offer.actions.reward.reward_meta._for)) || (offer.actions.reward.reward_meta.reward_type=="buffet" && !(offer.actions.reward.reward_meta.title && offer.actions.reward.reward_meta.cost))'>Input reward specifics to edit details</div>
                 <div class='form-group' ng-if='(offer.actions.reward.reward_meta.reward_type=="buyonegetone" && offer.actions.reward.reward_meta.bogo) || (offer.actions.reward.reward_meta.reward_type=="discount" && (offer.actions.reward.reward_meta.percent && offer.actions.reward.reward_meta.max)) || (offer.actions.reward.reward_meta.reward_type=="flatoff" && (offer.actions.reward.reward_meta.off && offer.actions.reward.reward_meta.spend)) || (offer.actions.reward.reward_meta.reward_type=="free" && (offer.actions.reward.reward_meta.title && offer.actions.reward.reward_meta._with)) || (offer.actions.reward.reward_meta.reward_type=="happyhours" && (offer.actions.reward.reward_meta.extension)) || (offer.actions.reward.reward_meta.reward_type=="reduced" && (offer.actions.reward.reward_meta.what && offer.actions.reward.reward_meta.worth && offer.actions.reward.reward_meta.for_what)) || offer.actions.reward.reward_meta.reward_type=="custom" || (offer.actions.reward.reward_meta.reward_type=="unlimited" && (offer.actions.reward.reward_meta.item && offer.actions.reward.reward_meta.conditions)) || (offer.actions.reward.reward_meta.reward_type=="onlyhappyhours" && (offer.actions.reward.reward_meta.title && offer.actions.reward.reward_meta.conditions)) || (offer.actions.reward.reward_meta.reward_type=="combo" && (offer.actions.reward.reward_meta.items && offer.actions.reward.reward_meta._for)) || (offer.actions.reward.reward_meta.reward_type=="buffet" && (offer.actions.reward.reward_meta.title && offer.actions.reward.reward_meta.cost))'>
-                  <div class='form-group'>
-                    <label class='col-md-3 control-label'>Header</label>
+                  <div class='form-group' ng-class="{'has-error': formFailure && !offer.actions.reward.header}">
+                    <label class='col-md-3 control-label'>Header <span class='glyphicon glyphicon-asterisk glyphicon-sm' ng-if='offer.actions.reward.reward_meta.reward_type=="custom"'></span></label>
                     <div class='col-md-6'>
                       <input type='text' ng-model='offer.actions.reward.header' class='form-control' ng-disabled='offer.actions.reward.reward_meta.reward_type!="custom"'>
                     </div>
                   </div>
-                  <div class='form-group'>
-                    <label class='col-md-3 control-label'>Line 1</label>
+                  <div class='form-group' ng-class="{'has-error': formFailure && !offer.actions.reward.line1}">
+                    <label class='col-md-3 control-label'>Line 1 <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
                     <div class='col-md-6'>
                       <input type='text' ng-model='offer.actions.reward.line1' class='form-control'>
                     </div>
@@ -374,7 +375,8 @@
             <div class='form-group'>
               <label class='col-md-2 control-label'>Offer Description</label>
               <div class='col-md-6'>
-                <textarea class='form-control' ng-model='offer.rule.friendly_text' rows='3' style='resize:none;overflow:auto;'></textarea>
+                <textarea class='form-control' ng-model='offer.actions.reward.description' rows='3' style='resize:none;overflow:auto;'></textarea>
+                <div class='help-block'>Add detailed offer description here if header, line 1 and line 2 do not capture all offer details.</div>
               </div>
             </div>
           </fieldset>
@@ -388,17 +390,17 @@
         <form class='form-horizontal'>
           <fieldset>
             <legend>Terms & Conditions</legend>
-            <div class='form-group' ng-if='offer.offer_type=="checkin" || offer.offer_type=="offer"'>
-              <label class='col-md-2 control-label'>Minimum Bill</label>
+            <div class='form-group' ng-if='offer.offer_type=="checkin" || offer.offer_type=="offer"' ng-class='{"has-error": formFailure && !offer.minimum_bill_value}'>
+              <label class='col-md-2 control-label'>Minimum Bill <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
               <div class='col-md-6'>
                 <div class='input-group'>
                   <div class='input-group-addon'>Rs.</div>
-                  <input type='number' class='form-control' ng-model='offer.actions.reward.reward_meta.min_bill'>
+                  <input type='number' class='form-control' ng-model='offer.minimum_bill_value'>
                 </div>
               </div>
             </div>
-            <div class='form-group'>
-              <label class='col-md-2 control-label'>Applicable For</label>
+            <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.applicability.dine_in && offer.actions.reward.applicability.delivery}'>
+              <label class='col-md-2 control-label'>Applicable For <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
               <div class='col-md-6'>
                 <div class='btn-group'>
                   <label class='btn' ng-class='{"btn-primary": offer.actions.reward.applicability.dine_in, "btn-default": !offer.actions.reward.applicability.dine_in}'>
@@ -411,45 +413,48 @@
               </div>
             </div>
             <div class='form-group' ng-if='offer.offer_type=="checkin"'>
-              <label class='col-md-2 control-label'>Lapses in</label>
+              <label class='col-md-2 control-label'>Lapses in <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
               <div class='col-md-6'>
                 <div class='input-group'>
-                  <input type='number' class='form-control' ng-model='offer.offer_lapse_days' min='1' steps='1'>
+                  <input type='number' class='form-control' ng-model='offer.offer_lapse_days' min='1' steps='1' placeholder='Duration for exclusive availability'>
                   <div class='input-group-addon'> days.</div>
                 </div>
               </div>
             </div>
             <div class='form-group' ng-if='offer.offer_type=="checkin"'>
-              <label class='col-md-2 control-label'>Expires in</label>
+              <label class='col-md-2 control-label'>Expires in <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
               <div class='col-md-6'>
                 <div class='input-group'>
-                  <input type='number' class='form-control' min='{{offer.offer_lapse_days + 14}}' ng-model='offer.offer_valid_days'>
+                  <input type='number' class='form-control' min='{{offer.offer_lapse_days + 14}}' ng-model='offer.offer_valid_days' placehulder='Actual offer validity duration.'>
                   <div class='input-group-addon'> days.</div>
                 </div>
+                <div class='help-block'>Expiration duration must be atleast 14 days more than lapse duration</div>
               </div>
             </div>
             <div class='form-group' ng-if='offer.offer_type=="offer"'>
-              <label class='col-md-2 control-label'>Offer Cost</label>
+              <label class='col-md-2 control-label'>Offer Cost <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
               <div class='col-md-6'>
-                <input type='number' class='form-control' ng-model='offer.offer_cost' min='1' steps='1'>
-                <span class='help-block'>Cost above is defined in Twyst imBucks</span>
+                <select class='form-control' ng-model='offer.offer_cost'>
+                  <option ng-repeat='i in getRange(18) track by $index' value='{{100 + (25*$index)}}'>{{100 + (25*$index)}}</option>
+                </select>
+                <span class='help-block'>Cost above is defined in Twyst Bucks</span>
               </div>
             </div>
             <div class='form-group' ng-if='offer.offer_type=="bank_deal"'>
-              <label class='col-md-2 control-label'>Deal Source</label>
+              <label class='col-md-2 control-label'>Deal Source <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
               <div class='col-md-6'>
                 <select ng-model='offer.offer_source' class='form-control'>
                   <option value='hdfc'>HDFC Bank</option>
                   <option value='sbi'>State Bank Of India</option>
                   <option value='hsbc'>HSBC Bank</option>
-                  <optoin value='citibank'>Citi Bank</option>
+                  <option value='citibank'>Citi Bank</option>
                 </select>
               </div>
             </div>
             <div class='form-group'>
               <label class='col-md-2 control-label'>Offer Terms</label>
               <div class='col-md-6'>
-                <textarea class='form-control' rows='6' style='resize:none;overflow:auto;' ng-model='offer.actions.reward.reward_meta.terms'></textarea>
+                <textarea class='form-control' rows='6' style='resize:none;overflow:auto;' ng-model='offer.actions.reward.terms'></textarea>
               </div>
             </div>
           </fieldset>
@@ -458,25 +463,96 @@
       <div class='well well-lg'>
         <form class='form-horizontal'>
           <fieldset>
-            <legend>Validity</legend>
+            <legend>Applicability</legend>
             <div class='form-group'>
-              <label class='col-md-2 control-label'>Start Date</label>
+              <label for='offer_outlets' class='col-md-2 control-label'>Outlets <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
+              <div class='col-md-9'>
+                <ul class='list-group' ng-if='offer.offer_outlets.length'>
+                  <li class='list-group-item' ng-repeat='outlet in offer.offer_outlets track by $index'>{{outlets[outlet].basics.name}}, {{outlets[outlet].contact.location.locality_1[0]}}, {{outlets[outlet].contact.location.locality_2[0]}}
+                    <button class='btn btn-sm btn-danger pull-right' ng-click='removeOutlet($index)'><span class='glyphicon glyphicon-trash'></span></button>
+                  </li>
+                </ul>
+                <div class='alert' ng-if='!offer.offer_outlets.length' ng-class='{"alert-warning": !formFailure, "alert-danger": formFailure && !(offer.offer_outlets && offer.offer_outlets.length)}'>
+                  <span ng-if='!formFailure'>Start adding outlets below.</span>
+                  <span ng-if='formFailure'>Choose atleast one outlet</span>
+                </div>
+              </div>
+            </div>
+            <div class='form-group'>
+              <label for='add_outlet' class='col-md-2 control-label'>
+                <span ng-if='!offer.offer_outlets.length'>Pick the first Outlet</span>
+                <span ng-if='offer.offer_outlets.length'>Pick another Outlet</span>
+              </label>
+              <div class='col-md-6 table-responsive'>
+                <table class='table table-bordered table-condensed'>
+                  <tbody>
+                    <tr ng-repeat='outlet in outlets track by $index' ng-show='!offer.offer_outlets || offer.offer_outlets.indexOf(outlet._id)==-1'>
+                      <td><button class='badge pull-left' ng-click='addOutlet(outlet._id)'><span class='glyphicon glyphicon-ok'> Add</span></button></td>
+                      <td>{{outlet.basics.name}}, {{outlet.contact.location.locality_1[0]}}, {{outlet.contact.location.locality_2[0]}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class='form-group'>
+              <label class='col-md-2 control-label'>Applicability <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
+              <div class='col-md-10'>
+                <div class='form-group' ng-if='offer.offer_outlets.length'>
+                  <label class='col-md-3 control-label'>Clone Outlet Timings</label>
+                  <div class='col-md-9'>
+                    <select ng-model='tempOutlet._id' class='form-control' ng-change='cloneTimings(tempOutlet)'>
+                      <option value=''>Choose an Outlet To Clone From</option>
+                      <option ng-repeat='outletId in offer.offer_outlets' value='{{outletId}}'>{{outlets[outletId].basics.name}}, {{outlets[outletId].contact.location.locality_1[0]}}, {{outlets[outletId].contact.location.locality_2[0]}}</option>
+                    </select>
+                  </div>
+                </div>
+                <div class='alert alert-warning' ng-if='!offer.offer_outlets.length'>
+                  <strong>Select atleast one outlet above to set offer timings</strong>
+                </div>
+                <div class='form-group table-responsive' ng-if='offer.offer_outlets.length'>
+                  <table class='table table-bordered table-condensed'>
+                    <thead>
+                      <th>Day</th>
+                      <th>Is Closed?</th>
+                      <th ng-repeat='i in getMaxRange() track by $index'>Timing {{$index+1}}</th>
+                      <th>Add Timing</th>
+                      <th>Apply to all days</th>
+                    </thead>
+                    <tbody>
+                      <tr ng-repeat='(day, schedule) in offer.actions.reward.reward_hours'>
+                        <th>{{day | uppercase}}</th>
+                        <td><input type='checkbox' ng-model='schedule.closed' ng-change='updateTiming(day, offer.actions.reward.reward_hours)'></td>
+                        <td ng-repeat='i in getMaxRange() track by $index'>
+                          <div class='col-md-12' ng-if='schedule.timings.length && schedule.timings[$index]' ng-click='removeTiming(day, $index, offer.actions.reward.reward_hours)' ng-show='schedule.timings.length>1' ng-init='initalizeTiming(day, $index, offer.actions.reward.reward_hours)'>
+                            <button class='btn btn-sm btn-danger pull-right' ><span class='glyphicon glyphicon-trash'></span></button>
+                          </div>
+                          <div class='col-md-12' ng-if='schedule.timings[$index]'>
+                            <input type='time' ng-model='schedule.timings[$index].open.time' placeholder="HH:MM A/P" class='form-control' ng-change='updateTime(day, $index, offer.actions.reward.reward_hours)'>
+                          </div>
+                          <div class='col-md-12 text-center' ng-if='schedule.timings[$index]'> to </div>
+                          <div class='col-md-12' ng-if='schedule.timings[$index]'>
+                            <input type='time' ng-model='schedule.timings[$index].close.time' placeholder="HH:MM A/P" class='form-control' ng-change='updateTime(day, $index, offer.actions.reward.reward_hours)'>
+                          </div>
+                        </td>
+                        <td><button class='btn btn-sm btn-default' ng-click='addNewTiming(day, offer.actions.reward.reward_hours)' ng-show='!schedule.closed'>Add Timing</button></td>
+                        <td><button class='btn btn-sm btn-default' ng-click='cloneToAllDays(day, offer.actions.reward.reward_hours)'>Apply to all days</button></td>
+                      </tr>
+                      <td>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class='form-group'>
+              <label class='col-md-2 control-label'>Start Date <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
               <div class='col-md-6'>
                 <datepicker ng-model="offer.offer_start_date" min-date="today" show-weeks="true" class="well well-sm"></datepicker>
               </div>
             </div>
             <div class='form-group'>
-              <label class='col-md-2 control-label'>End Date</label>
+              <label class='col-md-2 control-label'>End Date <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
               <div class='col-md-6'>
                 <datepicker ng-model="offer.offer_end_date" min-date="offer.offer_start_date || today" show-weeks="true" class="well well-sm"></datepicker>
-              </div>
-            </div>
-            <div class='form-group'>
-              <label class='col-md-2 control-label'>Choose Outlets</label>
-              <div class='col-md-6'>
-                <select multiple class='form-control' ng-model='offer.offer_outlets'>
-                  <option value='{{outlet._id}}' ng-repeat='outlet in outlets'>{{outlet.basics.name}}, {{outlet.contact.location.locality_1[0]}}, {{outlet.contact.location.locality_2[0]}}</option>
-                </select>
               </div>
             </div>
             <div class='clearfix'></div>
@@ -486,15 +562,89 @@
         </form>
       </div>
     </wz-step>
-    <wz-step>
-      <div class='well well-lg'>
-        <form class='form-horizontal'>
-          <legend>Review</legend>
-          <div class='clearfix'></div>
-          <button class='btn btn-default' wz-previous>Go Back</button>
-          <button class='btn btn-primary' wz-next>Create Offer</button>
-        </form>
+    <wz-step title='Review'>
+      <div class='panel panel-default'>
+        <div class='panel-heading'>Offer Basics</div>
+        <div class='panel-body'>
+          <div class='col-md-6'>
+            <h1>{{offer.actions.reward.header}}</h1>
+            <h3>{{offer.actions.reward.line1}}</h3>
+            <h3>{{offer.actions.reward.line2}}</h3>
+            <textarea class='form-control' ng-model='offer.actions.reward.description' disabled style='resize:none;overflow:auto;'></textarea>
+            <br />
+            <textarea class='form-control' rows='6' style='resize:none;overflow:auto;' disabled ng-model='offer.actions.reward.terms'></textarea>
+            <div class='pull-left'><div>Lapse Duration</div><span class='label label-success'>{{offer.offer_lapse_days}} days</span></div>
+            <div class='pull-right'><div>Expiration Duration</div><span class='label label-success'>{{offer.offer_valid_days}} days</span></div>
+          </div>
+          <div class='col-md-6'>
+            <h4>Offer Type: <span class='label label-primary'>{{offer_types[offer.offer_type]}}</span></h4>
+            <div>
+              <h4>Validity</h4>
+              <span class='label label-info'>{{offer.offer_start_date | date: longDate}}</span> to <span class='label label-info'>{{offer.offer_end_date | date: longDate}}</span>
+            </div>
+            <div>
+              <h4>Reward Type</h4>
+              <span class='label label-default'>{{reward_types[offer.actions.reward.reward_meta.reward_type]}}</div>
+            <div>
+              <h4>Reward Info</h4>
+              <div ng-if='offer.actions.reward.reward_meta.reward_type=="buyonegetone"'>Buy one <span class='label label-success'>{{offer.actions.reward.reward_meta.bogo}}</span> get another free.</div>
+              <div ng-if='offer.actions.reward.reward_meta.reward_type=="discount"'>Get <span class='label label-success'>{{offer.actions.reward.reward_meta.percent + '%'}}</span> for a max discount of upto <span class='label label-success'>{{'Rs.' + offer.actions.reward.reward_meta.max}}</span></div>
+              <div ng-if='offer.actions.reward.reward_meta.reward_type=="flatoff"'>Get <span class='label label-success'>{{'Rs.' + offer.actions.reward.reward_meta.off}}</span> on a minimum spend of <span class='label label-success'>{{'Rs.' + offer.actions.reward.reward_meta.spend}}</span></div>
+              <div ng-if='offer.actions.reward.reward_meta.reward_type=="free"'>Get <span class='label label-success'>{{offer.actions.reward.reward_meta.title}}</span> free with <span class='label label-success'>{{ offer.actions.reward.reward_meta._with}}</span></div>
+              <div ng-if='offer.actions.reward.reward_meta.reward_type=="happyhours"'>Happy hours extended by <span class='label label-success'>{{offer.actions.reward.reward_meta.extension + 'hr(s)'}}</span></div>
+              <div ng-if='offer.actions.reward.reward_meta.reward_type=="reduced"'>Get <span class='label label-success'>{{offer.actions.reward.reward_meta.what}}</span> worth <span class='label label-success'>{{'Rs.' + offer.actions.reward.reward_meta.worth}}</span> for just <span class='label label-success'>{{'Rs.' + offer.actions.reward.reward_meta.for_what}}</span></div>
+              <div ng-if='offer.actions.reward.reward_meta.reward_type=="custom"'><label class='control-label'>{{offer.actions.reward.reward_meta.title}}</label></div>
+              <div ng-if='offer.actions.reward.reward_meta.reward_type=="unlimited"'>Unlimited <span class='label label-success'>{{offer.actions.reward.reward_meta.item}}</span> for <span class='label label-success'>{{'Rs.' + offer.actions.reward.reward_meta.conditions}}</span></div>
+              <div ng-if='offer.actions.reward.reward_meta.reward_type=="onlyhappyhours"'>During happy hours get <span class='label label-success'>{{offer.actions.reward.reward_meta.title}}</span> on <span class='label label-success'>{{offer.actions.reward.reward_meta.conditions}}</span></div>
+              <div ng-if='offer.actions.reward.reward_meta.reward_type=="combo"'>Combo of <span class='label label-default'>{{offer.actions.reward.reward_meta.items}}</span> for just <span class='label label-default'>{{'Rs.' + offer.actions.reward.reward_meta._for}}</span></div>
+              <div ng-if='offer.actions.reward.reward_meta.reward_type=="buffet"'>Buffet <span class='label label-success'>{{offer.actions.reward.reward_meta.title}}</span> at <span class='label label-success'>{{'Rs.' + offer.actions.reward.reward_meta.cost}}</span></div>
+            </div>
+            <div ng-if='offer.offer_type=="checkin"'>
+              <h4>Offer Rules</h4>
+              <div ng-if='offer.rule.event_match=="on every"'>Application on every <span class='label label-success'>{{offer.rule.event_count + ((offer.rule.event_count==1)? 'st': (offer.rule.event_count==2)? 'nd': (offer.rule.event_count==3)? 'rd': 'th')}}</span> checkin from <span class='label label-success'>{{offer.rule.event_start + ((offer.rule.event_start==1)? 'st': (offer.rule.event_start==2)? 'nd': (offer.rule.event_start==3)? 'rd': 'th')}}</span> to <span class='label label-success'>{{offer.rule.event_end + ((offer.rule.event_end==1)? 'st': (offer.rule.event_end==2)? 'nd': (offer.rule.event_end==3)? 'rd': 'th')}}</span> checkin</div>
+              <div ng-if='offer.rule.event_match=="after"'>Application on every checkin starts from <span class='label label-success'>{{offer.rule.event_start + ((offer.rule.event_start==1)? 'st': (offer.rule.event_start==2)? 'nd': (offer.rule.event_start==3)? 'rd': 'th')}}</span> to <span class='label label-success'>{{offer.rule.event_end + ((offer.rule.event_end==1)? 'st': (offer.rule.event_end==2)? 'nd': (offer.rule.event_end==3)? 'rd': 'th')}}</span> checkin.</div>
+              <div ng-if='offer.rule.event_match=="on only"'>Application on the <span class='label label-success'>{{offer.rule.event_count + ((offer.rule.event_count==1)? 'st': (offer.rule.event_count==2)? 'nd': (offer.rule.event_count==3)? 'rd': 'th')}}</span> checkin.</div>
+            </div>
+            <div>
+              <h4>Applicable on: </h4>
+              <span ng-if='offer.actions.reward.applicability.dine_in' class='label label-success'>Dine in</span>
+              <span ng-if='offer.actions.reward.applicability.delivery' class='label label-success'>Delivery</span>
+            </div>
+            <div ng-if='offer.offer_type=="checkin" || offer.offer_type=="offer"'>
+              <h4>Minimum Bill <span class='label label-success'>Rs.{{offer.minimum_bill_value}}</span></h4>
+            </div>
+            <div ng-if='offer.offer_type=="offer"'>
+              <h4>Offer Cost <span class='label label-success'>{{offer.offer_cost}}</span> Twyst Bucks</h4>
+            </div>
+            <div ng-if='offer.offer_type=="bank_deal"'>
+              <h4>Deal Source <span class='label label-info'>{{offer_sources[offer.offer_source]}}</span></h4>
+            </div>
+          </div>
+        </div>
       </div>
+      <br />
+      <div class='panel panel-default'>
+        <div class='panel-heading'>Timings & Availability</div>
+        <div class='panel-body'>
+          <div class='col-md-6'>
+            <h3>Timings</h3>
+            <div class='row' ng-repeat='(day, schedule) in offer.actions.reward.reward_hours'>
+              <h4>{{day | uppercase}}</h4>
+              <span class='label label-warning' ng-if='schedule.closed'>Closed</span>
+              <span class='label label-success' ng-if='!schedule.closed'>Open</span>
+              <span ng-repeat='timing in schedule.timings' style='margin-left:10px;margin-right:10px;'><span class='label label-primary'>{{timing.open.time | date: 'hh:mm a'}}</span> to <span class='label label-primary'>{{timing.close.time | date: 'hh:mm a'}}</span></span>
+            </div>
+          </div>
+          <div class='col-md-6'>
+            <h4>Outlets Where Available</h4>
+            <ul class='list-group' ng-if='offer.offer_outlets.length'>
+              <li class='list-group-item' ng-repeat='outlet in offer.offer_outlets track by $index'>{{outlets[outlet].basics.name}}, {{outlets[outlet].contact.location.locality_1[0]}}, {{outlets[outlet].contact.location.locality_2[0]}}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <button class='btn btn-default' ng-click='backToStart()'>Back to First Step</button>
+      <button class='btn btn-primary' wz-next>Update Offer</button>
     </wz-step>
   </wizard>
 </div>

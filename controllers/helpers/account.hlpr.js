@@ -123,7 +123,8 @@ module.exports.create_user_account = function(phone) {
           validation: {
             otp: true
           },
-          twyst_bucks: 500
+          twyst_bucks: 500,
+          role: 6
         });
         var friend = new Friend();
         friend.save(function(err, user_friend){
@@ -184,7 +185,7 @@ module.exports.create_merchant = function(merchant) {
   var deferred = Q.defer();
 
   var acc = new Account(merchant);
-  var user = new User({activities: ['outlet.create','outlet.update' ,'outlet.view' , 'outlet.remove'], is_paying: merchant.is_paying || false });
+  var user = new User({activities: ['outlet.create','outlet.update' ,'outlet.view' , 'outlet.remove'], is_paying: merchant.isPaying || false, role: merchant.role });
   if(merchant.email) {
     user.email = merchant.email;
   }

@@ -11,7 +11,7 @@ var Friend = mongoose.model('Friend');
 var User = new Schema({
   activities: [],
   contact_person: {type: String, default: ''},
-  is_paying: {type: Boolean, required: true, default: false },
+  is_paying: {type: Boolean, default: false },
   company_name: {type: String, default: ''},
   job_title: {type: String, default: ''},
   website: {type: String, default: ''},
@@ -167,6 +167,10 @@ var User = new Schema({
     calculated_attributes: [],
     total_events: {},
     total_events_by_outlet: {}
+  },
+  role: {
+    type: Number,
+    default: 6
   },
   created_at: Date
 });
