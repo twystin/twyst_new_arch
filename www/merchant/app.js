@@ -64,12 +64,12 @@ angular.module('merchantApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angula
 				controller: 'OfferCreateController'
 			})
 			.state('merchant.view_offer', {
-				url: '/offers/view/:offerId',
+				url: '/offers/view/:offer_group',
 				templateUrl: 'templates/offers/view.html',
 				controller: 'OfferViewController'
 			})
 			.state('merchant.edit_offer', {
-				url: '/offers/edit/:offerId',
+				url: '/offers/edit/:offer_group',
 				templateUrl: 'templates/offers/edit.html',
 				controller: 'OfferEditController'
 			})

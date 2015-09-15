@@ -271,6 +271,7 @@ angular.module('merchantApp')
                                         $scope.handleErrors("Contact person's Email ID required");
                                         deferred.reject();
                                     } else {
+                                        $scope.formFailure = false;
                                         deferred.resolve(true);
                                     }
                                 }
@@ -312,10 +313,12 @@ angular.module('merchantApp')
                             $scope.handleErrors("SMS Off start and end time cannot be the same");
                             deferred.reject();
                         } else {
+                            $scope.formFailure = false;
                             deferred.resolve(true);
                         }
                     }
                 } else {
+                    $scope.formFailure = false;
                     deferred.resolve(true);
                 }
                 return deferred.promise;
@@ -363,6 +366,7 @@ angular.module('merchantApp')
                         $scope.handleErrors(err);
                         deferred.reject();
                     } else {
+                        $scope.formFailure = false;
                         deferred.resolve(true);
                     }
                 });
@@ -391,6 +395,7 @@ angular.module('merchantApp')
                             $scope.handleErrors(err);
                             deferred.reject();
                         } else {
+                            $scope.formFailure = false;
                             deferred.resolve(true);
                         }
                     })
