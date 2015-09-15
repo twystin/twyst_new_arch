@@ -77,12 +77,12 @@ angular.module('merchantApp')
 				return deferred.promise;
 			}
 
-			merchantRESTSvc.retrieveOutlet = function(outlet_id) {
+			merchantRESTSvc.createOffer = function(offer) {
 				var deferred = Q.defer();
 				var token = $cookies.get('token');
-				$http.get('/api/v4/outlets/retrieve/' + outlet_id + '?token=' + token)
+				$http.post('/api/v4/offers?token=' + token, offer)
 					.then(function(data) {
-						if (!data.data.response) {
+						if(!data.data.response) {
 							deferred.reject(data.data);
 						} else {
 							deferred.resolve(data.data);
@@ -93,15 +93,15 @@ angular.module('merchantApp')
 				return deferred.promise;
 			}
 
-			merchantRESTSvc.createOffer = function(offer) {
+			merchantRESTSvc.getOffer = function(offer_group) {
 				var deferred = Q.defer();
 				var token = $cookies.get('token');
-				$http.post('/api/v4/offers?token=' + token, offer)
+				$http.get('/api/v4/offers/' + offer_group + "?token=" + token)
 					.then(function(data) {
-						if(!data.data.response) {
-							deferred.reject(data.data);
-						} else {
+						if (data.data.response) {
 							deferred.resolve(data.data);
+						} else {
+							deferred.reject(data.data);
 						}
 					}, function(err) {
 						deferred.reject(err);

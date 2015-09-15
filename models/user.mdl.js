@@ -168,6 +168,10 @@ var User = new Schema({
     total_events: {},
     total_events_by_outlet: {}
   },
+  role: {
+    type: Number,
+    default: 6
+  },
   created_at: Date
 });
 

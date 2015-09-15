@@ -614,7 +614,6 @@ angular.module('merchantApp')
           if(offer_schedule.closed) {
             callback();
           } else {
-            console.log(offer_schedule.timings, day);
             async.each(offer_schedule.timings, function(offer_timing, callback) {
               var offerOpenMin = (offer_timing.open.hr * 60) + offer_timing.open.min,
                 offerCloseMin = (offer_timing.close.hr * 60) + offer_timing.close.min;
@@ -622,12 +621,21 @@ angular.module('merchantApp')
                 var outlet = $scope.outlets[outletId];
                 var outlet_schedule = outlet.business_hours[day];
 
+                if(offerCloseMin<=offerOpenMin) {
+                  offerCloseMin += (24*60);
+                }
+
                 if(outlet_schedule.closed) {
                   callback("Offer available on " + day.toUpperCase() + " despite outlet " + outlet.basics.name + " being closed");
                 } else {
                   async.each(outlet_schedule.timings, function(outlet_timing, callback) {
                     var outletOpenMin = (outlet_timing.open.hr * 60) + outlet_timing.open.min,
                       outletCloseMin = (outlet_timing.close.hr * 60) + outlet_timing.close.min;
+
+                    if(outletCloseMin<=outletOpenMin) {
+                      outletCloseMin += (24*60);
+                    }
+                    
                     if(outletOpenMin<=offerOpenMin && offerCloseMin<=outletCloseMin) {
                       callback("found");
                     } else {

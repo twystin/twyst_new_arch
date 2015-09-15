@@ -43,10 +43,13 @@ angular.module('merchantApp')
 					scope.$watch(function() {
 						return ngModel.$modelValue;
 					}, function(v) {
+						if(!v) {
+							return;
+						}
 						if(/^http/i.test(v)) {
 							$(imgElement).attr('src', v);
 						} else {
-							$(imgElement).attr('src', 'https://s3.amazonaws.com/retwyst-merchants/retwyst-outlets/' + _id + '/' + v);
+							$(imgElement).attr('src', 'https://s3-us-west-2.amazonaws.com/retwyst-merchants/retwyst-outlets/' + _id + '/' + v);
 						}
 					});
 				}
