@@ -62,6 +62,7 @@ module.exports.uploadAppImage = function(image_obj) {
 module.exports.uploadOutletImage = function(image_obj) {
 	logger.log();
 	var deferred = Q.defer();
+	var content_type = getContentType(image_obj.image);
 	var buff = new Buffer(image_obj.image.replace(/^data:image\/\w+;base64,/, ""),'base64');
 
 	if(!content_type) {

@@ -80,6 +80,7 @@ module.exports = function(app) {
     app.post('/api/v4/offers', OfferCtrl.new);
     app.put('/api/v4/offers/:offer_group', mustBe.authorized('outlet.update', OfferCtrl.update));
     app.get('/api/v4/offers/:offer_group', mustBe.authorized('outlet.view', OfferCtrl.get));
+    app.delete('/api/v4/offers/:offer_group', mustBe.authorized('outlet.update', OfferCtrl.delete));
   })();
 
   (function ImageRoutes() {

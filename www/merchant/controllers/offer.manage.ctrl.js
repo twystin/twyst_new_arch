@@ -2,15 +2,16 @@ angular.module('merchantApp')
 	.controller('OfferManageController', ['$scope', 'merchantRESTSvc', '$log', 'toastr',
 		function($scope, merchantRESTSvc, $log, toastr) {
 
-			$scope.offers = {
-				'checkin': [],
-				'offer': [],
-				'deal': [],
-				'bank_deal': []
-			}
+			
 
 			$scope.offer_groups = [];
 			$scope.get_offers = function() {
+				$scope.offers = {
+					'checkin': [],
+					'offer': [],
+					'deal': [],
+					'bank_deal': []
+				};
 				merchantRESTSvc.getOutlets().then(function(data) {
 					$scope.outlets = data.data.outlets;
 					_.each($scope.outlets, function(outlet) {
@@ -32,9 +33,15 @@ angular.module('merchantApp')
 			}
 			
 
-			$scope.removeOffer = function(index) {
+			$scope.removeOffer = function(offer_group) {
 				if(confirm("This is an irreversable change. Do you wish to continue?")) {
-					
+					merchantRESTSvc.removeOffer(offer_group)
+						.then(function(data) {
+							toastr.success(data.message);
+							$scope.get_offers();
+						}, function(err) {
+							console.log('error', err);
+						});
 				}
 			}
 		}

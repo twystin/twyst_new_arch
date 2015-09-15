@@ -101,7 +101,7 @@ module.exports.update_offer = function(token, new_offer) {
     var outletIds = _.map(new_offer.offer_outlets, function(obj) { return ObjectId(obj); });
     Outlet.find({
         $or: [{
-            '_id': outletIds
+            '_id': {$in: outletIds}
         }, {
             'offers.offer_group': new_offer.offer_group
         }]
@@ -144,6 +144,41 @@ module.exports.update_offer = function(token, new_offer) {
                     deferred.reject({err: err || true, message: 'Failed to update offer'});
                 } else {
                     deferred.resolve({data: new_offer, message: "Offer updated successfully"});
+                }
+            });
+        }
+    });
+    return deferred.promise;
+}
+
+module.exports.delete_offer = function(token, offer_group) {
+    logger.log();
+    var deferred = Q.defer();
+    Outlet.find({
+        'offers.offer_group': ObjectId(offer_group)
+    }).exec(function(err, outlets) {
+        if(err || !outlets) {
+            deferred.reject({err: err || true, message: 'Failed to update offer'});
+        } else {
+            async.each(outlets, function(outlet, callback) {
+                var index = _.findIndex(outlet.offers, function(offer) { return offer.offer_group.toString()==offer_group; });
+                if(index!==-1) {
+                    outlet.offers.splice(index, 1);
+                    outlet.save(function(err) {
+                        if(err) {
+                            callback(err);
+                        } else {
+                            callback();
+                        }
+                    });
+                } else {
+                    callback();
+                }
+            }, function(err) {
+                if(err) {
+                    deferred.reject({err: err || true, message: 'An error occured while deleting offer'});
+                } else {
+                    deferred.resolve({data: {}, message: 'Offer deleted successfully'});
                 }
             });
         }
