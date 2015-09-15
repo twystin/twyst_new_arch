@@ -47,6 +47,9 @@ module.exports.get_user = function(token) {
               })
               user.friends = friends;
             }
+            else if(user.role === 3){
+              user.token = token
+            }
             
           deferred.resolve({
             response: true,

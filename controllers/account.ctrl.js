@@ -11,6 +11,7 @@ var DTHelper = require('../common/datetime.hlpr.js');
 var SMSHelper = require('../common/sms.hlpr.js');
 var AccountHelper = require('./helpers/account.hlpr.js');
 var Cache = require('../common/cache.hlpr.js');
+var AuthHelper = require('../common/auth.hlpr.js');
 
 var _ = require('lodash');
 var Q = require('q');
@@ -27,9 +28,19 @@ module.exports.login = function(req, res) {
       return AccountHelper.populate_cache(data);
     })
     .then(function(data) {
-      HttpHelper.success(res, data.token.token, "Logged in successfully");
+      return AuthHelper.get_user(data.token.token);
+    })
+    .then(function(data) {
+      if(data.data.role === 3) {
+        HttpHelper.success(res, data, "Logged in successfully");  
+      }
+      else{
+        HttpHelper.success(res, data.data.token, "Logged in successfully");   
+      }
+      
     })
     .fail(function(err) {
+      console.log(err)
       HttpHelper.error(res, err, "Error logging in");
     });
 };
