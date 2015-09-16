@@ -10,6 +10,7 @@ var ObjectId = mongoose.Types.ObjectId;
 var Outlet = mongoose.model('Outlet');
 var logger = require('tracer').colorConsole();
 var AuthHelper = require('../../common/auth.hlpr');
+var Cache = require('../../common/cache.hlpr.js');
 
 module.exports.create_offer = function(token, new_offer) {
     logger.log();
@@ -130,6 +131,7 @@ module.exports.update_offer = function(token, new_offer) {
                         outlet.offers.push(new_offer);
                     } else {
                         offer = _.merge(offer, new_offer); 
+                        offer.offer_outlets = new_offer.offer_outlets;
                     }
                     outlet.save(function(err) {
                         if(err) {
@@ -143,12 +145,34 @@ module.exports.update_offer = function(token, new_offer) {
                 if(err) {
                     deferred.reject({err: err || true, message: 'Failed to update offer'});
                 } else {
+                    _updateCache(outlets);
                     deferred.resolve({data: new_offer, message: "Offer updated successfully"});
                 }
             });
         }
     });
     return deferred.promise;
+}
+
+var _updateCache = function(updated_outlet) {
+    Cache.get('outlets', function(err, reply) {
+        if(err) {
+            logger.error("Error retrieving outlets for updating");
+        } else {
+            var outlets = [];
+            if(reply) {
+                outlets = JSON.parse(reply);
+            }
+            async.each(updated_outlet, function(outlet, callback) {
+                outlets[outlet._id.toString()] = outlet;
+                callback();
+            }, function(err) {
+                Cache.set('outlets', JSON.stringify(outlets), function(err) {
+                    if(err) { logger.error("Error updating outlets"); }
+                });
+            });
+        }
+    });
 }
 
 module.exports.delete_offer = function(token, offer_group) {
@@ -178,6 +202,7 @@ module.exports.delete_offer = function(token, offer_group) {
                 if(err) {
                     deferred.reject({err: err || true, message: 'An error occured while deleting offer'});
                 } else {
+                    _updateCache(outlets);
                     deferred.resolve({data: {}, message: 'Offer deleted successfully'});
                 }
             });

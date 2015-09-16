@@ -78,6 +78,8 @@ module.exports.update_outlet = function(token, updated_outlet) {
               message: 'Couldn\'t update the outlet'
             });
           } else {
+            updated_outlet._id = id;
+            _updateOutletInCache(updated_outlet);
             deferred.resolve({
               data: o,
               message: 'Updated outlet successfully'
@@ -204,6 +206,7 @@ module.exports.remove_outlet = function(token, outlet_id) {
                 message: 'Couldn\'t remove the outlet reference from user'
               });
             } else {
+              _removeOutletFromCache(outlet_id);
               deferred.resolve({
                 data: element,
                 message: 'Successfully deleted the outlet'
@@ -221,3 +224,38 @@ module.exports.remove_outlet = function(token, outlet_id) {
 
   return deferred.promise;
 };
+
+var _updateOutletInCache = function(outlet) {
+  Cache.get('outlets', function(err, reply) {
+    if(err) {
+      logger.error("Error retrieving outlets for update", err);
+    } else {
+      var outlets = [];
+      if(reply) {
+        outlets = JSON.parse(reply);
+      }
+      outlets[outlet._id.toString()] = outlet;
+      Cache.set('outlets', JSON.stringify(outlets), function(err) {
+        if(err) {
+          logger.error("Error updating outlets", err);
+        }
+      });
+    }
+  });
+}
+
+var _removeOutletFromCache = function(outletId) {
+  Cache.get('outlets', function(err, reply) {
+    if(err) {
+      logger.error("Error retrieving outlets for update", err);
+    } else if(reply) {
+      var outlets = JSON.parse(reply);
+      delete outlets[outletId];
+      Cache.set('outlets', JSON.stringify(outlets), function(err) {
+        if(err) {
+          logger.error("Error updating outlets", err);
+        }
+      });
+    }
+  });
+}
