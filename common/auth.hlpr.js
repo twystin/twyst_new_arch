@@ -45,6 +45,7 @@ module.exports.get_user = function(token) {
                       friends.push(friend)
                   }
               })
+              user.friends_id = user.friends._id;
               user.friends = friends;
             }
             else if(user.role === 3){
