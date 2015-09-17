@@ -250,7 +250,7 @@ module.exports.opensAt = function(business_hours) {
   var today = business_hours[day];
 
   if(today.isClosed || !ld.has(today, 'timings') || ld.isEmpty(today.timings)) {
-    return checkTommorow(1);
+    return checkTomorrow(1);
   } else {
     for(var i=0; i < today.timings.length; i++) {
       var timing = today.timings[i];
@@ -266,10 +266,10 @@ module.exports.opensAt = function(business_hours) {
         }
       }
     }
-    return checkTommorow(1);
+    return checkTomorrow(1);
   }
 
-  function checkTommorow(counter) {
+  function checkTomorrow(counter) {
     if (counter === 7)
       return {
         'time': null,
@@ -281,7 +281,7 @@ module.exports.opensAt = function(business_hours) {
     today = business_hours[day];
 
     if(today.isClosed || !_.has(today, 'timings') || _.isEmpty(today.timings)) {
-      return checkTommorow(counter + 1);
+      return checkTomorrow(counter + 1);
     } else {
       for(var i=0; i < today.timings.length; i++) {
         var timing = today.timings[i];
@@ -290,7 +290,7 @@ module.exports.opensAt = function(business_hours) {
           var open_min = (timing.open.hr * 60) + timing.open.min;
           if(open_min > minutes) {
             if (counter === 1)
-              day = 'Tommorow';
+              day = 'Tomorrow';
 
 
             return {
@@ -300,7 +300,7 @@ module.exports.opensAt = function(business_hours) {
           }
         }
       }
-      return checkTommorow(counter + 1);
+      return checkTomorrow(counter + 1);
     }
   };
 };

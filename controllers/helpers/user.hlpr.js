@@ -3,7 +3,9 @@
 
 var Q = require('q');
 var _ = require('underscore');
+var ld = require('lodash');
 var mongoose = require('mongoose');
+var ObjectId = mongoose.Types.ObjectId;
 var Outlet = mongoose.model('Outlet');
 var User = mongoose.model('User');
 var Friend = mongoose.model('Friend');
@@ -13,19 +15,24 @@ var logger = require('tracer').colorConsole();
 
 
 module.exports.update_user = function(token, updated_user) {
+  logger.log();
   var deferred = Q.defer();
   AuthHelper.get_user(token).then(function(data) {
     var user = data.data;
-    user = _.extend(user, updated_user);
+
+    user = ld.merge(user, updated_user);
     
     if(user.gcmId) {
-        var push_info = {
-            push_type: 'gcm',
-            push_id: user.gcmId,
-            push_meta: {} 
-            
-        };   
-        user.push_ids.push(push_info);
+        var index = ld.findIndex(user.push_ids, function(push) { return push.push_id==gcmId; });
+        if(index==-1) {
+          var push_info = {
+              push_type: 'gcm',
+              push_id: user.gcmId,
+              push_meta: {} 
+              
+          };   
+          user.push_ids.push(push_info);
+        }
     }
     if(user.lat && user.long) {
         user.locations = {};
@@ -33,6 +40,10 @@ module.exports.update_user = function(token, updated_user) {
         user.locations.coords.lat = user.lat;
         user.locations.coords.log = user.long;
         user.locations.when = new Date();
+    }
+
+    if(user.source) {
+      user[updated_user.source] = updated_user;
     }
     
     user.device_info = {
@@ -48,6 +59,7 @@ module.exports.update_user = function(token, updated_user) {
     delete user.lat;
     delete user.long;
     delete user.__v;
+    delete user.friends_id;
 
     
     User.findOneAndUpdate({
@@ -82,136 +94,125 @@ module.exports.update_user = function(token, updated_user) {
 };
 
 module.exports.update_friends = function(token, friend_list) {
+  logger.log();
   var deferred = Q.defer();
-    AuthHelper.get_user(token).then(function(data) {
-        var user = data.data;
+  AuthHelper.get_user(token).then(function(data) {
+    var user = data.data;
+    var update_query = { $pushAll: { friends: [] } };
+    async.each(friend_list.list, function(friend, callback) {
+      var index;
+      
+      if (friend_list.source === 'GOOGLE' || friend_list.source === 'FACEBOOK') {
+        index = _.findIndex(user.friends, function(existing_friend) { return existing_friend.social_id == friend.id; });
+      } else {
+        index = _.findIndex(user.friends, function(existing_friend) { return existing_friend.phone == friend.phone; });
+      }
+      if (index === -1) {
+        var friend_obj = { source: friend_list.source, add_date: new Date(), phone: '', social_id: '', name: friend.name, email: friend.email };
+        var referral_obj = { source: friend_list.source, add_date: new Date(), phone: user.phone, social_id: '', email: user.email, user: user._id, name: user.first_name };
         
-        async.each(friend_list.list, function(friend){
-            
-            var update_phone_user = {
-                $addToSet: {
-                    friends: {
-                        source: friend_list.source,
-                        add_date: new Date(),
-                        phone: user.phone,
-                        email: user.email,
-                        user: user._id,
-                        name: user.frist_name
-                    }
-                }
-            }
-            var update_referral = {
-                $addToSet: {
-                    friends: {
-                        source: friend_list.source,
-                        add_date: new Date(),
-                        phone: friend.phone,
-                        name: friend.name,
-                        social_id: friend.id
-                    }
-                }   
-            }   
-            
-            User.findOne({ $or: [ { phone: friend.phone }, { 'facebook.id': friend.id }, 
-             { 'google.id': friend.id }] }, {}, function(err, phone_user){
-                if(err || ! phone_user) {
-                    if(user.friends_id){                        
-                        update_user_friend(user.friends_id, update_referral).then(function(data){
-                            deferred.resolve({
-                                data: user,
-                                message: 'Saved Referral'
-                            });   
-                        },function(err) {
-                            deferred.reject({
-                                err: err || true,
-                                message: "Couldn\'t update user"
-                            });
-                        });
-                    }                    
-                    
-                }
-                else if(phone_user.friends)   {
-                    update_user_friend(phone_user.friends, update_phone_user).then(function(data){
-                        if(user.friends_id) {
+        if (friend_list.source === 'GOOGLE' || friend_list.source === 'FACEBOOK') {
+          friend_obj.social_id = friend.id;
 
-                            update_user_friend(user.friends_id, update_referral).then(function(data){
-                                deferred.resolve({
-                                    data: user,
-                                    message: 'Saved Referral'
-                                });
-                            }, function(err) {
-                                deferred.reject({
-                                    err: err || true,
-                                    message: "Couldn\'t update user"
-                                });
-                            });
-                        }
-                        
-                    }, function(err) {
-                        deferred.reject({
-                            err: err || true,
-                            message: "Couldn\'t update phone user"
-                        });
-                    });
-                   
-                }
-                else{
-                    update_user_friend(user.friends_id, update_referral).then(function(data){
-                        deferred.resolve({
-                            data: user,
-                            message: 'Saved Referral'
-                        });   
-                    },function(err) {
-                        deferred.reject({
-                            err: err || true,
-                            message: "Couldn\'t update user"
-                        });
-                    });   
-                }
-                
-                
-            })        
-        }, function(err){            
-            if( err ) {
-                deferred.reject({
-                    err: err || true,
-                    message: "Couldn\'t update phone user"
-                });
-            } 
-            else {
-                deferred.resolve({
-                    data: user,
-                    message: 'Saved Referral'
-                });  
+          findFriendBySourceId(friend.id).then(function(app_friend) {
+            if (app_friend) {
+              friend_obj.user = app_friend.id;
+              friend_obj.email = app_friend.email;
+              friend_obj.phone = app_friend.phone;
+              addUserReferral(referral_obj, app_friend.friends);
             }
-        });
-    
-    }, function(err) {
-        deferred.reject({
+            update_query['$pushAll'].friends.push(friend_obj);
+            callback();
+          })
+
+        } else {
+          friend_obj.phone = friend.phone;
+
+          findFriendByPhone(friend.phone).then(function(app_friend) {
+            if (app_friend) {
+              friend_obj.user = app_friend.id;
+              friend_obj.email = app_friend.email;
+              addUserReferral(referral_obj, app_friend.friends);
+            }
+            update_query['$pushAll'].friends.push(friend_obj);
+            callback();
+          })
+
+        }
+      } else {
+        callback();
+      }
+    }, function() {
+      Friend.update({
+        '_id': user.friends_id
+      }, update_query, function(err, u) {
+        if (err || !u) {
+          deferred.reject({
             err: err || true,
-            message: "Couldn\'t find user"
-        });
-    });
+            message: "Couldn\'t update user"
+          });
+        } else {
+          deferred.resolve({
+            data: u,
+            message: 'Updated user'
+          });
+        }
+      });
+    })
 
-    return deferred.promise;
+  }, function(err) {
+    deferred.reject({
+      err: err || true,
+      message: "Couldn\'t find user"
+    });
+  });
+
+  return deferred.promise;
 };
 
-function update_user_friend(id, referral) {
-    logger.log();
-    var deferred = Q.defer();
-    Friend.findOneAndUpdate({
-            _id: id
-        }, 
-        referral,
-        function(err, u) {
-        if (err || !u) {
-            console.log(err)
-            deferred.reject(err);
-          
-        } else {
-            deferred.resolve(u);
-        }
-    });
+function findFriendBySourceId(friendId) {
+  logger.log();
+  var deferred = Q.defer();
+  User.findOne({ $or: [{ 'facebook.id': friendId }, { 'google.id': friendId }] }).exec(function(err, friend) {
+    if (err || !friend) {
+      deferred.resolve();
+    } else {
+      deferred.resolve({
+        id: friend._id.toString(),
+        email: friend.email,
+        phone: friend.phone,
+        friends: friend.friends
+      });
+    }
+  });
+  return deferred.promise;
+}
 
-    return deferred.promise;
+function findFriendByPhone(phone) {
+  logger.log();
+  var deferred = Q.defer();
+  User.findOne({ phone: phone }).exec(function(err, friend) {
+    if (err || !friend) {
+      deferred.resolve();
+    } else {
+      deferred.resolve({ id: friend._id.toString(), email: friend.email, friends: friend.friends });
+    }
+  });
+  return deferred.promise;
+}
+
+function addUserReferral(referral_obj, friendObjId) {
+  logger.log();
+  Friend.findOne({'_id': ObjectId(friendObjId)}).exec(function(err, obj) {
+    if(err || !obj) {
+    } else {
+      var index = _.findIndex(obj.friends, function(friend) { return friend.phone==referral_obj.phone; });
+      if(index==-1) {
+        obj.friends.push(referral_obj);
+      } else {
+        obj.friends[index].user = referral_obj.user.toString();
+      }
+      obj.save(function(err) { if(err) { logger.error(err); } else { logger.log('referral added successfully'); }});
+    }
+  });
 }
