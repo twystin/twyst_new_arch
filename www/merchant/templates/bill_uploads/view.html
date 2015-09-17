@@ -1,0 +1,39 @@
+<div class='col-xs-12 col-sm-10 col-sm-offset-1 col-lg-8 col-lg-offset-2' ng-init='get_offers()'>
+  <div class='panel panel-default'>
+    <div class='panel-heading'>
+      <ol class='breadcrumb'>
+        <li><a ui-sref='merchant.bill_uploads'>Bills</a></li>
+        <li class='active'>{{bill._id}}</li>
+      </ol>
+    </div>
+    <div class='panel-body'>
+    	<div class='row'>
+    		<div class='col-sm-6'>
+    			<img ng-src='{{bill.image}}' style='max-width:100%;height:auto;'>
+    		</div>
+    		<div class='col-sm-6'>
+    			<div class='row'>
+	    			<div><div class='col-sm-6'>Upload Date: </div><label class='col-sm-6 text-right'>{{bill.uploaded_on | date: 'MMM dd, yyyy'}}</label></div>
+	    			<div><div class='col-sm-6'>User ID: </div><label class='col-sm-6 text-right'>{{bill.user}}</label></div>
+	    			<div><div class='col-sm-6'>User Phone: </div><label class='col-sm-6 text-right'>{{bill.phone}}</label></div>
+	    			<div><div class='col-sm-6'>User Email: </div><label class='col-sm-6 text-right'>{{bill.email}}</label></div>
+	    			<p>&nbsp;</p>
+	    			<div><div class='col-sm-6'>Outlet:</div> <label class='col-sm-6 text-right control-label'>{{bill.outlet_name}}</label></div>
+	    			<div><div class='col-sm-6'>Location:</div> <label class='col-sm-6 text-right control-label'>{{bill.outlet_location}}</label></div>
+	    			<div><div class='col-sm-6'>Bill No.:</div> <label class='col-sm-6 text-right control-label'>{{bill.bill_number}}</label></div>
+	    			<div><div class='col-sm-6'>Bill Date:</div> <label class='col-sm-6 text-right control-label'>{{bill.bill_date| date: 'MMM dd, yyyy'}}</label></div>
+	    			<div><div class='col-sm-6'>Bill Time:</div> <label class='col-sm-6 text-right control-label'>{{bill.bill_time| date: 'hh:mm a'}}</label></div>
+	    			<div><div class='col-sm-6'>Bill Amount:</div> <label class='col-sm-6 text-right control-label'>{{bill.bill_amount}}</label></div>
+	    		</div>
+    		</div>
+    	</div>
+    	<div class='row'>
+    		<div class='col-xs-12'><br /></div>
+    		<div class='col-sm-6 col-sm-offset-3'>
+    			<a class='btn btn-primary btn-lg pull-left' ng-click='approveBill()'>Approve</a>
+    			<a class='btn btn-warning btn-lg pull-right' ng-click='rejectBill()'>Reject</a>
+    		</div>
+    	</div> 
+    </div>
+  </div>
+</div>

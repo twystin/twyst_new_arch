@@ -86,4 +86,14 @@ angular.module('merchantApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angula
 				url: '/profile',
 				templateUrl: 'templates/profile/home.html'
 			})
+			.state('merchant.bill_uploads', {
+				url: '/bill_uploads',
+				templateUrl: 'templates/bill_uploads/manage.html',
+				controller: 'BillManageController'
+			})
+			.state('merchant.view_bill', {
+				url: '/bill_uploads/:bill_id',
+				templateUrl: 'templates/bill_uploads/view.html',
+				controller: 'BillViewManageController'
+			})
 	})

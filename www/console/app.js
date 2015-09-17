@@ -32,4 +32,14 @@ angular.module('consoleApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angular
 				templateUrl: 'templates/merchant/register.html',
 				controller: 'MerchantRegisterController'
 			})
+			.state('console.bills', {
+				url: '/bills',
+				templateUrl: 'templates/bills/manage.html',
+				controller: 'BillManageController'
+			})
+			.state('console.bill_view', {
+				url: '/bills/:billId',
+				templateUrl: 'templates/bills/view.html',
+				controller: 'BillViewController'
+			})
 	});

@@ -14,7 +14,7 @@ var Friend = new Schema({
 	    name: String,
 	    email: String,
 	    user: {
-	      type: Schema.ObjectId,
+	      type: Schema.Types.ObjectId,
 	      ref: 'User'
 	    }
   	}],

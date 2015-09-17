@@ -38,13 +38,25 @@ module.exports.get_user = function(token) {
 
         if (user) {
             user = user.toJSON();
+            user.facebook_connect = false;
+            user.google_connect = false;
             if(user.role === 6) {
               var friends = [];
+              var twyst_friends = [];
               _.each(user.friends.friends, function(friend){
                   if(friend.user){
-                      friends.push(friend)
+                      twyst_friends.push(friend)
                   }
+                  friends.push(friend);
               })
+              if(user.facebook) {
+                user.facebook_connect = true;
+              }
+              if(user.google) {
+                user.google_connect = true;
+              }
+              user.friends_id = user.friends._id;
+              user.twyst_friends = twyst_friends;
               user.friends = friends;
             }
             else if(user.role === 3){
