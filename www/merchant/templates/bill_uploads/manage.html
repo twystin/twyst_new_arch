@@ -1,0 +1,40 @@
+<div class='col-xs-12 col-sm-10 col-sm-offset-1 col-lg-8 col-lg-offset-2' ng-init='get_bills()'>
+  <div class='panel panel-default table-responsive'>
+    <div class='panel-heading'>
+      <ol class='breadcrumb'>
+        <li><a>Bills</a></li>
+        <li class='active'>List</li>
+      </ol>
+    </div>
+    <div class='panel-body'>
+      <ul class='nav nav-pills nav-justified'>
+        <li role='presentation' class='dropdown'>
+          <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Sort By: {{sort_order[sort]}} <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+          	<li ng-repeat='(sort, text) in sort_order'><a ng-click='updateSortOrder(sort)'>{{text}}</a></li>
+          </ul>
+        </li>
+        <li role='presentation' ng-repeat='(val, text) in view_options' ng-class='{"active": view_by==val}' ng-click='updateViewBy(val)'><a>{{text}}</a></li>
+      </ul>
+    </div>
+    <table class='table table-striped table-hover'>
+      <thead>
+        <th>S.No.</th>
+        <th>User ID</th>
+        <th>Outlet Name</th>
+        <th>Upload Date</th>
+        <th>Status</th>
+      </thead>
+      <tbody>
+        <tr ng-repeat='bill in bills' ui-sref='merchant.view_bill({bill_id: bill._id})'>
+          <td class='text-right'>{{$index+1}}</td>
+          <td>{{bill.user}}</td>
+          <td>{{bill.outlet}}</td>
+          <td>{{bill.created_at}}</td>
+          <td>{{bill.status}}</td>
+        </tr>
+      </tbody>
+    </table>
+    <pagination total-items="totalItems" ng-model="currentPage" items-per-page='itemsPerPage' ng-change="get_bills()"></pagination>
+  </div>
+</div>
