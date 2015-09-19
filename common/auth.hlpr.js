@@ -45,7 +45,7 @@ module.exports.get_user = function(token) {
               var twyst_friends = [];
               _.each(user.friends.friends, function(friend){
                   if(friend.user){
-                      twyst_friends.push(friend)
+                      twyst_friends.push(friend);
                   }
                   friends.push(friend);
               })

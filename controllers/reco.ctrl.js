@@ -271,10 +271,10 @@ function pick_outlet_fields(params) {
       }
 
       if (item.photos && item.photos.logo) {
-        massaged_item.logo = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + item._id + '/' + item.photos.logo;
+        massaged_item.logo = 'https://s3-us-west-2.amazonaws.com/retwyst-merchants/retwyst-outlets/' + item._id + '/' + item.photos.logo;
       }
       if (item.photos && item.photos.background) {
-        massaged_item.background = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + item._id + '/' + item.photos.background;
+        massaged_item.background = 'https://s3-us-west-2.amazonaws.com/retwyst-merchants/retwyst-outlets/' + item._id + '/' + item.photos.background;
       }
       massaged_item.open_next = RecoHelper.opensAt(item.business_hours);
 
