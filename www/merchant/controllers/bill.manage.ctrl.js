@@ -8,9 +8,9 @@ angular.module('merchantApp')
 
 			$scope.view_options = {
 				'pending': 'Pending',
-				'all': 'All',
 				'approved': 'Approved',
-				'rejected': 'Rejected'
+				'rejected': 'Rejected',
+				'all': 'All'
 			}
 
 			$scope.sort = 'oldest_first';
@@ -23,5 +23,12 @@ angular.module('merchantApp')
 			$scope.updateViewBy = function(val) {
 				$scope.view_by = val;
 			}
+
+			merchantRESTSvc.getBills().then(function(res) {
+				$scope.bills = res.data;
+				console.log(res);
+			}, function(err) {
+				console.log(err);
+			})
 		}
 	])

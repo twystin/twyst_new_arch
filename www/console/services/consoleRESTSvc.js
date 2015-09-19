@@ -40,6 +40,54 @@ angular.module('consoleApp').factory('consoleRESTSvc', ['$http', '$q', '$cookies
 				return deferred.promise;
 			}
 
+			consoleRESTSvc.getBills = function() {
+				var deferred = Q.defer();
+				var token = $cookies.get('token');
+				$http.get('/api/v4/events?event_type=upload_bill&token=' + token)
+					.then(function(data) {
+						if(data.data.response) {
+							deferred.resolve(data.data);
+						} else {
+							deferred.reject(data.data);
+						}
+					}, function(err) {
+						deferred.reject(err);
+					});
+				return deferred.promise;
+			}
+
+			consoleRESTSvc.getBill = function(bill_id) {
+				var deferred = Q.defer();
+				var token = $cookies.get('token');
+				$http.get('/api/v4/events/retrieve/' + bill_id + '?token=' + token)
+					.then(function(data) {
+						if(data.data.response) {
+							deferred.resolve(data.data);
+						} else {
+							deferred.reject(data.data);
+						}
+					}, function(err) {
+						deferred.reject(err);
+					});
+				return deferred.promise;
+			}
+
+			consoleRESTSvc.updateBill = function(bill) {
+				var deferred = Q.defer();
+				var token = $cookies.get('token');
+				$http.put('/api/v4/events/' + bill._id + '?token=' + token, bill)
+					.then(function(data) {
+						if(data.data.response) {
+							deferred.resolve(data.data);
+						} else {
+							deferred.reject(data.data);
+						}
+					}, function(err) {
+						deferred.reject(err);
+					});
+				return deferred.promise;
+			}
+
 			return consoleRESTSvc;
 		}
 	])

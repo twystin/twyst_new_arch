@@ -4,96 +4,114 @@
       <ol class='breadcrumb'>
         <li><a ui-sref='console.bills'>Bills</a></li>
         <li class='active'>{{bill._id}}</li>
+        <li class='pull-right' ng-if='bill.event_meta.status=="Submitted"'><a class='btn btn-warning'>PENDING</a></li>
+        <li class='pull-right' ng-if='bill.event_meta.status=="Twyst Approved"'><a class='btn btn-success'>Twyst Approved</a></li>
+        <li class='pull-right' ng-if='bill.event_meta.status=="Twyst Rejected"'><a class='btn btn-danger'>REJECTED</a></li>
       </ol>
     </div>
     <div class='panel-body'>
       <div class='col-xs-12'>
         <div class='col-sm-6'>
-          <img ng-src='{{bill.image}}' style='max-width:100%;height:auto;'>
+          <img ng-src='{{bill.event_meta.photo}}' style='max-width:100%;height:auto;'>
         </div>
         <div class='col-sm-6'>
-          <div class='row'><div class='col-xs-6'>Upload Date:</div><label class='col-xs-6 text-right'>{{bill.uploaded_on | date: 'MMM dd, yyyy'}}</label></div>
-          <div class='row'><div class='col-xs-6'>User ID:</div><label class='col-xs-6 text-right'>{{bill.user}}</label></div>
-          <div class='row'><div class='col-xs-6'>User Phone:</div><label class='col-xs-6 text-right'>{{bill.phone}}</label></div>
-          <div class='row'><div class='col-xs-6'>User Email:</div><label class='col-xs-6 text-right'>{{bill.email}}</label></div>
+          <div class='row'><div class='col-xs-6'>Upload Date:</div><label class='col-xs-6 text-right'>{{bill.event_date | date: 'MMM dd, yyyy'}}</label></div>
+          <div class='row'><div class='col-xs-6'>User ID:</div><label class='col-xs-6 text-right'>{{bill.event_user}}</label></div>
+          <div class='row'><div class='col-xs-6'>User Phone:</div><label class='col-xs-6 text-right'>{{bill.event_meta.phone}}</label></div>
+          <div class='row'><div class='col-xs-6'>User Email:</div><label class='col-xs-6 text-right'>{{bill.event_meta.email}}</label></div>
+          <div class='alert alert-danger' ng-if='bill.event_meta.status=="Twyst Rejected"'>
+            <strong>Bill Rejected. Reason: </strong>
+            <p>{{bill.event_meta.reason}}</p>
+            </div>
           <div class='row'><p>&nbsp;</p></div>
-          <div class='row'>
+          <div class='row' ng-if='bill.event_meta.status==="Submitted"'>
             <label for='is_image_clear' class='control-label'>Clear, complete, non-manipulated image?</label>
             <div class='pull-right'>
-              <a class='btn btn-primary'>YES</a>
-              <a class='btn btn-default'>NO</a>
+              <a class='btn' ng-class='{"btn-default": isClear!==true, "btn-primary": isClear===true}' ng-click='updateCheck("isClear", true)'>YES</a>
+              <a class='btn' ng-class='{"btn-default": isClear!==false, "btn-warning": isClear===false}' ng-click='updateCheck("isClear", false)'>NO</a>
             </div>
           </div>
-          <div class='row'>
+          <div class='row' ng-if='bill.event_meta.status!=="Twyst Approved" && bill.event_meta.status!=="Twyst Rejected"'>&nbsp;</div>
+          <div class='row' ng-if='isClear===true' ng-if='bill.event_meta.status!=="Twyst Approved" && bill.event_meta.status!=="Rejected"'>
             <label for='is_image_bill' class='control-label'>Image of a bill?</label>
             <div class='pull-right'>
-              <a class='btn btn-primary'>YES</a>
-              <a class='btn btn-default'>NO</a>
+              <a class='btn' ng-class='{"btn-default": isBill!==true, "btn-primary": isBill==true}' ng-click='updateCheck("isBill", true)'>YES</a>
+              <a class='btn' ng-class='{"btn-default": isBill!==false, "btn-warning": isBill==false}' ng-click='updateCheck("isBill", false)'>NO</a>
             </div>
           </div>
-          <div class='row'>
+          <div class='row'>&nbsp;</div>
+          <div class='row' ng-if='isBill===true && isClear==true'>
             <label for='is_outlet_listed' class='control-label'>Outlet listed on Twyst</label>
             <div class='pull-right'>
-              <a class='btn btn-primary'>YES</a>
-              <a class='btn btn-default'>NO</a>
+              <a class='btn' ng-class='{"btn-default": isListed!==true, "btn-primary": isListed==true}' ng-click='updateCheck("isListed", true)'>YES</a>
+              <a class='btn' ng-class='{"btn-default": isListed!==false, "btn-warning": isListed==false}' ng-click='updateCheck("isListed", false)'>NO</a>
             </div>
           </div>
         </div>
+        <div class='row' ng-if='(isClear===false || isBill===false || isListed===false) && bill.event_meta.status!=="Twyst Approved"'>
+          <div class='col-xs-12'><br /></div>
+          <div class='col-xs-12 text-center'>
+            <a class='btn btn-warning btn-lg' ng-click='rejectBill()'>Reject</a>
+          </div>
+        </div> 
       </div>
-      <div class='col-xs-12'><p>&nbsp;</p></div>
-      <div class='col-xs-12 form-horizontal'>
+      <div class='col-xs-12'>&nbsp;</div>
+      <div class='col-xs-12 form-horizontal' ng-if='(isBill===true && isClear===true && isListed===true) || bill.event_meta.status==="Twyst Approved"'>
         <legend>Bill Specifics</legend>
         <div class='form-group'>
           <label for='merchant_name' class='col-md-3'><span class='glyphicon gi-lg glyphicon-user'></span> Merchant Name:</label>
           <div class='col-md-8'>
-            <input type='text' class='form-control' ng-model='bill.merchant'>
+            <input type='text' class='form-control' ng-model='bill.event_meta.merchant'>
           </div>
         </div>
         <div class='form-group'>
           <label for='outlet_name' class='col-md-3'><span class='glyphicon gi-lg glyphicon-home'></span> Outlet Name:</label>
           <div class='col-md-8'>
-            <input type='text' class='form-control' ng-model='bill.outlet_name'>
+            <input type='text' class='form-control' ng-model='bill.event_meta.outlet_name' disabled>
           </div>
         </div>
         <div class='form-group'>
           <label for='outlet_location' class='col-md-3'><span class='glyphicon gi-lg glyphicon-map-marker'></span> Outlet Location:</label>
           <div class='col-md-8'>
-            <input type='text' class='form-control' ng-model='bill.outlet_location'>
+            <input type='text' class='form-control' ng-model='bill.event_meta.outlet_location' disabled>
           </div>
         </div>
         <div class='form-group'>
           <label for='bill_number' class='col-md-3'><span class='glyphicon gi-lg glyphicon-list-alt'></span> Bill Number:</label>
           <div class='col-md-8'>
-            <input type='text' class='form-control' ng-model='bill.bill_number'>
+            <input type='text' class='form-control' ng-model='bill.event_meta.bill_number'>
           </div>
         </div>
         <div class='form-group'>
           <label for='bill_date' class='col-md-3'><span class='glyphicon gi-lg glyphicon-calendar'></span> Bill Date</label>
           <div class='col-md-8'>
-            <input type='date' class='form-control' ng-model='bill.bill_date'>
+            <input type='date' class='form-control' ng-model='bill.event_meta.timestamp'>
           </div>
         </div>
         <div class='form-group'>
           <label for='bill_time' class='col-md-3'><span class='glyphicon gi-lg glyphicon-time'></span> Bill Time</label>
           <div class='col-md-8'>
-            <input type='time' class='form-control' ng-model='bill.bill_date'> 
+            <input type='time' class='form-control' ng-model='bill.event_meta.timestamp'> 
           </div>
         </div>
         <div class='form-group'>
           <label for='bill_amount' class='col-md-3'><span class='glyphicon gi-lg glyphicon-piggy-bank'></span> Bill Amount</label>
           <div class='col-md-8'>
-            <input type='number' class='form-control' ng-model='bill.bill_amount'>
+            <div class='input-group'>
+              <div class='input-group-addon'>Rs.</div>
+              <input type='number' class='form-control' ng-model='bill.event_meta.bill_amount'>
+            </div>
           </div>
         </div>
-        <div class='form-group'>
+        <div class='form-group' ng-if='bill.event_meta.status!=="Twyst Approved"'>
           <div class='col-md-8 col-md-offset-3'>
-            <button class='btn btn-primary pull-right'>Submit</button>
+            <button class='btn btn-primary pull-right' ng-click='approveBill()'>Submit</button>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <div class='panel panel-primary'>
+  <div class='panel panel-primary' ng-if='isClear===true && isBill===true && isListed==true'>
     <div class='panel-heading'>
       <h3 class='panel-title'>Redemptions Pending Bills</h3>
     </div>
@@ -109,12 +127,13 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat='item in pending_redeems'>
+        <tr ng-repeat='item in pending'>
           <td>{{$index +1}}</td>
-          <td>{{item.coupon_group}}</td>
-          <td>{{item.offer.header}}, {{item.offer.line1}}, {{item.offer.line2}}</td>
-          <td>{{item.used_details.used_time}}</td>
-          <td><a class='btn btn-primary'>Link</a></td>
+          <td>{{item.offer_group}}</td>
+          <td><strong>{{item.header}}<strong>, {{item.line1}}<span ng-if='item.line2'>, {{item.line2}}<span></td>
+          <td>{{item.used_time | date: 'MMM dd, yyyy'}}</td>
+          <td>{{item.used_time | date: 'hh:mm a'}}</td>
+          <td><a class='btn btn-sm btn-primary' ng-click='linkRedemption(item.offer_group)' ng-if='bill.event_meta.offer_group!==item.offer_group'>Link</a></td>
         </tr>
       </tbody>
     </table>
