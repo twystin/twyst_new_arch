@@ -37,8 +37,8 @@ angular.module('consoleApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angular
 				templateUrl: 'templates/bills/manage.html',
 				controller: 'BillManageController'
 			})
-			.state('console.bill_view', {
-				url: '/bills/:billId',
+			.state('console.view_bill', {
+				url: '/bills/:bill_id',
 				templateUrl: 'templates/bills/view.html',
 				controller: 'BillViewController'
 			})

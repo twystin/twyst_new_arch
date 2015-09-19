@@ -1,19 +1,31 @@
 angular.module('merchantApp')
-	.controller('BillViewManageController', ['$scope', 'merchantRESTSvc', '$log', 'toastr', 
-		function($scope, merchantRESTSvc, $log, toastr) {
-			$scope.bill = {
-				_id: 'asd',
-				uploaded_on: new Date(),
-				user: '123dsa21',
-				phone: '9992342321',
-				email: 'email@domain.com',
-				outlet_name: 'Outlet Name',
-				outlet_location: 'Address goes here',
-				bill_number: 'BILL0001',
-				bill_date: new Date(),
-				bill_time: new Date(),
-				bill_amount: 2400,
-				image: 'https://s3-us-west-2.amazonaws.com/retwyst-merchants/retwyst-outlets/55f01d855198eaee17f4c4a0/background'
+	.controller('BillViewManageController', ['$scope', 'merchantRESTSvc', '$log', 'toastr', '$http', '$stateParams',
+		function($scope, merchantRESTSvc, $log, toastr, $http, $stateParams) {
+			merchantRESTSvc.getBill($stateParams.bill_id).then(function(res) {
+				console.log(res);
+				$scope.bill = res.data;
+			}, function(err) {
+				console.log(err);
+			})
+
+			$scope.approveBill = function() {
+				$scope.bill.event_meta.status = "Verified";
+				merchantRESTSvc.updateBill($scope.bill).then(function(res) {
+					$scope.bill = res.data;
+				}, function(err) {
+					console.log(err);
+				})
+			}
+
+			$scope.rejectBill = function() {
+				$scope.bill.event_meta.status = "Outlet Rejected";
+				$scope.bill.event_meta.is_rejected = true;
+				$scope.bill.event_meta.reason = 'Declined by the outlet';
+				merchantRESTSvc.updateBill($scope.bill).then(function(res) {
+					$scope.bill = res.data;
+				}, function(err) {
+					console.log(err);
+				})
 			}
 		}
 	])

@@ -4,6 +4,8 @@ angular.module('merchantApp')
 
       merchantRESTSvc.getOutlets().then(function(data) { $scope.outlets = _.indexBy(data.data.outlets, '_id'); }, function(err) { $log.log('Could not get outlets - ' + err.message); $scope.outlets = []; });
 
+      $scope.reward_types = { 'buyonegetone': 'Buy One Get One', 'discount': 'Discount', 'flatoff': 'Flat Off', 'free': 'Free', 'happyhours': 'Happy Hours', 'reduced': 'Reduced Price', 'custom': 'Custom', 'unlimited': 'Unlimited', 'onlyhappyhours': 'Only Happy Hours', 'combo': 'Combo', 'buffet': 'Buffet' };
+      
       merchantRESTSvc.getOffer($stateParams.offer_group).then(function(data) {
         if (data.data.offer_cost) {
           data.data.offer_cost = data.data.offer_cost.toString();

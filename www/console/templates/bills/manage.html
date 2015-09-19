@@ -25,11 +25,11 @@
         <th>Status</th>
       </thead>
       <tbody>
-        <tr ng-repeat='bill in bills' ui-sref='merchant.view_bill({bill_id: bill._id})'>
+        <tr ng-repeat='bill in bills' ui-sref='console.view_bill({bill_id: bill._id})' style='cursor:pointer;'>
           <td class='text-right'>{{$index+1}}</td>
-          <td>{{bill.user}}</td>
-          <td>{{bill.created_at}}</td>
-          <td>{{bill.status}}</td>
+          <td>{{bill.event_user}}</td>
+          <td>{{bill.event_date | date: 'MMM dd, yyyy hh:mm a'}}</td>
+          <td>{{bill.event_meta.status}}</td>
         </tr>
       </tbody>
     </table>
