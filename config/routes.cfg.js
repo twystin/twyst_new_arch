@@ -27,13 +27,11 @@ module.exports = function(app) {
 
   (function EventRoutes() {
     var EventCtrl = require('../controllers/event.ctrl');
-    app.get('/api/v4/events', function(req, res) {
-      res.status(405).send({
-        message: 'Not yet implemented'
-      });
-    });
+    app.get('/api/v4/events', EventCtrl.list_events);
+    app.get('/api/v4/events/retrieve/:event_id', EventCtrl.get_event);
     var NotifCtrl = require('../controllers/notif.ctrl');
     app.get('/api/v4/events/:event_id', NotifCtrl.get_notif);
+    app.put('/api/v4/events/:event_id', EventCtrl.update_event);
     app.post('/api/v4/events', EventCtrl.new);
 
     app.post('/api/v4/coupon/gift', EventCtrl.gift);

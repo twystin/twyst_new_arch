@@ -33,26 +33,26 @@ module.exports.uploadAppImage = function(image_obj) {
     var deferred = Q.defer();
 
     var buff = new Buffer(image_obj.image.replace(/^data:image\/\w+;base64,/, ""),'base64')
+    var timestamp = Date.now();
     var img_obj = {
 		Bucket: 'retwyst-app',
 		ACL: 'public-read',
 		ContentType: 'image/jpg',
-		Key: 'retwyst_user' + '/' + image_obj.user + '/'+ image_obj.event+ '/' + Date.now(),
+		Key: 'retwyst_user' + '/' + image_obj.user + '/'+ image_obj.event+ '/' + timestamp,
 		Body: buff
 	};
     
-	AWSHelper.uploadImage(img_obj, function(err, data) {
-		if(err) {
-			deferred.reject({
-                data: err,
-                message: 'Image upload error'
-            });
-  		} else {
-  			deferred.resolve({
-                data: data,
-                message: 'Image uploaded successfully'
-            });
-		}
+	AWSHelper.uploadImage(img_obj).then(function(data) {
+		deferred.resolve({
+            data: {path: 'https://s3-us-west-2.amazonaws.com/retwyst-app/retwyst_user' + '/' + image_obj.user + '/'+ image_obj.event+ '/' + timestamp},
+            message: 'Image uploaded successfully'
+        });
+	},
+	function(err) {
+		deferred.reject({
+            data: err,
+            message: 'Image upload error'
+        });
 	});
 	return deferred.promise;
 	

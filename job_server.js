@@ -8,7 +8,8 @@ var mongoose = require('mongoose');
 var jobs = [
 	// {name: 'test', schedule: 'in 1 minute'}
 	{name: 'unredeemed', schedule: 'in 1 minute'},
-	{name: 'reactivate', schedule: 'in 1 minute'}
+	{name: 'reactivate', schedule: 'in 1 minute'},
+	{name: 'social_pool', schedule: 'in 1 minute'}
 ];
 
 (function() {
