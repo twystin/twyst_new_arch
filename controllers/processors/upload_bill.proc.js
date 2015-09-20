@@ -7,13 +7,12 @@ module.exports.check = function(data) {
   logger.log();
   var deferred = Q.defer();
   var passed_data = data;
-  var bill_date = _.get(passed_data, 'event_data.event_meta.bill_date');
   var photo = _.get(passed_data, 'event_data.event_meta.photo');
   var outlet_name = _.get(passed_data, 'event_data.event_meta.outlet_name');
   var outlet = _.get(passed_data, 'event_data.event_outlet');
 
-  if (!bill_date || !photo || !outlet_name) {
-    deferred.reject('Submit bill needs to have bill date, photo & outlet name.');
+  if (!photo || !outlet_name) {
+    deferred.reject('Submit bill needs to have bill photo & outlet name.');
   } else {
     deferred.resolve(passed_data);
   }
@@ -29,7 +28,12 @@ module.exports.process = function(data) {
     image: data.event_data.event_meta.photo
   }
 
-  ImageUploader.uploadAppImage(img_obj).then(function(data){
+  ImageUploader.uploadAppImage(img_obj).then(function(res){
+    data.event_data.event_meta.photo = res.data.path;
+    data.event_data.event_meta.status = 'Submitted';
+    data.event_data.event_meta.phone = data.user.phone;
+    data.event_data.event_meta.email = data.user.email;
+    data.event_data.event_meta.outlet_location = data.outlet && data.outlet.contact && data.outlet.contact.location && data.outlet.contact.location.address;
     deferred.resolve(true);  
   },function(err) {
         deferred.reject({

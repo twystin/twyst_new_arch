@@ -115,20 +115,105 @@ module.exports.referral_join = function(req, res) {
   create_new(res, setup_event(req, 'referral_join'));
 };
 
+module.exports.list_events = function(req, res) {
+  logger.log();
+  var event_types = ['follow', 'checkin', 'gift', 'grab', 'redeem', 'unfollow', 'feedback', 'submit_offer', 'like_offer', 'unlike_offer', 'upload_bill', 'share_offer', 'share_outlet', 'suggestion', 'extend_offer', 'report_problem', 'write_to_twyst', 'generate_coupon', 'deal_log', 'referral_join' ];
+  var HttpHelper = require('../common/http.hlpr.js');
+  var AuthHelper = require('../common/auth.hlpr.js');
+  var EventHelper = require('./helpers/event.hlpr.js');
+  var token = req.query.token || null;
+  var event_type = req.query.event_type || null;
+  
+  if(!token) {
+    HttpHelper.error(res, null, "Not authenticated");
+  } else if(event_types.indexOf(event_type)===-1) {
+    HttpHelper.error(res, null, "Event type is invalid");
+  } else {
+    AuthHelper.get_user(token).then(function(data) {
+      var user = data.data;
+      EventHelper.get_event_list(user, event_type).then(function(data) {
+        HttpHelper.success(res, data.data, data.message);
+      }, function(err) {
+        HttpHelper.error(res, err.err, err.message);
+      })
+    }, function(err) {
+      HttpHelper.error(res, err, "Could not find user");
+    })
+  }
+}
+
+module.exports.get_event = function(req, res) {
+  logger.log();
+  var HttpHelper = require('../common/http.hlpr.js');
+  var AuthHelper = require('../common/auth.hlpr.js');
+  var EventHelper = require('./helpers/event.hlpr.js');
+  var token = req.query.token || null;
+  var event_id = req.params.event_id || null;
+
+  if(!token) {
+    HttpHelper.error(res, null, "Not authenticated");
+  } else if(!event_id) {
+    HttpHelper.error(res, null, "Event ID is invalid/missing");
+  } else {
+    AuthHelper.get_user(token).then(function(data) {
+      var user = data.data;
+      EventHelper.get_event(user, event_id).then(function(data) {
+        HttpHelper.success(res, data.data, data.message);
+      }, function(err) {
+        HttpHelper.error(res, err.err, err.message);
+      })
+    }, function(err) {
+      HttpHelper.error(res, err, "Could not find user");
+    })
+  }
+}
+
+module.exports.update_event = function(req, res) {
+  var HttpHelper = require('../common/http.hlpr.js');
+  var AuthHelper = require('../common/auth.hlpr.js');
+  var EventHelper = require('./helpers/event.hlpr.js');
+  var token = req.query.token || null;
+  var event_id = req.params.event_id || null;
+  var event = {};
+  event = _.extend(event, req.body);
+
+  logger.info(token, event_id, event);
+  if(!token) {
+    HttpHelper.error(res, null, "Not authenticated");
+  } else if(!event_id) {
+    HttpHelper.error(res, null, "Event ID is invalid/missing");
+  } else if(!Object.keys(event).length) {
+    HttpHelper.error(res, null, "Request invalid");
+  } else {
+    logger.log();
+    AuthHelper.get_user(token).then(function(data) {
+      var user = data.data;
+      EventHelper.update_event(user, event).then(function(data) {
+        HttpHelper.success(res, data.data, data.message);
+      }, function(err) {
+        HttpHelper.error(res, err.err, err.message);
+      })
+    }, function(err) {
+      logger.log();
+      HttpHelper.error(res, err || false, "Could not find user");
+    });
+  }
+}
+
 function setup_event(req, type) {
   logger.log();
   var passed_data = {};
+  logger.log(req.body);
   passed_data.event_data = req.body || {};
   passed_data.event_data.event_type = type;
   passed_data.user_token = (req.query && req.query.token) || null;
   passed_data.query_params = req.params || null;
+  logger.log(passed_data);
   return passed_data;
 }
 
 function create_new(res, passed_data) {
   var HttpHelper = require('../common/http.hlpr.js');
-
-  logger.log();
 
   basic_checks(passed_data)
     .then(function(data) {

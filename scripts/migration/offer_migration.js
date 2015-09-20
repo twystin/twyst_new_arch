@@ -3,7 +3,7 @@ var program_cursor = db.programs.find({status:'active'});
 var tier_cursor = null;
 var offer_cursor = null;
 var ti, oi = 0;
-var p,t,o = null;
+var p,t,o, k = null;
 
 var retwyst = db.getSiblingDB('retwyst')
 while(program_cursor.hasNext()) {
@@ -18,23 +18,29 @@ while(program_cursor.hasNext()) {
         offer_cursor = db.offers.find({_id: t.offers[oi]});
         while(offer_cursor.hasNext()) {
           o = offer_cursor.next();
+          k = retwyst.outlets.find({_id: {$in: p.outlets}});
+          printjson(k.next())
           retwyst.outlets.update({_id: {$in: p.outlets}},{
             $push: {
               offers: {
                 _id: new ObjectId(),
                 offer_status: p.status,
                 offer_type: 'checkin',
-                offer_group: p.name,
+                offer_group: new ObjectId(),
+                offer_valid_days: o.voucher_valid_days,
+                offer_start_date: p.validity.earn_start,
+                offer_end_date: p.validity.earn_end,
                 actions: {
                   reward: {
                     _id: new ObjectId(),
                     header: o.basics.title,
                     line1: o.basics.description,
-                    line2: o.terms,
-                    expiry: p.validity.earn_end,
+                    line2: '',
+                    terms: o.terms,
+                    
                     reward_hours: o.avail_hours,
                     applicability: o.reward_applicability,
-                    valid_days: o.valid_days,
+                    offer_valid_days: o.voucher_valid_for_days,
                     reward_meta: {
                       reward_type: Object.keys(o.reward)[0],
                       reward_info: o.reward
@@ -50,8 +56,10 @@ while(program_cursor.hasNext()) {
               }
             },
           },{
+            upsert: true,
             multi: true
-          });
+          }
+          );
         }
         oi++;
       }
