@@ -113,13 +113,13 @@ function filter_out_expired_and_used_coupons(data) {
   var deferred = Q.defer();
   
   data.coupons = _.filter(data.coupons, function(coupon) {
-    if(_.has(coupon, 'status') && (coupon.status === 'active') && (coupon.coupon_source === 'qr_checkin')) {
+    if(_.has(coupon, 'status') && (coupon.status === 'active') && (coupon.coupon_source === 'qr_checkin'
+     || coupon.coupon_source === 'QR' || coupon.coupon_source === 'PANEL' || coupon.coupon_source === 'POS')) {
       return true;
     } else {
       return false;
     }
   });
-
   deferred.resolve(data);
   return deferred.promise;
 };
@@ -128,8 +128,8 @@ function filter_out_expired_and_used_coupons(data) {
 function load_social_pool_coupons(data) {
   logger.log();
   var deferred = Q.defer();
-  
-  Cache.hget(data.data.user.data, 'social_pool_coupons', function(err, reply) {
+
+  Cache.hget(data.user.data, 'social_pool_coupons', function(err, reply) {
       if(err || !reply) {
 
       }
@@ -166,8 +166,10 @@ function load_outlet_info_from_cache(data) {
                 var _coupons = [];
                 async.each(data.coupons, function(coupon, callback) {
                     var massaged_item = {};
-
-                    outlet = outlets[coupon.issued_by.toString()];        
+                    if(coupon.issued_by) {
+                        outlet = outlets[coupon.issued_by.toString()];            
+                    }
+                    
                                     
                     massaged_item._id = outlet._id;
                     massaged_item.name = outlet.basics.name;

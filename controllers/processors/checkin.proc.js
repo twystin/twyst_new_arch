@@ -227,7 +227,7 @@ function create_coupon(offer, user, outlet) {
         _id: mongoose.Types.ObjectId(),
         code: code,
         coupon_group: offer.offer_group,
-        coupon_source:  'qr_checkin',
+        coupon_source:  'QR',
         header: offer.actions.reward.header,
         line1: offer.actions.reward.line1,
         line2: offer.actions.reward.line2,
