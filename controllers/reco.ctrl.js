@@ -119,6 +119,36 @@ function set_user_coupons(params) {
   return deferred.promise;
 }
 
+function set_social_pool_coupons(params) {
+  logger.log();
+
+  var deferred = Q.defer();
+  if (params.user) {
+    Cache.hget(params.user._id, 'social_pool_coupons', function(err, reply) {
+      logger.log(err, JSON.parse(reply));
+      if(err || !reply) {
+        deferred.resolve(params);
+      } else {
+        var social_pool = JSON.parse(reply);
+        var outlets = params.outlets;
+        if(social_pool) {
+          _.each(social_pool, function(coupon) {
+            if(outlets[coupon.issued_by]) {
+              outlets[coupon.issued_by].offers.push(coupon)
+            }
+          });
+          deferred.resolve(params);
+        } else {
+          deferred.resolve(params);
+        }
+      }
+    })
+  } else {
+    deferred.resolve(params);
+  }
+  return deferred.promise;
+}
+
 function set_distance(params) {
   logger.log();
 
@@ -404,19 +434,19 @@ function massage_offers(params) {
       } else {
         var massaged_offer = {};
         massaged_offer._id = offer._id;
-        massaged_offer.header = offer.actions && offer.actions.reward && offer.actions.reward.header;
-        massaged_offer.line1 = offer.actions && offer.actions.reward && offer.actions.reward.line1;
-        massaged_offer.line2 = offer.actions && offer.actions.reward && offer.actions.reward.line2;
-        massaged_offer.description = offer.actions && offer.actions.reward && offer.actions.reward.description;
-        massaged_offer.terms = offer.actions && offer.actions.reward && offer.actions.reward.terms;
+        massaged_offer.header = offer.actions && offer.actions.reward && offer.actions.reward.header || offer.header;
+        massaged_offer.line1 = offer.actions && offer.actions.reward && offer.actions.reward.line1 || offer.line1;
+        massaged_offer.line2 = offer.actions && offer.actions.reward && offer.actions.reward.line2 || offer.line2;
+        massaged_offer.description = offer.actions && offer.actions.reward && offer.actions.reward.description || '';
+        massaged_offer.terms = offer.actions && offer.actions.reward && offer.actions.reward.terms || '';
 
-        massaged_offer.type = offer.offer_type;
+        massaged_offer.type = offer.offer_type || offer.status;
         if (offer.offer_type === 'checkin') {
           massaged_offer.next = parseInt(offer.rule && offer.rule.event_count);
           massaged_offer.checkins = item.recco && item.recco.checkins || 0;
         }
-        massaged_offer.meta = offer.actions && offer.actions.reward && offer.actions.reward.reward_meta;
-        massaged_offer.expiry = offer.offer_end_date;
+        massaged_offer.meta = offer.actions && offer.actions.reward && offer.actions.reward.reward_meta || offer.meta;
+        massaged_offer.expiry = offer.offer_end_date || offer.expiry_date;
         if(offer.offer_likes && offer.offer_likes.length) {
           massaged_offer.offer_likes = offer.offer_likes.length;  
         }
@@ -479,6 +509,9 @@ module.exports.get = function(req, res) {
     })
     .then(function(data) {
       return set_user_coupons(data);
+    })
+    .then(function(data) {
+      return set_social_pool_coupons(data);
     })
     .then(function(data) {
       return set_distance(data);
