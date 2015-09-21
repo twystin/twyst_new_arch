@@ -30,6 +30,8 @@ module.exports.get_coupons = function(req, res) {
     filter_out_expired_and_used_coupons(data)
       .then(function(data) {
         return load_outlet_info_from_cache(data)
+      }).then(function(data) {
+        return load_social_pool_coupons(data)
       })
       .then(function(data) {
         var twyst_bucks
@@ -117,6 +119,24 @@ function filter_out_expired_and_used_coupons(data) {
       return false;
     }
   });
+
+  deferred.resolve(data);
+  return deferred.promise;
+};
+
+
+function load_social_pool_coupons(data) {
+  logger.log();
+  var deferred = Q.defer();
+  
+  Cache.hget(data.data.user.data, 'social_pool_coupons', function(err, reply) {
+      if(err || !reply) {
+
+      }
+      else {
+        console.log(reply)
+      }
+    })
 
   deferred.resolve(data);
   return deferred.promise;

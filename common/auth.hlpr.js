@@ -40,7 +40,7 @@ module.exports.get_user = function(token) {
             user = user.toJSON();
             user.facebook_connect = false;
             user.google_connect = false;
-            if(user.role === 6) {
+            if(user.role === 6 || user.role === 7) {
               var friends = [];
               var twyst_friends = [];
               _.each(user.friends.friends, function(friend){
@@ -56,6 +56,7 @@ module.exports.get_user = function(token) {
                 user.google_connect = true;
               }
               user.friends_id = user.friends._id;
+            
               user.twyst_friends = twyst_friends;
               user.friends = friends;
             }
