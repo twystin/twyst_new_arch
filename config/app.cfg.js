@@ -105,11 +105,11 @@ module.exports = function(app) {
     process.exit(1);
   });
 
-  redis.flushall(function(err) {
-    if (!err) {
-      logger.info('Cleared the cache');
-    }
-  });
+  //redis.flushall(function(err) {
+   // if (!err) {
+    //  logger.info('Cleared the cache');
+    //}
+  //});
 
   // If the Node process ends, close the Mongoose connection
   process.on('SIGINT', function() {

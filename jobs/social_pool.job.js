@@ -3,8 +3,6 @@
 
 var logger = require('tracer').colorConsole();
 var _ = require('lodash');
-
-var logger = require('tracer').colorConsole();
 var notification = require('../notifications/social_pool.notfn');
 
 var mongoose = require('mongoose');
@@ -12,18 +10,17 @@ require('../models/user.mdl');
 require('../models/event.mdl')
 var User = mongoose.model('User');
 var Event = mongoose.model('Event')
+var Cache = require('../common/cache.hlpr');
+var AuthHelper = require('../common/auth.hlpr.js');
 
 exports.runner = function(agenda) {
     agenda.define('social_pool', function(job, done) {
         logger.log();
-
-        User.find({
-            "coupons.status": "active",
-            "coupons.used_details": {
-                $exists: false
-            }
+        console.log('inside pool')
+        User.find({"role": 6, "coupons.coupon_source": "qr_checkin",
+            "coupons.status": "active",            
             "coupons.lapse_date": {
-                "$lte": new Date()
+                $lte: new Date()
             },
         }).populate('friends').exec(function(err, users) {
             logger.log();
@@ -43,29 +40,36 @@ function process_user(user) {
     var current_time = new Date();
     current_time = current_time.getTime();
     _.each(user.coupons, function(coupon) {
-        if (coupon.lapse_date.getTime() <= current_time && coupon.status === 'active' && !coupon.used_details && user.friends) {
+        
+        if (coupon.coupon_source ===  "qr_checkin" && coupon.lapse_date.getTime() <= current_time && coupon.status === 'active') {
             coupon.status = 'social_pool';
             coupon.lapsed_coupon_source = user._id;
             coupon.social_friend_list = [];
-            _.each(user.friends, function(friend) {
+            _.each(user.friends.friends, function(friend) {
                 if (friend.user) {
-                    coupon.social_list.push(friend.user);
+                    var arr= [];
+                    arr.push(coupon);
+                    coupon.social_friend_list.push(friend.user);
+                    Cache.hget(friend.user, 'social_pool_coupons', function(err, reply){
+                        if(err || !reply) {
+                            console.log('first_push')
+                            Cache.hset(friend.user, 'social_pool_coupons', arr);
+                        }
+                        else{
+                            var a = [];
+                            a = JSON.parse(reply)
+                            a.push(arr[0]);
+                            console.log(a)
+                            Cache.hset(friend.user, 'social_pool_coupons', a);
+                        }
+                    })
+                    
+                    Cache.hset(user._id, 'social_pool_coupons', JSON.stringify(arr));
                 }
             })
+
             User.findOneAndUpdate({
-                _id: ObjectId('')
-            }, {
-                $push: {
-                    coupons: coupon
-                }
-            }, function(err, user) {
-                if (err || !user) {
-                    logger.log(err)
-                } else
-                    logger.log('coupon saved successfully')
-            });
-            User.findOneAndUpdate({
-                _id: ObjectId(user._id),
+                _id: user._id,
                 'coupons._id': coupon._id
             }, {
                 $set: {
@@ -78,10 +82,5 @@ function process_user(user) {
             });
         }
     });
-    notification.notify(what, null, user, null).then(function(data) { //what?
-        logger.log(data);
-    }, function(err) {
-        logger.log(err);
-    });
-    
+   
 }
