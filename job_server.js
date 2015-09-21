@@ -7,14 +7,14 @@ var logger = require('tracer').colorConsole();
 var mongoose = require('mongoose');
 var jobs = [
 	// {name: 'test', schedule: 'in 1 minute'}
-	{name: 'unredeemed', schedule: 'in 1 minute'},
-	{name: 'reactivate', schedule: 'in 1 minute'},
-	{name: 'social_pool', schedule: 'in 1 minute'}
+	//{name: 'unredeemed', schedule: 'in 1 minute'},
+	//{name: 'reactivate', schedule: 'in 1 minute'},
+	{name: 'social_pool', schedule: 'in 1 seconds'}
 ];
 
 (function() {
 	logger.info('Starting the job server');
-	mongoose.connect('mongodb://localhost/retwyst');
+	mongoose.connect('mongodb://localhost/retwyst_dummy');
 	var agenda = new Agenda({db: { address: 'localhost:27017/twyst_agenda'}});
 
 	var job = null;
