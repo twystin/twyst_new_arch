@@ -1,12 +1,16 @@
 var logger = require('tracer').colorConsole();
 var _ = require('lodash');
 var Q = require('q');
+var Cache = require('../../common/cache.hlpr');
+var mongoose = require('mongoose');
+var User = mongoose.model('User');
+var ObjectId = mongoose.Types.ObjectId;
 
 module.exports.check = function(data) {
   logger.log();
   var deferred = Q.defer();
   var passed_data = data;
-  if (!_.get(data, 'event_data.event_meta.coupon') || !_.get(data, 'event_data.event_outlet')) {
+  if (!_.get(data, 'event_data.event_meta.code') || !_.get(data, 'event_data.event_outlet')) {
     deferred.reject('No coupon code or outlet sent to grab');
   } else {
     deferred.resolve(passed_data);
@@ -17,66 +21,90 @@ module.exports.check = function(data) {
 module.exports.process = function(data) {
     logger.log();
     var deferred = Q.defer();
-
     var user_id = data.user._id;
-    var coupon_id = data.coupon._id;
-    var outlet_id = data.outlet._id;
-    var coupon = data.coupon;
-    //remove coupon from cache
-    _.each(coupon.social_friend_list, function(friend){
-        Cache.hget(friend, 'social_pool_coupons', function(err, reply){
-            if(err || !reply) {
+    var coupon_code = data.event_data.event_meta.code;
+    Cache.hget(user_id, 'social_pool_coupons', function(err,reply) {
+        if(err || !reply) {
+            deferred.reject({
+                err: err || false,
+                message: 'Unable to find offer to grab'
+            });
+        } else {
+            var social_coupons = JSON.parse(reply);
+            var index = _.findIndex(social_coupons, function(coupon) { 
+                return coupon.code === coupon_code; 
+            });
+            if(index === -1) {
+                deferred.reject({
+                    err: false,
+                    message: 'Unable to find offer to grab'
+                });
+            } else {
+                var coupon = social_coupons[index];
+                _.each(coupon.social_friend_list, function(friend) {
+                    Cache.hget(friend, 'social_pool_coupons', function(err, reply) {
+                        if(err || !reply) {
+                            logger.error(err, reply);
+                        } else {
+                            var coupon_pool = JSON.parse(reply);
+                            var new_social_pool = [];
+                            _.each(coupon_pool, function(coupon_in_pool) {
+                                if(coupon_in_pool._id !== coupon._id) {
+                                    new_social_pool.push(coupon);
+                                }
+                            });
+                            Cache.hset(friend, 'social_pool_coupons', JSON.stringify(new_social_pool));
+                        }
+                    });
+                });
+                social_coupons.splice(index, 1);
+                Cache.hset(user_id, 'social_pool_coupons', JSON.stringify(social_coupons));
 
-            }
-            else {
-                var new_social_pool = []
-                _.each(reply, function(coupon_in_social_pool){
-                    if(coupon_in_social_pool._id != coupon._id) {
-                        new_social_pool.push(coupon_in_social_pool);
+                var coupon_id = coupon._id.toString();
+
+                User.findOneAndUpdate({
+                    _id: user_id,
+                    'coupons._id': coupon_id
+                }, {
+                    $set: {
+                        'coupon.$._id': new ObjectId(),
+                        'coupons.$.status': 'active',
+                        'coupons.$.is_grabbed': true
                     }
-                })
-                Cache.hset(friend, 'social_pool_coupons', new_social_pool);
-            }
-        })
-    })
-  
-    coupon.is_grabed = true;
-    coupons.status = 'active';
-    var update = {
-        $push: {
-            coupons: coupon
-        }
-    }
-    //update user who grabbed coupon
-    User.findOneAndUpdate({'_id': user_id}, update, function(err, u) {
-        if (err || !u) {
-          deferred.reject({
-            err: err || true,
-            message: "Couldn\'t update user"
-          });
-        } 
-        else {//update user whose coupon is being grabbed
-            User.findOneAndUpdate({'_id': lapsed_coupon_source,
-                coupons: {$elemMatch: {  _id: coupon._id }}
-                }, {$set: {'coupons.$.grabbed_by': user_id, 'coupons.$.status': 'grabbed'}},
-                function(err, u) {
-                    if (err || !u) {
+                }, function(err, u) {
+                    if(err || !u) {
                         deferred.reject({
-                            err: err || true,
-                            message: "Couldn\'t grab coupon"
+                            err: err || false,
+                            message: 'Unable to grab the offer right now'
+                        });
+                    } else {
+                        User.findOneAndUpdate({
+                            '_id': coupon.lapsed_coupon_source,
+                            'coupons._id': coupon_id
+                        }, {
+                            $set: {
+                                'coupons.$.grabbed_by': user_id, 
+                                'coupons.$.status': 'grabbed'
+                            }
+                        }, function(err, u) {
+                            if(err || !u) {
+                                deferred.reject({
+                                    err: err || false,
+                                    message: 'Unable to grab the offer right now'
+                                });
+                            } else {
+                                deferred.resolve({
+                                    data: u,
+                                    message: 'coupon grabbed successfully'
+                                });
+                            }
                         });
                     }
-                    else{
-                        deferred.resolve({
-                            data: user,
-                            message: 'coupon grabbed successfully'
-                        });
-                    }
-                }
-            )
+                });
+            }
         }
-      
-    })
+    });
+
 
     deferred.resolve(true);
     return deferred.promise;

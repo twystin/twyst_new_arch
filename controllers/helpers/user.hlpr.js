@@ -23,7 +23,7 @@ module.exports.update_user = function(token, updated_user) {
     user = ld.merge(user, updated_user);
     
     if(user.gcmId) {
-        var index = ld.findIndex(user.push_ids, function(push) { return push.push_id==gcmId; });
+        var index = ld.findIndex(user.push_ids, function(push) { return push.push_id==user.gcmId; });
         if(index==-1) {
           var push_info = {
               push_type: 'gcm',
