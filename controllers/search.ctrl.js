@@ -489,7 +489,7 @@ module.exports.search = function(req, res) {
 
     Outlet.setKeywords(function(err) {
         if(err) {
-            HttpHelper.error(res, null, "erro in saving keywords");
+            HttpHelper.error(res, null, "error in saving keywords");
         }
     });
 
@@ -530,11 +530,11 @@ module.exports.search = function(req, res) {
         var data = {};
         data.outlets = outlets;
         data.twyst_bucks = twyst_bucks;
-      HttpHelper.success(res, data, "Got the recos");
+      HttpHelper.success(res, data, "Got results");
     })
     .fail(function(err) {
         console.log(err)
-        HttpHelper.error(res, err || false, "Error getting reccos");
+        HttpHelper.error(res, err || false, "Error in search");
     });
     
   

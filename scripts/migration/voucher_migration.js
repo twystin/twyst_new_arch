@@ -8,7 +8,7 @@ while(cursor.hasNext()) {
       coupons: {
         _id: a._id,
         code: a.basics.code,
-        outlets: a.issue_details.issued_at,
+        issued_by: a.issue_details.issued_at,
         header: a.basics.description,
         line1: "",
         line2: "",

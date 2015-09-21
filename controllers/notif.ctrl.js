@@ -18,6 +18,7 @@ module.exports.get_notif = function(req, res) {
   var deferred = Q.defer();
 
   if(req.params.event_id !== 'notifications') {
+    console.log('dkk')
     HttpHelper.error(res, false, "Error in getting notifications");
   } 
 
@@ -26,7 +27,7 @@ module.exports.get_notif = function(req, res) {
       return get_user_events(data);
     })
     .then(function(data) {
-
+      console.log(data)
       HttpHelper.success(res, data, "Got notifications.");
     })
     .fail(function(err) {

@@ -14,4 +14,4 @@ while(cursor.hasNext()) {
 }
 
 var retwyst = db.getSiblingDB('retwyst');
-retwyst.users.update({},{$unset:{"username":"", "hash":"","salt":"", role: ""}}, {multi:true});
+retwyst.users.update({},{$unset:{"username":"", "hash":"","salt":""}}, {multi:true});
