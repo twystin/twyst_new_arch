@@ -25,20 +25,14 @@ module.exports.process = function(data) {
     var coupon_code = data.event_data.event_meta.code;
     Cache.hget(user_id, 'social_pool_coupons', function(err,reply) {
         if(err || !reply) {
-            deferred.reject({
-                err: err || false,
-                message: 'Unable to find offer to grab'
-            });
+            deferred.reject('Unable to find offer to grab');
         } else {
             var social_coupons = JSON.parse(reply);
             var index = _.findIndex(social_coupons, function(coupon) { 
                 return coupon.code === coupon_code; 
             });
             if(index === -1) {
-                deferred.reject({
-                    err: false,
-                    message: 'Unable to find offer to grab'
-                });
+                deferred.reject('Unable to find offer to grab');
             } else {
                 var coupon = social_coupons[index];
                 _.each(coupon.social_friend_list, function(friend) {
@@ -73,10 +67,7 @@ module.exports.process = function(data) {
                     }
                 }, function(err, u) {
                     if(err || !u) {
-                        deferred.reject({
-                            err: err || false,
-                            message: 'Unable to grab the offer right now'
-                        });
+                        deferred.reject('Unable to grab the offer right now');
                     } else {
                         User.findOneAndUpdate({
                             '_id': coupon.lapsed_coupon_source,
@@ -88,10 +79,7 @@ module.exports.process = function(data) {
                             }
                         }, function(err, u) {
                             if(err || !u) {
-                                deferred.reject({
-                                    err: err || false,
-                                    message: 'Unable to grab the offer right now'
-                                });
+                                deferred.reject('Unable to grab the offer right now');
                             } else {
                                 deferred.resolve({
                                     data: u,
@@ -105,7 +93,5 @@ module.exports.process = function(data) {
         }
     });
 
-
-    deferred.resolve(true);
     return deferred.promise;
 };
