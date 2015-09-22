@@ -2,6 +2,8 @@ angular.module('merchantApp')
 	.controller('OutletManageController', ['$scope', 'merchantRESTSvc', '$log', 'toastr',
 		function($scope, merchantRESTSvc, $log, toastr) {
 			
+            _id = undefined;
+
 			$scope.get_outlets = function() {
 				merchantRESTSvc.getOutlets().then(function(data) {
 					$scope.outlets = data.data.outlets;
