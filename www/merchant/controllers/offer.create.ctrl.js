@@ -681,9 +681,9 @@ angular.module('merchantApp')
 
       $scope.validateOfferValidity = function() {
         var def = Q.defer();
-        if (!$scope.offer.offer_start_date || $scope.offer.offer_start_date < $scope.today || $scope.offer.offer_end_date > max_date) {
+        if (!$scope.offer.offer_start_date || $scope.offer.offer_end_date > $scope.max_date) {
           def.reject("Offer requires valid start date")
-        } else if (!$scope.offer.offer_end_date || $scope.offer.offer_start_date < $scope.today || $scope.offer.offer_end_date > max_date) {
+        } else if (!$scope.offer.offer_end_date || $scope.offer.offer_end_date > $scope.max_date) {
           def.reject("Offer requires valid end date");
         } else if ($scope.offer.offer_start_date >= $scope.offer.offer_end_date) {
           def.reject("Offer end date cannot be before or the same as offer end date");
