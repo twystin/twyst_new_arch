@@ -41,9 +41,9 @@
         <span class='label label-warning' ng-if='!outlet.attributes.alcohol'>Do Not Serve</span>
         <span class='label label-primary' ng-if='outlet.attributes.alcohol'>Serves</span>
         <h4>Cost for two: 
-	      From: <span class='label label-primary'>Rs.{{outlet.attributes.cost_for_two.min}}</span> 
-	      To:   <span class='label label-primary'>Rs.{{outlet.attributes.cost_for_two.max}}</span>
-	    </h4>
+          From: <span class='label label-primary'>Rs.{{outlet.attributes.cost_for_two.min}}</span> 
+          To:   <span class='label label-primary'>Rs.{{outlet.attributes.cost_for_two.max}}</span>
+        </h4>
       </div>
       <div class='col-md-6'>
         <h4>Cuisines</h4>
@@ -57,11 +57,11 @@
     <div class='panel-heading'>Timings & SMS OFF Time</div>
     <div class='panel-body'>
       <div class='col-md-8'>
-        <div class='row' ng-repeat='(day, schedule) in outlet.business_hours'>
+        <div class='row' ng-repeat='day in days'>
           <h4>{{day | uppercase}}</h4>
-          <span class='label label-warning' ng-if='schedule.closed'>Closed</span>
-          <span class='label label-success' ng-if='!schedule.closed'>Open</span>
-          <span ng-repeat='timing in schedule.timings' style='margin-left:10px;margin-right:10px;'><span class='label label-primary'>{{timing.open.time | date: 'hh:mm a'}}</span> to <span class='label label-primary'>{{timing.close.time | date: 'hh:mm a'}}</span></span>
+          <span class='label label-warning' ng-if='outlet.business_hours[day].closed'>Closed</span>
+          <span class='label label-success' ng-if='!outlet.business_hours[day].closed'>Open</span>
+          <span ng-repeat='timing in outlet.business_hours[day].timings' style='margin-left:10px;margin-right:10px;'><span class='label label-primary'>{{timing.open.time | date: 'hh:mm a'}}</span> to <span class='label label-primary'>{{timing.close.time | date: 'hh:mm a'}}</span></span>
         </div>
       </div>
       <div class='col-md-4'>

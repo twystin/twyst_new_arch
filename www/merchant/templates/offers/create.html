@@ -530,22 +530,22 @@
                       <th>Apply to all days</th>
                     </thead>
                     <tbody>
-                      <tr ng-repeat='(day, schedule) in offer.actions.reward.reward_hours'>
+                      <tr ng-repeat='day in days'>
                         <th>{{day | uppercase}}</th>
-                        <td><input type='checkbox' ng-model='schedule.closed' ng-change='updateTiming(day, offer.actions.reward.reward_hours)'></td>
+                        <td><input type='checkbox' ng-model='offer.actions.reward.reward_hours[day].closed' ng-change='updateTiming(day, offer.actions.reward.reward_hours)'></td>
                         <td ng-repeat='i in getMaxRange() track by $index'>
-                          <div class='col-md-12' ng-if='schedule.timings.length && schedule.timings[$index]' ng-click='removeTiming(day, $index, offer.actions.reward.reward_hours)' ng-show='schedule.timings.length>1' ng-init='initalizeTiming(day, $index, offer.actions.reward.reward_hours)'>
+                          <div class='col-md-12' ng-if='offer.actions.reward.reward_hours[day].timings.length && offer.actions.reward.reward_hours[day].timings[$index]' ng-click='removeTiming(day, $index, offer.actions.reward.reward_hours)' ng-show='offer.actions.reward.reward_hours[day].timings.length>1' ng-init='initalizeTiming(day, $index, offer.actions.reward.reward_hours)'>
                             <button class='btn btn-sm btn-danger pull-right' ><span class='glyphicon glyphicon-trash'></span></button>
                           </div>
-                          <div class='col-md-12' ng-if='schedule.timings[$index]'>
-                            <input type='time' ng-model='schedule.timings[$index].open.time' placeholder="HH:MM A/P" class='form-control' ng-change='updateTime(day, $index, offer.actions.reward.reward_hours)'>
+                          <div class='col-md-12' ng-if='offer.actions.reward.reward_hours[day].timings[$index]'>
+                            <input type='time' ng-model='offer.actions.reward.reward_hours[day].timings[$index].open.time' placeholder="HH:MM A/P" class='form-control' ng-change='updateTime(day, $index, offer.actions.reward.reward_hours)'>
                           </div>
-                          <div class='col-md-12 text-center' ng-if='schedule.timings[$index]'> to </div>
-                          <div class='col-md-12' ng-if='schedule.timings[$index]'>
-                            <input type='time' ng-model='schedule.timings[$index].close.time' placeholder="HH:MM A/P" class='form-control' ng-change='updateTime(day, $index, offer.actions.reward.reward_hours)'>
+                          <div class='col-md-12 text-center' ng-if='offer.actions.reward.reward_hours[day].timings[$index]'> to </div>
+                          <div class='col-md-12' ng-if='offer.actions.reward.reward_hours[day].timings[$index]'>
+                            <input type='time' ng-model='offer.actions.reward.reward_hours[day].timings[$index].close.time' placeholder="HH:MM A/P" class='form-control' ng-change='updateTime(day, $index, offer.actions.reward.reward_hours)'>
                           </div>
                         </td>
-                        <td><button class='btn btn-sm btn-default' ng-click='addNewTiming(day, offer.actions.reward.reward_hours)' ng-show='!schedule.closed'>Add Timing</button></td>
+                        <td><button class='btn btn-sm btn-default' ng-click='addNewTiming(day, offer.actions.reward.reward_hours)' ng-show='!offer.actions.reward.reward_hours[day].closed'>Add Timing</button></td>
                         <td><button class='btn btn-sm btn-default' ng-click='cloneToAllDays(day, offer.actions.reward.reward_hours)'>Apply to all days</button></td>
                       </tr>
                       <td>
@@ -639,11 +639,11 @@
         <div class='panel-body'>
           <div class='col-md-6'>
             <h3>Timings</h3>
-            <div class='row' ng-repeat='(day, schedule) in offer.actions.reward.reward_hours'>
+            <div class='row' ng-repeat='day in days'>
               <h4>{{day | uppercase}}</h4>
-              <span class='label label-warning' ng-if='schedule.closed'>Closed</span>
-              <span class='label label-success' ng-if='!schedule.closed'>Open</span>
-              <span ng-repeat='timing in schedule.timings' style='margin-left:10px;margin-right:10px;'><span class='label label-primary'>{{timing.open.time | date: 'hh:mm a'}}</span> to <span class='label label-primary'>{{timing.close.time | date: 'hh:mm a'}}</span></span>
+              <span class='label label-warning' ng-if='offer.actions.reward.reward_hours[day].closed'>Closed</span>
+              <span class='label label-success' ng-if='!offer.actions.reward.reward_hours[day].closed'>Open</span>
+              <span ng-repeat='timing in offer.actions.reward.reward_hours[day].timings' style='margin-left:10px;margin-right:10px;'><span class='label label-primary'>{{timing.open.time | date: 'hh:mm a'}}</span> to <span class='label label-primary'>{{timing.close.time | date: 'hh:mm a'}}</span></span>
             </div>
           </div>
           <div class='col-md-6'>

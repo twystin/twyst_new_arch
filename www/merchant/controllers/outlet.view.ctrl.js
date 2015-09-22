@@ -28,6 +28,8 @@ angular.module('merchantApp')
         "unknown": 'Not Known'
       };
 
+      $scope.days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
       $scope.marker = { id: 0, coords: { latitude: 28.6078341976, longitude: 77.2465642784 } };
 
       $scope.map = { center: { latitude: 28.805422897457665, longitude: 77.16647699812655 }, zoom: 14 };

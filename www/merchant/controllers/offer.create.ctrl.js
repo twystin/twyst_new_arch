@@ -10,8 +10,8 @@ angular.module('merchantApp')
         $scope.outlets = [];
       });
 
-      $scope.today = new Date(),
-        max_date = new Date($scope.today.getTime() + (2 * 365 * 24 * 60 * 60 * 1000));
+      $scope.today = new Date();
+      $scope.max_date = new Date($scope.today.getTime() + (2 * 365 * 24 * 60 * 60 * 1000));
       $scope.today.setMinutes(0);
       $scope.today.setHours(0);
       $scope.today.setSeconds(0);
@@ -38,6 +38,7 @@ angular.module('merchantApp')
         }
       }
 
+      $scope.days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
       $scope.offer_types = { 'checkin': 'Checkin Offer', 'offer': 'Offer', 'deal': 'Deal', 'bank_deal': 'Bank Deal' }
       $scope.reward_types = {'buyonegetone': 'Buy One Get One', 'discount': 'Discount', 'flatoff': 'Flat Off', 'free': 'Free', 'happyhours': 'Happy Hours', 'reduced': 'Reduced Price', 'custom': 'Custom', 'unlimited': 'Unlimited', 'onlyhappyhours': 'Only Happy Hours', 'combo': 'Combo', 'buffet': 'Buffet'};
       $scope.offer_sources = { 'hdfc': 'HDFC Bank', 'sbi': 'State Bank Of India', 'hsbc': 'HSBC Bank', 'citibank': 'Citi Bank' };

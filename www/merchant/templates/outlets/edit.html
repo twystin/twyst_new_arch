@@ -21,7 +21,7 @@
             <div class='form-group'>
               <label for='locality_1' class='col-md-2 control-label'>Locality 1</label>
               <div class='col-md-4'>
-                <input type='text' class='form-control' ng-model='outlet.contact.location.locality_1[0]' typeahead="location.location_1 for location in locations | filter:{location_1:$viewValue, location_2: outlet.contact.location.locality_2[0], city: outlet.contact.location.city}"  typeahead-on-select='updateMapMarker($item.lat, $item.long)' autocomplete='off'>
+                <input type='text' class='form-control' ng-model='outlet.contact.location.locality_1[0]' typeahead="location.location_1 for location in locations | filter:{location_1:$viewValue, location_2: outlet.contact.location.locality_2[0], city: outlet.contact.location.city}" typeahead-on-select='updateMapMarker($item.lat, $item.long)' autocomplete='off'>
               </div>
               <label for='locality_2' class='col-md-2 control-label' ng-class='{"has-error": formFailure && !outlet.contact.location.locality_2[0]}'>Locality 2 <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
               <div class='col-md-4' ng-class='{"has-error": formFailure && !outlet.contact.location.locality_2[0]}'>
@@ -301,13 +301,12 @@
                   <span ng-if='!formFailure'>Start adding cuisines below.</span>
                   <span ng-if='formFailure'>Add atleast one cuisine below</span>
                 </div>
-
               </div>
             </div>
             <div class='form-group'>
               <label for='add_cuisine' class='col-md-3 control-label'>Add a Cuisine</label>
               <div class='col-md-9'>
-                <input class='form-control' ng-model='newCuisine' ng-list placeholder='Add cuisine...' typeahead="cuisine for cuisine in cuisines | filter:$viewValue | limitTo:8" typeahead-on-select="addCuisine(newCuisine)"/>
+                <input class='form-control' ng-model='newCuisine' ng-list placeholder='Add cuisine...' typeahead="cuisine for cuisine in cuisines | filter:$viewValue | limitTo:8" typeahead-on-select="addCuisine(newCuisine)" />
               </div>
             </div>
           </fieldset>
@@ -345,7 +344,7 @@
       </div>
       <button class='btn btn-default' wz-previous>Go Back</button>
       <button class='btn btn-primary' wz-next>Continue</button>
-      <div class='clearfix'></div>      
+      <div class='clearfix'></div>
     </wz-step>
     <wz-step title='Outlet Timings' canexit='validateStep3'>
       <div class='well well-lg'>
@@ -362,22 +361,24 @@
                   <th>Apply to all days</th>
                 </thead>
                 <tbody>
-                  <tr ng-repeat='(day, schedule) in outlet.business_hours'>
+                  <tr ng-repeat='day in days'>
                     <th>{{day | uppercase}}</th>
-                    <td><input type='checkbox' ng-model='schedule.closed' ng-change='updateTiming(day, outlet.business_hours)'></td>
+                    <td>
+                      <input type='checkbox' ng-model='outlet.business_hours[day].closed' ng-change='updateTiming(day, outlet.business_hours)'>
+                    </td>
                     <td ng-repeat='i in getMaxRange() track by $index'>
-                      <div class='col-md-12' ng-if='schedule.timings.length && schedule.timings[$index]' ng-click='removeTiming(day, $index, outlet.business_hours)' ng-show='schedule.timings.length>1' ng-init='initalizeTiming(day, $index, outlet.business_hours)'>
-                        <button class='btn btn-sm btn-danger pull-right' ><span class='glyphicon glyphicon-trash'></span></button>
+                      <div class='col-md-12' ng-if='outlet.business_hours[day].timings.length && outlet.business_hours[day].timings[$index]' ng-click='removeTiming(day, $index, outlet.business_hours)' ng-show='outlet.business_hours[day].timings.length>1' ng-init='initalizeTiming(day, $index, outlet.business_hours)'>
+                        <button class='btn btn-sm btn-danger pull-right'><span class='glyphicon glyphicon-trash'></span></button>
                       </div>
-                      <div class='col-md-12' ng-if='schedule.timings[$index]'>
-                        <input type='time' ng-model='schedule.timings[$index].open.time' placeholder="HH:MM A/P" class='form-control' ng-change='updateTime(day, $index, outlet.business_hours)'>
+                      <div class='col-md-12' ng-if='outlet.business_hours[day].timings[$index]'>
+                        <input type='time' ng-model='outlet.business_hours[day].timings[$index].open.time' placeholder="HH:MM A/P" class='form-control' ng-change='updateTime(day, $index, outlet.business_hours)'>
                       </div>
-                      <div class='col-md-12 text-center' ng-if='schedule.timings[$index]'> to </div>
-                      <div class='col-md-12' ng-if='schedule.timings[$index]'>
-                        <input type='time' ng-model='schedule.timings[$index].close.time' placeholder="HH:MM A/P" class='form-control' ng-change='updateTime(day, $index, outlet.business_hours)'>
+                      <div class='col-md-12 text-center' ng-if='outlet.business_hours[day].timings[$index]'> to </div>
+                      <div class='col-md-12' ng-if='outlet.business_hours[day].timings[$index]'>
+                        <input type='time' ng-model='outlet.business_hours[day].timings[$index].close.time' placeholder="HH:MM A/P" class='form-control' ng-change='updateTime(day, $index, outlet.business_hours)'>
                       </div>
                     </td>
-                    <td><button class='btn btn-sm btn-default' ng-click='addNewTiming(day, outlet.business_hours)' ng-show='!schedule.closed'>Add Timing</button></td>
+                    <td><button class='btn btn-sm btn-default' ng-click='addNewTiming(day, outlet.business_hours)' ng-show='!outlet.business_hours[day].closed'>Add Timing</button></td>
                     <td><button class='btn btn-sm btn-default' ng-click='cloneToAllDays(day, outlet.business_hours)'>Apply to all days</button></td>
                   </tr>
                   <td>
@@ -390,7 +391,7 @@
       <div class='clearfix'></div>
       <button class='btn btn-default' wz-previous>Go Back</button>
       <button class='btn btn-primary' wz-next>Continue</button>
-      <div class='clearfix'></div> 
+      <div class='clearfix'></div>
     </wz-step>
     <wz-step title='Photos' canexit='validateStep4'>
       <div class='well well-lg'>
@@ -500,11 +501,11 @@
         <div class='panel-heading'>Timings & SMS OFF Time</div>
         <div class='panel-body'>
           <div class='col-md-8'>
-            <div class='row' ng-repeat='(day, schedule) in outlet.business_hours'>
+            <div class='row' ng-repeat='day in days'>
               <h4>{{day | uppercase}}</h4>
-              <span class='label label-warning' ng-if='schedule.closed'>Closed</span>
-              <span class='label label-success' ng-if='!schedule.closed'>Open</span>
-              <span ng-repeat='timing in schedule.timings' style='margin-left:10px;margin-right:10px;'><span class='label label-primary'>{{timing.open.time | date: 'hh:mm a'}}</span> to <span class='label label-primary'>{{timing.close.time | date: 'hh:mm a'}}</span></span>
+              <span class='label label-warning' ng-if='outlet.business_hours[day].closed'>Closed</span>
+              <span class='label label-success' ng-if='!outlet.business_hours[day].closed'>Open</span>
+              <span ng-repeat='timing in outlet.business_hours[day].timings' style='margin-left:10px;margin-right:10px;'><span class='label label-primary'>{{timing.open.time | date: 'hh:mm a'}}</span> to <span class='label label-primary'>{{timing.close.time | date: 'hh:mm a'}}</span></span>
             </div>
           </div>
           <div class='col-md-4'>

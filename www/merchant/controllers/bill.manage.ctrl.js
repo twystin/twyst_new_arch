@@ -1,6 +1,9 @@
 angular.module('merchantApp')
 	.controller('BillManageController', ['$scope', 'merchantRESTSvc', '$log', 'toastr',
 		function($scope, merchantRESTSvc, $log, toastr) {
+			
+			_id = undefined;
+
 			$scope.sort_order = {
 				'oldest_first': 'Oldest First',
 				'newest_first': 'Newest FIrst'
