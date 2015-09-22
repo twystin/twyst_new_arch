@@ -46,6 +46,7 @@ function process_user(user) {
         if (coupon.coupon_source === "qr_checkin" && coupon.lapse_date.getTime() <= current_time && coupon.status === 'active') {
             coupon.status = 'social_pool';
             coupon.lapsed_coupon_source = user._id;
+            coupon.lapsed_user_name = user.first_name || '';
             coupon.social_friend_list = [];
             _.each(user.friends.friends, function(friend) {
                 if (friend.user) {

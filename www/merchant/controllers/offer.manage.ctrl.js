@@ -2,7 +2,7 @@ angular.module('merchantApp')
 	.controller('OfferManageController', ['$scope', 'merchantRESTSvc', '$log', 'toastr',
 		function($scope, merchantRESTSvc, $log, toastr) {
 
-			
+			_id = undefined;
 
 			$scope.offer_groups = [];
 			$scope.get_offers = function() {

@@ -13,7 +13,7 @@ angular.module('merchantApp')
         angular.forEach($scope.offer.actions.reward.reward_hours, function(schedule) {
           if(!schedule.closed) {
             angular.forEach(schedule.timings, function(timing) {
-              timing.open.time = new Date(),
+              timing.open.time = new Date();
               timing.close.time = new Date();
               timing.open.time.setSeconds(0); timing.open.time.setMilliseconds(0);
               timing.close.time.setSeconds(0); timing.close.time.setMilliseconds(0);
@@ -43,6 +43,7 @@ angular.module('merchantApp')
       $scope.reward_types = { 'buyonegetone': 'Buy One Get One', 'discount': 'Discount', 'flatoff': 'Flat Off', 'free': 'Free', 'happyhours': 'Happy Hours', 'reduced': 'Reduced Price', 'custom': 'Custom', 'unlimited': 'Unlimited', 'onlyhappyhours': 'Only Happy Hours', 'combo': 'Combo', 'buffet': 'Buffet' };
       $scope.offer_sources = { 'hdfc': 'HDFC Bank', 'sbi': 'State Bank Of India', 'hsbc': 'HSBC Bank', 'citibank': 'Citi Bank' };
       $scope.event_matches = [{ name: 'On every', value: 'on every' }, { name: 'After', value: 'after' }, { name: 'On only', value: 'on only' }]
+      $scope.days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
       $scope.updateTiming = function(day, list) {
         if (list[day].closed) {
@@ -215,7 +216,6 @@ angular.module('merchantApp')
         }
 
         if (newVal.reward_type != oldVal.reward_type) {
-          
           if (newVal.reward_type == 'custom') {
             $scope.offer.actions.reward.header = '';
             $scope.offer.actions.reward.line1 = '';
@@ -360,9 +360,6 @@ angular.module('merchantApp')
             }, _handleErrors)
           }, _handleErrors)
         }, _handleErrors);
-          
-          
-          
         return deferred.promise;
       }
 
@@ -598,7 +595,6 @@ angular.module('merchantApp')
                           });
                       }
                   }, function(err) {
-                      
                       callback(err);
                   })
               }
@@ -675,9 +671,9 @@ angular.module('merchantApp')
 
       $scope.validateOfferValidity = function() {
         var def = Q.defer();
-        if (!$scope.offer.offer_start_date || $scope.offer.offer_start_date < $scope.today || $scope.offer.offer_end_date > $scope.max_date) {
+        if (!$scope.offer.offer_start_date || $scope.offer.offer_end_date > $scope.max_date) {
           def.reject("Offer requires valid start date")
-        } else if (!$scope.offer.offer_end_date || $scope.offer.offer_start_date < $scope.today || $scope.offer.offer_end_date > $scope.max_date) {
+        } else if (!$scope.offer.offer_end_date || $scope.offer.offer_end_date > $scope.max_date) {
           def.reject("Offer requires valid end date");
         } else if ($scope.offer.offer_start_date >= $scope.offer.offer_end_date) {
           def.reject("Offer end date cannot be before or the same as offer end date");
