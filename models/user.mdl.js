@@ -122,11 +122,12 @@ var User = new Schema({
       ref: 'Outlet'
     },
     coupon_source: {type: String, default: ''},
-    lapsed_coupon_source: {type: Schema.ObjectId, ref: 'User'},
+    lapsed_coupon_source: {},
     is_grabbed: {type: Boolean, default: false},
     header: {type: String, default: ''},
     line1: {type: String, default: ''},
     line2: {type: String, default: ''},
+    description: {type: String, default: ''},
     lapse_date: Date,
     expiry_date: Date,
     coupon_valid_days: Number,
