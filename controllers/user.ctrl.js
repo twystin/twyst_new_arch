@@ -31,9 +31,6 @@ module.exports.get_coupons = function(req, res) {
       .then(function(data) {
         return load_outlet_info_from_cache(data)
       }).then(function(data) {
-        return load_social_pool_coupons(data)
-      })
-      .then(function(data) {
         var twyst_bucks
         if(data.coupons && data.coupons.length){ 
             twyst_bucks = data.twyst_bucks;
@@ -113,31 +110,14 @@ function filter_out_expired_and_used_coupons(data) {
   var deferred = Q.defer();
   
   data.coupons = _.filter(data.coupons, function(coupon) {
-    if(_.has(coupon, 'status') && (coupon.status === 'active') && (coupon.coupon_source === 'qr_checkin'
-     || coupon.coupon_source === 'QR' || coupon.coupon_source === 'PANEL' || coupon.coupon_source === 'POS')) {
+    if(_.has(coupon, 'status') && (coupon.status === 'active') 
+        && ( coupon.coupon_source === 'QR' || coupon.coupon_source === 'PANEL' || coupon.coupon_source === 'POS' 
+            || coupon.coupon_source === 'BATCH')) {
       return true;
     } else {
       return false;
     }
   });
-  deferred.resolve(data);
-  return deferred.promise;
-};
-
-
-function load_social_pool_coupons(data) {
-  logger.log();
-  var deferred = Q.defer();
-
-  Cache.hget(data.user.data, 'social_pool_coupons', function(err, reply) {
-      if(err || !reply) {
-
-      }
-      else {
-        console.log(reply)
-      }
-    })
-
   deferred.resolve(data);
   return deferred.promise;
 };
@@ -195,7 +175,7 @@ function load_outlet_info_from_cache(data) {
                     massaged_item.open_next = RecoHelper.opensAt(outlet.business_hours);
                     
                     _.each(outlet.offers, function(offer) {
-                        if(_.has(offer, ['actions', 'reward']) && _.isEqual(offer.actions.reward.header, coupon.header) && _.isEqual(offer.actions.reward.line1, coupon.line1) && _.isEqual(offer.actions.reward.line2, coupon.line2)) {
+                        if(offer.offer_group.toString() === coupon.coupon_group.toString()) {
                             coupon.available_now = !(RecoHelper.isClosed('dummy', 'dummy', offer.actions.reward.reward_hours));
                             if(!coupon.available_now) {
                               coupon.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;

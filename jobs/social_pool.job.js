@@ -19,7 +19,7 @@ exports.runner = function(agenda) {
         console.log('inside pool');
         User.find({
             "role": 6,
-            "coupons.coupon_source": "qr_checkin",
+            "coupons.coupon_source": "QR",
             "coupons.status": "active",
             "coupons.lapse_date": {
                 $lte: new Date()
@@ -43,11 +43,16 @@ function process_user(user) {
     var current_time = new Date();
     current_time = current_time.getTime();
     _.each(user.coupons, function(coupon) {
-        if (coupon.coupon_source === "qr_checkin" && coupon.lapse_date.getTime() <= current_time && coupon.status === 'active') {
+        if (coupon.status === 'active' && coupon.coupon_source === "QR"  && coupon.lapse_date.getTime() <= current_time && coupon.expiry_date.getTime() > current_time){
             coupon.status = 'social_pool';
-            coupon.lapsed_coupon_source = user._id;
-            coupon.lapsed_user_name = user.first_name || '';
+            coupon.offer_type = 'pool';
+            coupon.lapse_date = coupon.expiry_date;
+            coupon.lapsed_coupon_source = {};
+            coupon.lapsed_coupon_source.id = user._id;
+            coupon.lapsed_coupon_source.name = user.first_name || '';
+            coupon.lapsed_coupon_source.phone = user.phone || '';
             coupon.social_friend_list = [];
+            
             _.each(user.friends.friends, function(friend) {
                 if (friend.user) {
                     var arr = [];

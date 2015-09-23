@@ -51,44 +51,58 @@ module.exports.process = function(data) {
                         }
                     });
                 });
-                social_coupons.splice(index, 1);
-                Cache.hset(user_id, 'social_pool_coupons', JSON.stringify(social_coupons));
-
+                Cache.hget(coupon.lapsed_coupon_source.id, 'social_pool_coupons', function(err, reply) {
+                    if(err || !reply) {
+                       logger.error(err);
+                    } 
+                    else {
+                        var coupon_pool = JSON.parse(reply);
+                        var new_social_pool = [];
+                       _.each(coupon_pool, function(coupon_in_pool) {
+                           if(coupon_in_pool._id !== coupon_id) {
+                                new_social_pool.push(coupon);
+                           }
+                       });
+                        Cache.hset(coupon.lapsed_coupon_source.id, 'social_pool_coupons', JSON.stringify(new_social_pool));                         
+                    }    
+                }); 
+                
                 var coupon_id = coupon._id.toString();
-
+                coupon._id = new ObjectId();
+                coupon.status = 'active';
+                coupon.is_grabbed = true;
                 User.findOneAndUpdate({
-                    _id: user_id,
+                    '_id': coupon.lapsed_coupon_source._id,
                     'coupons._id': coupon_id
-                }, {
-                    $set: {
-                        'coupon.$._id': new ObjectId(),
-                        'coupons.$.status': 'active',
-                        'coupons.$.is_grabbed': true
+                    },
+                    {   $set: {
+                            'coupons.$.grabbed_by': user_id, 'coupons.$.status': 'grabbed'
+                        }
+                    },  
+                    function(err, u) {
+                        if(err || !u) {
+                            deferred.reject('Unable to grab the offer right now');
+                        } 
+                        else {
+                            User.findOneAndUpdate({
+                                _id: user_id
+                            }, {
+                                $push: {
+                                coupons: coupon
+                              }
+
+                            }, function(err, u) {
+                                if(err || !u) {
+                                    deferred.reject('Unable to grab the offer right now');
+                                }                                 
+                                else    {
+                                    deferred.resolve('Offer grabbed successfully');
+                                }
+                            });                                  
+                        }
                     }
-                }, function(err, u) {
-                    if(err || !u) {
-                        deferred.reject('Unable to grab the offer right now');
-                    } else {
-                        User.findOneAndUpdate({
-                            '_id': coupon.lapsed_coupon_source,
-                            'coupons._id': coupon_id
-                        }, {
-                            $set: {
-                                'coupons.$.grabbed_by': user_id, 
-                                'coupons.$.status': 'grabbed'
-                            }
-                        }, function(err, u) {
-                            if(err || !u) {
-                                deferred.reject('Unable to grab the offer right now');
-                            } else {
-                                deferred.resolve({
-                                    data: u,
-                                    message: 'coupon grabbed successfully'
-                                });
-                            }
-                        });
-                    }
-                });
+                );
+                
             }
         }
     });
