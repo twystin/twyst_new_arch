@@ -653,16 +653,18 @@ angular.module('merchantApp')
                     } else {
                       callback();
                     }
-                  }, function(found) {
-                    if(found) {
-                      callback();
-                    } else {
-                      callback("Offer available on " + day.toUpperCase() + " outside the timings for " + outlet.basics.name);
-                    }
+                  }, function(found_or_err) {
+                    callback(found_or_err);
                   });
                 }
-              }, function(err) {
-                callback(err);
+              }, function(found_or_err) {
+                if(found_or_err=='found') {
+                  callback();
+                } else if (found_or_err) {
+                  callback(err);
+                } else {
+                  callback("Offer available on " + day.toUpperCase() + " outside the timings for all outlets");
+                }
               })
             }, function(err) {
               callback(err);
