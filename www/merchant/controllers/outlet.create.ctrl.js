@@ -409,10 +409,10 @@ angular.module('merchantApp')
 
             $scope.validateStep4 = function() {
                 var deferred = Q.defer();
-                if (!_.has($scope.outlet, 'photos.logo')) {
+                if (!_.has($scope.outlet, 'photos.logo') && $scope.isPaying) {
                     $scope.handleErrors('Logo is mandatory');
                     deferred.reject();
-                } else if (!_.has($scope.outlet, 'photos.background')) {
+                } else if (!_.has($scope.outlet, 'photos.background') && $scope.isPaying) {
                     $scope.handleErrors('Background image is mandatory');
                     deferred.reject();
                 } else {
