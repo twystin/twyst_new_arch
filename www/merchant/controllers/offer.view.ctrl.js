@@ -7,12 +7,11 @@ angular.module('merchantApp')
       $scope.days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
       $scope.reward_types = { 'buyonegetone': 'Buy One Get One', 'discount': 'Discount', 'flatoff': 'Flat Off', 'free': 'Free', 'happyhours': 'Happy Hours', 'reduced': 'Reduced Price', 'custom': 'Custom', 'unlimited': 'Unlimited', 'onlyhappyhours': 'Only Happy Hours', 'combo': 'Combo', 'buffet': 'Buffet' };
       
-      merchantRESTSvc.getOffer($stateParams.offer_group).then(function(data) {
+      merchantRESTSvc.getOffer($stateParams.offer_id).then(function(data) {
         if (data.data.offer_cost) {
           data.data.offer_cost = data.data.offer_cost.toString();
         }
         $scope.offer = _.merge({}, data.data);
-        delete $scope.offer._id;
         angular.forEach($scope.offer.actions.reward.reward_hours, function(schedule) {
           if (!schedule.closed) {
             angular.forEach(schedule.timings, function(timing) {

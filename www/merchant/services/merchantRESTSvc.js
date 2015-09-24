@@ -93,10 +93,10 @@ angular.module('merchantApp')
 				return deferred.promise;
 			}
 
-			merchantRESTSvc.getOffer = function(offer_group) {
+			merchantRESTSvc.getOffer = function(offer_id) {
 				var deferred = Q.defer();
 				var token = $cookies.get('token');
-				$http.get('/api/v4/offers/' + offer_group + "?token=" + token)
+				$http.get('/api/v4/offers/' + offer_id + "?token=" + token)
 					.then(function(data) {
 						if (data.data.response) {
 							deferred.resolve(data.data);
@@ -109,10 +109,10 @@ angular.module('merchantApp')
 				return deferred.promise;
 			}
 
-			merchantRESTSvc.removeOffer = function(offer_group) {
+			merchantRESTSvc.removeOffer = function(offer_id) {
 				var deferred = Q.defer();
 				var token = $cookies.get('token');
-				$http.delete('/api/v4/offers/' + offer_group + '?token=' + token)
+				$http.delete('/api/v4/offers/' + offer_id + '?token=' + token)
 					.then(function(data) {
 						if(data.data.response) {
 							deferred.resolve(data.data);
