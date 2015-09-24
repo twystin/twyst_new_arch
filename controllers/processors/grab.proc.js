@@ -72,7 +72,7 @@ module.exports.process = function(data) {
                 coupon.status = 'active';
                 coupon.is_grabbed = true;
                 User.findOneAndUpdate({
-                    '_id': coupon.lapsed_coupon_source._id,
+                    '_id': coupon.lapsed_coupon_source.id,
                     'coupons._id': coupon_id
                     },
                     {   $set: {

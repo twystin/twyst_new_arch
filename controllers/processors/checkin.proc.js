@@ -1,4 +1,5 @@
 var logger = require('tracer').colorConsole();
+
 var _ = require('lodash');
 var Q = require('q');
 
@@ -95,7 +96,7 @@ function validate_qr(data) {
     }
     passed_data.qr = qr;
     passed_data.outlet = qr.outlet_id; // SO THAT THE OUTLET IS SAVED IN THE EVENT TABLE
-    deferred.resolve(passed_data);
+    deferred.resolve(passed_data  );
   });
 
   return deferred.promise;
@@ -174,21 +175,24 @@ function check_and_create_coupon(data) {
   var outlet_id = _.get(data, 'outlet._id');
 
   var offers = _.get(data, 'outlet.offers');
-  var sorted_checkin_offers = _.sortBy(_.filter(offers, {
+  var sorted_checkin_offers = _.filter(offers, {'offer_status': 'active'})
+
+  sorted_checkin_offers = _.sortBy(_.filter(sorted_checkin_offers, {
     'offer_type': 'checkin'
   }), 'rule.event_count');
-
+  
   Event.find({
     'event_user': user_id,
     'event_type': 'checkin',
-    'event_outlet': outlet_id
+    'event_outlet': outlet_id,
+
   }, function(err, events) {
     if (err) {
       deferred.reject(err);
     }
-
     var matching_offer = find_matching_offer(events, sorted_checkin_offers);
-    if (matching_offer) {
+    
+    if (matching_offer && isNaN(matching_offer)) {
       create_coupon(matching_offer, user_id, outlet_id).then(function(data) {
         if(data.coupons && data.coupons.length) {
             passed_data.user.coupons.push(data.coupons[data.coupons.length-1]);
@@ -197,8 +201,14 @@ function check_and_create_coupon(data) {
       }, function(err) {
         deferred.reject('Could not create coupon' + err);
       })
-    } else {
-      deferred.reject('No matching offer for user');
+    } 
+    else if(!isNaN(matching_offer)){
+      console.log('locked_offer');
+      data.checkins_to_go = matching_offer;
+      deferred.resolve(data);
+    }
+    else{
+      deferred.reject('no matching offer for user');
     }
   });
   return deferred.promise;
@@ -206,7 +216,6 @@ function check_and_create_coupon(data) {
 
 function create_coupon(offer, user, outlet) {
   logger.log();
-
   var keygen = require('keygenerator');
   var code = keygen._({
     forceUppercase: true,
@@ -235,7 +244,7 @@ function create_coupon(offer, user, outlet) {
         expiry_date: expiry_date,
         meta: {
           reward_type: {
-            type: offer.actions.reward.reward_meta.type,
+            type: offer.actions.reward.reward_meta.reward_type
           }
         },
         status: 'active',
@@ -258,11 +267,18 @@ function create_coupon(offer, user, outlet) {
 }
 
 function find_matching_offer(events, offers) {
-  var i = 0;
-  var checkins = events.length + 1; // TO COUNT THIS CHECKIN AS WELL
-  var count, match;
-
+  var i, checkins = 1;// TO COUNT THIS CHECKIN AS WELL
+  var count, match, start_date, event_date;
+  
   for (i = 0; i < offers.length; i++) {
+    _.each(events, function(event) {
+      
+      if(event.event_date.getTime() >= offers[i].offer_start_date.getTime()  &&
+       event.event_date.getTime() <= offers[i].offer_end_date.getTime()){
+        checkins = checkins+1;
+      }
+    })
+    
     count = _.get(offers[i], 'rule.event_count');
     match = _.get(offers[i], 'rule.event_match');
 
@@ -273,20 +289,38 @@ function find_matching_offer(events, offers) {
     }
 
     if (match === 'on only') {
-
       if (checkins === count) {
         return offers[i];
       }
     }
 
     if (match === 'after') {
-
       if (checkins > count) {
         return offers[i];
       }
     }
-  }
 
+    if (match === 'on every') {
+      var checkins_to_go = count - (checkins % count);
+      return checkins_to_go;
+    }
+
+    if (match === 'on only') {
+      if(count > checkins) {
+        var checkins_to_go = count - checkins; 
+        return checkins_to_go; 
+      }
+    }
+
+    if (match === 'after' && count > checkins) {
+      var checkins_to_go = count+1 - checkins; 
+      return checkins_to_go;
+    }
+    else if(match === 'after' && count <= checkins) {
+      return 1;
+       
+    } 
+  }
   return undefined;
 }
 
