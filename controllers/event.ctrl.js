@@ -238,7 +238,6 @@ function create_new(res, passed_data) {
       return update_twyst_bucks(data);
     })
     .then(function(data) {
-
         if(data && data.event_data && data.event_data.event_type === 'referral_join'){
             update_from_user_twyst_bucks(data.from_user);
         }
@@ -248,12 +247,18 @@ function create_new(res, passed_data) {
         if(data.user.coupons.length) {
             code = data.user.coupons[data.user.coupons.length-1].code;    
         }
-        if(event_type === 'checkin' && data.user.coupons.length) {
+        
+        if(event_type === 'checkin'  && !data.checkins_to_go && data.user.coupons.length ) {
             header = data.user.coupons[data.user.coupons.length-1].header;
             line1 = data.user.coupons[data.user.coupons.length-1].line1;
             line2 = data.user.coupons[data.user.coupons.length-1].line2;
             outlet_id = data.user.coupons[data.user.coupons.length-1].issued_by;
             outlet_name = data.outlet.basics.name;
+        }
+        else if(event_type === 'checkin'  && data.checkins_to_go){
+          outlet_id = data.user.coupons[data.user.coupons.length-1].issued_by;
+          outlet_name = data.outlet.basics.name;  
+          checkin_left = data.checkins_to_go;
         }
         
         var data = {};
@@ -264,6 +269,7 @@ function create_new(res, passed_data) {
             data.line1 = line1;
             data.outlet_id = outlet_id;
             data.outlet_name = outlet_name;
+            dat.checkins_to_go = checkin_left;
         }
 
       HttpHelper.success(res, data, "Processed the event successfully.");
