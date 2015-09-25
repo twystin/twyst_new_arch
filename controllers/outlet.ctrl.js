@@ -242,14 +242,14 @@ function massage_offers(params) {
 
       params.outlet = add_user_coupons(
         pick_offer_fields(
-          select_relevant_checkin_offer(params.outlet), params.user._id), coupon_map && coupon_map[params.outlet._id] && coupon_map[params.outlet._id].coupons);
+          select_relevant_checkin_offer(params.outlet), params.user._id, params.query.date, params.query.time), coupon_map && coupon_map[params.outlet._id] && coupon_map[params.outlet._id].coupons);
       deferred.resolve(params);
 
     });
   } else {
     params.outlet =
       pick_offer_fields(
-        select_relevant_checkin_offer(params.outlet), params.user._id);
+        select_relevant_checkin_offer(params.outlet), params.user._id, params.query.date, params.query.time);
     deferred.resolve(params);
     deferred.resolve(params);
   }
@@ -330,32 +330,56 @@ function massage_offers(params) {
     return item;
   }
 
-  function pick_offer_fields(item, user_id) {
+  function pick_offer_fields(item, user_id, date, time) {
+
     item.offers = _.map(item.offers, function(offer) {
       if (offer.type) {
         return offer;
       } else {
         var massaged_offer = {};
         massaged_offer._id = offer._id;
+        massaged_offer.header = offer.actions && offer.actions.reward && offer.actions.reward.header || offer.header;
+        massaged_offer.line1 = offer.actions && offer.actions.reward && offer.actions.reward.line1 || offer.line1;
+        massaged_offer.line2 = offer.actions && offer.actions.reward && offer.actions.reward.line2 || offer.line2;
+        massaged_offer.description = offer.actions && offer.actions.reward && offer.actions.reward.description || '';
+        massaged_offer.terms = offer.actions && offer.actions.reward && offer.actions.reward.terms || '';
+
         massaged_offer.type = offer.offer_type;
-        massaged_offer.title = offer.actions && offer.actions.reward && offer.actions.reward.title;
-        massaged_offer.terms = offer.actions && offer.actions.reward && offer.actions.reward.terms;
-        massaged_offer.next = parseInt(offer.rule && offer.rule.event_count);
-        massaged_offer.checkins = item.recco && item.recco.checkins || 0;
-        massaged_offer.meta = offer.actions && offer.actions.reward && offer.actions.reward.reward_meta;
-        massaged_offer.expiry = offer.offer_end_date;
-        if (offer && offer.actions && offer.actions.reward && offer.actions.reward.reward_hours) {
-          massaged_offer.available_now = !(RecoHelper.isClosed('dummy', 'dummy', offer.actions.reward.reward_hours));
-          if (!massaged_offer.available_now) {
-            massaged_offer.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
-          }
+        massaged_offer.meta = offer.actions && offer.actions.reward && offer.actions.reward.reward_meta || offer.meta;
+        if(offer.offer_type === 'pool') {         
+          massaged_offer.available_now = true;          
+          massaged_offer.source_name = offer.lapsed_user_name;
+          massaged_offer.code = offer.code;
+          massaged_offer.meta.reward_type = offer.meta.reward_type.type;
         }
-        // massaged_offer.applicability = offer.actions.reward.applicability;
-        massaged_offer.header = offer.actions && offer.actions.reward && offer.actions.reward.header;
-        massaged_offer.line1 = offer.actions && offer.actions.reward && offer.actions.reward.line1;
-        massaged_offer.line2 = offer.actions && offer.actions.reward && offer.actions.reward.line2;
-        massaged_offer.description = offer.actions && offer.actions.reward && offer.actions.reward.description;
-        massaged_offer.terms = offer.actions && offer.actions.reward && offer.actions.reward.terms;
+        
+       if (offer.offer_type === 'checkin') {
+          massaged_offer.next = parseInt(offer.rule && offer.rule.event_count);
+          massaged_offer.checkins = item.recco && item.recco.checkins || 0;
+          if (offer.rule.event_match === 'on every') {
+            var checkins_to_go = massaged_offer.next - (massaged_offer.checkins % massaged_offer.next);
+            massaged_offer.next =  checkins_to_go;
+          }
+
+          if (offer.rule.event_match === 'on only') {
+            if(massaged_offer.next > massaged_offer.checkins) {
+              var checkins_to_go = massaged_offer.next - massaged_offer.checkins; 
+              massaged_offer.next =  checkins_to_go; 
+            }
+          }
+
+          if (offer.rule.event_match === 'after' && massaged_offer.next > massaged_offer.checkins) {
+            var checkins_to_go = massaged_offer.next+1 - massaged_offer.checkins; 
+            massaged_offer.next =  checkins_to_go;
+          }
+          else if(offer.rule.event_match === 'after' && massaged_offer.next <=massaged_offer.checkins) {
+            massaged_offer.next =  1;
+             
+          } 
+        }        
+
+        massaged_offer.expiry = offer.offer_end_date || offer.expiry_date;
+        
         if(offer.offer_likes && offer.offer_likes.length) {
           massaged_offer.offer_likes = offer.offer_likes.length;  
         }
@@ -365,16 +389,6 @@ function massage_offers(params) {
 
         massaged_offer.is_like = false;
         
-        if(offer.status == 'social_pool') {
-          massaged_offer.header = offer.header;
-          massaged_offer.line1  = offer.line1;
-          massaged_offer.line2  = offer.line2;
-          massaged_offer.expiry = offer.expiry_date;
-          massaged_offer.available_now = true;
-          massaged_offer.meta = offer.meta;
-          massaged_offer.type = 'pool';
-        }
-
         _.find(offer.offer_likes, function(user) {
             if(user.toString() === user_id.toString()) {
                 massaged_offer.is_like = true;  
@@ -382,12 +396,22 @@ function massage_offers(params) {
             } 
         })
 
-        if(offer.offer_type === 'offer' || offer.offer_type === 'deal' || offer.offer_type === 'bank_deal') {
+        if (offer && offer.actions && offer.actions.reward && offer.actions.reward.reward_hours) {
+          massaged_offer.available_now = !(RecoHelper.isClosed(date, time, offer.actions.reward.reward_hours));
+          if (!massaged_offer.available_now) {
+            massaged_offer.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
+          }
+
+        }
+        if(offer.offer_type === 'offer' || offer.offer_type === 'deal' || offer.offer_type ==='bank_deal') {
           massaged_offer.offer_cost =  offer.offer_cost;  
         }
         if(offer.offer_type === 'bank_deal') {
           massaged_offer.offer_source = offer.offer_source;
         }
+        
+        // massaged_offer.applicability = offer.actions.reward.applicability;
+        // massaged_offer.valid_days = offer.actions.reward.valid_days;
         return massaged_offer;
       }
 

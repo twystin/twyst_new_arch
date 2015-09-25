@@ -84,7 +84,7 @@ function process_user(user) {
                     
                 }
             });
-
+            
             User.findOneAndUpdate({
                 _id: user._id,
                 'coupons._id': coupon._id
@@ -92,10 +92,12 @@ function process_user(user) {
                 $set: {
                     'coupons.$.status': 'social_pool',
                 }
-            }).exec(function(err, user) {
+            }).exec(function(err) {
                 if (err) {
                     logger.error(err);
                 }
+                RecoHelper.cache_user_coupons(user);
+
             });
         }
     });

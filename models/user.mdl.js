@@ -114,7 +114,7 @@ var User = new Schema({
   coupons: [{
     _id: Schema.ObjectId,
     code: {type: String, default: ''},
-    coupon_group: {
+    issued_for: {
       type: Schema.ObjectId
     },
     issued_by: {
@@ -157,6 +157,10 @@ var User = new Schema({
         type: Schema.ObjectId,
         ref: 'User'
       }
+    },
+    outlets: {
+      type: Schema.ObjectId,
+      ref: 'Outlet'
     },
     issued_at: Date
     }],
