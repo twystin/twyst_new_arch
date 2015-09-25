@@ -169,6 +169,7 @@ module.exports.get_event = function(req, res) {
 }
 
 module.exports.update_event = function(req, res) {
+  logger.log();
   var HttpHelper = require('../common/http.hlpr.js');
   var AuthHelper = require('../common/auth.hlpr.js');
   var EventHelper = require('./helpers/event.hlpr.js');
@@ -177,7 +178,6 @@ module.exports.update_event = function(req, res) {
   var event = {};
   event = _.extend(event, req.body);
 
-  logger.info(token, event_id, event);
   if(!token) {
     HttpHelper.error(res, null, "Not authenticated");
   } else if(!event_id) {
@@ -185,7 +185,6 @@ module.exports.update_event = function(req, res) {
   } else if(!Object.keys(event).length) {
     HttpHelper.error(res, null, "Request invalid");
   } else {
-    logger.log();
     AuthHelper.get_user(token).then(function(data) {
       var user = data.data;
       EventHelper.update_event(user, event).then(function(data) {
@@ -194,7 +193,6 @@ module.exports.update_event = function(req, res) {
         HttpHelper.error(res, err.err, err.message);
       })
     }, function(err) {
-      logger.log();
       HttpHelper.error(res, err || false, "Could not find user");
     });
   }
@@ -203,12 +201,10 @@ module.exports.update_event = function(req, res) {
 function setup_event(req, type) {
   logger.log();
   var passed_data = {};
-  logger.log(req.body);
   passed_data.event_data = req.body || {};
   passed_data.event_data.event_type = type;
   passed_data.user_token = (req.query && req.query.token) || null;
   passed_data.query_params = req.params || null;
-  logger.log(passed_data);
   return passed_data;
 }
 
@@ -256,7 +252,7 @@ function create_new(res, passed_data) {
             outlet_name = data.outlet.basics.name;
         }
         else if(event_type === 'checkin'  && data.checkins_to_go){
-          outlet_id = data.user.coupons[data.user.coupons.length-1].issued_by;
+          outlet_id = data.outlet._id;
           outlet_name = data.outlet.basics.name;  
           checkin_left = data.checkins_to_go;
         }
@@ -269,7 +265,7 @@ function create_new(res, passed_data) {
             data.line1 = line1;
             data.outlet_id = outlet_id;
             data.outlet_name = outlet_name;
-            dat.checkins_to_go = checkin_left;
+            data.checkins_to_go = checkin_left;
         }
 
       HttpHelper.success(res, data, "Processed the event successfully.");

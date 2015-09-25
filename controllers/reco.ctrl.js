@@ -89,7 +89,6 @@ function set_user_checkins(params) {
 
 function set_user_coupons(params) {
   logger.log();
-
   var deferred = Q.defer();
   if (params.user) {
     Cache.hget(params.user._id, 'coupon_map', function(err, reply) {
@@ -104,7 +103,6 @@ function set_user_coupons(params) {
               outlets[key].recco = outlets[key].recco || {};
               outlets[key].recco.coupons = value.coupons.length;
             }
-
           });
           params.outlets = outlets;
           deferred.resolve(params);
@@ -283,6 +281,7 @@ function pick_outlet_fields(params) {
     }
 
     params.outlets = _.map(params.outlets, function(item) {
+
       var massaged_item = {};
       massaged_item._id = item._id;
       massaged_item.name = item.basics.name;
@@ -353,7 +352,7 @@ function massage_offers(params) {
 
     var checkins = (item.recco && item.recco.checkins || 0);
     var returned = false;
-
+    
     // SORT BY THE EVENT COUNT
     item.offers = _.sortBy(item.offers, function(offer) {
       if (offer.offer_type === 'checkin') {
@@ -364,24 +363,6 @@ function massage_offers(params) {
         }
       } else {
         return 0;
-      }
-    });
-
-    // AND THEN PICK THE FIRST ONE
-    item.offers = _.filter(item.offers, function(offer) {
-      if (offer.offer_type === 'checkin' && offer.rule && offer.rule.event_count) {
-        if (checkins < offer.rule.event_count && !returned) {
-          returned = true;
-          return true;
-        } else {
-          return false;
-        }
-      } else {
-        if (offer.offer_type === 'winback' || offer.offer_type === 'birthday') {
-          return false;
-        } else {
-          return true;
-        }
       }
     });
 
@@ -452,6 +433,26 @@ function massage_offers(params) {
        if (offer.offer_type === 'checkin') {
           massaged_offer.next = parseInt(offer.rule && offer.rule.event_count);
           massaged_offer.checkins = item.recco && item.recco.checkins || 0;
+          if (offer.rule.event_match === 'on every') {
+            var checkins_to_go = massaged_offer.next - (massaged_offer.checkins % massaged_offer.next);
+            massaged_offer.next =  checkins_to_go;
+          }
+
+          if (offer.rule.event_match === 'on only') {
+            if(massaged_offer.next > massaged_offer.checkins) {
+              var checkins_to_go = massaged_offer.next - massaged_offer.checkins; 
+              massaged_offer.next =  checkins_to_go; 
+            }
+          }
+
+          if (offer.rule.event_match === 'after' && massaged_offer.next > massaged_offer.checkins) {
+            var checkins_to_go = massaged_offer.next+1 - massaged_offer.checkins; 
+            massaged_offer.next =  checkins_to_go;
+          }
+          else if(offer.rule.event_match === 'after' && massaged_offer.next <=massaged_offer.checkins) {
+            massaged_offer.next =  1;
+             
+          } 
         }        
 
         massaged_offer.expiry = offer.offer_end_date || offer.expiry_date;
