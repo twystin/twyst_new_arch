@@ -4,12 +4,11 @@ angular.module('merchantApp')
       merchantRESTSvc.getOutlets().then(function(data) { $scope.outlets = _.indexBy(data.data.outlets, '_id'); }, function(err) { $log.log('Could not get outlets - ' + err.message); $scope.outlets = []; });
 
       $scope.isPaying = $rootScope.isPaying;
-      merchantRESTSvc.getOffer($stateParams.offer_group).then(function(data) {
+      merchantRESTSvc.getOffer($stateParams.offer_id).then(function(data) {
         if(data.data.offer_cost) {
           data.data.offer_cost = data.data.offer_cost.toString();
         }
         $scope.offer = _.merge($scope.offer, data.data);
-        delete $scope.offer._id;
         angular.forEach($scope.offer.actions.reward.reward_hours, function(schedule) {
           if(!schedule.closed) {
             angular.forEach(schedule.timings, function(timing) {
@@ -688,7 +687,7 @@ angular.module('merchantApp')
       }
 
       $scope.updateOffer = function() {
-        $http.put('/api/v4/offers/' + $stateParams.offer_group + '?token=' + $rootScope.token, $scope.offer)
+        $http.put('/api/v4/offers/' + $stateParams.offer_id + '?token=' + $rootScope.token, $scope.offer)
           .then(function(res) {
             if (res.data.response) {
               toastr.success('Offer creted successfully');

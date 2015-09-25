@@ -1,7 +1,7 @@
 <div class='container'>
   <div class='col-xs-12'>
     <a class='btn btn-default' ui-sref='merchant.offers'>Go Back</a> &nbsp;&nbsp;
-    <a class='btn btn-primary' ui-sref='merchant.edit_offer({offer_group: offer.offer_group})'>Update Offer</a>
+    <a class='btn btn-primary' ui-sref='merchant.edit_offer({offer_id: offer._id})'>Update Offer</a>
     <p> </p>
   </div>
   <div class='clearfix'></div>
@@ -78,7 +78,7 @@
         <h4>{{day | uppercase}}</h4>
         <span class='label label-warning' ng-if='offer.actions.reward.reward_hours.closed'>Closed</span>
         <span class='label label-success' ng-if='!offer.actions.reward.reward_hours.closed'>Open</span>
-        <span ng-repeat='timing in offer.actions.reward.reward_hours.timings' style='margin-left:10px;margin-right:10px;'><span class='label label-primary'>{{timing.open.time | date: 'hh:mm a'}}</span> to <span class='label label-primary'>{{timing.close.time | date: 'hh:mm a'}}</span></span>
+        <span ng-repeat='timing in offer.actions.reward.reward_hours[day].timings' style='margin-left:10px;margin-right:10px;'><span class='label label-primary'>{{timing.open.time | date: 'hh:mm a'}}</span> to <span class='label label-primary'>{{timing.close.time | date: 'hh:mm a'}}</span></span>
       </div>
     </div>
     <div class='col-md-6'>

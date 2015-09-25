@@ -25,13 +25,13 @@ module.exports.new = function(req, res) {
 module.exports.get = function(req, res) {
 	logger.log();
 	var token = req.query.token || null,
-		offer_group = req.params.offer_group;
+		offer_id = req.params.offer_id;
 
 	if(!token) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
 
-	OfferHelper.get_offer(token, offer_group).then(function(data) {
+	OfferHelper.get_offer(token, offer_id).then(function(data) {
 		HttpHelper.success(res, data.data, data.message);
 	}, function(err) {
 		HttpHelper.error(res, err.err, err.message);
@@ -41,7 +41,7 @@ module.exports.get = function(req, res) {
 module.exports.update = function(req, res) {
 	logger.log();
 	var token = req.query.token || null,
-		offer_group = req.params.offer_group;
+		offer_id = req.params.offer_id;
 
 	if(!token) {
 		HttpHelper.error(res, null, 'Not Authenticated');
@@ -60,13 +60,13 @@ module.exports.update = function(req, res) {
 module.exports.delete = function(req, res) {
     logger.log();
     var token = req.query.token || null,
-    offer_group = req.params.offer_group;
+    offer_id = req.params.offer_id;
 
     if(!token) {
         HttpHelper.error(res, null, "Not Authenticated");
     }
 
-    OfferHelper.delete_offer(token, offer_group).then(function(data) {
+    OfferHelper.delete_offer(token, offer_id).then(function(data) {
         HttpHelper.success(res, data.data, data.message);
     }, function(err) {
         HttpHelper.error(res, err.err || true, err.message);
