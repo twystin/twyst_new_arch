@@ -4,7 +4,7 @@ angular.module('merchantApp')
 
 			_id = undefined;
 
-			$scope.offer_groups = [];
+			$scope.offer_ids = [];
 			$scope.get_offers = function() {
 				$scope.offers = {
 					'checkin': [],
@@ -16,8 +16,8 @@ angular.module('merchantApp')
 					$scope.outlets = data.data.outlets;
 					_.each($scope.outlets, function(outlet) {
 						_.each(outlet.offers, function(offer) {
-							if($scope.offer_groups.indexOf(offer.offer_group)==-1) {
-								$scope.offer_groups.push(offer.offer_group);
+							if($scope.offer_ids.indexOf(offer._id)==-1) {
+								$scope.offer_ids.push(offer._id);
 								if(offer.offer_type) {
 									$scope.offers[offer.offer_type].push(offer);
 								} else {
@@ -33,9 +33,9 @@ angular.module('merchantApp')
 			}
 			
 
-			$scope.removeOffer = function(offer_group) {
+			$scope.removeOffer = function(offer_id) {
 				if(confirm("This is an irreversable change. Do you wish to continue?")) {
-					merchantRESTSvc.removeOffer(offer_group)
+					merchantRESTSvc.removeOffer(offer_id)
 						.then(function(data) {
 							toastr.success(data.message);
 							$scope.get_offers();

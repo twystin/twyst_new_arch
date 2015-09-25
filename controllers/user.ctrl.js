@@ -175,7 +175,7 @@ function load_outlet_info_from_cache(data) {
                     massaged_item.open_next = RecoHelper.opensAt(outlet.business_hours);
                     
                     _.each(outlet.offers, function(offer) {
-                        if(offer.offer_group.toString() === coupon.coupon_group.toString()) {
+                        if(offer._id.toString() === coupon.issued_for.toString()) {
                             coupon.available_now = !(RecoHelper.isClosed('dummy', 'dummy', offer.actions.reward.reward_hours));
                             if(!coupon.available_now) {
                               coupon.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
@@ -186,7 +186,7 @@ function load_outlet_info_from_cache(data) {
                         
                     });
 
-                    Outlet.find({'offers.offer_group': coupon.coupon_group}, function (err, all_outlets) {
+                    Outlet.find({'offers._id': coupon.issued_for}, function (err, all_outlets) {
                         if(err) {
                             console.log(err);
                             callback();
