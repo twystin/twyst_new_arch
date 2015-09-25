@@ -9,6 +9,7 @@ require('../../models/user.mdl');
 var QR = mongoose.model('QR');
 var Event = mongoose.model('Event');
 var User = mongoose.model('User');
+var RecoHelper = require('../helpers/reco.hlpr');
 
 
 module.exports.check = function(data) {
@@ -52,7 +53,6 @@ function check_user_has_coupon(data) {
   }, function(err, u) {
     var coupons = u.coupons;
     var coupon = (_.filter(coupons, {code:code}))[0]; // TODO: _.find didnt work here, find out why
-    logger.log(coupon);
     if (!coupon) {
       deferred.reject('Could not find this coupon for the user');
     } else {
@@ -104,9 +104,10 @@ module.exports.process = function(data) {
     function(err, user) {
       if (err) {
         deferred.reject('Error redeeming the coupon');
+      } else {
+        RecoHelper.cache_user_coupons(user);
+        deferred.resolve(data);
       }
-
-      deferred.resolve(data);
     }
   );
 

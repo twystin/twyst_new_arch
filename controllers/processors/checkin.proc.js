@@ -193,7 +193,6 @@ function check_and_create_coupon(data) {
       deferred.reject(err);
     }
     var matching_offer = find_matching_offer(events, sorted_checkin_offers);
-    logger.log(matching_offer);
     if (matching_offer && isNaN(matching_offer)) {
       create_coupon(matching_offer, user_id, outlet_id).then(function(data) {
         if(data.coupons && data.coupons.length) {
@@ -237,7 +236,7 @@ function create_coupon(offer, user, outlet) {
       coupons: {
         _id: mongoose.Types.ObjectId(),
         code: code,
-        coupon_group: offer.offer_group,
+        issued_for: offer._id,
         coupon_source:  'QR',
         header: offer.actions.reward.header,
         line1: offer.actions.reward.line1,
@@ -251,7 +250,8 @@ function create_coupon(offer, user, outlet) {
         },
         status: 'active',
         issued_at: new Date(),
-        issued_by: outlet
+        issued_by: outlet,
+        outlets: offer.offer_outlets
       }
     }
   };
@@ -269,11 +269,11 @@ function create_coupon(offer, user, outlet) {
 }
 
 function find_matching_offer(events, offers) {
-  var i, next = [];
+  var i, next = [], checkins;
   var count, match, start_date, event_date;
 
   _.each(offers, function(offer) {
-    var checkins = 1;// TO COUNT THIS CHECKIN AS WELL
+    checkins = 1; // TO COUNT THIS CHECKIN AS WELL
     _.each(events, function(event) {
       if(event.event_date.getTime() >= offer.offer_start_date.getTime() && event.event_date.getTime() <= offer.offer_end_date.getTime()) {
         checkins += 1;
@@ -329,7 +329,6 @@ function find_matching_offer(events, offers) {
     } 
   }
   if(next.length) {
-    logger.log(next);
     return _.sortBy(next, function(num) { return num; })[0];
   } else {
     return undefined;

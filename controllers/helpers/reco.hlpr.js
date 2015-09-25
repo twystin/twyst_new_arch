@@ -54,10 +54,12 @@ module.exports.cache_user_coupons = function(user) {
   var deferred = Q.defer();
   
   Cache.hget(user._id, 'coupon_map', function(err, reply) {
-    if (err || !reply) {
-      if (user.coupons && user.coupons.length !== 0) {
+    if (err) {
+      logger.log(err);
+      deferred.resolve(true);
+    } else {
+      if (user.coupons) {
         var coupon_map = _.reduce(user.coupons, function(memo, item) {
-          console.log(memo, item);
           //TODO: see where else this problem occurs
           //TODO: also fix up coupon migration map
             memo[item.issued_by] = memo[item.issued_by] || {};
@@ -69,16 +71,12 @@ module.exports.cache_user_coupons = function(user) {
 
           return memo;
         }, {});
-        logger.error(coupon_map);
         Cache.hset(user._id, 'coupon_map', JSON.stringify(coupon_map));
         deferred.resolve(true);
       } else {
         deferred.resolve(true);
       }
-    } else {
-
-      deferred.resolve(true);
-    }
+    } 
   });
   return deferred.promise;
 };
