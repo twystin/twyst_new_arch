@@ -18,7 +18,7 @@ function get_outlets(params) {
     var deferred = Q.defer();
     Outlet.search(params.text,  {}, function(err, data) {
         if(err || data.results.length === 0){
-            deferred.reject('Could not get outlets');
+            deferred.reject(new Error('Could not get outlets'));
         }
         else{
             var reduced_outlets = _.reduce(data.results, function(memo, item) {
@@ -79,10 +79,41 @@ function set_user_checkins(params) {
         var outlets = params.outlets;
         if (cmap) {
           _.each(cmap, function(value, key) {
-            outlets[key].recco = outlets[key].recco || {};
-            outlets[key].recco.checkins = value;
+            if(outlets[key]) {
+              outlets[key].recco = outlets[key].recco || {};
+              outlets[key].recco.checkins = value;
+            }
           });
           params.outlets = outlets;
+          deferred.resolve(params);
+        } else {
+          deferred.resolve(params);
+        }
+      }
+    });
+  } else {
+    deferred.resolve(params);
+  }
+  return deferred.promise;
+}
+
+function set_social_pool_coupons(params) {
+  logger.log();
+
+  var deferred = Q.defer();
+  if (params.user) {
+    Cache.hget(params.user._id, 'social_pool_coupons', function(err, reply) {
+      if(err || !reply) {
+        deferred.resolve(params);
+      } else {
+        var social_pool = JSON.parse(reply);
+        var outlet = params.outlet;
+        if(social_pool) {
+          _.each(social_pool, function(coupon) {
+            if(outlet._id.toString() === coupon.issued_by) {
+              outlet.offers.push(coupon);
+            }
+          });
           deferred.resolve(params);
         } else {
           deferred.resolve(params);
@@ -499,6 +530,9 @@ module.exports.search = function(req, res) {
     })
     .then(function(data) {
       return set_user_checkins(data);
+    })
+    .then(function(data) {
+      return set_social_pool_coupons(data);
     })
     .then(function(data) {
       return set_user_coupons(data);

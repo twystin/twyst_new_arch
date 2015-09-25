@@ -52,37 +52,31 @@ module.exports.cache_user_favourites = function(user) {
 module.exports.cache_user_coupons = function(user) {
   logger.log();
   var deferred = Q.defer();
+  
   Cache.hget(user._id, 'coupon_map', function(err, reply) {
     if (err || !reply) {
       if (user.coupons && user.coupons.length !== 0) {
         var coupon_map = _.reduce(user.coupons, function(memo, item) {
+          console.log(memo, item);
           //TODO: see where else this problem occurs
           //TODO: also fix up coupon migration map
-          if (item.outlets && item.outlets.length) {
-            _.each(item.outlets, function(outlet) {
-              memo[outlet] = memo[outlet] || {};
-              memo[outlet].coupons = memo[outlet].coupons || [];
-              if (item.status === "active") {
-                memo[outlet].coupons.push(item);
-              }
-            });
-          } else {
-            memo[item.outlets] = memo[item.outlets] || {};
-            memo[item.outlets].coupons = memo[item.outlets].coupons || [];
+            memo[item.issued_by] = memo[item.issued_by] || {};
+            memo[item.issued_by].coupons = memo[item.issued_by].coupons || [];
             if (item.status === "active") {
-              memo[item.outlets].coupons.push(item);
+              memo[item.issued_by].coupons.push(item);
             }
-          }
+              
 
           return memo;
         }, {});
-
+        logger.error(coupon_map);
         Cache.hset(user._id, 'coupon_map', JSON.stringify(coupon_map));
         deferred.resolve(true);
       } else {
         deferred.resolve(true);
       }
     } else {
+
       deferred.resolve(true);
     }
   });

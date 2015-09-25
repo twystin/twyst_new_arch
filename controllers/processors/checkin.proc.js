@@ -10,6 +10,8 @@ require('../../models/user.mdl');
 var QR = mongoose.model('QR');
 var Event = mongoose.model('Event');
 var User = mongoose.model('User');
+var RecoHelper = require('../helpers/reco.hlpr');
+var Cache = require('../../common/cache.hlpr');
 
 module.exports.check = function(data) {
   logger.log();
@@ -191,7 +193,7 @@ function check_and_create_coupon(data) {
       deferred.reject(err);
     }
     var matching_offer = find_matching_offer(events, sorted_checkin_offers);
-    
+    logger.log(matching_offer);
     if (matching_offer && isNaN(matching_offer)) {
       create_coupon(matching_offer, user_id, outlet_id).then(function(data) {
         if(data.coupons && data.coupons.length) {
@@ -267,67 +269,98 @@ function create_coupon(offer, user, outlet) {
 }
 
 function find_matching_offer(events, offers) {
-  var i, checkins = 1;// TO COUNT THIS CHECKIN AS WELL
+  var i, next = [];
   var count, match, start_date, event_date;
+
+  _.each(offers, function(offer) {
+    var checkins = 1;// TO COUNT THIS CHECKIN AS WELL
+    _.each(events, function(event) {
+      if(event.event_date.getTime() >= offer.offer_start_date.getTime() && event.event_date.getTime() <= offer.offer_end_date.getTime()) {
+        checkins += 1;
+      }
+    });
+    offer.checkin_count = checkins;
+  });
+
+  offers = _.sortBy(offers, 'checkin_count');
   
   for (i = 0; i < offers.length; i++) {
-    _.each(events, function(event) {
-      
-      if(event.event_date.getTime() >= offers[i].offer_start_date.getTime()  &&
-       event.event_date.getTime() <= offers[i].offer_end_date.getTime()){
-        checkins = checkins+1;
-      }
-    })
     
     count = _.get(offers[i], 'rule.event_count');
     match = _.get(offers[i], 'rule.event_match');
 
     if (match === 'on every') {
-      if (checkins % count === 0) {
+      if (offers[i].checkin_count % count === 0) {
         return offers[i];
       }
     }
 
     if (match === 'on only') {
-      if (checkins === count) {
+      if (offers[i].checkin_count === count) {
         return offers[i];
       }
     }
 
     if (match === 'after') {
-      if (checkins > count) {
+      if (offers[i].checkin_count > count) {
         return offers[i];
       }
     }
 
     if (match === 'on every') {
-      var checkins_to_go = count - (checkins % count);
-      return checkins_to_go;
+      var checkins_to_go = count - (offers[i].checkin_count % count);
+      next.push(checkins_to_go);
     }
 
     if (match === 'on only') {
-      if(count > checkins) {
-        var checkins_to_go = count - checkins; 
-        return checkins_to_go; 
+      if(count > offers[i].checkin_count) {
+        var checkins_to_go = count - offers[i].checkin_count; 
+        next.push(checkins_to_go);
       }
     }
 
-    if (match === 'after' && count > checkins) {
-      var checkins_to_go = count+1 - checkins; 
-      return checkins_to_go;
+    if (match === 'after' && count > offers[i].checkin_count) {
+      var checkins_to_go = count+1 - offers[i].checkin_count; 
+      next.push(checkins_to_go);
     }
-    else if(match === 'after' && count <= checkins) {
-      return 1;
+    else if(match === 'after' && count <= offers[i].checkin_count) {
+      next.push(1);
        
     } 
   }
-  return undefined;
+  if(next.length) {
+    logger.log(next);
+    return _.sortBy(next, function(num) { return num; })[0];
+  } else {
+    return undefined;
+  }
 }
 
 function update_checkin_counts(data) {
   // UPDATE CACHES?
   var deferred = Q.defer();
-  deferred.resolve(data);
+  RecoHelper.cache_user_coupons(data.user);
+  Cache.hget(data.user._id, "checkin_map", function(err, reply) {
+    if(err) {
+      logger.error(err);
+      deferred.resolve(data);
+    } else {
+      var cmap = JSON.parse(reply);
+      if(!cmap)
+        cmap = {};
+      if(cmap[data.outlet._id]) {
+        cmap[data.outlet._id] += 1;
+      } else {
+        cmap[data.outlet._id] = 1;
+      }
+      Cache.hset(data.user._id, "checkin_map", JSON.stringify(cmap), function(err) {
+        if(err) {
+          logger.log(err);
+        }
+        deferred.resolve(data);
+      });
+    }
+  });
   return deferred.promise;
 }
 
