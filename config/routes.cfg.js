@@ -84,6 +84,7 @@ module.exports = function(app) {
   (function ImageRoutes() {
     var ImageCtrl = require('../controllers/image.ctrl');
     app.post('/api/v4/images', ImageCtrl.uploadImage);
+    app.post('/api/v4/images/clone', ImageCtrl.cloneImage);
   })();
 
   (function UserRoutes() {

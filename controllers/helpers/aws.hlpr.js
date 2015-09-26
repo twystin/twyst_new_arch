@@ -23,3 +23,18 @@ module.exports.uploadImage = function(img_obj) {
 	})
 	return deferred.promise;
 };
+
+module.exports.cloneImage = function(img_obj) {
+	logger.log();
+	var deferred = Q.defer();
+	var s3 = new AWS.S3();
+	s3.copyObject(img_obj, function(err) {
+		if(err) {
+			logger.error(err);
+			deferred.reject(err);
+		} else {
+			deferred.resolve(true);
+		}
+	});
+	return deferred.promise;
+};

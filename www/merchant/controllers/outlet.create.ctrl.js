@@ -1,6 +1,6 @@
 angular.module('merchantApp')
-    .controller('OutletCreateController', ['$scope', '$log', '$state', '$http', '$rootScope', 'toastr', '$timeout', '$stateParams', '$q',
-        function($scope, $log, $state, $http, $rootScope, toastr, $timeout, $stateParams, Q) {
+    .controller('OutletCreateController', ['$scope', '$log', '$state', '$http', '$rootScope', 'toastr', '$timeout', '$stateParams', '$q', '$modal', 'imageSvc',
+        function($scope, $log, $state, $http, $rootScope, toastr, $timeout, $stateParams, Q, $modal, imageSvc) {
 
             $scope.cuisines = ["African", "American", "Andhra", "Arabic", "Armenian", "Asian", "Assamese", "Awadhi", "Bangladeshi", "Belgian", "Bengali", "Biryani", "British", "Burmese", "Chettinad", "Chinese", "Continental", "Costal", "Desserts", "European", "Fast Food", "Finger Food", "French", "German", "Goan", "Greek", "Gujarati", "Healthy Food", "Hyderabadi", "Ice creams", "Indian", "Indonesian", "Italian", "Japanese", "Kashmiri", "Konkan", "Malayali", "Korean", "Lebanese", "Lucknowi", "Maharashtrian", "Malaysian", "Mangalorean", "Mediterranean", "Mexican", "Moroccan", "Mughlai", "Naga", "Nepalese", "North Eastern", "North Indian", "Oriya", "Pakistani", "Parsi", "Pizza", "Portuguese", "Punjabi", "Rajasthani", "Russian", "Sri Lankan", "Sindhi", "Singaporean", "South American", "South Indian", "Spanish", "Street Food", "Sushi", "Tex-Mex", "Thai", "Tibetan", "Turkish", "Vietnamese", "Wraps", "Bakery", "Beverages", "Burgers", "Cafe", "Salads", "Sandwiches", "Seafood", "Middle Eastern", "Steaks", "Sizzlers"];
             $scope.days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -452,5 +452,41 @@ angular.module('merchantApp')
             $scope.removeCuisine = function(index) {
                 $scope.outlet.attributes.cuisines.splice(index, 1);
             }
+
+            $scope.chooseImage = function() {
+                var modalInstance = $modal.open({
+                    animation: $scope.animationsEnabled,
+                    templateUrl: 'templates/partials/background_picker.html',
+                    size: 'lg',
+                    controller: 'ImagePickerController'
+                });
+
+                modalInstance.result.then(function (selectedItem) {
+                    var img_obj = {};
+                    img_obj['source'] = selectedItem;
+                    img_obj['image_type'] = 'background';
+                    if(_id) {
+                        img_obj['id'] = _id
+                    }
+                    imageSvc.cloneImage(img_obj).then(function(data) {
+                        _id = data.id;
+                        $scope.outlet.photos.background = 'asd';
+                        $scope.outlet.photos.background = data.key;
+                        toastr.success('Image set successfully');
+                    }, function(err) {
+                        console.log(err);
+                    });
+                }, function () {
+                    $log.info('Modal dismissed at: ' + new Date());
+                });
+            }
+
+            $scope.$watch(function() {
+                return _id;
+            }, function(n, o) {
+                if(n) {
+                    $scope.outlet._id = n;
+                }
+            });
         }
     ])

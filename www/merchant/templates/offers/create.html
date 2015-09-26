@@ -420,10 +420,7 @@
               <label class='col-md-2 control-label'>Deal Source <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
               <div class='col-md-6'>
                 <select ng-model='offer.offer_source' class='form-control'>
-                  <option value='hdfc'>HDFC Bank</option>
-                  <option value='sbi'>State Bank Of India</option>
-                  <option value='hsbc'>HSBC Bank</option>
-                  <optoin value='citibank'>Citi Bank</option>
+                  <option value='{{key}}' ng-repeat='(key, val) in offer_sources'>{{val}}</option>
                 </select>
               </div>
             </div>
