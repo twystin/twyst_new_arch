@@ -62,13 +62,14 @@ module.exports.cache_user_coupons = function(user) {
         var coupon_map = _.reduce(user.coupons, function(memo, item) {
           //TODO: see where else this problem occurs
           //TODO: also fix up coupon migration map
-            memo[item.issued_by] = memo[item.issued_by] || {};
-            memo[item.issued_by].coupons = memo[item.issued_by].coupons || [];
+          _.each(item.outlets, function(outlet){
+            memo[item.outlet] = memo[item.outlet] || {};
+            memo[item.outlet].coupons = memo[item.outlet].coupons || [];
             if (item.status === "active") {
-              memo[item.issued_by].coupons.push(item);
-            }
-              
-
+              memo[item.outlet].coupons.push(item);
+            }  
+          })
+        
           return memo;
         }, {});
         Cache.hset(user._id, 'coupon_map', JSON.stringify(coupon_map));
