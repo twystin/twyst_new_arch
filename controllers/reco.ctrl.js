@@ -384,18 +384,17 @@ function massage_offers(params) {
         coupon.lapse_date = itemd && itemd.lapse_date;
         coupon.expiry = itemd && itemd.expiry_date;
         coupon.meta = {};
-        coupon.meta.reward_type = itemd && itemd.meta && itemd.meta.reward_type;
-        coupon.description = itemd.actions && itemd.actions.reward && itemd.actions.reward.description;
-        coupon.terms = itemd.actions && itemd.actions.reward && itemd.actions.reward.terms;
+        coupon.meta.reward_type = itemd && itemd.meta && itemd.meta.reward_type.type;
+        coupon.description = itemd.description;
+        coupon.terms = itemd.terms;
 
         _.each(item.offers, function(offer) {
-            if(_.isEqual(offer.header, coupon.header) && _.isEqual(offer.line1, coupon.line1) && _.isEqual(offer.line2, coupon.line2)) {
+            if(offer._id.toString() === itemd.issued_for.toString()) {
                 coupon.available_now = offer.available_now;
                 if(!coupon.available_now) {
                   coupon.available_next = offer.available_next;
                 }
-                coupon.meta = {};
-                coupon.meta.reward_type = offer.meta.reward_type;
+                
 
             }
         });
@@ -489,7 +488,7 @@ function massage_offers(params) {
         
         // massaged_offer.applicability = offer.actions.reward.applicability;
         // massaged_offer.valid_days = offer.actions.reward.valid_days;
-        if(offer.offer_type === 'checkin' && offer.rule.event_match === 'on only' && massaged_offer.next === massaged_offer.checkins) {
+        if(offer.offer_type === 'checkin' && offer.rule.event_match === 'on only' && massaged_offer.checkins >=  offer.rule.event_count) {
           return false;
         }
         else{
@@ -499,6 +498,7 @@ function massage_offers(params) {
       }
 
     });
+    item.offers = _.compact(item.offers);
     return item;
   }
 }

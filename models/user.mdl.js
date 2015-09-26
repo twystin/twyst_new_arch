@@ -86,7 +86,7 @@ var User = new Schema({
     block_outlets: [{
       outlet_id: {
         type: Schema.ObjectId,
-        ref: Outlet
+        ref: 'Outlet'
       },
       handle: {type: String, default: ''},
       sms: {
