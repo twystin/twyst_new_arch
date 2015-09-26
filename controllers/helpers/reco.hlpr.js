@@ -63,10 +63,10 @@ module.exports.cache_user_coupons = function(user) {
           //TODO: see where else this problem occurs
           //TODO: also fix up coupon migration map
           _.each(item.outlets, function(outlet){
-            memo[item.outlet] = memo[item.outlet] || {};
-            memo[item.outlet].coupons = memo[item.outlet].coupons || [];
+            memo[outlet] = memo[outlet] || {};
+            memo[outlet].coupons = memo[outlet].coupons || [];
             if (item.status === "active") {
-              memo[item.outlet].coupons.push(item);
+              memo[outlet].coupons.push(item);
             }  
           })
         
