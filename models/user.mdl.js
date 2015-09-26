@@ -158,10 +158,10 @@ var User = new Schema({
         ref: 'User'
       }
     },
-    outlets: {
+    outlets: [{
       type: Schema.ObjectId,
       ref: 'Outlet'
-    },
+    }],
     issued_at: Date
     }],
     friends: {
