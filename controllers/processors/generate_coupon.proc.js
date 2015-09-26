@@ -121,20 +121,21 @@ function create_coupon(offer, user, outlet) {
       coupons: {
         _id: mongoose.Types.ObjectId(),
         code: code,
-        outlets: outlets,
-        coupon_source: 'exclusive_offer',
+        issued_for: offer._id,
+        coupon_source:  'exclusive_offer',
         header: offer.actions.reward.header,
         line1: offer.actions.reward.line1,
-        line2: offer.actions.reward.line2,
+        line2: offer.actions.reward.line2,        
         expiry_date: new Date(),
         meta: {
           reward_type: {
-            type: 'need to fix' // to fix = where from?
+            type: offer.actions.reward.reward_meta.reward_type
           }
         },
         status: 'active',
         issued_at: new Date(),
-        issued_by: outlet
+        issued_by: outlet,
+        outlets: offer.offer_outlets
       }
     }
   };
