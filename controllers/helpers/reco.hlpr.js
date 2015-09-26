@@ -66,7 +66,7 @@ module.exports.cache_user_coupons = function(user) {
             memo[outlet] = memo[outlet] || {};
             memo[outlet].coupons = memo[outlet].coupons || [];
             if (item.status === "active" && ( coupon.coupon_source === 'QR' || coupon.coupon_source === 'PANEL' || coupon.coupon_source === 'POS' 
-            || coupon.coupon_source === 'BATCH'))) {
+            || coupon.coupon_source === 'BATCH')) {
               memo[outlet].coupons.push(item);
             }  
           })

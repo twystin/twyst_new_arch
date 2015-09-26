@@ -488,7 +488,7 @@ function massage_offers(params) {
         
         // massaged_offer.applicability = offer.actions.reward.applicability;
         // massaged_offer.valid_days = offer.actions.reward.valid_days;
-        if(offer.offer_type === 'checkin' && offer.rule.event_match === 'on only' && massaged_offer.next  massaged_offer.checkins) {
+        if(offer.offer_type === 'checkin' && offer.rule.event_match === 'on only' && massaged_offer.checkins >=  offer.rule.event_count) {
           return false;
         }
         else{
