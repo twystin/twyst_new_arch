@@ -18,6 +18,20 @@ angular.module('merchantApp')
 				return deferred.promise;
 			};
 
+			imageSvc.cloneImage = function(request_object) {
+				var deferred = $q.defer();
+				$http.post('/api/v4/images/clone', request_object)
+					.then(function(data) {
+						console.log(data);
+						if(data.data.response) {
+							deferred.resolve(data.data.data);
+						} else {
+							deferred.reject(data.data.data);
+						}
+					});
+				return deferred.promise;
+			};
+
 			imageSvc.deleteImage = function(imageObj) {
 				var deferred = $q.defer();
 				$upload.upload({

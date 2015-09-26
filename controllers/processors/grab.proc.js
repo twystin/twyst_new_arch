@@ -35,6 +35,7 @@ module.exports.process = function(data) {
                 deferred.reject('Unable to find offer to grab');
             } else {
                 var coupon = social_coupons[index];
+                var coupon_id = coupon._id.toString();
                 _.each(coupon.social_friend_list, function(friend) {
                     Cache.hget(friend, 'social_pool_coupons', function(err, reply) {
                         if(err || !reply) {
@@ -43,7 +44,7 @@ module.exports.process = function(data) {
                             var coupon_pool = JSON.parse(reply);
                             var new_social_pool = [];
                             _.each(coupon_pool, function(coupon_in_pool) {
-                                if(coupon_in_pool._id !== coupon._id) {
+                                if(coupon_in_pool._id !== coupon_id) {
                                     new_social_pool.push(coupon);
                                 }
                             });
@@ -67,17 +68,20 @@ module.exports.process = function(data) {
                     }    
                 }); 
                 
-                var coupon_id = coupon._id.toString();
+                
                 coupon._id = new ObjectId();
                 coupon.status = 'active';
                 coupon.is_grabbed = true;
                 User.findOneAndUpdate({
-                    '_id': coupon.lapsed_coupon_source.id,
+                    '_id': ObjectId(coupon.lapsed_coupon_source.id),
                     'coupons._id': coupon_id
                     },
                     {   $set: {
                             'coupons.$.grabbed_by': user_id, 'coupons.$.status': 'grabbed'
                         }
+                    },
+                    {
+                        upsert: true
                     },  
                     function(err, u) {
                         if(err || !u) {
@@ -96,6 +100,21 @@ module.exports.process = function(data) {
                                     deferred.reject('Unable to grab the offer right now');
                                 }                                 
                                 else    {
+                                    //Cache.hget(user_id, 'coupon_map', function(err, reply) {
+                                        //if(err) {
+                                           //logger.log(err);
+                                        //}
+                                        //var coupon_map = {};
+                                       // if(reply) {
+                                        //    coupon_map = JSON.parser(reply);
+                                       // }
+                                        //if(!coupon_map[coupon.issued_by] || !coupon_map[coupon.issued_by].coupons) {
+                                        //    coupon_map[coupon.issued_by] = {coupons: []};
+                                       // }
+                                        //coupon_map[coupon.issued_by].coupons.push(coupon);
+                                        //Cache.hset(user_id, 'coupon_map', JSON.parse(coupon_map));
+                                    //});
+
                                     deferred.resolve('Offer grabbed successfully');
                                 }
                             });                                  

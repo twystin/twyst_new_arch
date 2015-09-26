@@ -213,7 +213,7 @@ function calculate_relevance(params) {
 
     // OUTLET DISTANCE RELEVANCE
     if (val.recco.distance) {
-      relevance = relevance + val.recco.distance;
+      relevance = relevance - val.recco.distance;
     }
 
     // OUTLET OPEN RELEVANCE
@@ -222,28 +222,28 @@ function calculate_relevance(params) {
     }
 
     // OUTLET REDEEMED RELEVANCE
-    if (val.analytics &&
-      val.analytics.coupon_analytics &&
-      val.analytics.coupon_analytics.coupons_redeemed) {
-      relevance = relevance + val.analytics.coupon_analytics.coupons_redeemed * 10;
-    }
+    //if (val.analytics &&
+     // val.analytics.coupon_analytics &&
+     // val.analytics.coupon_analytics.coupons_redeemed) {
+    //  relevance = relevance + val.analytics.coupon_analytics.coupons_redeemed * 10;
+    //}
 
     // SHOULD FIX THIS LATER
-    if (val.basics && val.basics.featured) {
-      relevance = relevance + 1000000;
-    }
+    //if (val.basics && val.basics.featured) {
+    //  relevance = relevance + 1000000;
+   // }
 
     // OUTLET GENERATED RELEVANCE
-    if (val.analytics &&
-      val.analytics.coupon_analytics &&
-      val.analytics.coupon_analytics.coupons_generated) {
-      relevance = relevance + val.analytics.coupon_analytics.coupons_generated;
-    }
+    //if (val.analytics &&
+    //  val.analytics.coupon_analytics &&
+    //  val.analytics.coupon_analytics.coupons_generated) {
+    //  relevance = relevance + val.analytics.coupon_analytics.coupons_generated;
+    //}
 
     // CURRENT OFFERS RELEVANCE
-    if (val.offers && val.offers.length > 1) {
-      relevance = relevance + val.offers.length * 1000;
-    }
+    //if (val.offers && val.offers.length > 1) {
+      //relevance = relevance + val.offers.length * 1000;
+    //}
 
     val.recco = val.recco || {};
     val.recco.relevance = relevance;
@@ -430,7 +430,7 @@ function massage_offers(params) {
           massaged_offer.meta.reward_type = offer.meta.reward_type.type;
         }
         
-       if (offer.offer_type === 'checkin') {
+        if (offer.offer_type === 'checkin') {
           massaged_offer.next = parseInt(offer.rule && offer.rule.event_count);
           massaged_offer.checkins = item.recco && item.recco.checkins || 0;
           if (offer.rule.event_match === 'on every') {
@@ -489,7 +489,13 @@ function massage_offers(params) {
         
         // massaged_offer.applicability = offer.actions.reward.applicability;
         // massaged_offer.valid_days = offer.actions.reward.valid_days;
-        return massaged_offer;
+        if(offer.offer_type === 'checkin' && offer.rule.event_match === 'on only' && massaged_offer.next === massaged_offer.checkins) {
+          return false;
+        }
+        else{
+          return massaged_offer;  
+        }
+        
       }
 
     });

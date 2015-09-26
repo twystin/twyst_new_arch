@@ -35,3 +35,22 @@ module.exports.uploadImage = function(req, res) {
 		HttpHelper.error(res, new Error("Invalid request object"), "Invalid request object");
 	}
 }
+
+module.exports.cloneImage = function(req, res) {
+	console.log(req.body);
+	if(!_.has(req.body, 'image_type') || !_.has(req.body, 'source')) {
+		HttpHelper.error(res, new Error("Invalid request object"), "Invalid request object");
+	} else {
+		var id = req.body.id || new ObjectId();
+		var img_obj = {};
+		img_obj['Bucket'] = 'retwyst-merchants';
+		img_obj['ACL'] = 'public-read';
+		img_obj['CopySource'] = req.body.source;
+		img_obj['Key'] = 'retwyst-outlets/' + id + '/' + req.body.image_type;
+		AWSHelper.cloneImage(img_obj).then(function(data) {
+			HttpHelper.success(res, {id: id, key: req.body.image_type}, "Image set successfully");
+		}, function(err) {
+			HttpHelper.error(res, err, "Something went wrong");
+		});
+	}
+}

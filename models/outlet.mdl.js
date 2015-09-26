@@ -384,9 +384,7 @@ var OutletSchema = new Schema({
     offer_type: {
       type: String
     }, // job,
-    offer_group: {
-      type: Schema.Types.ObjectId
-    }, // to model the program
+    
     offer_start_date: {
       type: Date
     },

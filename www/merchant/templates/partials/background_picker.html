@@ -1,0 +1,18 @@
+<div class='well well-lg'>
+	<legend>Choose an image
+		<button type='button' class='btn btn-warning pull-right' ng-click='cancel()'>Cancel</button>
+	</legend>
+	<div class='col-xs-6 col-md-4'>
+		<select ng-model='image_type' class='form-control'>
+			<option value='' ng-if='!image_type'>Choose Image Type</option>
+			<option value='{{key}}' ng-repeat='(key, val) in image_types'>{{val}}</option>
+		</select>
+	</div>
+	<div class='clearfix'></div>
+	<div class='col-xs-6 col-md-4' ng-repeat='image in images[image_type]' style='padding:15px;'>
+		<img class='img-responsive' ng-src='{{"https://s3-us-west-2.amazonaws.com/" + image}}' ng-click='chooseImage(image)' style='cursor:pointer;'>
+	</div>
+	<div class='clearfix'></div>
+	<div class='col-xs-12'>
+	</div>
+</div>
