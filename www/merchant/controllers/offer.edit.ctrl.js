@@ -40,7 +40,7 @@ angular.module('merchantApp')
 
       $scope.offer_types = { 'checkin': 'Checkin Offer', 'offer': 'Offer', 'deal': 'Deal', 'bank_deal': 'Bank Deal' }
       $scope.reward_types = { 'buyonegetone': 'Buy One Get One', 'discount': 'Discount', 'flatoff': 'Flat Off', 'free': 'Free', 'happyhours': 'Happy Hours', 'reduced': 'Reduced Price', 'custom': 'Custom', 'unlimited': 'Unlimited', 'onlyhappyhours': 'Only Happy Hours', 'combo': 'Combo', 'buffet': 'Buffet' };
-      $scope.offer_sources = { 'hdfc': 'HDFC Bank', 'sbi': 'State Bank Of India', 'hsbc': 'HSBC Bank', 'citibank': 'Citi Bank' };
+      $scope.offer_sources = { 'hdfc': 'HDFC Bank', 'sbi': 'State Bank Of India', 'hsbc': 'HSBC Bank', 'citibank': 'Citi Bank', 'axis': 'Axis Bank', 'icici': 'ICICI Bank', 'american_express': 'American Express' };
       $scope.event_matches = [{ name: 'On every', value: 'on every' }, { name: 'After', value: 'after' }, { name: 'On only', value: 'on only' }]
       $scope.days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
