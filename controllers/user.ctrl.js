@@ -110,7 +110,7 @@ function filter_out_expired_and_used_coupons(data) {
   var deferred = Q.defer();
   
   data.coupons = _.filter(data.coupons, function(coupon) {
-    if(_.has(coupon, 'status') && (coupon.status === 'active') 
+    if(_.has(coupon, 'status') && (coupon.status === 'active' && coupon.expiry_date && Date.now(coupon.expiry_date) <= Date.now()) 
         && ( coupon.coupon_source === 'QR' || coupon.coupon_source === 'PANEL' || coupon.coupon_source === 'POS' 
             || coupon.coupon_source === 'BATCH')) {
       return true;
@@ -166,6 +166,11 @@ function load_outlet_info_from_cache(data) {
                         massaged_item.following = false;
                     }
 
+                    if (data.query.lat && data.query.long) {
+                      massaged_item.distance = RecoHelper.distance(data.query.lat, data.query.long);
+                      console.log(massaged_item.distance)
+                    }
+
                     if (outlet.photos && outlet.photos.logo) {
                         massaged_item.logo = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + outlet._id + '/' + outlet.photos.logo;
                     }
@@ -175,7 +180,6 @@ function load_outlet_info_from_cache(data) {
                     massaged_item.open_next = RecoHelper.opensAt(outlet.business_hours);
                     
                     _.each(outlet.offers, function(offer) {
-                        console.log('okok')
                         if(offer._id && coupon.issued_for && offer._id.toString() === coupon.issued_for.toString()) {
                             coupon.available_now = !(RecoHelper.isClosed('dummy', 'dummy', offer.actions.reward.reward_hours));
                             if(!coupon.available_now) {
@@ -193,7 +197,6 @@ function load_outlet_info_from_cache(data) {
                             callback();
                         }
                         else {
-                            console.log('heer')
                             var outlets = [];
                             if(all_outlets.length){
                                 _.each(all_outlets, function(outlet){

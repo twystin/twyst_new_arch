@@ -7,7 +7,7 @@ var fs = require('fs'),
 var logger = require('tracer').colorConsole();
 
 module.exports.distance = function(p1, p2) {
-
+  console.log(p1, p2)
   if (!p1 || !p1.latitude || !p1.longitude ||
     !p2 || !p2.latitude || !p2.longitude) {
     return undefined;
