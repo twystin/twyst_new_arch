@@ -7,7 +7,7 @@ var fs = require('fs'),
 var logger = require('tracer').colorConsole();
 
 module.exports.distance = function(p1, p2) {
-
+  console.log(p1, p2)
   if (!p1 || !p1.latitude || !p1.longitude ||
     !p2 || !p2.latitude || !p2.longitude) {
     return undefined;
@@ -65,8 +65,8 @@ module.exports.cache_user_coupons = function(user) {
           _.each(item.outlets, function(outlet){
             memo[outlet] = memo[outlet] || {};
             memo[outlet].coupons = memo[outlet].coupons || [];
-            if (item.status === "active" && ( coupon.coupon_source === 'QR' || coupon.coupon_source === 'PANEL' || coupon.coupon_source === 'POS' 
-            || coupon.coupon_source === 'BATCH')) {
+            if (item.status === "active" && ( item.coupon_source === 'QR' || item.coupon_source === 'PANEL' || item.coupon_source === 'POS' 
+            || item.coupon_source === 'BATCH' || item.coupon_source === 'MRL')) {
               memo[outlet].coupons.push(item);
             }  
           })
@@ -282,7 +282,7 @@ module.exports.opensAt = function(business_hours) {
 
         if(ld.has(timing, 'open.hr') && ld.has(timing, 'open.min') && ld.has(timing, 'close.hr') && ld.has(timing, 'open.min')) {
           var open_min = (timing.open.hr * 60) + timing.open.min;
-          if(open_min > minutes) {
+           if(open_min >= minutes) {
             if (counter === 1)
               day = 'Tomorrow';
 

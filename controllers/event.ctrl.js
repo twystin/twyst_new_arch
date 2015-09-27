@@ -487,45 +487,52 @@ function create_event(data) {
 function update_twyst_bucks(data) {
   logger.log();
   var deferred = Q.defer();
-  var event_type = data.event_data.event_type;
-  var available_twyst_bucks = data.user.twyst_bucks;
-  var update_twyst_bucks = {
-    $set: {
 
-    }
+  if(data.already_followed || data.already_liked) {
+    deferred.resolve(data); 
   }
+  else {
+    var event_type = data.event_data.event_type;
+    var available_twyst_bucks = data.user.twyst_bucks;
+    var update_twyst_bucks = {
+      $set: {
 
-  Cache.hget('twyst_bucks', "twyst_bucks_grid", function(err, reply) {
-    if (err || !reply) {
-      deferred.reject('Could not get bucks grid' + err);
-    } else {
-
-      var bucks_grid = JSON.parse(reply);
-
-      _.find(bucks_grid, function(current_event) {
-        if (current_event.event === event_type && current_event.update_now) {
-          if (current_event.earn) {
-            data.user.twyst_bucks = available_twyst_bucks + current_event.bucks;
-          } else {
-            data.user.twyst_bucks = available_twyst_bucks - current_event.bucks;
-          }
-
-          update_twyst_bucks.$set.twyst_bucks = data.user.twyst_bucks;
-
-          User.findOneAndUpdate({
-            _id: data.user._id
-          }, update_twyst_bucks, function(err, user) {
-            if (err) {
-              deferred.reject('Could not update user bucks' + err);
-            } else {
-              deferred.resolve(data);
-            }
-          });
-        }
-      })
-      deferred.resolve(data);
+      }
     }
-  });
+
+    Cache.hget('twyst_bucks', "twyst_bucks_grid", function(err, reply) {
+      if (err || !reply) {
+        deferred.reject('Could not get bucks grid' + err);
+      } else {
+
+        var bucks_grid = JSON.parse(reply);
+
+        _.find(bucks_grid, function(current_event) {
+          if (current_event.event === event_type && current_event.update_now) {
+            if (current_event.earn) {
+              data.user.twyst_bucks = available_twyst_bucks + current_event.bucks;
+            } else {
+              data.user.twyst_bucks = available_twyst_bucks - current_event.bucks;
+            }
+
+            update_twyst_bucks.$set.twyst_bucks = data.user.twyst_bucks;
+
+            User.findOneAndUpdate({
+              _id: data.user._id
+            }, update_twyst_bucks, function(err, user) {
+              if (err) {
+                deferred.reject('Could not update user bucks' + err);
+              } else {
+                deferred.resolve(data);
+              }
+            });
+          }
+        })
+        deferred.resolve(data);
+      }
+    });  
+  }
+  
   return deferred.promise;
 }
 

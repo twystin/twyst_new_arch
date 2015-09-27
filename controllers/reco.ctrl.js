@@ -241,9 +241,9 @@ function calculate_relevance(params) {
     //}
 
     // CURRENT OFFERS RELEVANCE
-    //if (val.offers && val.offers.length > 1) {
-      //relevance = relevance + val.offers.length * 1000;
-    //}
+    if (val.offers && val.offers.length > 1) {
+      relevance = relevance + val.offers.length * 1000;
+    }
 
     val.recco = val.recco || {};
     val.recco.relevance = relevance;
@@ -281,7 +281,9 @@ function pick_outlet_fields(params) {
     }
 
     params.outlets = _.map(params.outlets, function(item) {
-
+      if(item.outlet_meta.status === 'archived' || item.outlet_meta.status === 'draft') {
+        return false;        
+      }
       var massaged_item = {};
       massaged_item._id = item._id;
       massaged_item.name = item.basics.name;
@@ -306,9 +308,10 @@ function pick_outlet_fields(params) {
         massaged_item.background = 'https://s3-us-west-2.amazonaws.com/retwyst-merchants/retwyst-outlets/' + item._id + '/' + item.photos.background;
       }
       massaged_item.open_next = RecoHelper.opensAt(item.business_hours);
-
+      
       return massaged_item;
     });
+    params.outlets = _.compact(params.outlets);
 
     deferred.resolve(params);
   });
@@ -387,6 +390,7 @@ function massage_offers(params) {
         coupon.meta.reward_type = itemd && itemd.meta && itemd.meta.reward_type.type;
         coupon.description = itemd.description;
         coupon.terms = itemd.terms;
+        coupon.available_now = true;
 
         _.each(item.offers, function(offer) {
             if(offer._id.toString() === itemd.issued_for.toString()) {
@@ -411,7 +415,11 @@ function massage_offers(params) {
     item.offers = _.map(item.offers, function(offer) {
       if (offer.type) {
         return offer;
-      } else {
+      } 
+      else if(offer.offer_status === 'archived' || offer.offer_status === 'draft') {
+        return false;
+      }
+      else {
         var massaged_offer = {};
         massaged_offer._id = offer._id;
         massaged_offer.header = offer.actions && offer.actions.reward && offer.actions.reward.header || offer.header;
@@ -435,23 +443,26 @@ function massage_offers(params) {
           if (offer.rule.event_match === 'on every') {
             var checkins_to_go = massaged_offer.next - (massaged_offer.checkins % massaged_offer.next);
             massaged_offer.next =  checkins_to_go;
-          }
-
-          if (offer.rule.event_match === 'on only') {
-            if(massaged_offer.next > massaged_offer.checkins) {
-              var checkins_to_go = massaged_offer.next - massaged_offer.checkins; 
-              massaged_offer.next =  checkins_to_go; 
+            if(massaged_offer.checkins > offer.rule.event_end) {
+              massaged_offer.next = -1;
             }
           }
 
-          if (offer.rule.event_match === 'after' && massaged_offer.next > massaged_offer.checkins) {
-            var checkins_to_go = massaged_offer.next+1 - massaged_offer.checkins; 
-            massaged_offer.next =  checkins_to_go;
+          if (offer.rule.event_match === 'on only') {
+            var checkins_to_go = massaged_offer.next - massaged_offer.checkins; 
+            massaged_offer.next =  checkins_to_go; 
           }
-          else if(offer.rule.event_match === 'after' && massaged_offer.next <=massaged_offer.checkins) {
-            massaged_offer.next =  1;
-             
-          } 
+
+          if (offer.rule.evnet_match === 'after' && offer.rule.event_start>massaged_offer.checkins) { // to remove
+            console.log('after next', offers[i].checkin_count, event_start);
+            var checkins_to_go = offer.rule.event_start - massaged_offer.checkins;
+            massaged_offer.next = checkins_to_go;
+          } else if(offer.rule.event_match === 'after' && offer.rule.event_start<=massaged_offer.checkins && offer.rule.event_end>massaged_offer.checkins) {
+            massaged_offer.next = 1;
+          } else if(offer.rule.event_match === 'after') {
+            massaged_offer.next = -1;
+          }
+
         }        
 
         massaged_offer.expiry = offer.offer_end_date || offer.expiry_date;
@@ -488,7 +499,16 @@ function massage_offers(params) {
         
         // massaged_offer.applicability = offer.actions.reward.applicability;
         // massaged_offer.valid_days = offer.actions.reward.valid_days;
-        if(offer.offer_type === 'checkin' && offer.rule.event_match === 'on only' && massaged_offer.checkins >=  offer.rule.event_count) {
+        console.log(massaged_offer.next)
+        if(massaged_offer.next<=0) {
+          console.log('here')
+          return false;
+        }
+        console.log(massaged_offer.expiry)
+        var today = new Date();
+        today = today.getTime();
+        if(massaged_offer.expiry && new Date(massaged_offer.expiry) <= today) {
+          console.log('here1')
           return false;
         }
         else{
