@@ -31,7 +31,7 @@ module.exports.login = function(req, res) {
       return AuthHelper.get_user(data.token.token);
     })
     .then(function(data) {
-      if(data.data.role === 3) {
+      if(data.data.role === 3 || data.data.role === 4 || data.data.role === 5) {
         HttpHelper.success(res, data, "Logged in successfully");  
       }
       else{

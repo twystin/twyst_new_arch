@@ -8,15 +8,16 @@ while(cursor.hasNext()) {
       coupons: {
         _id: a._id,
         code: a.basics.code,
-        issued_by: a.issue_details.issued_at,
+        issued_by: a.issue_details.issued_at[0],
         coupon_source: a.basics.gen_type,
         header: a.basics.description,
-        coupon_group: new ObjectId(),
         line1: "",
         line2: "",
         terms: a.terms,
+        description: '',
         coupon_valid_days: a.validity.number_of_days,
-        expiry: a.validity.end_date,
+        expiry_date: a.validity.end_date,
+        lapse_date: a.validity.end_date,
         meta: a.issue_details,
         reward: a.reward,
         used_details: {
@@ -26,7 +27,8 @@ while(cursor.hasNext()) {
           used_phone: a.redemption_phone_number
         },
         status: a.basics.status,
-        issued_at: a.issue_details.issue_date
+        issued_at: a.issue_details.issue_date,
+        outlets: a.issue_details.issued_at
       }
     }
   }, {
