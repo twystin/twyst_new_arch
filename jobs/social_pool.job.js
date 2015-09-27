@@ -18,7 +18,9 @@ exports.runner = function(agenda) {
         logger.log();
         console.log('inside pool');
         User.find({
-            "role": 6,
+            "role": {
+                $in: [6, 7]
+            },
             "coupons.coupon_source": "QR",
             "coupons.status": "active",
             "coupons.lapse_date": {
@@ -53,6 +55,9 @@ function process_user(user) {
             coupon.lapsed_coupon_source.phone = user.phone || '';
             coupon.social_friend_list = [];
             
+            var push_notification_ids = [],
+                user_notification_id = user.push_ids[user.push_ids.length - 1].push_id;
+
             _.each(user.friends.friends, function(friend) {
                 if (friend.user) {
                     var arr = [];
@@ -61,11 +66,13 @@ function process_user(user) {
                     Cache.hget(friend.user, 'social_pool_coupons', function(err, reply) {
                         if (err || !reply) {
                             console.log('first push')
+                            push_notification_ids.push(friend.gcm_id);
                             Cache.hset(friend.user, 'social_pool_coupons', JSON.stringify(arr));
                         } else {
                             var a = JSON.parse(reply);
                             a.push(arr[0]);
                             console.log('updated friends coupons', a.length);
+                            push_notification_ids.push(friend.gcm_id);
                             Cache.hset(friend.user, 'social_pool_coupons', JSON.stringify(a));
                         }
                     })
@@ -97,7 +104,11 @@ function process_user(user) {
                     logger.error(err);
                 }
                 RecoHelper.cache_user_coupons(user);
-
+                notification.notify(null, null, push_notification_ids, null).then(function(data) {
+                    logger.log(data);
+                }, function(err) {
+                    logger.log(err);
+                });
             });
         }
     });

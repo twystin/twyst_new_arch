@@ -122,7 +122,8 @@ module.exports.update_friends = function(token, friend_list) {
                     social_id: '',
                     email: user.email, 
                     user: user._id, 
-                    name: user.first_name 
+                    name: user.first_name,
+                    gcm_id: user.push_ids[user.push_ids.length - 1].push_id
                 };
         
                 if (friend_list.source === 'GOOGLE' || friend_list.source === 'FACEBOOK') {
@@ -134,6 +135,7 @@ module.exports.update_friends = function(token, friend_list) {
                             friend_obj.email = app_friend.email;
                             friend_obj.phone = app_friend.phone;
                             addUserReferral(user_obj, app_friend.friends);
+                            friend_obj.gcm_id = app_friend.gcm_id;
                         }
                         update_query['$pushAll'].friends.push(friend_obj);
                         callback();
@@ -148,6 +150,7 @@ module.exports.update_friends = function(token, friend_list) {
                             friend_obj.user = app_friend.id;
                             friend_obj.email = app_friend.email;
                             addUserReferral(user_obj, app_friend.friends);
+                            friend_obj.gcm_id = app_friend.gcm_id;
                         }
                         update_query['$pushAll'].friends.push(friend_obj);
                         callback();
@@ -198,7 +201,8 @@ function findFriendBySourceId(friendId) {
         id: friend._id.toString(),
         email: friend.email,
         phone: friend.phone,
-        friends: friend.friends
+        friends: friend.friends,
+        gcm_id: friend.push_ids[friend.push_ids.length - 1].push_id
       });
     }
   });

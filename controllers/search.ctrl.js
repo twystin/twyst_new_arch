@@ -440,7 +440,11 @@ function massage_offers(params) {
     item.offers = _.map(item.offers, function(offer) {
       if (offer.type) {
         return offer;
-      } else {
+      } 
+      else if(offer.offer_status === 'archived' || offer.offer_status === 'draft') {
+        return false;
+      }
+      else {
         var massaged_offer = {};
         massaged_offer._id = offer._id;
         massaged_offer.header = offer.actions && offer.actions.reward && offer.actions.reward.header || offer.header;
@@ -458,29 +462,32 @@ function massage_offers(params) {
           massaged_offer.meta.reward_type = offer.meta.reward_type.type;
         }
         
-       if (offer.offer_type === 'checkin') {
+        if (offer.offer_type === 'checkin') {
           massaged_offer.next = parseInt(offer.rule && offer.rule.event_count);
           massaged_offer.checkins = item.recco && item.recco.checkins || 0;
           if (offer.rule.event_match === 'on every') {
             var checkins_to_go = massaged_offer.next - (massaged_offer.checkins % massaged_offer.next);
             massaged_offer.next =  checkins_to_go;
-          }
-
-          if (offer.rule.event_match === 'on only') {
-            if(massaged_offer.next > massaged_offer.checkins) {
-              var checkins_to_go = massaged_offer.next - massaged_offer.checkins; 
-              massaged_offer.next =  checkins_to_go; 
+            if(massaged_offer.checkins > offer.rule.event_end) {
+              massaged_offer.next = -1;
             }
           }
 
-          if (offer.rule.event_match === 'after' && massaged_offer.next > massaged_offer.checkins) {
-            var checkins_to_go = massaged_offer.next+1 - massaged_offer.checkins; 
-            massaged_offer.next =  checkins_to_go;
+          if (offer.rule.event_match === 'on only') {
+            var checkins_to_go = massaged_offer.next - massaged_offer.checkins; 
+            massaged_offer.next =  checkins_to_go; 
           }
-          else if(offer.rule.event_match === 'after' && massaged_offer.next <=massaged_offer.checkins) {
-            massaged_offer.next =  1;
-             
-          } 
+
+          if (offer.rule.evnet_match === 'after' && offer.rule.event_start>massaged_offer.checkins) { // to remove
+            console.log('after next', offers[i].checkin_count, event_start);
+            var checkins_to_go = offer.rule.event_start - massaged_offer.checkins;
+            massaged_offer.next = checkins_to_go;
+          } else if(offer.rule.event_match === 'after' && offer.rule.event_start<=massaged_offer.checkins && offer.rule.event_end>massaged_offer.checkins) {
+            massaged_offer.next = 1;
+          } else if(offer.rule.event_match === 'after') {
+            massaged_offer.next = -1;
+          }
+
         }        
 
         massaged_offer.expiry = offer.offer_end_date || offer.expiry_date;
@@ -517,16 +524,26 @@ function massage_offers(params) {
         
         // massaged_offer.applicability = offer.actions.reward.applicability;
         // massaged_offer.valid_days = offer.actions.reward.valid_days;
-        if(offer.offer_type === 'checkin' && offer.rule.event_match === 'on only' && massaged_offer.checkins >=  offer.rule.event_count) {
+        console.log(massaged_offer.next)
+        if(massaged_offer.next<=0) {
+          return false;
+        }
+        
+        var today = new Date();
+        var expiry_date = new Date();
+        today = today.getTime();
+
+        if(massaged_offer.expiry && expiry_date(massaged_offer.expiry).getTime() <= today) {
           return false;
         }
         else{
           return massaged_offer;  
         }
+        
       }
 
     });
-    item.offers = item.offers.concat(coupon_map);
+    item.offers = _.compact(item.offers);
     return item;
   }
 }

@@ -37,30 +37,27 @@ module.exports.process = function(data) {
         deferred.reject('Unable to process event');
       }
       else if(!events.length){
-        User.findOneAndUpdate({
-          _id: updated_user._id
-          }, {
-            $addToSet: {
-              following: passed_data.event_data.event_outlet
-            }
-          },
-          function(err, u) {
-            if (err || !u) {
-              deferred.reject('Could not update user');
-            } else {
-              RecoHelper.cache_user_favourites(updated_user).then(function(data) {
-                deferred.resolve(passed_data);
-              }, function(err) {
-                deferred.reject('Could not update user cache')
-              })
-            }
-          }
-        );    
-      }
-      else{
         passed_data.already_followed = true;
-        deferred.resolve(passed_data)
       }
+      User.findOneAndUpdate({
+        _id: updated_user._id
+        }, {
+          $addToSet: {
+            following: passed_data.event_data.event_outlet
+          }
+        },
+        function(err, u) {
+          if (err || !u) {
+            deferred.reject('Could not update user');
+          } else {
+            RecoHelper.cache_user_favourites(updated_user).then(function(data) {
+              deferred.resolve(passed_data);
+            }, function(err) {
+              deferred.reject('Could not update user cache')
+            })
+          }
+        }
+      );
     }
   )
 
