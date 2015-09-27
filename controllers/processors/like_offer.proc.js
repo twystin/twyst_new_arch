@@ -36,37 +36,35 @@ module.exports.process = function(data) {
         console.log(err);
         deferred.reject('Unable to process event');
       }
-      else if(!events.length){
-        Outlet.findOneAndUpdate({
-            _id: passed_data.event_data.event_meta.outlet,
-            offers: {
-              $elemMatch: {
-                '_id': passed_data.event_data.event_meta.offer
-              }
-            }
-          }, {
-            $addToSet: {
-              'offers.$.offer_likes': updated_user._id
-            }
-          },
-          function(err, updated_outlet) {
-            if (err || !updated_outlet) {
-              console.log(err);
-              deferred.reject('Could not update offer');
-            } else {
-              RecoHelper.cache_offer_likes(passed_data.event_data.event_type, passed_data.event_data.event_meta.offer, updated_user._id, updated_outlet._id).then(function(data) {
-                deferred.resolve(passed_data);
-              }, function(err) {
-                deferred.reject('Could not update outlet cache');
-              });
+      else if(events.length){
+        passed_data.already_liked = true;
+      }
+      Outlet.findOneAndUpdate({
+          _id: passed_data.event_data.event_meta.outlet,
+          offers: {
+            $elemMatch: {
+              '_id': passed_data.event_data.event_meta.offer
             }
           }
-        );
-      }
-      else{
-        passed_data.already_liked = true;
-        deferred.resolve(passed_data)
-      }
+        }, {
+          $addToSet: {
+            'offers.$.offer_likes': updated_user._id
+          }
+        },
+        function(err, updated_outlet) {
+          if (err || !updated_outlet) {
+            console.log(err);
+            deferred.reject('Could not update offer');
+          } else {
+            RecoHelper.cache_offer_likes(passed_data.event_data.event_type, passed_data.event_data.event_meta.offer, updated_user._id, updated_outlet._id).then(function(data) {
+              deferred.resolve(passed_data);
+            }, function(err) {
+              deferred.reject('Could not update outlet cache');
+            });
+          }
+        }
+      );
+      
     }
   )
 

@@ -146,6 +146,9 @@ function load_outlet_info_from_cache(data) {
                 var _coupons = [];
                 async.each(data.coupons, function(coupon, callback) {
                     var massaged_item = {};
+                    var today = new Date(),
+                    date = (today.getMonth() + 1) + '-' + today.getDate() + '-' + today.getFullYear(),
+                    time = today.getHours() + ':' + today.getMinutes();
                     if(coupon.issued_by) {
                         outlet = outlets[coupon.issued_by.toString()];            
                     }
@@ -167,8 +170,7 @@ function load_outlet_info_from_cache(data) {
                     }
 
                     if (data.query.lat && data.query.long) {
-                      massaged_item.distance = RecoHelper.distance(data.query.lat, data.query.long);
-                      console.log(massaged_item.distance)
+                      massaged_item.distance = RecoHelper.distance({latitude: data.query.lat, longitude: data.query.long}, outlet.contact.location.coords);
                     }
 
                     if (outlet.photos && outlet.photos.logo) {
@@ -181,7 +183,7 @@ function load_outlet_info_from_cache(data) {
                     
                     _.each(outlet.offers, function(offer) {
                         if(offer._id && coupon.issued_for && offer._id.toString() === coupon.issued_for.toString()) {
-                            coupon.available_now = !(RecoHelper.isClosed('dummy', 'dummy', offer.actions.reward.reward_hours));
+                            coupon.available_now = !(RecoHelper.isClosed(date, time, offer.actions.reward.reward_hours));
                             if(!coupon.available_now) {
                               coupon.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
                             }

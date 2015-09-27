@@ -3,7 +3,7 @@
 
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var User = require('./user.mdl');
+// var User = require('./user.mdl');
 
 var Friend = new Schema({
 	friends: [{
@@ -13,6 +13,7 @@ var Friend = new Schema({
 	    social_id: String,
 	    name: String,
 	    email: String,
+	    gcm_id: String,
 	    user: {
 	      type: Schema.Types.ObjectId,
 	      ref: 'User'

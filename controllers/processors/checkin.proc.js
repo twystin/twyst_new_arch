@@ -73,7 +73,10 @@ function validate_qr(data) {
   if (!code) {
     deferred.reject('QR checkin needs a QR code to be sent');
   };
-
+  if(/^http/.test(code)) {
+    code = code.slice(code.lastIndexOf('/') + 1);
+    data.event_data.event_meta.code = code;
+  }
   QR.findOne({
     code: code
   }).populate('outlet_id').exec(function(err, qr) {
