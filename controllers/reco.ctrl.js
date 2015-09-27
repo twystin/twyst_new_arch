@@ -501,14 +501,14 @@ function massage_offers(params) {
         // massaged_offer.valid_days = offer.actions.reward.valid_days;
         console.log(massaged_offer.next)
         if(massaged_offer.next<=0) {
-          console.log('here')
           return false;
         }
-        console.log(massaged_offer.expiry)
+        
         var today = new Date();
+        var expiry_date = new Date();
         today = today.getTime();
-        if(massaged_offer.expiry && new Date(massaged_offer.expiry) <= today) {
-          console.log('here1')
+
+        if(massaged_offer.expiry && expiry_date(massaged_offer.expiry).getTime() <= today) {
           return false;
         }
         else{
