@@ -438,17 +438,19 @@ function massage_offers(params) {
         }
         
         if (offer.offer_type === 'checkin') {
-          massaged_offer.next = parseInt(offer.rule && offer.rule.event_count);
           massaged_offer.checkins = item.recco && item.recco.checkins || 0;
           if (offer.rule.event_match === 'on every') {
-            var checkins_to_go = massaged_offer.next - (massaged_offer.checkins % massaged_offer.next);
-            massaged_offer.next =  checkins_to_go;
-            if(massaged_offer.checkins > offer.rule.event_end) {
+            if(massaged_offer.checkins<offer.rule.event_start) {
+              massaged_offer.next = offer.rule.event_start - massaged_offer.checkins; 
+            } else if(massaged_offer.checkins>=offer.rule.event_start && massaged_offer.checks<=offer.rule.event_end) {
+              massaged_offer.next = offer.rule.event_count - ((massaged_offer.checkins - offer.rule.event_start) % massaged_offer.event_count);
+            } else {
               massaged_offer.next = -1;
             }
           }
 
           if (offer.rule.event_match === 'on only') {
+            massaged_offer.next = parseInt(offer.rule && offer.rule.event_count);
             var checkins_to_go = massaged_offer.next - massaged_offer.checkins; 
             massaged_offer.next =  checkins_to_go; 
           }
@@ -503,12 +505,8 @@ function massage_offers(params) {
         if(massaged_offer.next<=0) {
           return false;
         }
-        
-        var today = new Date();
-        var expiry_date = new Date();
-        today = today.getTime();
 
-        if(massaged_offer.expiry && expiry_date(massaged_offer.expiry).getTime() <= today) {
+        if(massaged_offer.expiry && (new Date(massaged_offer.expiry) <= new Date())) {
           return false;
         }
         else{
