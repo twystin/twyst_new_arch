@@ -312,6 +312,7 @@ function massage_offers(params) {
         coupon.meta.reward_type = itemd && itemd.meta && itemd.meta.reward_type.type;
         coupon.description = itemd.description;
         coupon.terms = itemd.terms;
+        coupon.available_now = true;
 
         _.each(item.offers, function(offer) {
             if(offer._id.toString() === itemd.issued_for.toString()) {

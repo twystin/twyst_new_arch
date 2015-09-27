@@ -231,41 +231,56 @@ function create_coupon(offer, user, outlet) {
 
   var deferred = Q.defer();
   
-  var update = {
-    $push: {
-      coupons: {
-        _id: mongoose.Types.ObjectId(),
-        code: code,
-        issued_for: offer._id,
-        coupon_source:  'QR',
-        header: offer.actions.reward.header,
-        line1: offer.actions.reward.line1,
-        line2: offer.actions.reward.line2,
-        terms: offer.terms,
-        description: offer.actions.reward.description,
-        lapse_date: lapse_date,
-        expiry_date: expiry_date,
-        meta: {
-          reward_type: {
-            type: offer.actions.reward.reward_meta.reward_type
-          }
-        },
-        status: 'active',
-        issued_at: new Date(),
-        issued_by: outlet,
-        outlets: offer.offer_outlets
+  var coupon =  {
+    _id: mongoose.Types.ObjectId(),
+    code: code,
+    issued_for: offer._id,
+    coupon_source:  'QR',
+    header: offer.actions.reward.header,
+    line1: offer.actions.reward.line1,
+    line2: offer.actions.reward.line2,
+    terms: offer.terms,
+    description: offer.actions.reward.description,
+    lapse_date: lapse_date,
+    expiry_date: expiry_date,
+    meta: {
+      reward_type: {
+        type: offer.actions.reward.reward_meta.reward_type
       }
-    }
-  };
+    },
+    status: 'active',
+    issued_at: new Date(),
+    issued_by: outlet,
+    outlets: offer.offer_outlets
+  }
 
-  User.findOneAndUpdate({
+  User.findOne({
     _id: user
-  }, update, function(err, user) {
-    if (err || !user) {
+  }).exec(function(err, user) {
+    if(err || !user) {
+      console.log('user save err', err);
       deferred.reject('Could not update user');
-    } else
-      deferred.resolve(user);
+    } else {
+      user.coupons.push(coupon);
+      user.save(function(err) {
+        if(err) {
+          console.log('user save err', err);
+        } else {
+          deferred.resolve(user);
+        }
+      });
+    }
   });
+
+  // User.findOneAndUpdate({
+  //   _id: user
+  // }, update, function(err, user) {
+  //   console.log('push coupon', err, user);
+  //   if (err || !user) {
+  //     deferred.reject('Could not update user');
+  //   } else
+  //     deferred.resolve(user);
+  // });
 
   return deferred.promise;
 }
@@ -294,6 +309,7 @@ function find_matching_offer(events, offers) {
     event_end = _.get(offers[i], 'rule.event_end');
 
     if (match === 'on every') {
+      console.log('on every', offers[i].checkin_count, count, event_start, event_end);
       if (offers[i].checkin_count % count === 0 && offers[i].checkin_count >= event_start
         && offers[i].checkin_count <= event_end) {
         return offers[i];
@@ -301,13 +317,15 @@ function find_matching_offer(events, offers) {
     }
 
     if (match === 'on only') {
+      console.log('on only', offers[i].checkin_count, count);
       if (offers[i].checkin_count === count) {
         return offers[i];
       }
     }
 
     if (match === 'after') {
-      if (offers[i].checkin_count > count && offers[i].checkin_count >= event_start
+      console.log('after', offers[i].checkin_count, event_start, event_end);
+      if (offers[i].checkin_count >= event_start
         && offers[i].checkin_count <= event_end) {
         return offers[i];
       }
@@ -315,28 +333,26 @@ function find_matching_offer(events, offers) {
 
     if (match === 'on every' && offers[i].checkin_count >= event_start
         && offers[i].checkin_count <= event_end) {
+      console.log('on every next', offers[i].checkin_count, event_start, event_end);
       var checkins_to_go = count - (offers[i].checkin_count % count);
       next.push(checkins_to_go);
     }
 
     if (match === 'on only') {
+      console.log('on only next', offers[i].checkin_count, count);
       if(count > offers[i].checkin_count) {
         var checkins_to_go = count - offers[i].checkin_count; 
         next.push(checkins_to_go);
       }
     }
 
-    if (match === 'after' && count > offers[i].checkin_count && offers[i].checkin_count >= event_start
-        && offers[i].checkin_count <= event_end) {
-      var checkins_to_go = count+1 - offers[i].checkin_count; 
+    if (match === 'after' && event_start >= offers[i].checkin_count) {
+      console.log('after next', offers[i].checkin_count, event_start);
+      var checkins_to_go = event_start - offers[i].checkin_count;
       next.push(checkins_to_go);
     }
-    else if(match === 'after' && count <= offers[i].checkin_count && offers[i].checkin_count >= event_start
-        && offers[i].checkin_count <= event_end) {
-      next.push(1);
-       
-    } 
   }
+  console.log('next', next);
   if(next.length) {
     return _.sortBy(next, function(num) { return num; })[0];
   } else {
