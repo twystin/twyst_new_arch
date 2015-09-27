@@ -175,7 +175,8 @@ function load_outlet_info_from_cache(data) {
                     massaged_item.open_next = RecoHelper.opensAt(outlet.business_hours);
                     
                     _.each(outlet.offers, function(offer) {
-                        if(offer._id.toString() === coupon.issued_for.toString()) {
+                        console.log('okok')
+                        if(offer._id && coupon.issued_for && offer._id.toString() === coupon.issued_for.toString()) {
                             coupon.available_now = !(RecoHelper.isClosed('dummy', 'dummy', offer.actions.reward.reward_hours));
                             if(!coupon.available_now) {
                               coupon.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
@@ -192,8 +193,9 @@ function load_outlet_info_from_cache(data) {
                             callback();
                         }
                         else {
+                            console.log('heer')
                             var outlets = [];
-                            if(all_outlets.length > 1){
+                            if(all_outlets.length){
                                 _.each(all_outlets, function(outlet){
                                     var obj = {
                                         _id: outlet._id,

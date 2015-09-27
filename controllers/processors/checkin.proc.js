@@ -241,6 +241,8 @@ function create_coupon(offer, user, outlet) {
         header: offer.actions.reward.header,
         line1: offer.actions.reward.line1,
         line2: offer.actions.reward.line2,
+        terms: offer.terms,
+        description: offer.actions.reward.description,
         lapse_date: lapse_date,
         expiry_date: expiry_date,
         meta: {
@@ -270,7 +272,7 @@ function create_coupon(offer, user, outlet) {
 
 function find_matching_offer(events, offers) {
   var i, next = [], checkins;
-  var count, match, start_date, event_date;
+  var count, match, event_start, event_end, start_date, event_date;
 
   _.each(offers, function(offer) {
     checkins = 1; // TO COUNT THIS CHECKIN AS WELL
@@ -288,9 +290,12 @@ function find_matching_offer(events, offers) {
     
     count = _.get(offers[i], 'rule.event_count');
     match = _.get(offers[i], 'rule.event_match');
+    event_start = _.get(offers[i], 'rule.event_start');
+    event_end = _.get(offers[i], 'rule.event_end');
 
     if (match === 'on every') {
-      if (offers[i].checkin_count % count === 0) {
+      if (offers[i].checkin_count % count === 0 && offers[i].checkin_count >= event_start
+        && offers[i].checkin_count <= event_end) {
         return offers[i];
       }
     }
@@ -302,12 +307,14 @@ function find_matching_offer(events, offers) {
     }
 
     if (match === 'after') {
-      if (offers[i].checkin_count > count) {
+      if (offers[i].checkin_count > count && offers[i].checkin_count >= event_start
+        && offers[i].checkin_count <= event_end) {
         return offers[i];
       }
     }
 
-    if (match === 'on every') {
+    if (match === 'on every' && offers[i].checkin_count >= event_start
+        && offers[i].checkin_count <= event_end) {
       var checkins_to_go = count - (offers[i].checkin_count % count);
       next.push(checkins_to_go);
     }
@@ -319,11 +326,13 @@ function find_matching_offer(events, offers) {
       }
     }
 
-    if (match === 'after' && count > offers[i].checkin_count) {
+    if (match === 'after' && count > offers[i].checkin_count && offers[i].checkin_count >= event_start
+        && offers[i].checkin_count <= event_end) {
       var checkins_to_go = count+1 - offers[i].checkin_count; 
       next.push(checkins_to_go);
     }
-    else if(match === 'after' && count <= offers[i].checkin_count) {
+    else if(match === 'after' && count <= offers[i].checkin_count && offers[i].checkin_count >= event_start
+        && offers[i].checkin_count <= event_end) {
       next.push(1);
        
     } 
