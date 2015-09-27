@@ -15,17 +15,18 @@ module.exports.notify = function(what, when, who, campaign) {
   var notify_text = "You have a new voucher in your social pool";
   var payload = {
   	body: notify_text,
-  	head: 'New Voucher in Social Pool'
+  	head: 'New Voucher in Social Pool',
+    gcms: who
   };
 
   if (when) {
-    Transporter.schedule("other", "debug", when, payload).then(function(data) {
+    Transporter.schedule("push", "gcm", when, payload).then(function(data) {
       deferred.resolve(data);
     }, function(err) {
       deferred.reject(err);
     })
   } else {
-    Transporter.send("other", "debug", payload).then(function(data) {
+    Transporter.send("push", "gcm", payload).then(function(data) {
       deferred.resolve(data);
     }, function(err) {
       deferred.reject(err);
