@@ -17,6 +17,13 @@
                 </select>
               </div>
             </div>
+            <div class='form-group'>
+              <div class='col-md-4 col-md-offset-2'>
+                <span class='fa fa-lg fa-check-square' ng-click='toggleStatus()' ng-if='offer.offer_status==="active"'></span>
+                <span class='fa fa-lg fa-square-o' ng-click='toggleStatus()' ng-if='offer.offer_status!=="active"'></span>
+                <label for='city'>Is Active?</label>
+              </div>
+            </div>
           </fieldset>
         </form>
       </div>
