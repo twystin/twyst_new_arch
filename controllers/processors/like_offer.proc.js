@@ -5,6 +5,7 @@ var Q = require('q');
 var mongoose = require('mongoose');
 var RecoHelper = require('../helpers/reco.hlpr.js');
 var Outlet = mongoose.model('Outlet');
+var Event = mongoose.model('Event');
 
 module.exports.check = function(data) {
   logger.log();
