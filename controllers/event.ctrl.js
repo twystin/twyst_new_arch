@@ -15,10 +15,15 @@ module.exports.new = function(req, res) {
   create_new(res, setup_event(req, req.body.event_type || ''));
 };
 
-module.exports.checkin = function(req, res) {
+module.exports.qr_checkin = function(req, res) {
   logger.log();
-  create_new(res, setup_event(req, 'checkin'));
+  create_new(res, setup_event(req, 'qr_checkin'));
 };
+
+module.exports.panel_checkin = function(req, res) {
+  logger.log();
+  create_new(res, setup_event(req, 'panel_checkin'));
+}
 
 module.exports.gift = function(req, res) {
   logger.log();
@@ -117,7 +122,7 @@ module.exports.referral_join = function(req, res) {
 
 module.exports.list_events = function(req, res) {
   logger.log();
-  var event_types = ['follow', 'checkin', 'gift', 'grab', 'redeem', 'unfollow', 'feedback', 'submit_offer', 'like_offer', 'unlike_offer', 'upload_bill', 'share_offer', 'share_outlet', 'suggestion', 'extend_offer', 'report_problem', 'write_to_twyst', 'generate_coupon', 'deal_log', 'referral_join' ];
+  var event_types = ['follow', 'qr_checkin', 'panel_checkin', 'gift', 'grab', 'redeem', 'unfollow', 'feedback', 'submit_offer', 'like_offer', 'unlike_offer', 'upload_bill', 'share_offer', 'share_outlet', 'suggestion', 'extend_offer', 'report_problem', 'write_to_twyst', 'generate_coupon', 'deal_log', 'referral_join' ];
   var HttpHelper = require('../common/http.hlpr.js');
   var AuthHelper = require('../common/auth.hlpr.js');
   var EventHelper = require('./helpers/event.hlpr.js');
@@ -243,7 +248,7 @@ function create_new(res, passed_data) {
         if(data.user.coupons.length) {
             code = data.user.coupons[data.user.coupons.length-1].code;    
         }
-        
+        console.log('event_ctrl', event_type, data.checkins_to_go, data.user.coupons.length);
         if(event_type === 'checkin'  && !data.checkins_to_go && data.user.coupons.length ) {
             header = data.user.coupons[data.user.coupons.length-1].header;
             line1 = data.user.coupons[data.user.coupons.length-1].line1;
@@ -260,6 +265,7 @@ function create_new(res, passed_data) {
         var data = {};
         data.twyst_bucks = bucks;
         if(event_type ===  'generate_coupon' || event_type == 'checkin') {
+            console.log('data fields', code, header, line1, line2, outlet_id, outlet_name, checkin_left);
             data.code = code;    
             data.header = header;
             data.line1 = line1;
@@ -341,7 +347,8 @@ function process_event(data) {
 
   var processors = {
     'follow': require('./processors/follow.proc'),
-    'checkin': require('./processors/checkin.proc'),
+    'qr_checkin': require('./processors/qr_checkin.proc'),
+    'panel_checkin': require('./processors/panel_checkin.proc'),
     'gift': require('./processors/gift.proc'),
     'grab': require('./processors/grab.proc'),
     'redeem': require('./processors/redeem.proc'),
