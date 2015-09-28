@@ -6,6 +6,12 @@ var mustBe = require('mustbe').routeHelpers();
 var mongoose = require('mongoose');
 var passport = require('passport');
 module.exports = function(app) {
+
+  (function WepAppRoutes() {
+    app.get('', function(req, res) { res.redirect('/home') });
+    app.get('/', function(req, res) { res.redirect('/home') });
+  });
+
   (function AccountRoutes() {
     var AccountCtrl = require('../controllers/account.ctrl');
     app.post('/api/v4/auth/register', AccountCtrl.register_merchant);
@@ -18,6 +24,11 @@ module.exports = function(app) {
     app.post('/api/v4/authcode', AccountCtrl.verify_authcode_and_create_account);
     app.get('/api/v4/accounts/logout', AccountCtrl.logout);
 
+  })();
+
+  (function LegacyRoutes() {
+    app.all('/api/v2/*', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
+    app.all('/api/v3/*', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
   })();
 
   (function RecoRoutes() {
@@ -41,8 +52,8 @@ module.exports = function(app) {
     app.post('/api/v4/deal/log', EventCtrl.deal_log); // FOR DEAL TYPE
 
     app.post('/api/v4/checkin/bill', EventCtrl.upload_bill);
-    app.post('/api/v4/checkin/qr', EventCtrl.checkin);
-    app.post('/api/v4/checkin/panel', EventCtrl.checkin);
+    app.post('/api/v4/checkin/qr', EventCtrl.qr_checkin);
+    app.post('/api/v4/checkin/panel', EventCtrl.panel_checkin);
 
     app.post('/api/v4/outlet/follow', EventCtrl.follow);
     app.post('/api/v4/outlet/unfollow', EventCtrl.unfollow);
@@ -65,6 +76,9 @@ module.exports = function(app) {
   (function OutletRoutes() {
     var OutletCtrl = require('../controllers/outlet.ctrl');
     app.post('/api/v4/outlets', mustBe.authorized('outlet.create', OutletCtrl.new));
+    app.get('/api/v4/outlets/:outlet_id/code/:code', mustBe.authorized('outlet.view', OutletCtrl.get_coupon_by_code));
+    app.get('/api/v4/outlets/:outlet_id/phone/:phone', mustBe.authorized('outlet.view', OutletCtrl.get_user_coupons));
+    app.post('/api/v4/outlets/redeem_user_coupon', OutletCtrl.redeem_user_coupon);
     app.put('/api/v4/outlets/:outlet_id', mustBe.authorized('outlet.update', OutletCtrl.update));
 
     // Anonymous route
