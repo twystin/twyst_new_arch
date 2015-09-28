@@ -13,12 +13,14 @@ angular.module('merchantApp')
 
 			$scope.resetForms = function() {
 				$scope.show_vouchers = false;
+				$scope.show_msg = false;
 				$scope.search = {};
 				$scope.checkin = {};
 			}
 
 			$scope.redeemUserCoupon = function(code) {
 				$scope.show_vouchers = false;
+				$scope.show_msg = false;
 				merchantRESTSvc.redeemUserCoupon($scope.choosen_outlet, code)
 					.then(function(data) {
 						toastr.success(data.message);
@@ -30,6 +32,7 @@ angular.module('merchantApp')
 
 			$scope.getVouchersByPhone = function() {
 				$scope.show_vouchers = false;
+				$scope.show_msg = false;
 				if(!$scope.search || !$scope.search.number) {
 					toastr.error("Fill-in the phone number", "Error");
 				} else if(!/^[0-9]{10}$/.test($scope.search.number)) {
@@ -40,7 +43,12 @@ angular.module('merchantApp')
 							$scope.search = {};
 							$scope.show_vouchers = true;
 							$scope.user_vouchers = data.data;
-							toastr.success(data.message);
+							if(!$scope.user_vouchers.length) {
+								$scope.show_msg = true;
+								toastr.warning("No vouchers found");
+							} else {
+								toastr.success(data.message);	
+							}
 							console.log('data', data);
 						}, function(err) {
 							$scope.search = {};
@@ -51,10 +59,13 @@ angular.module('merchantApp')
 
 			$scope.checkinUser = function() {
 				$scope.show_vouchers = false;
+				$scope.show_msg = false;
 				if (!$scope.checkin || !$scope.checkin.number) {
 					toastr.error("Please finn-in the customer's number", "Error");
 				} else if (!/^[0-9]{10}$/.test($scope.checkin.number)) {
 					toastr.error("Number entered is invalid. Please recheck", "Error");
+				} else if(!$scope.checkin.date) {
+					toastr.error("Please select checkin date", "Error");
 				} else {
 					var req_obj = {
 						"event_meta": {
@@ -90,6 +101,7 @@ angular.module('merchantApp')
 
 			$scope.getVoucherByCode = function() {
 				$scope.show_vouchers = false;
+				$scope.show_msg = false;
 				if (!$scope.search || !$scope.search.code) {
 					toastr.error("Please fill-in the voucher code", "Error");
 				} else {
@@ -98,8 +110,13 @@ angular.module('merchantApp')
 							$scope.search = {};
 							$scope.show_vouchers = true;
 							$scope.user_vouchers = [data.data];
+							if(!$scope.user_vouchers.length) {
+								$scope.show_msg = true;
+								toastr.warning("No vouchers found");
+							} else {
+								toastr.success(data.message);
+							}
 							console.log('data', data);
-							toastr.success(data.message);
 						}, function(err) {
 							$scope.search = {};
 							console.log('err', err);

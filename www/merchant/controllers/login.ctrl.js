@@ -16,7 +16,7 @@ angular.module('merchantApp')
 						$rootScope.isPaying = res.data.data.data.is_paying;
 						toastr.success("Logged in successfully");
 						$timeout(function() {
-							$state.go('merchant.home', {}, {
+							$state.go('merchant.panel', {}, {
 								reload: true
 							});
 						}, 900);
