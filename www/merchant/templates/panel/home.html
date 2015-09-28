@@ -1,3 +1,61 @@
-<div class='container'>
-	<h2>Control Panel Home</h2>
+<div class='container-fluid'>
+	<h1>Control Panel Home</h1>
+	<div class='row'>
+		<div class='col-xs-12 col-md-8'>
+			<div class='row'>
+				<div class='col-xs-12 col-md-6'>
+					<div class='well'>
+						<legend>Outlet
+							<select class='pull-right' ng-model='outlet_id'>
+							</select>
+						</legend>
+						<h3>Outlet Name</h3>
+						<h4>Locality 1, Locality 2</h4>
+					</div>
+					<div class='well'>
+						<legend>Check-in a User</legend>
+						<div class='form-group'>
+							<label for='checkin_date' class='col-xs-6 control-label'>Checkin date</label>
+							<div class='col-xs-6'>
+								<input type='date' class='form-control' ng-model='checkin.date'>
+							</div>
+							<p>&nbsp;</p>
+							<div class='input-group'>
+								<input type='text' ng-model='checkin.number' class='form-control' placeholder='10 digit mobile number'>
+								<div class='input-group-btn'>
+									<a class='btn btn-primary'>Checkin</a>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class='well'>
+						<legend>Redeem Voucher</legend>
+						<div class='input-group'>
+							<input type='text' class='form-control' ng-model='redeem.voucher' placeholder='Voucher code'>
+							<div class='input-group-btn'>
+								<a class='btn btn-primary'>Get Details</a>
+							</div>
+						</div>
+					</div>
+					<div class='well'>
+						<legend>List Vouchers</legend>
+						<div class='input-group'>
+							<input type='text' class='form-control' ng-model='search.number' placeholder='10 digit mobile number'>
+							<div class='input-group-btn'>
+								<a class='btn btn-primary'>Search</a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class='col-xs-12 col-md-6' ui-view>
+				</div>
+			</div>
+		</div>
+		<div class='col-xs-12 col-md-4'>
+			<legend>a</legend>
+		</div>
+	</div>
 </div>
+<!-- <div class='container'>
+	<h2>Control Panel Home</h2>
+</div> -->

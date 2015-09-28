@@ -19,7 +19,6 @@ module.exports.update_user = function(token, updated_user) {
   var deferred = Q.defer();
   AuthHelper.get_user(token).then(function(data) {
     var user = data.data;
-    console.log(updated_user);
     user = ld.merge(user, updated_user);
     
     if(user.gcmId) {
@@ -163,7 +162,6 @@ module.exports.update_friends = function(token, friend_list) {
             }
         }, 
         function() {
-            console.log(update_query)
             Friend.findOneAndUpdate({'_id': user.friends_id}, update_query, function(err, u) {
                 if (err || !u) {
                     deferred.reject({
@@ -172,7 +170,6 @@ module.exports.update_friends = function(token, friend_list) {
                     });
                 } 
                 else {
-                   // console.log(u)
                     deferred.resolve({
                         data: u,
                         message: 'Updated user'
@@ -197,12 +194,18 @@ function findFriendBySourceId(friendId) {
     if (err || !friend) {
       deferred.resolve();
     } else {
+      var push_id = null;
+      if(friend.push_ids.length) {
+        push_id = friend.push_ids[friend.push_ids.length - 1].push_id
+      } else {
+        push_id = '';
+      }
       deferred.resolve({
         id: friend._id.toString(),
         email: friend.email,
         phone: friend.phone,
         friends: friend.friends,
-        gcm_id: friend.push_ids[friend.push_ids.length - 1].push_id
+        gcm_id: push_id
       });
     }
   });

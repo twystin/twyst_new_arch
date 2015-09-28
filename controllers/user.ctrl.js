@@ -110,9 +110,9 @@ function filter_out_expired_and_used_coupons(data) {
   var deferred = Q.defer();
   
   data.coupons = _.filter(data.coupons, function(coupon) {
-    if(_.has(coupon, 'status') && (coupon.status === 'active' && coupon.expiry_date && Date.now(coupon.expiry_date) <= Date.now()) 
+    if(_.has(coupon, 'status') && (coupon.status === 'active' && coupon.expiry_date && new Date(coupon.expiry_date) > new Date()) 
         && ( coupon.coupon_source === 'QR' || coupon.coupon_source === 'PANEL' || coupon.coupon_source === 'POS' 
-            || coupon.coupon_source === 'BATCH')) {
+            || coupon.coupon_source === 'BATCH') && coupon.issued_at<new Date(Date.now() - 10800000)) {
       return true;
     } else {
       return false;
@@ -148,7 +148,7 @@ function load_outlet_info_from_cache(data) {
                     var massaged_item = {};
                     var today = new Date(),
                     date = (today.getMonth() + 1) + '-' + today.getDate() + '-' + today.getFullYear(),
-                    time = today.getHours() + ':' + today.getMinutes();
+                    time = (today.getHours() + 5) + ':' + (today.getMinutes() + 30);
                     if(coupon.issued_by) {
                         outlet = outlets[coupon.issued_by.toString()];            
                     }
