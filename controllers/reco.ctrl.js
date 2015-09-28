@@ -337,8 +337,10 @@ function massage_offers(params) {
           pick_offer_fields(
             select_relevant_checkin_offer(item), params.user._id, params.query.date, params.query.time), coupon_map && coupon_map[item._id] && coupon_map[item._id].coupons);
         item.offers = _.sortBy(item.offers, function(offer) {
-          if(offer.type === 'coupon' || offer.offer_type === 'pool') {
+          if(offer.type === 'coupon') {
             return -100;
+          } else if(offer.offer_type === 'pool') {
+            return -50;
           } else if(offer.next) {
             return offer.next;
           } else {

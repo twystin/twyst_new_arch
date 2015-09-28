@@ -244,13 +244,17 @@ function massage_offers(params) {
         pick_offer_fields(
           select_relevant_checkin_offer(params.outlet), params.user._id, params.query.date, params.query.time), coupon_map && coupon_map[params.outlet._id] && coupon_map[params.outlet._id].coupons);
       param.outlet.offers = _.sortBy(param.outlet.offers, function(offer) {
-          if(offer.type === 'coupon' || offer.offer_type === 'pool') {
-            return -100;
-          } else if(offer.next) {
-            return offer.next;
-          } else {
-            return 100;
-          }
+          item.offers = _.sortBy(item.offers, function(offer) {
+            if(offer.type === 'coupon') {
+              return -100;
+            } else if(offer.offer_type === 'pool') {
+              return -50;
+            } else if(offer.next) {
+              return offer.next;
+            } else {
+              return 100;
+            }
+          });
         });
       deferred.resolve(params);
 

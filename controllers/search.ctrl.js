@@ -340,12 +340,17 @@ function massage_offers(params) {
       }
 
       params.outlets = _.map(params.outlets, function(item) {
+        if(item.outlet_meta.status === 'archived' || item.outlet_meta.status === 'draft') {
+          return false;        
+        }
         item = add_user_coupons(
           pick_offer_fields(
             select_relevant_checkin_offer(item), params.user._id, params.query.date, params.query.time), coupon_map && coupon_map[item._id] && coupon_map[item._id].coupons);
         item.offers = _.sortBy(item.offers, function(offer) {
-          if(offer.type === 'coupon' || offer.offer_type === 'pool') {
+          if(offer.type === 'coupon') {
             return -100;
+          } else if(offer.offer_type === 'pool') {
+            return -50;
           } else if(offer.next) {
             return offer.next;
           } else {
