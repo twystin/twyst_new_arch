@@ -2,7 +2,7 @@
 /*jslint node: true */
 
 
-var _ = require('underscore');
+var _ = require('lodash');
 var mongoose = require('mongoose');
 var Q = require('q');
 var logger = require('tracer').colorConsole();
@@ -79,37 +79,9 @@ function set_user_checkins(params) {
         var outlets = params.outlets;
         if (cmap) {
           _.each(cmap, function(value, key) {
-            outlets[key].recco = outlets[key].recco || {};
-            outlets[key].recco.checkins = value;
-          });
-          params.outlets = outlets;
-          deferred.resolve(params);
-        } else {
-          deferred.resolve(params);
-        }
-      }
-    });
-  } else {
-    deferred.resolve(params);
-  }
-  return deferred.promise;
-}
-
-function set_user_coupons(params) {
-  logger.log();
-  var deferred = Q.defer();
-  if (params.user) {
-    Cache.hget(params.user._id, 'coupon_map', function(err, reply) {
-      if (err || !reply) {
-        deferred.resolve(params);
-      } else {
-        var cmap = JSON.parse(reply);
-        var outlets = params.outlets;
-        if (cmap) {
-          _.each(cmap, function(value, key) {
-            if (outlets[key]) {
+            if(outlets[key]) {
               outlets[key].recco = outlets[key].recco || {};
-              outlets[key].recco.coupons = value.coupons.length;
+              outlets[key].recco.checkins = value;
             }
           });
           params.outlets = outlets;
@@ -131,16 +103,15 @@ function set_social_pool_coupons(params) {
   var deferred = Q.defer();
   if (params.user) {
     Cache.hget(params.user._id, 'social_pool_coupons', function(err, reply) {
-      
       if(err || !reply) {
         deferred.resolve(params);
       } else {
         var social_pool = JSON.parse(reply);
-        var outlets = params.outlets;
+        var outlet = params.outlet;
         if(social_pool) {
           _.each(social_pool, function(coupon) {
-            if(outlets[coupon.issued_by]) {
-              outlets[coupon.issued_by].offers.push(coupon)
+            if(outlet._id.toString() === coupon.issued_by) {
+              outlet.offers.push(coupon);
             }
           });
           deferred.resolve(params);
@@ -148,7 +119,39 @@ function set_social_pool_coupons(params) {
           deferred.resolve(params);
         }
       }
-    })
+    });
+  } else {
+    deferred.resolve(params);
+  }
+  return deferred.promise;
+}
+
+function set_user_coupons(params) {
+  logger.log();
+
+  var deferred = Q.defer();
+  if (params.user) {
+    Cache.hget(params.user._id, 'coupon_map', function(err, reply) {
+      if (err || !reply) {
+        deferred.resolve(params);
+      } else {
+        var cmap = JSON.parse(reply);
+        var outlets = params.outlets;
+        if (cmap) {
+          _.each(cmap, function(value, key) {
+            if (outlets[key]) {
+              outlets[key].recco = outlets[key].recco || {};
+              outlets[key].recco.coupons = value.coupons.length;
+            }
+
+          });
+          params.outlets = outlets;
+          deferred.resolve(params);
+        } else {
+          deferred.resolve(params);
+        }
+      }
+    });
   } else {
     deferred.resolve(params);
   }
@@ -160,7 +163,7 @@ function set_distance(params) {
 
   var deferred = Q.defer();
   if (params.query.lat && params.query.long) {
-    params.outlets = _.mapObject(params.outlets, function(val, key) {
+    params.outlets = _.mapValues(params.outlets, function(val, key) {
       val.recco = val.recco || {};
       val.recco.distance = RecoHelper.distance({
         latitude: params.query.lat,
@@ -178,7 +181,7 @@ function set_open_closed(params) {
 
   var deferred = Q.defer();
   if (params.query.date && params.query.time) {
-    params.outlets = _.mapObject(params.outlets, function(val, key) {
+    params.outlets = _.mapValues(params.outlets, function(val, key) {
       val.recco = val.recco || {};
       val.recco.closed = RecoHelper.isClosed(params.query.date,
         params.query.time,
@@ -194,7 +197,7 @@ function calculate_relevance(params) {
   logger.log();
 
   var deferred = Q.defer();
-  params.outlets = _.mapObject(params.outlets, function(val, key) {
+  params.outlets = _.mapValues(params.outlets, function(val, key) {
     var relevance = 0;
     val.recco = val.recco || {};
 
@@ -230,23 +233,23 @@ function calculate_relevance(params) {
     }
 
     // OUTLET REDEEMED RELEVANCE
-    //if (val.analytics &&
-     // val.analytics.coupon_analytics &&
-     // val.analytics.coupon_analytics.coupons_redeemed) {
-    //  relevance = relevance + val.analytics.coupon_analytics.coupons_redeemed * 10;
-    //}
+    if (val.analytics &&
+      val.analytics.coupon_analytics &&
+      val.analytics.coupon_analytics.coupons_redeemed) {
+      relevance = relevance + val.analytics.coupon_analytics.coupons_redeemed * 10;
+    }
 
     // SHOULD FIX THIS LATER
-    //if (val.basics && val.basics.featured) {
-    //  relevance = relevance + 1000000;
-   // }
+    if (val.basics && val.basics.featured) {
+      relevance = relevance + 1000000;
+    }
 
     // OUTLET GENERATED RELEVANCE
-    //if (val.analytics &&
-    //  val.analytics.coupon_analytics &&
-    //  val.analytics.coupon_analytics.coupons_generated) {
-    //  relevance = relevance + val.analytics.coupon_analytics.coupons_generated;
-    //}
+    if (val.analytics &&
+      val.analytics.coupon_analytics &&
+      val.analytics.coupon_analytics.coupons_generated) {
+      relevance = relevance + val.analytics.coupon_analytics.coupons_generated;
+    }
 
     // CURRENT OFFERS RELEVANCE
     if (val.offers && val.offers.length > 1) {
@@ -289,9 +292,6 @@ function pick_outlet_fields(params) {
     }
 
     params.outlets = _.map(params.outlets, function(item) {
-      if(item.outlet_meta.status === 'archived' || item.outlet_meta.status === 'draft') {
-        return false;        
-      }
       var massaged_item = {};
       massaged_item._id = item._id;
       massaged_item.name = item.basics.name;
@@ -310,16 +310,15 @@ function pick_outlet_fields(params) {
       }
 
       if (item.photos && item.photos.logo) {
-        massaged_item.logo = 'https://s3-us-west-2.amazonaws.com/retwyst-merchants/retwyst-outlets/' + item._id + '/' + item.photos.logo;
+        massaged_item.logo = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + item._id + '/' + item.photos.logo;
       }
       if (item.photos && item.photos.background) {
-        massaged_item.background = 'https://s3-us-west-2.amazonaws.com/retwyst-merchants/retwyst-outlets/' + item._id + '/' + item.photos.background;
+        massaged_item.background = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + item._id + '/' + item.photos.background;
       }
       massaged_item.open_next = RecoHelper.opensAt(item.business_hours);
-      
+
       return massaged_item;
     });
-    params.outlets = _.compact(params.outlets);
 
     deferred.resolve(params);
   });
@@ -341,6 +340,9 @@ function massage_offers(params) {
       }
 
       params.outlets = _.map(params.outlets, function(item) {
+        if(item.outlet_meta.status === 'archived' || item.outlet_meta.status === 'draft') {
+          return false;        
+        }
         item = add_user_coupons(
           pick_offer_fields(
             select_relevant_checkin_offer(item), params.user._id, params.query.date, params.query.time), coupon_map && coupon_map[item._id] && coupon_map[item._id].coupons);
@@ -362,7 +364,7 @@ function massage_offers(params) {
     });
   } else {
     params.outlets = _.map(params.outlets, function(item) {
-      item = pick_offer_fields(select_relevant_checkin_offer(item), params.user._id, params.query.date, params.query.time);
+      item = pick_offer_fields(select_relevant_checkin_offer(item), params.user._id);
       return item;
     });
     deferred.resolve(params);
@@ -374,7 +376,7 @@ function massage_offers(params) {
 
     var checkins = (item.recco && item.recco.checkins || 0);
     var returned = false;
-    
+
     // SORT BY THE EVENT COUNT
     item.offers = _.sortBy(item.offers, function(offer) {
       if (offer.offer_type === 'checkin') {
@@ -387,6 +389,24 @@ function massage_offers(params) {
         return 0;
       }
     });
+
+    // AND THEN PICK THE FIRST ONE
+    // item.offers = _.filter(item.offers, function(offer) {
+    //   if (offer.offer_type === 'checkin' && offer.rule && offer.rule.event_count) {
+    //     if (checkins < offer.rule.event_count && !returned) {
+    //       returned = true;
+    //       return true;
+    //     } else {
+    //       return false;
+    //     }
+    //   } else {
+    //     if (offer.offer_type === 'winback' || offer.offer_type === 'birthday') {
+    //       return false;
+    //     } else {
+    //       return true;
+    //     }
+    //   }
+    // });
 
     return item;
   }
@@ -412,7 +432,7 @@ function massage_offers(params) {
         coupon.available_now = true;
 
         _.each(item.offers, function(offer) {
-            if(offer._id.toString() === itemd.issued_for.toString()) {
+            if(offer._id && itemd.issued_for && offer._id.toString() === itemd.issued_for.toString()) {
                 coupon.available_now = offer.available_now;
                 if(!coupon.available_now) {
                   coupon.available_next = offer.available_next;
@@ -421,7 +441,8 @@ function massage_offers(params) {
 
             }
         });
-        if (coupon.lapse_date <= new Date()) {
+        
+        if (new Date(coupon.lapse_date) <= new Date()) {
           return false;
         } else {
           return coupon;
@@ -524,6 +545,7 @@ function massage_offers(params) {
         
         // massaged_offer.applicability = offer.actions.reward.applicability;
         // massaged_offer.valid_days = offer.actions.reward.valid_days;
+        console.log(massaged_offer.next)
         if(massaged_offer.next<=0) {
           return false;
         }
