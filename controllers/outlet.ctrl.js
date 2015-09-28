@@ -243,19 +243,19 @@ function massage_offers(params) {
       params.outlet = add_user_coupons(
         pick_offer_fields(
           select_relevant_checkin_offer(params.outlet), params.user._id, params.query.date, params.query.time), coupon_map && coupon_map[params.outlet._id] && coupon_map[params.outlet._id].coupons);
-      param.outlet.offers = _.sortBy(param.outlet.offers, function(offer) {
-          item.offers = _.sortBy(item.offers, function(offer) {
-            if(offer.type === 'coupon') {
-              return -100;
-            } else if(offer.offer_type === 'pool') {
-              return -50;
-            } else if(offer.next) {
-              return offer.next;
-            } else {
-              return 100;
-            }
-          });
-        });
+      params.outlet.offers = _.sortBy(params.outlet.offers, function(offer) {
+          
+        if(offer.type === 'coupon') {
+          return -100;
+        } else if(offer.offer_type === 'pool') {
+          return -50;
+        } else if(offer.next) {
+          return offer.next;
+        } else {
+          return 100;
+        }
+          
+      });
       deferred.resolve(params);
 
     });
@@ -337,7 +337,7 @@ function massage_offers(params) {
 
             }
         });
-        if (coupon.lapse_date <= new Date()) {
+        if (new Date(coupon.lapse_date) <= new Date()) {
           return false;
         } else {
           return coupon;

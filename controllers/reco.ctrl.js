@@ -413,7 +413,7 @@ function massage_offers(params) {
 
             }
         });
-        if (coupon.lapse_date <= new Date()) {
+        if (new Date(coupon.lapse_date) <= new Date()) {
           return false;
         } else {
           return coupon;

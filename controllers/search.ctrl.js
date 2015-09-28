@@ -442,13 +442,13 @@ function massage_offers(params) {
             }
         });
         
-        if (coupon.lapse_date <= new Date()) {
+        if (new Date(coupon.lapse_date) <= new Date()) {
           return false;
         } else {
           return coupon;
         }
       });
-      coupon_map = _.compact(coupon);
+      coupon_map = _.compact(coupon_map);
       item.offers = item.offers.concat(coupon_map);
     }
     return item;
