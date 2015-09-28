@@ -50,6 +50,9 @@
 				</div>
 				<div class='col-xs-12 col-md-6 jumbotron'>
 					<div ng-if='show_vouchers'>
+						<div ng-if='!show_msg' class='alert alert-warning'>
+							<h4>No matching vouchers found</h4>
+						</div>
 						<div class='col-xs-12 well well-lg' ng-repeat='voucher in user_vouchers'>
 							<legend>{{voucher.code}}</legend>
 							<h2>{{voucher.header}}</h2>
