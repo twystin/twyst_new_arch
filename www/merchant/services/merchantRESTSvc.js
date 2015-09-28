@@ -173,6 +173,70 @@ angular.module('merchantApp')
 				return deferred.promise;
 			}
 
+			merchantRESTSvc.checkinUser = function(req_obj) {
+				var deferred = Q.defer();
+				var token = $cookies.get('token');
+				$http.post('/api/v4/checkin/panel?token=' + token, req_obj)
+					.then(function(data) {
+						if(data.data.response) {
+							deferred.resolve(data.data);
+						} else {
+							deferred.reject(data.data);
+						}
+					}, function(err) {
+						deferred.reject(err);
+					});
+				return deferred.promise;
+			}
+
+			merchantRESTSvc.getVoucherByCode = function(outlet_id, code) {
+				var deferred = Q.defer();
+				var token = $cookies.get('token');
+				$http.get('/api/v4/outlets/' + outlet_id + '/code/' + code + "?token=" + token)
+					.then(function(data) {
+						if(data.data.response) {
+							deferred.resolve(data.data);
+						} else {
+							deferred.reject(data.data);
+						}
+					}, function(err) {
+						deferred.reject(err);
+					});
+				return deferred.promise;
+			}
+
+			merchantRESTSvc.getVouchersByPhone = function(outlet_id, phone) {
+				var deferred = Q.defer();
+				var token = $cookies.get('token');
+				$http.get('/api/v4/outlets/' + outlet_id + '/phone/' + phone + '?token=' + token)
+					.then(function(data) {
+						if(data.data.response) {
+							deferred.resolve(data.data);
+						} else {
+							deferred.reject(data.data);
+						}
+					}, function(err) {
+						deferred.reject(err);
+					});
+				return deferred.promise;
+			}
+
+			merchantRESTSvc.redeemUserCoupon = function(outlet_id, code) {
+				var deferred = Q.defer();
+				var token = $cookies.get('token');
+				$http.post('/api/v4/outlets/redeem_user_coupon?token=' + token, {code: code, outlet_id: outlet_id})
+					.then(function(data) {
+						if(data.data.response) {
+							deferred.resolve(data.data);
+						} else {
+							deferred.reject(data.data);
+						}
+					}, function(err) {
+						deferred.reject(err);
+					});
+				return deferred.promise;
+			}
+
 			return merchantRESTSvc;
 		}
 	])

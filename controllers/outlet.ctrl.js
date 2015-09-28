@@ -6,10 +6,12 @@ var AuthHelper = require('../common/auth.hlpr.js');
 var OutletHelper = require('./helpers/outlet.hlpr.js');
 var RecoHelper = require('./helpers/reco.hlpr.js');
 var _ = require('underscore');
+var ld = require('lodash');
 var mongoose = require('mongoose');
 var Outlet = mongoose.model('Outlet');
 var User = mongoose.model('User');
 var Q = require('q');
+var ObjectId = mongoose.Types.ObjectId;
 var Cache = require('../common/cache.hlpr');
 var logger = require('tracer').colorConsole();
 
@@ -216,10 +218,10 @@ function pick_outlet_fields(params) {
     }
 
     if (params.outlet.photos && params.outlet.photos.logo) {
-      massaged_item.logo = params.outlet.photos.logo;
+      massaged_item.logo = 'https://s3-us-west-2.amazonaws.com/retwyst-merchants/retwyst-outlets/' + params.outlet._id + '/' + params.outlet.photos.logo;
     }
     if (params.outlet.photos && params.outlet.photos.background) {
-      massaged_item.background = params.outlet.photos.background;
+      massaged_item.background = 'https://s3-us-west-2.amazonaws.com/retwyst-merchants/retwyst-outlets/' + params.outlet._id + '/' + params.outlet.photos.background;
     }
     massaged_item.open_next = RecoHelper.opensAt(params.outlet.business_hours);
     params.outlet = massaged_item;
@@ -538,4 +540,246 @@ module.exports.remove = function(req, res) {
   }, function(err) {
     HttpHelper.error(res, err.data, err.message);
   });
+};
+
+module.exports.get_user_coupons = function(req, res) {
+  logger.log();
+  var token = req.query.token || null;
+  var outlet_id = req.params.outlet_id || null;
+  var phone = req.params.phone || null;
+
+  if (!token) {
+    HttpHelper.error(res, null, "Not authenticated")
+  }
+
+  if(!outlet_id) {
+    HttpHelper.error(res, null, "Outlet info required");
+  }
+
+  if(!phone) {
+    HttpHelper.error(res, null, "Customer's phone number required");
+  }
+
+  AuthHelper.get_user(token).then(function(data) {
+    
+    var user = data.data;
+    if(user.role>=6) {
+      HttpHelper.error(res, null, "Unauthorized access");
+    } else {
+      User.findOne({
+        phone: phone
+      }).exec(function(err, user) {
+
+        if(err || !user) {
+          HttpHelper.error(res, null, "No coupons found");
+        } else {
+          var filterd_coupons = _.filter(user.coupons, function(coupon) {
+            var coupon_outlets = _.map(coupon.outlets, function(outlet) {
+              return outlet.toString();
+            });
+            logger.info(coupon_outlets);
+            if(coupon.status==='active' && new Date(coupon.lapse_date) > new Date() && coupon_outlets.indexOf(outlet_id)!==-1) {
+              return true;
+            } else {
+              return false;
+            }
+          });
+          HttpHelper.success(res, filterd_coupons, "Pending coupons found!");
+        }
+      });
+    }
+  }, function(err) {
+    console.log(err);
+    HttpHelper.error(res, err, 'Couldn\'t find the user');
+  });
+}
+
+module.exports.get_coupon_by_code = function(req, res) {
+  logger.log();
+  var token = req.query.token || null;
+  var outlet_id = req.params.outlet_id || null;
+  var code = req.params.code || null;
+  var data = {};
+
+  if (!token) {
+    HttpHelper.error(res, null, "Not authenticated")
+  }
+
+  if(!outlet_id) {
+    HttpHelper.error(res, null, "Outlet info required");
+  }
+
+  if(!code) {
+    HttpHelper.error(res, null, "coupon code required");
+  }
+
+  data.token = token;
+  data.outlet_id = outlet_id;
+  data.code = code;
+
+  check_merchant_authorization(data)
+    .then(function(data) {
+      return retrieve_coupon_info(data)
+    })
+    .then(function(data) {
+      return format_response(data)
+    })
+    .then(function(data) {
+      HttpHelper.success(res, data, "Coupon found");
+    })
+    .fail(function(err) {
+      HttpHelper.error(res, err.err, err.message);
+    })
+
+  return deferred.promise;
+}
+
+
+function check_merchant_authorization(data) {
+  logger.log();
+  var deferred = Q.defer();
+  AuthHelper.get_user(data.token).then(function(new_user) {
+    var user = new_user.data;
+    if(user.role>=6) {
+      console.log(1);
+      deferred.reject({
+        err: null,
+        message: 'Unauthorized access'
+      })
+    } else {
+      var merchant_outlets = _.map(user.outlets, function(outlet) {
+        return outlet.toString();
+      });
+      console.log(merchant_outlets.indexOf(data.outlet_id), data.outlet_id);
+      if(merchant_outlets.indexOf(data.outlet_id)===-1) {
+        deferred.reject({
+          err: null,
+          message: 'Unauthorized access'
+        });
+      } else {
+        data.merchant = user;
+        deferred.resolve(data);
+      }
+    }
+  }, function(err) {
+    deferred.reject(err);
+  });
+  return deferred.promise;
+}
+
+
+function retrieve_coupon_info(data) {
+  logger.log();
+  var deferred = Q.defer();
+  User.findOne({
+    'coupons.code': data.code,
+    'coupons.outlets': {
+      $in: [ObjectId(data.outlet_id)]
+    }
+  }).exec(function(err, user) {
+    if(err || !user) {
+      logger.error(err);
+      deferred.reject({
+        err: err || null,
+        message: 'Unable to find coupon'
+      });
+    } else {
+      data.user = user;
+      data.coupon = _.find(user.coupons, function(coupon) {
+        return coupon.status==='active' && new Date(coupon.lapse_date) > new Date();
+      });
+      if(data.coupon) {
+        deferred.resolve(data);
+      } else {
+        deferred.reject({
+          err: null,
+          message: "Coupon code is not valid"
+        });
+      }
+    }
+  });
+  return deferred.promise;
+}
+
+function format_response(data) {
+  logger.log(data);
+  var deferred = Q.defer();
+  var info = {};
+  info.user_id = data.user._id;
+  info.phone = data.user.phone;
+  info.coupon_id = data.coupon._id;
+  info.header = data.coupon.header;
+  info.line1 = data.coupon.line1;
+  info.description = data.coupon.description;
+  info.coupon_code = data.coupon.code;
+  info.lapse_date = data.coupon.lapse_date;
+  info.expiry_date = data.coupon.expiry_date;
+  info.terms = data.coupon.terms
+  deferred.resolve(info);
+  return deferred.promise;
+}
+
+module.exports.redeem_user_coupon = function(req, res) {
+  var token = req.query.token || null;
+  var code = ld.get(req, 'body.code');
+  var outlet_id = ld.get(req, 'body.outlet_id');
+  var user;
+  console.error(token, code, outlet_id);
+  if (!token) {
+    HttpHelper.error(res, null, "Not authenticated");
+  }
+
+  if (!code) {
+    HttpHelper.error(res, null, "No coupon code sent.");
+  }
+
+  if(!outlet_id) {
+    HttpHelper.error(res, null, "Outlet info required");
+  }
+
+  AuthHelper.get_user(token).then(function(data) {
+    user = data.data;
+    if(user.role >=6) {
+      HttpHelper.error(res, null, 'Unauthorized access detected');
+    } else {
+      User.findOne({
+        'coupons.code': code,
+        'coupons.status': 'active'
+      }, function(err, u) {
+        var coupons = u.coupons;
+        var coupon = (_.filter(coupons, {code:code}))[0]; // TODO: _.find didnt work here, find out why
+        if (!coupon) {
+          HttpHelper.error(res, null, 'Could not find this coupon for the user');
+        } else {
+          var update = {
+            $set: {
+              "coupons.$.status": "merchant_redeemed",
+              "coupons.$.used_details": {
+                used_time: new Date(),
+                used_by: u._id,
+                used_at: outlet_id,
+              }
+            }
+          }
+
+          User.findOneAndUpdate({
+              _id: u._id,
+              'coupons._id': coupon._id
+            },
+            update,
+            function(err, user) {
+              if (err) {
+                HttpHelper.error(res, null, 'Error redeeming the coupon');
+              } else {
+                HttpHelper.success(res, null, "Coupon redeemed successfully");
+              }
+            }
+          );
+          
+        }
+      });
+    }
+  }, function(err) {
+    HttpHelper.error(res, null, "Authorization failure");
+  })
 };

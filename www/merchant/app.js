@@ -80,7 +80,8 @@ angular.module('merchantApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angula
 			})
 			.state('merchant.panel', {
 				url: '/panel',
-				templateUrl: 'templates/panel/home.html'
+				templateUrl: 'templates/panel/home.html',
+				controller: 'PanelHomeController'
 			})
 			.state('merchant.profile', {
 				url: '/profile',

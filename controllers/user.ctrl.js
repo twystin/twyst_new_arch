@@ -24,32 +24,59 @@ module.exports.get_coupons = function(req, res) {
   AuthHelper.get_user(req.query.token).then(function(user) {
     var data = {};
     data.query = req.query;
-    data.coupons = user.data.coupons;
     data.user = user;
-    data.twyst_bucks = user.data.twyst_bucks;
-    filter_out_expired_and_used_coupons(data)
-      .then(function(data) {
-        return load_outlet_info_from_cache(data)
-      }).then(function(data) {
-        var twyst_bucks
-        if(data.coupons && data.coupons.length){ 
-            twyst_bucks = data.twyst_bucks;
-        }
-        else{
-            twyst_bucks = data.data.twyst_bucks;
-        }
-        var coupons = data.coupons;   
-        
-        var message = data.message;
-        var data = {};
-        data.coupons = coupons;
-        data.twyst_bucks = twyst_bucks;
-        HttpHelper.success(res, data, message);
-      })
-      .fail(function(err) {
-        console.log(err)
-        HttpHelper.error(res, err, 'Couldn\'t find the user coupons');
-      });
+    
+    if (user.data.role >= 6) {
+      data.coupons = user.data.coupons;
+      data.twyst_bucks = user.data.twyst_bucks;
+      filter_out_expired_and_used_coupons(data)
+        .then(function(data) {
+          return load_outlet_info_from_cache(data)
+        }).then(function(data) {
+          var twyst_bucks
+          if(data.coupons && data.coupons.length){ 
+              twyst_bucks = data.twyst_bucks;
+          }
+          else{
+              twyst_bucks = data.data.twyst_bucks;
+          }
+          var coupons = data.coupons;   
+          
+          var message = data.message;
+          var data = {};
+          data.coupons = coupons;
+          data.twyst_bucks = twyst_bucks;
+          HttpHelper.success(res, data, message);
+        })
+        .fail(function(err) {
+          console.log(err)
+          HttpHelper.error(res, err, 'Couldn\'t find the user coupons');
+        });
+    } else {
+      var phone_number = req.query.phone || null;
+
+      if(!phone_number) {
+        HttpHelper.error(res, null, "Phone number required");
+      }
+
+      data.phone_number = phone_number;
+      get_coupons_for_user(data)
+        .then(function(data) {
+          return filter_out_expired_and_used_coupons(data);
+        }).then(function(data) {
+          return load_outlet_info_from_cache(data)
+        }).then(function(data) {
+          console.log(data.coupons);
+          var coupons = data.coupons;
+          var data = {};
+          data.coupons = coupons;
+          HttpHelper.success(res, data, 'message');
+        })
+        .fail(function(err) {
+          console.log(err);
+          HttpHelper.error(res, err, 'Couldn\'t find the user coupons');
+        });
+    }
   }, function(err) {
     HttpHelper.error(res, err, 'Couldn\'t find the user');
   });
@@ -104,11 +131,47 @@ module.exports.update_friends = function(req, res) {
   });
 };
 
+function get_coupons_for_user(data) {
+  logger.log();
+  var deferred = Q.defer();
+  
+  User.findOne({
+    phone: data.phone_number
+  }).exec(function(err, user) {
+    if(err || !user) {
+      logger.log(err);
+      deferred.reject({
+        data: null,
+        message: 'Unable to load coupons for this number'
+      });
+    } else {
+      user = user.toJSON();
+      var merchant_outlets = _.map(data.user.data.outlets, function(outlet) {
+        return outlet.toString(); 
+      });
+      var filtered_coupons = _.filter(user.coupons, function(coupon) {
+        var coupon_outlets = _.map(coupon.outlets, function(outlet) { 
+          return outlet.toString(); 
+        });
+        var outlet_match = _.find(coupon_outlets, function(outlet) {
+          return merchant_outlets.indexOf(outlet)!==-1;
+        });
+        if(outlet_match) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+      deferred.resolve(data);
+    }
+  });
+
+  return deferred.promise;
+}
 
 function filter_out_expired_and_used_coupons(data) {
   logger.log();
   var deferred = Q.defer();
-  
   data.coupons = _.filter(data.coupons, function(coupon) {
     if(_.has(coupon, 'status') && (coupon.status === 'active' && coupon.expiry_date && new Date(coupon.expiry_date) > new Date()) 
         && ( coupon.coupon_source === 'QR' || coupon.coupon_source === 'PANEL' || coupon.coupon_source === 'POS' 
@@ -125,7 +188,6 @@ function filter_out_expired_and_used_coupons(data) {
 function load_outlet_info_from_cache(data) {
   logger.log();
   var deferred = Q.defer();
-
   Cache.get('outlets', function(err, reply) {
 
     if(err || !reply) {
@@ -266,3 +328,4 @@ module.exports.update_location = function(req, res) {
     HttpHelper.error(res, err, "Could not find user");
   });
 };
+
