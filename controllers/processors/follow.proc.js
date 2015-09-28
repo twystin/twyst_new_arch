@@ -36,7 +36,7 @@ module.exports.process = function(data) {
         console.log(err);
         deferred.reject('Unable to process event');
       }
-      else if(!events.length){
+      else if(events.length){
         passed_data.already_followed = true;
       }
       User.findOneAndUpdate({

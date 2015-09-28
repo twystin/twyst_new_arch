@@ -224,7 +224,7 @@ function calculate_relevance(params) {
 
     // OUTLET DISTANCE RELEVANCE
     if (val.recco.distance) {
-      relevance = relevance + val.recco.distance;
+      relevance = relevance - (val.recco.distance * 1500);
     }
 
     // OUTLET OPEN RELEVANCE
@@ -340,9 +340,23 @@ function massage_offers(params) {
       }
 
       params.outlets = _.map(params.outlets, function(item) {
+        if(item.outlet_meta.status === 'archived' || item.outlet_meta.status === 'draft') {
+          return false;        
+        }
         item = add_user_coupons(
           pick_offer_fields(
             select_relevant_checkin_offer(item), params.user._id, params.query.date, params.query.time), coupon_map && coupon_map[item._id] && coupon_map[item._id].coupons);
+        item.offers = _.sortBy(item.offers, function(offer) {
+          if(offer.type === 'coupon') {
+            return -100;
+          } else if(offer.offer_type === 'pool') {
+            return -50;
+          } else if(offer.next) {
+            return offer.next;
+          } else {
+            return 100;
+          }
+        });
         return item;
       });
       deferred.resolve(params);
@@ -428,8 +442,13 @@ function massage_offers(params) {
             }
         });
         
-        return coupon;
+        if (coupon.lapse_date <= new Date()) {
+          return false;
+        } else {
+          return coupon;
+        }
       });
+      coupon_map = _.compact(coupon);
       item.offers = item.offers.concat(coupon_map);
     }
     return item;
@@ -457,7 +476,7 @@ function massage_offers(params) {
         massaged_offer.meta = offer.actions && offer.actions.reward && offer.actions.reward.reward_meta || offer.meta;
         if(offer.offer_type === 'pool') {         
           massaged_offer.available_now = true;          
-          massaged_offer.source_name = offer.lapsed_user_name;
+          massaged_offer.lapsed_coupon_source = offer.lapsed_coupon_source;
           massaged_offer.code = offer.code;
           massaged_offer.meta.reward_type = offer.meta.reward_type.type;
         }

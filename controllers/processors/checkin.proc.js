@@ -109,11 +109,10 @@ function validate_qr(data) {
 
 function already_checked_in(data) {
   logger.log();
-  var SIX_HOURS = new Date(Date.now() - 21600000);
+  var THREE_HOURS = new Date(Date.now() - 10800000);
   var FIVE_MINS = new Date(Date.now() - 300000);
 
   var deferred = Q.defer();
-  deferred.resolve(data); // TEMPORARY
 
   var user_id = _.get(data, 'user._id');
   var outlet_id = _.get(data, 'outlet._id');
@@ -122,7 +121,7 @@ function already_checked_in(data) {
     'event_user': user_id,
     'event_type': 'checkin',
     'event_date': {
-      $gt: SIX_HOURS
+      $gt: THREE_HOURS
     }
   }, function(err, events) {
     if (err) {
@@ -143,9 +142,12 @@ function already_checked_in(data) {
 
       if (too_soon) {
         deferred.reject('Checked in at another outlet less than 5 minutes ago!');
+      } else {
+        deferred.resolve(data); 
       }
+    } else {
+      deferred.resolve(data);
     }
-    deferred.resolve(data);
   })
 
   return deferred.promise;
@@ -175,12 +177,14 @@ function check_and_create_coupon(data) {
   logger.log();
   var deferred = Q.defer();
   var passed_data = data;
-
+  var today = new Date();
   var user_id = _.get(data, 'user._id');
   var outlet_id = _.get(data, 'outlet._id');
 
   var offers = _.get(data, 'outlet.offers');
-  var sorted_checkin_offers = _.filter(offers, {'offer_status': 'active'})
+  var sorted_checkin_offers = _.filter(offers, function(offer) {
+    return offer.offer_status==='active' && offer.offer_start_date<=today && offer.offer_end_date>=today;
+  });
 
   sorted_checkin_offers = _.sortBy(_.filter(sorted_checkin_offers, {
     'offer_type': 'checkin'
@@ -274,16 +278,6 @@ function create_coupon(offer, user, outlet) {
       });
     }
   });
-
-  // User.findOneAndUpdate({
-  //   _id: user
-  // }, update, function(err, user) {
-  //   console.log('push coupon', err, user);
-  //   if (err || !user) {
-  //     deferred.reject('Could not update user');
-  //   } else
-  //     deferred.resolve(user);
-  // });
 
   return deferred.promise;
 }
