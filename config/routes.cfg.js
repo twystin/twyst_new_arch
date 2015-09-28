@@ -8,9 +8,9 @@ var passport = require('passport');
 module.exports = function(app) {
 
   (function WepAppRoutes() {
-    app.get('', function(req, res) { res.redirect('/home') });
-    app.get('/', function(req, res) { res.redirect('/home') });
-  });
+    app.get('', function(req, res) { res.redirect('/home'); });
+    app.get('/', function(req, res) { res.redirect('/home'); });
+  })();
 
   (function AccountRoutes() {
     var AccountCtrl = require('../controllers/account.ctrl');
@@ -27,6 +27,7 @@ module.exports = function(app) {
   })();
 
   (function LegacyRoutes() {
+    app.all('/api/v1/*', function(req, res) { res.redirect('http://staging/twyst.in' + req.url) });
     app.all('/api/v2/*', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
     app.all('/api/v3/*', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
   })();

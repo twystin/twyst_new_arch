@@ -25,6 +25,14 @@ angular.module('merchantApp')
         console.log('err', err);
       })
 
+      $scope.toggleStatus = function() {
+        if($scope.offer.offer_status==='active') {
+          $scope.offer.offer_status = 'draft';
+        } else {
+          $scope.offer.offer_status = 'active';
+        }
+      }
+
       $scope.today = new Date();
       $scope.max_date = new Date($scope.today.getTime() + (2 * 365 * 24 * 60 * 60 * 1000));
       $scope.today.setMinutes(0);

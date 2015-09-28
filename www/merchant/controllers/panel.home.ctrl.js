@@ -53,6 +53,7 @@ angular.module('merchantApp')
 						}, function(err) {
 							$scope.search = {};
 							console.log('err', err);
+							toastr.error("Unable to find voucher");
 						})
 				}
 			}
@@ -111,7 +112,7 @@ angular.module('merchantApp')
 							$scope.show_vouchers = true;
 							$scope.user_vouchers = [data.data];
 							if(!$scope.user_vouchers.length) {
-								$scope.show_msg = true;
+								$scope.show_msg = false;
 								toastr.warning("No vouchers found");
 							} else {
 								toastr.success(data.message);
