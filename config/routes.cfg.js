@@ -6,6 +6,12 @@ var mustBe = require('mustbe').routeHelpers();
 var mongoose = require('mongoose');
 var passport = require('passport');
 module.exports = function(app) {
+
+  (function WepAppRoutes() {
+    app.get('', function(req, res) { res.redirect('/home') });
+    app.get('/', function(req, res) { res.redirect('/home') });
+  });
+
   (function AccountRoutes() {
     var AccountCtrl = require('../controllers/account.ctrl');
     app.post('/api/v4/auth/register', AccountCtrl.register_merchant);
