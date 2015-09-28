@@ -38,6 +38,13 @@
                 <input type='text' class='form-control' ng-model='outlet.contact.location.pin'>
               </div>
             </div>
+            <div class='form-group'>
+              <div class='col-md-4 col-md-offset-2'>
+                <span class='fa fa-lg fa-check-square' ng-click='toggleStatus()' ng-if='outlet.outlet_meta.status==="active"'></span>
+                <span class='fa fa-lg fa-square-o' ng-click='toggleStatus()' ng-if='outlet.outlet_meta.status!=="active"'></span>
+                <label for='city'>Is Active?</label>
+              </div>
+            </div>
           </fieldset>
         </form>
       </div>

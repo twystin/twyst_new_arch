@@ -36,6 +36,14 @@ angular.module('merchantApp')
           });
       }
 
+      $scope.toggleStatus = function() {
+        if($scope.outlet.outlet_meta.status==='active') {
+          $scope.outlet.outlet_meta.status = 'draft';
+        } else {
+          $scope.outlet.outlet_meta.status = 'active';
+        }
+      }
+
       $scope.addNumber = function(field_name) {
         if (!$scope.outlet.contact.phones[field_name]) {
           $scope.outlet.contact.phones[field_name] = [];
