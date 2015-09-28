@@ -2,7 +2,7 @@
 /*jslint node: true */
 
 
-var _ = require('lodash');
+var _ = require('underscore');
 var mongoose = require('mongoose');
 var Q = require('q');
 var logger = require('tracer').colorConsole();
