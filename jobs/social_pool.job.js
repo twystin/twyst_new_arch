@@ -12,6 +12,7 @@ var User = mongoose.model('User');
 var Event = mongoose.model('Event')
 var Cache = require('../common/cache.hlpr');
 var AuthHelper = require('../common/auth.hlpr.js');
+var RecoHelper = require('../controllers/helpers/reco.hlpr');
 
 exports.runner = function(agenda) {
     agenda.define('social_pool', function(job, done) {
@@ -21,11 +22,14 @@ exports.runner = function(agenda) {
             "role": {
                 $in: [6, 7]
             },
-            "coupons.coupon_source": "QR",
-            "coupons.status": "active",
             "coupons.lapse_date": {
                 $lte: new Date()
-            }
+            },
+            "coupons.expiry_date": {
+                $gt: new Date()
+            },
+            "coupons.coupon_source": {$in: ["QR", "PANEL", "MRL", "POS", "BATCH"]},
+            "coupons.status": "active"
         }).populate('friends').exec(function(err, users) {
             logger.log();
             if (err || users.length === 0) {
