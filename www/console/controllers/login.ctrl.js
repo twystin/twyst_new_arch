@@ -10,12 +10,16 @@ angular.module('consoleApp')
 			$scope.login = function() {
 				consoleRESTSvc.login($scope.user)
 					.then(function(res) {
-						$cookies.put('token', res.data.data.data.token);
-						$rootScope.token = res.data.data.data.token;
-						toastr.success("Logged in successfully");
-						$state.go('console.home', {}, {
-							reload: true
-						});
+						if(res.data.data.data.is_admin) {
+							$cookies.put('token', res.data.data.data.token);
+							$rootScope.token = res.data.data.data.token;
+							toastr.success("Logged in successfully");
+							$state.go('console.home', {}, {
+								reload: true
+							});
+						} else {
+							toastr.error("Not authorized", "Access Denied");
+						}
 					}, function(err) {
 						if(err.message) {
 							toastr.error(err.message, "Error");

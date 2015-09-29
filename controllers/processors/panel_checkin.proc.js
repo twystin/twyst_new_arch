@@ -4,6 +4,7 @@ var _ = require('lodash');
 var Q = require('q');
 
 var mongoose = require('mongoose');
+var dateFormat = require('dateformat')
 require('../../models/qr_code.mdl');
 require('../../models/event.mdl');
 require('../../models/user.mdl');
@@ -12,19 +13,21 @@ var Event = mongoose.model('Event');
 var User = mongoose.model('User');
 var RecoHelper = require('../helpers/reco.hlpr');
 var Cache = require('../../common/cache.hlpr');
+var http = require('http');
+var sms_push_url = "http://myvaluefirst.com/smpp/sendsms?username=twysthttp&password=twystht6&to=";
 
 module.exports.check = function(data) {
     logger.log();
     var deferred = Q.defer();
     validate_request(data)
         .then(function(data) {
-        	return already_checked_in(data);
+            return already_checked_in(data);
         })
         .then(function(data) {
             deferred.resolve(data);
         })
         .fail(function(err) {
-        	data.event_data.event_type = 'checkin';
+            data.event_data.event_type = 'checkin';
             deferred.reject(err);
         })
     return deferred.promise;
@@ -45,7 +48,7 @@ module.exports.process = function(data) {
             deferred.resolve(data);
         })
         .fail(function(err) {
-        	data.event_data.event_type = 'checkin';
+            data.event_data.event_type = 'checkin';
             deferred.reject(err);
         })
     return deferred.promise;
@@ -62,7 +65,7 @@ function validate_request(data) {
     if (!date) {
         date = new Date();
     } else {
-    	date = new Date(date);
+        date = new Date(date);
     }
 
     if (!phone || !/^[0-9]{10}$/.test(phone)) {
@@ -152,7 +155,7 @@ function check_and_create_coupon(data) {
 
     var offers = _.get(data, 'outlet.offers');
     var sorted_checkin_offers = _.filter(offers, function(offer) {
-    	return offer.offer_status === 'active' && new Date(offer.offer_start_date)<=today && new Date(offer.offer_end_date)>=today;
+        return offer.offer_status === 'active' && new Date(offer.offer_start_date) <= today && new Date(offer.offer_end_date) >= today;
     });
     sorted_checkin_offers = _.sortBy(_.filter(sorted_checkin_offers, {
         'offer_type': 'checkin'
@@ -172,12 +175,15 @@ function check_and_create_coupon(data) {
                 if (data.coupons && data.coupons.length) {
                     passed_data.user.coupons.push(data.coupons[data.coupons.length - 1]);
                 }
+                console.log(1);
+                passed_data.message = 'Check-in successful at '+ passed_data.outlet.basics.name +' on '+ formatDate(new Date(passed_data.event_data.event_meta.date)) +". Reward unlocked! Your voucher will be available on your Twyst app soon. Don't have the app? Get it now at http://twy.st/app";                
                 deferred.resolve(passed_data);
             }, function(err) {
                 deferred.reject('Could not create coupon' + err);
             })
         } else if (!isNaN(matching_offer)) {
             console.log('locked_offer');
+            passed_data.message = 'Check-in successful at '+ passed_data.outlet.basics.name +' on '+ formatDate(new Date(passed_data.event_data.event_meta.date)) +'. You are '+ matching_offer +' check-in(s) away from your next reward. Find '+ passed_data.outlet.basics.name + ' on Twystat http://twy.st/app';
             data.checkins_to_go = matching_offer;
             deferred.resolve(data);
         } else {
@@ -193,7 +199,7 @@ function find_matching_offer(events, offers) {
     var count, match, event_start, event_end, start_date, event_date;
     _.each(offers, function(offer) {
         var start_date = new Date(offer.offer_start_date);
-        var end_date   = new Date(offer.offer_end_date);
+        var end_date = new Date(offer.offer_end_date);
         checkins = 1; // TO COUNT THIS CHECKIN AS WELL
         _.each(events, function(event) {
             if (event.event_date.getTime() >= start_date.getTime() && event.event_date.getTime() <= end_date.getTime()) {
@@ -211,7 +217,7 @@ function find_matching_offer(events, offers) {
         match = _.get(offers[i], 'rule.event_match');
         event_start = _.get(offers[i], 'rule.event_start');
         event_end = _.get(offers[i], 'rule.event_end');
-        
+
         if (match === 'on every') {
             console.log('on every', offers[i].checkin_count, count, event_start, event_end);
             if (offers[i].checkin_count % count === 0 && offers[i].checkin_count >= event_start && offers[i].checkin_count <= event_end) {
@@ -301,7 +307,7 @@ function create_coupon(offer, user, outlet) {
         issued_by: outlet,
         outlets: offer.offer_outlets
     }
-
+    console.log(coupon);
     User.findOne({
         _id: user
     }).exec(function(err, user) {
@@ -352,7 +358,36 @@ function update_checkin_counts(data) {
 }
 
 function send_sms(data) {
-  var deferred = Q.defer();
-  deferred.resolve(data);
-  return deferred.promise;
+    var deferred = Q.defer();
+    deferred.resolve(data);
+    var from;
+    var message = data.message;
+    var phone = data.event_data.event_meta.phone;
+    send();
+    function send() {
+        from = from || 'TWYSTR';
+        console.log(from, phone, message);
+        var send_sms_url = sms_push_url + phone + "&from=" + from + "&udh=0&text=" + message;
+        http.get(send_sms_url, function(res) {
+            console.log(res.statusCode);
+            var body = '';
+            res.on('data', function(chunk) {
+                // append chunk to your data 
+                body += chunk;
+            });
+
+            res.on('end', function() {
+                console.log(body);
+            });
+
+            res.on('error', function(e) {
+                console.log("Error message: " + e.message)
+            });
+        });
+    }
+    return deferred.promise;
 }
+
+var formatDate = function(date) {
+    return dateFormat(date, "dd mmm yyyy");
+};

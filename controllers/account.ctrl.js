@@ -31,7 +31,12 @@ module.exports.login = function(req, res) {
       return AuthHelper.get_user(data.token.token);
     })
     .then(function(data) {
-      if(data.data.role === 3 || data.data.role === 4 || data.data.role === 5) {
+      console.log('data', data);
+      if(data.data.role===1 || data.data.role===2 || data.data.role === 3 || data.data.role === 4 || data.data.role === 5) {
+        if (data.data.role===1 || data.data.role===2) {
+          data.data.is_admin = true;
+        }
+        console.log(data);
         HttpHelper.success(res, data, "Logged in successfully");  
       }
       else{
