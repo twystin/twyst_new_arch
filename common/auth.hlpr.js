@@ -60,7 +60,7 @@ module.exports.get_user = function(token) {
               user.twyst_friends = twyst_friends;
               user.friends = friends;
             }
-            else if(user.role === 3 || user.role === 4 || user.role === 5){
+            else if(user.role === 1 || user.role === 2 || user.role === 3 || user.role === 4 || user.role === 5){
               user.token = token
             }
             
