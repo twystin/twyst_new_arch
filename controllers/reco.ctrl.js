@@ -399,6 +399,7 @@ function massage_offers(params) {
         coupon.line2 = itemd && itemd.line2;
         coupon.lapse_date = itemd && itemd.lapse_date;
         coupon.expiry = itemd && itemd.expiry_date;
+        coupon.issued_at = itemd && itemd.issued_at;
         coupon.meta = {};
         coupon.meta.reward_type = itemd && itemd.meta && itemd.meta.reward_type.type;
         coupon.description = itemd.description;
@@ -415,10 +416,10 @@ function massage_offers(params) {
 
             }
         });
-        if (new Date(coupon.lapse_date) <= new Date() && coupon.issued_at < new Date(Date.now() - 10800000)) {
-          return false;
-        } else {
+        if (new Date(coupon.lapse_date) >= new Date() && new Date(coupon.issued_at) < new Date(Date.now() - 10800000)) {
           return coupon;
+        } else {
+          return false;
         }
       });
       coupon_map = _.compact(coupon_map);
