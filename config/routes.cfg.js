@@ -26,12 +26,6 @@ module.exports = function(app) {
 
   })();
 
-  (function LegacyRoutes() {
-    app.all('/api/v1/*', function(req, res) { res.redirect('http://staging/twyst.in' + req.url) });
-    app.all('/api/v2/*', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
-    app.all('/api/v3/*', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
-  })();
-
   (function RecoRoutes() {
     var RecoCtrl = require('../controllers/reco.ctrl');
     app.get('/api/v4/recos', RecoCtrl.get);
@@ -119,6 +113,13 @@ module.exports = function(app) {
   (function SearchRoutes() {
     var SearchCtrl = require('../controllers/search.ctrl');
     app.get('/api/v4/search', SearchCtrl.search);
+  })();
+
+  (function LegacyRoutes() {
+    app.all('/:shortUrl(*)', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
+    app.all('/api/v1/*', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
+    app.all('/api/v2/*', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
+    app.all('/api/v3/*', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
   })();
 };
 
