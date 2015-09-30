@@ -687,7 +687,7 @@ function retrieve_coupon_info(data) {
       data.coupon = _.find(user.coupons, function(coupon) {
         return coupon.code === data.code && coupon.status==='active' && new Date(coupon.lapse_date) > new Date();
       });
-  
+      
       if(data.coupon) {
         deferred.resolve(data);
       } else {
@@ -709,6 +709,8 @@ function format_response(data) {
   info.coupon_id = data.coupon._id;
   info.header = data.coupon.header;
   info.line1 = data.coupon.line1;
+  info.line2 = data.coupon.line2;
+  info.coupon_code = data.coupon.code;
   info.description = data.coupon.description;
   info.coupon_code = data.coupon.code;
   info.lapse_date = data.coupon.lapse_date;
