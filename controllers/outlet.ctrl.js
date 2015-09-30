@@ -330,7 +330,7 @@ function massage_offers(params) {
         coupon.available_now = true;
 
         _.each(item.offers, function(offer) {
-            if(offer._id.toString() === itemd.issued_for.toString()) {
+            if(offer._id && itemd.issued_for && offer._id.toString() === itemd.issued_for.toString()) {
                 coupon.available_now = offer.available_now;
                 if(!coupon.available_now) {
                   coupon.available_next = offer.available_next;
