@@ -173,9 +173,9 @@ function filter_out_expired_and_used_coupons(data) {
   logger.log();
   var deferred = Q.defer();
   data.coupons = _.filter(data.coupons, function(coupon) {
-    if(_.has(coupon, 'status') && (coupon.status === 'active' && coupon.expiry_date && new Date(coupon.expiry_date) > new Date()) 
+    if(_.has(coupon, 'status') && (coupon.status === 'active' && coupon.lapse_date && new Date(coupon.lapse_date) > new Date()) 
         && ( coupon.coupon_source === 'QR' || coupon.coupon_source === 'PANEL' || coupon.coupon_source === 'POS' 
-            || coupon.coupon_source === 'BATCH') && coupon.issued_at<new Date(Date.now() - 10800000)) {
+            || coupon.coupon_source === 'BATCH') && new Date(coupon.issued_at) < new Date(Date.now() - 10800000)) {
       return true;
     } else {
       return false;

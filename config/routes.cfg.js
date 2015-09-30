@@ -116,10 +116,11 @@ module.exports = function(app) {
   })();
 
   (function LegacyRoutes() {
-    app.all('/:shortUrl(*)', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
     app.all('/api/v1/*', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
     app.all('/api/v2/*', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
     app.all('/api/v3/*', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
+    app.all('/:shortUrl(*)', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
   })();
 };
+
 

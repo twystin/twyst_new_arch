@@ -340,8 +340,10 @@ function massage_offers(params) {
           if(offer.type === 'coupon') {
             return -100;
           } else if(offer.offer_type === 'pool') {
+            return -75;
+          } else if(offer.offer_type === 'offer') {
             return -50;
-          } else if(offer.next) {
+          }else if(offer.next) {
             return offer.next;
           } else {
             return 100;
@@ -413,7 +415,7 @@ function massage_offers(params) {
 
             }
         });
-        if (new Date(coupon.lapse_date) <= new Date()) {
+        if (new Date(coupon.lapse_date) <= new Date() && coupon.issued_at < new Date(Date.now() - 10800000)) {
           return false;
         } else {
           return coupon;
