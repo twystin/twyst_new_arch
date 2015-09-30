@@ -84,7 +84,7 @@ angular.module('merchantApp')
 							if(_.has(res, 'data.code')) {
 								success_msg = "Checkin successfull, User also unlocked a coupon";
 							} else {
-								success_msg = "CHeckin successfull";
+								success_msg = "Checkin successfull";
 							}
 							toastr.success(success_msg);
 						}, function(err) {
@@ -103,7 +103,7 @@ angular.module('merchantApp')
 			$scope.getVoucherByCode = function() {
 				$scope.show_vouchers = false;
 				$scope.show_msg = false;
-				if (!$scope.search || !$scope.search.code) {
+				if (!$scope.search || !$scope.search.length === 6  ) {
 					toastr.error("Please fill-in the voucher code", "Error");
 				} else {
 					merchantRESTSvc.getVoucherByCode($scope.choosen_outlet, $scope.search.code)
@@ -111,15 +111,19 @@ angular.module('merchantApp')
 							$scope.search = {};
 							$scope.show_vouchers = true;
 							$scope.user_vouchers = [data.data];
+							console.log($scope.user_vouchers)
 							if(!$scope.user_vouchers.length) {
-								$scope.show_msg = false;
-								toastr.warning("No vouchers found");
+								$scope.show_msg = true;
+								toastr.warning("No active voucher found");
 							} else {
+
 								toastr.success(data.message);
 							}
 							console.log('data', data);
 						}, function(err) {
+							$scope.show_msg = true;
 							$scope.search = {};
+							toastr.warning("No active vouchers found");
 							console.log('err', err);
 						})
 				}
