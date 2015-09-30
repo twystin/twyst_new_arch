@@ -13,6 +13,7 @@ var Event = mongoose.model('Event');
 var User = mongoose.model('User');
 var RecoHelper = require('../helpers/reco.hlpr');
 var Cache = require('../../common/cache.hlpr');
+var AccountHelper = require('../helpers/account.hlpr');
 var http = require('http');
 var sms_push_url = "http://myvaluefirst.com/smpp/sendsms?username=twysthttp&password=twystht6&to=";
 
@@ -89,7 +90,18 @@ function validate_request(data) {
         if (err) {
             logger.error(err);
             deferred.reject('The customer in not on Twyst');
-        } else { // create noew user and checkin if not in twyst
+        } 
+        else if(!user){ // create new user and checkin 
+            AccountHelper.create_user_account(phone).then(function(data) {                
+                passed_data.user = data.data.user;
+                deferred.resolve(passed_data);
+            
+            }, function(err) {
+                console.log(err)
+                deferred.reject('could not create user')
+            })
+        }
+        else{
             passed_data.user = user;
             deferred.resolve(passed_data);
         }
@@ -307,7 +319,7 @@ function create_coupon(offer, user, outlet) {
         issued_by: outlet,
         outlets: offer.offer_outlets
     }
-    console.log(coupon);
+    
     User.findOne({
         _id: user
     }).exec(function(err, user) {
@@ -366,7 +378,7 @@ function send_sms(data) {
     send();
     function send() {
         from = from || 'TWYSTR';
-        console.log(from, phone, message);
+        console.log(message);
         var send_sms_url = sms_push_url + phone + "&from=" + from + "&udh=0&text=" + message;
         http.get(send_sms_url, function(res) {
             console.log(res.statusCode);

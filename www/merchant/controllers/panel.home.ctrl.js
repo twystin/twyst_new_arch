@@ -82,7 +82,7 @@ angular.module('merchantApp')
 							$scope.checkin = {};
 							var success_msg;
 							if(_.has(res, 'data.code')) {
-								success_msg = "CHeckin successfull. New voucher earned. Will be available in 3 hours";
+								success_msg = "Checkin successfull, User also unlocked a coupon";
 							} else {
 								success_msg = "CHeckin successfull";
 							}
