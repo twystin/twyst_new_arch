@@ -577,7 +577,7 @@ module.exports.get_user_coupons = function(req, res) {
             var coupon_outlets = _.map(coupon.outlets, function(outlet) {
               return outlet.toString();
             });
-            logger.info(coupon_outlets);
+            
             if(coupon.status==='active' && new Date(coupon.lapse_date) > new Date() && coupon_outlets.indexOf(outlet_id)!==-1) {
               return true;
             } else {
@@ -671,11 +671,9 @@ function check_merchant_authorization(data) {
 function retrieve_coupon_info(data) {
   logger.log();
   var deferred = Q.defer();
+  
   User.findOne({
-    'coupons.code': data.code,
-    'coupons.outlets': {
-      $in: [ObjectId(data.outlet_id)]
-    }
+      coupons: {$elemMatch: {code: data.code}}
   }).exec(function(err, user) {
     if(err || !user) {
       logger.error(err);
@@ -684,10 +682,12 @@ function retrieve_coupon_info(data) {
         message: 'Unable to find coupon'
       });
     } else {
+      
       data.user = user;
       data.coupon = _.find(user.coupons, function(coupon) {
-        return coupon.status==='active' && new Date(coupon.lapse_date) > new Date();
+        return coupon.code === data.code && coupon.status==='active' && new Date(coupon.lapse_date) > new Date();
       });
+  
       if(data.coupon) {
         deferred.resolve(data);
       } else {
@@ -702,7 +702,6 @@ function retrieve_coupon_info(data) {
 }
 
 function format_response(data) {
-  logger.log(data);
   var deferred = Q.defer();
   var info = {};
   info.user_id = data.user._id;
