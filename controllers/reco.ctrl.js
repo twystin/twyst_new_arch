@@ -241,8 +241,16 @@ function calculate_relevance(params) {
     //}
 
     // CURRENT OFFERS RELEVANCE
-    if (val.offers && val.offers.length > 1) {
-      relevance = relevance + val.offers.length * 1000;
+    if (val.offers && val.offers.length > 1) {      
+      for(var i = 0; i < val.offers.length; i++) {
+        if(val.offers[i].offer_type === 'coupon' || val.offers[i].offer_type === 'offer') {
+          relevance = relevance +  1000;    
+        }
+        else if(val.offers[i].offer_type === 'checkin' || val.offers[i].offer_type === 'deal') {
+          relevance = relevance +  500;    
+        }
+      }
+      //relevance = relevance + val.offers.length * 1000;
     }
 
     val.recco = val.recco || {};

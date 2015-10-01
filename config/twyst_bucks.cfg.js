@@ -1,8 +1,8 @@
 module.exports.bucks_grid = [
 
-	{"event": "invite_friends", "bucks": 100, "earn": true, "update_now": true},
+	{"event": "invite_friends", "bucks": 250, "earn": true, "update_now": true},
 
-	{"event": "referral_join", "bucks": 100, "earn": true, "update_now": true},
+	{"event": "referral_join", "bucks": 250, "earn": true, "update_now": true},
 
 	{"event": "update_profile", "bucks": 200, "earn": true, "update_now": true},
 
