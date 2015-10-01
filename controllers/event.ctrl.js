@@ -249,7 +249,7 @@ function create_new(res, passed_data) {
         if(data.user.coupons.length) {
             code = data.user.coupons[data.user.coupons.length-1].code;    
         }
-        console.log('event_ctrl', event_type, data.checkins_to_go, data.user.coupons.length);
+        
         if(event_type === 'checkin'  && !data.checkins_to_go && data.user.coupons.length ) {
             header = data.user.coupons[data.user.coupons.length-1].header;
             line1 = data.user.coupons[data.user.coupons.length-1].line1;
@@ -266,7 +266,7 @@ function create_new(res, passed_data) {
         var data = {};
         data.twyst_bucks = bucks;
         if(event_type ===  'generate_coupon' || event_type == 'checkin') {
-            console.log('data fields', code, header, line1, line2, outlet_id, outlet_name, checkin_left);
+            
             data.code = code;    
             data.header = header;
             data.line1 = line1;
@@ -473,12 +473,12 @@ function create_event(data) {
   var deferred = Q.defer();
   var event = {};
   var passed_data = data;
+  if(passed_data.event_data.event_type === 'qr_checkin' || passed_data.event_data.event_type === 'panel_checkin') {
+    passed_data.event_data.event_type = 'checkin'
+  }
 
   event = _.extend(event, passed_data.event_data);
   event.event_user = passed_data.user._id;
-  if(event.event_type === 'qr_checkin' || event.event_type === 'panel_checkin') {
-    event.event_type = 'checkin'
-  }
 
   if (passed_data.outlet) {
     event.event_outlet = passed_data.outlet._id;
