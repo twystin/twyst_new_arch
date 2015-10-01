@@ -244,9 +244,7 @@ function create_new(res, passed_data) {
         }
         var bucks = data.user.twyst_bucks;
         var event_type = data.event_data.event_type;
-        if(event_type == 'qr_checkin') {
-          event_type = 'checkin'
-        }
+
         var code, header, line1, line2, outlet_id, outlet_name, checkin_left ;
         if(data.user.coupons.length) {
             code = data.user.coupons[data.user.coupons.length-1].code;    
@@ -390,6 +388,7 @@ function process_event(data) {
       deferred.resolve(passed_data);
     })
     .fail(function(err) {
+      console.log(err)
       deferred.reject('Could not process the event - ' + err);
     });
 
@@ -477,6 +476,10 @@ function create_event(data) {
 
   event = _.extend(event, passed_data.event_data);
   event.event_user = passed_data.user._id;
+  if(event.event_type === 'qr_checkin' || event.event_type === 'panel_checkin') {
+    event.event_type = 'checkin'
+  }
+
   if (passed_data.outlet) {
     event.event_outlet = passed_data.outlet._id;
   }

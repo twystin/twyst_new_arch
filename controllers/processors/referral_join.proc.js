@@ -2,8 +2,9 @@ var logger = require('tracer').colorConsole();
 var _ = require('lodash');
 var Q = require('q');
 var mongoose = require('mongoose');
-var User = mongoose.model('User')
-var Friend = mongoose.model('Friend')
+var User = mongoose.model('User');
+var Friend = mongoose.model('Friend');
+var ObjectId = mongoose.Types.ObjectId;
 
 module.exports.check = function(data) {
     logger.log();
@@ -61,7 +62,7 @@ module.exports.process = function(data) {
 
     if(friend_referred_by.friends) {
         update_referral_friend(friend_referred_by.friends, update_referral).then(function(data) {
-            update_referral_friend(user.friends, updated_user).then(function(data) {
+            update_referral_friend(user.friends_id, updated_user).then(function(data) {
                 
                 deferred.resolve({
                     data: data,
@@ -97,7 +98,7 @@ function update_referral_friend(id, referral) {
     logger.log();
     var deferred = Q.defer();
     Friend.findOneAndUpdate({
-            _id: id
+            _id: ObjectId(id)
         }, 
         referral,
         function(err, u) {
