@@ -375,7 +375,7 @@ function send_sms(data) {
     var payload = {};
     payload.from = 'TWYSTR';
     payload.message = data.message;
-    payload.phone = data.phone;
+    payload.phone = data.event_data.event_meta.phone;
     Transporter.send('sms', 'vf', payload);
     return deferred.promise;
 }
