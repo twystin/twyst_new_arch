@@ -18,7 +18,7 @@ angular.module('merchantApp')
       $scope.today.setMilliseconds(0);
 
       $scope.offer = {
-        offer_status: 'draft',
+        offer_status: 'active',
         offer_type: '',
         offer_start_date: _.clone($scope.today),
         offer_end_date: new Date($scope.today.getTime() + (2 * 30 * 24 * 60 * 60 * 1000)),

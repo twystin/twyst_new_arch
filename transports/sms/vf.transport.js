@@ -20,7 +20,7 @@ module.exports.send = function(payload) {
     "&udh=0&text=" +
     payload.message;
 
-  http.get(send_sms_url + payload, function(res) {
+  http.get(send_sms_url, function(res) {
     var body = '';
     res.on('data', function(chunk) {
       body += chunk;
