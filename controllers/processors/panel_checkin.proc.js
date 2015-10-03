@@ -15,7 +15,7 @@ var RecoHelper = require('../helpers/reco.hlpr');
 var Cache = require('../../common/cache.hlpr');
 var AccountHelper = require('../helpers/account.hlpr');
 var http = require('http');
-var sms_push_url = "http://myvaluefirst.com/smpp/sendsms?username=twysthttp&password=twystht6&to=";
+var Transporter = require('../../transports/transporter.js');
 
 module.exports.check = function(data) {
     logger.log();
@@ -187,7 +187,6 @@ function check_and_create_coupon(data) {
                 if (data.coupons && data.coupons.length) {
                     passed_data.user.coupons.push(data.coupons[data.coupons.length - 1]);
                 }
-                console.log(1);
                 passed_data.message = 'Check-in successful at '+ passed_data.outlet.basics.name +' on '+ formatDate(new Date(passed_data.event_data.event_meta.date)) +". Reward unlocked! Your voucher will be available on your Twyst app soon. Don't have the app? Get it now at http://twy.st/app";                
                 deferred.resolve(passed_data);
             }, function(err) {
@@ -370,33 +369,14 @@ function update_checkin_counts(data) {
 }
 
 function send_sms(data) {
+    logger.log();
     var deferred = Q.defer();
-    deferred.resolve(data);
-    var from;
-    var message = data.message;
-    var phone = data.event_data.event_meta.phone;
-    send();
-    function send() {
-        from = from || 'TWYSTR';
-        console.log(message);
-        var send_sms_url = sms_push_url + phone + "&from=" + from + "&udh=0&text=" + message;
-        http.get(send_sms_url, function(res) {
-            console.log(res.statusCode);
-            var body = '';
-            res.on('data', function(chunk) {
-                // append chunk to your data 
-                body += chunk;
-            });
-
-            res.on('end', function() {
-                console.log(body);
-            });
-
-            res.on('error', function(e) {
-                console.log("Error message: " + e.message)
-            });
-        });
-    }
+    
+    var payload = {};
+    payload.from = 'TWYSTR';
+    payload.message = data.message;
+    payload.phone = data.phone;
+    Transporter.send('sms', 'vf', payload);
     return deferred.promise;
 }
 
