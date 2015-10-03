@@ -173,7 +173,13 @@ function sendMessageToMerchant(coupon, outlet, user_phone) {
     var payload  = {}
     
     payload.from = 'TWYSTR'
-    payload.message = 'User '+user_phone+' has used offer at '+outlet.basics.name+', '+outlet.contact.location.locality_1.toString()+' on ' +Utils.formatDate(current_time)+ '. Coupon code '+coupon.code+', Offer- '+coupon.header+' '+ coupon.line1+' '+coupon.line2+'.' 
+    if(outlet.contact.location.locality_1) {
+        payload.message = 'User '+user_phone+' has used offer at '+ outlet.basics.name + ', ' + outlet.contact.location.locality_1.toString()+' on ' +Utils.formatDate(current_time)+ '. Coupon code '+coupon.code+', Offer- '+coupon.header+' '+ coupon.line1+' '+coupon.line2+'.'     
+    }
+    else{
+        payload.message = 'User '+user_phone+' has used offer at '+ outlet.basics.name + ', ' + outlet.contact.location.locality_2.toString()+' on ' +Utils.formatDate(current_time)+ '. Coupon code '+coupon.code+', Offer- '+coupon.header+' '+ coupon.line1+' '+coupon.line2+'.' 
+    }
+    
     
     outlet.contact.phones.reg_mobile.forEach (function (phone) {
         if(phone && phone.num) {
