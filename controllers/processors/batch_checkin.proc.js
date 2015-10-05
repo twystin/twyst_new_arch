@@ -58,9 +58,13 @@ function validate_request(data) {
     logger.log();
     var deferred = Q.defer();
     var passed_data = data;
+    console.log()
     var phone = _.get(passed_data, 'event_data.event_meta.phone'),
         date = _.get(passed_data, 'event_data.event_meta.date'),
-        today = new Date();
+        today = new Date(),
+        message = _.get(passed_data, 'event_data.event_meta.message'),
+        sms_sender_id = _.get(passed_data, 'event_data.event_meta.sms_sender_id'),
+        outlet = _.get(passed_data, 'event_data.event_meta.outlet');
     if (!date) {
         date = new Date();
     } else {
@@ -75,7 +79,7 @@ function validate_request(data) {
         deferred.reject('Checkin-in cannot be set in the future');
     }
 
-    if (!data.outlet) {
+    if (!outlet) {
         deferred.reject('Provide the outlet info to checkin the user');
     }
     if (_.get(data, 'outlet.outlet_meta.status') !== 'active') {
@@ -185,14 +189,17 @@ function check_and_create_coupon(data) {
                 if (data.coupons && data.coupons.length) {
                     passed_data.user.coupons.push(data.coupons[data.coupons.length - 1]);
                 }
-                passed_data.message = 'Check-in successful at '+ passed_data.outlet.basics.name +' on '+ formatDate(new Date(passed_data.event_data.event_meta.date)) +". Reward unlocked! Your voucher will be available on your Twyst app soon. Don't have the app? Get it now at http://twy.st/app";                
+                console.log(passed_data.event_data.event_meta.message)
+                passed_data.message = passed_data.event_data.event_meta.message;
+                passed_data.message = passed_data.message.replace(/xxxxxx/g, passed_data.user.coupons[passed_data.user.coupons.length-1].code);
+                console.log(passed_data.message)
                 deferred.resolve(passed_data);
             }, function(err) {
                 deferred.reject('Could not create coupon' + err);
             })
         } else if (!isNaN(matching_offer)) {
             console.log('locked_offer');
-            passed_data.message = 'Check-in successful at '+ passed_data.outlet.basics.name +' on '+ formatDate(new Date(passed_data.event_data.event_meta.date)) +'. You are '+ matching_offer +' check-in(s) away from your next reward. Find '+ passed_data.outlet.basics.name + ' on Twystat http://twy.st/app';
+            //passed_data.message = 'Check-in successful at '+ passed_data.outlet.basics.name +' on '+ formatDate(new Date(passed_data.event_data.event_meta.date)) +'. You are '+ matching_offer +' check-in(s) away from your next reward. Find '+ passed_data.outlet.basics.name + ' on Twystat http://twy.st/app';
             data.checkins_to_go = matching_offer;
             deferred.resolve(data);
         } else {
@@ -286,7 +293,7 @@ function create_coupon(offer, user, outlet) {
         length: 6,
         exclude: ['O', '0', 'L', '1']
     });
-
+    console.log('herte')
     var lapse_date = new Date();
     lapse_date.setDate(lapse_date.getDate() + offer.offer_lapse_days);
     var expiry_date = new Date();
@@ -298,7 +305,7 @@ function create_coupon(offer, user, outlet) {
         _id: mongoose.Types.ObjectId(),
         code: code,
         issued_for: offer._id,
-        coupon_source: 'PANEL',
+        coupon_source: 'BATCH',
         header: offer.actions.reward.header,
         line1: offer.actions.reward.line1,
         line2: offer.actions.reward.line2,
@@ -341,6 +348,7 @@ function create_coupon(offer, user, outlet) {
 function update_checkin_counts(data) {
     // UPDATE CACHES?
     var deferred = Q.defer();
+    
     Cache.hget(data.user._id, "checkin_map", function(err, reply) {
         if (err) {
             logger.error(err);
@@ -370,10 +378,11 @@ function send_sms(data) {
     var deferred = Q.defer();
     
     var payload = {};
-    payload.from = 'TWYSTR';
+    payload.from = data.event_data.event_meta.sms_sender_id;
     payload.message = data.message;
     payload.phone = data.event_data.event_meta.phone;
     Transporter.send('sms', 'vf', payload);
+    
     deferred.resolve(data);
     return deferred.promise;
 }

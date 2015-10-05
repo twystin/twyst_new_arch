@@ -49,6 +49,7 @@ module.exports = function(app) {
     app.post('/api/v4/checkin/bill', EventCtrl.upload_bill);
     app.post('/api/v4/checkin/qr', EventCtrl.qr_checkin);
     app.post('/api/v4/checkin/panel', EventCtrl.panel_checkin);
+    app.post('/api/v4/checkin/batch', EventCtrl.batch_checkin);
 
     app.post('/api/v4/outlet/follow', EventCtrl.follow);
     app.post('/api/v4/outlet/unfollow', EventCtrl.unfollow);
@@ -115,7 +116,15 @@ module.exports = function(app) {
     app.get('/api/v4/search', SearchCtrl.search);
   })();
 
+  (function QR_Routes() {
+      var QrCtrl = require('../controllers/qr.ctrl');
+      app.post('/api/v4/qr/outlets',  QrCtrl.qr_create);
+  })();
+
   (function LegacyRoutes() {
+    app.get('/app', function(req, res) {
+        res.redirect('https://play.google.com/store/apps/details?id=com.twyst.app.android&hl=en');
+    });
     app.all('/api/v1/*', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
     app.all('/api/v2/*', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
     app.all('/api/v3/*', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });

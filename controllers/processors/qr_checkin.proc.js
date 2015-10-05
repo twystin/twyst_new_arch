@@ -360,7 +360,7 @@ function find_matching_offer(events, offers) {
 function update_checkin_counts(data) {
   // UPDATE CACHES?
   var deferred = Q.defer();
-  RecoHelper.cache_user_coupons(data.user);
+  
   Cache.hget(data.user._id, "checkin_map", function(err, reply) {
     if(err) {
       logger.error(err);
