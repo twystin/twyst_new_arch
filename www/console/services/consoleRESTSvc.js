@@ -40,10 +40,10 @@ angular.module('consoleApp').factory('consoleRESTSvc', ['$http', '$q', '$cookies
 				return deferred.promise;
 			}
 
-			consoleRESTSvc.getBills = function() {
+			consoleRESTSvc.getBills = function(status, sort) {
 				var deferred = Q.defer();
 				var token = $cookies.get('token');
-				$http.get('/api/v4/events?event_type=upload_bill&token=' + token)
+				$http.get('/api/v4/events/upload_bill?token=' + token + '&status=' + status + '&sort=' + sort)
 					.then(function(data) {
 						if(data.data.response) {
 							deferred.resolve(data.data);
@@ -81,6 +81,22 @@ angular.module('consoleApp').factory('consoleRESTSvc', ['$http', '$q', '$cookies
 							deferred.resolve(data.data);
 						} else {
 							deferred.reject(data.data);
+						}
+					}, function(err) {
+						deferred.reject(err);
+					});
+				return deferred.promise;
+			}
+
+			consoleRESTSvc.getAllOutlets = function() {
+				var deferred = Q.defer();
+				var token = $cookies.get('token');
+				$http.get('/api/v4/outlets?token=' + token)
+					.then(function(data) {
+						if(data.data.response) {
+							deferred.resolve(data.data);
+						} else {
+							deferred.reject(data.data);	
 						}
 					}, function(err) {
 						deferred.reject(err);

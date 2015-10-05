@@ -5,6 +5,15 @@ angular.module('consoleApp')
 				$scope[check] = isChecked? true: false
 			};
 
+			consoleRESTSvc.getAllOutlets().then(function(res) {
+				$scope.outlets = res.data;
+			}, function(err) {
+				if (err.message) {
+					toastr.error(err.message, "Error");
+				}
+				console.log(err);
+			})
+
 			consoleRESTSvc.getBill($stateParams.bill_id).then(function(res) {
 				if(res.data.event_meta.timestamp) {
 					res.data.event_meta.timestamp = new Date(res.data.event_meta.timestamp);
@@ -14,8 +23,10 @@ angular.module('consoleApp')
 					$scope.pending = angular.copy($scope.bill.pending);
 					delete $scope.bill.pending;
 				}
-				console.log(res);
 			}, function(err) {
+				if (err.message) {
+					toastr.error(err.message, "Error");
+				}
 				console.log(err);
 			});
 
@@ -31,18 +42,19 @@ angular.module('consoleApp')
 				} else {
 					$scope.bill.event_meta.status = 'Twyst Approved';
 					consoleRESTSvc.updateBill($scope.bill).then(function(res) {
-						console.log(res);
 						toastr.success(res.message);
 						$scope.bill = res.data;
 					}, function(err) {
+						if (err.message) {
+							toastr.error(err.message, "Error");
+						}
 						console.log(err);
 					});
-					// $http.put('/api/v4/events/' + $stateParams.bill_id, $scope.bill).then(function(data) {
-					// 	if(data.data)
-					// }, function(err) {
-					// 	console.log(err);
-					// })
 				}
+			}
+
+			$scope.updateOutletId = function(outlet) {
+				$scope.bill.event_outlet = outlet._id;
 			}
 
 			$scope.rejectBill = function() {
@@ -61,11 +73,13 @@ angular.module('consoleApp')
 
 				if($scope.bill.event_meta.reason) {
 					consoleRESTSvc.updateBill($scope.bill).then(function(res) {
-						console.log(res);
 						toastr.success(res.message);
 						$scope.bill = res.data;
 						$scope.isClear = $scope.isBill = $scope.isListed = false;
 					}, function(err) {
+						if (err.message) {
+							toastr.error(err.message, "Error");
+						}
 						console.log(err);
 					});
 				} else {
@@ -73,11 +87,8 @@ angular.module('consoleApp')
 				}
 			}
 
-			$scope.linkRedemption = function(offer_group) {
-				console.log(offer_group);
-				console.log($scope.bill.event_meta.offer_group);
-				$scope.bill.event_meta.offer_group = offer_group;
-				console.log($scope.bill.event_meta.offer_group);
+			$scope.linkRedemption = function(issued_for) {
+				$scope.bill.event_meta.issued_for = issued_for;
 			}
 		}
 	]);

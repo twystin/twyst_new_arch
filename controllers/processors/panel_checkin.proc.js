@@ -374,6 +374,7 @@ function send_sms(data) {
     payload.message = data.message;
     payload.phone = data.event_data.event_meta.phone;
     Transporter.send('sms', 'vf', payload);
+    deferred.resolve(data);
     return deferred.promise;
 }
 

@@ -11,7 +11,10 @@
     <div class='row' ng-if='offers.checkin.length'>
       <div class='col-md-4' ng-repeat='offer in offers.checkin'>
         <div class='panel panel-primary'>
-          <div class='panel-heading'>{{offer.actions.reward.header}}</div>
+          <div class='panel-heading'>{{offer.actions.reward.header}}
+            <i class='pull-right fa fa-cutlery' ng-if='offer.actions.reward.applicability.dine_in'></i>
+            <i class='pull-right fa fa-motorcycle' ng-if='offer.actions.reward.applicability.delivery'></i>
+          </div>
           <div class='panel-body' style='min-height:110px;'>
             <p> {{offer.actions.reward.line1}} </p>
             <p> {{offer.actions.reward.line2}} </p>

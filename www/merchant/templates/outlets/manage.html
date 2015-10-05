@@ -6,7 +6,10 @@
     </div>
     <div class="col-md-4" ng-repeat="outlet in outlets">
       <div class="panel panel-primary">
-        <div class="panel-heading">{{outlet.basics.name}}</div>
+        <div class="panel-heading">{{outlet.basics.name}}
+          <i class='pull-right fa fa-cutlery' ng-if='outlet.attributes.dine_in'></i>
+          <i class='pull-right fa fa-motorcycle' ng-if='outlet.attributes.home_delivery'></i>
+        </div>
         <div class="panel-body" style='min-height:120px;'>
           <p>{{outlet.contact.location.address}}</p>
         </div>

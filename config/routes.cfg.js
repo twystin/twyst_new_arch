@@ -34,6 +34,7 @@ module.exports = function(app) {
   (function EventRoutes() {
     var EventCtrl = require('../controllers/event.ctrl');
     app.get('/api/v4/events', EventCtrl.list_events);
+    app.get('/api/v4/events/upload_bill', EventCtrl.list_bills);
     app.get('/api/v4/events/retrieve/:event_id', EventCtrl.get_event);
     var NotifCtrl = require('../controllers/notif.ctrl');
     app.get('/api/v4/events/:event_id', NotifCtrl.get_notif);

@@ -1,34 +1,36 @@
 angular.module('consoleApp')
 	.controller('BillManageController', ['$scope', 'toastr', 'consoleRESTSvc', '$log',
 		function($scope, toastr, consoleRESTSvc, $log) {
-			consoleRESTSvc.getBills().then(function(res) {
-				$scope.bills = res.data;
-				console.log(res);
-			}, function(err) {
-				console.log(err);
-			})
 
 			$scope.sort_order = {
-				'oldest_first': 'Oldest First',
-				'newest_first': 'Newest FIrst'
+				'event_date': 'Oldest First',
+				'-event_date': 'Newest FIrst'
 			};
 
-			$scope.view_options = {
-				'pending': 'Pending',
-				'approved': 'Approved',
-				'rejected': 'Rejected',
-				'all': 'All'
-			}
+			$scope.view_options = ['Submitted', 'Twyst Approved', 'Twyst Rejected', 'Outlet Rejected', 'Verified', 'All']
 
-			$scope.sort = 'oldest_first';
-			$scope.view_by = 'pending';
+			$scope.sort = 'event_date';
+			$scope.view_by = 'Submitted';
+
+			$scope.getBills = function() {
+				consoleRESTSvc.getBills($scope.view_by, $scope.sort).then(function(res) {
+					$scope.bills = res.data;
+				}, function(err) {
+					if (err.message) {
+						toastr.error(err.message, "Error");
+					}
+					console.log(err);
+				})
+			}
 
 			$scope.updateSortOrder = function(sort) {
 				$scope.sort = sort;
+				$scope.getBills();
 			}
 
 			$scope.updateViewBy = function(val) {
-				$scope.view_by = val;
+				$scope.view_by = $scope.view_options[val];
+				$scope.getBills();
 			}
 		}
 	])
