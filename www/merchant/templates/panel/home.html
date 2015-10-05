@@ -18,7 +18,7 @@
 						<div class='form-group'>
 							<label for='checkin_date' class='col-xs-6 control-label'>Checkin date</label>
 							<div class='col-xs-6'>
-								<input type='date' class='form-control' ng-model='checkin.date'>
+								<input type='text' datepicker-popup="MM/dd/yyyy" show-button-bar='false' min-date='minDate' max-date='maxDate' is-open="date_open" ng-click="date_open = true" class='form-control' ng-model='checkin.date'>
 							</div>
 							<p>&nbsp;</p>
 							<div class='input-group'>

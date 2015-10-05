@@ -30,6 +30,49 @@ module.exports.get_event_list = function(user, event_type) {
   return deferred.promise;
 }
 
+module.exports.get_upload_bills = function(user, status, sort) {
+  logger.log();
+
+  var deferred = Q.defer();
+
+  if(user.role > 5) {
+    rejectUser(deferred);
+  } else {
+    var query = {
+      event_type: 'upload_bill',
+    };
+
+    if(status) {
+      query['event_meta.status'] = status
+    }
+
+    if(user.role > 2) {
+      query.event_outlet = {
+        '$in': user.outlets
+      }
+      query['event_meta.offer_group'] = {
+        $exists: true
+      }
+    };
+
+    Event.find(query).exec(function(err, events) {
+      if(err || !events) {
+        deferred.reject({
+          err: err || null, 
+          message: "Unable to retrieve bills" 
+        });
+      } else {
+        deferred.resolve({
+          data: events, 
+          message: 'Found the bills' 
+        });
+      }
+    });
+
+  }
+  return deferred.promise;
+}
+
 module.exports.get_event = function(user, event_id) {
   var deferred = Q.defer();
   if (user.role > 5) {
@@ -158,10 +201,7 @@ function getBillListForAdmin() {
   logger.log();
   var deferred = Q.defer();
   Event.find({
-    event_type: 'upload_bill',
-    'event_meta.offer_group': {
-      $exists: true
-    }
+    event_type: 'upload_bill'
   }).exec(function(err, events) {
     if(err || !events) {
       deferred.reject({err: err || null, message: "Unable to retrieve bills" });
@@ -259,13 +299,13 @@ function processUploadBillForAdmin(event) {
         } else {
           var coupons = _.filter(event_user.coupons, function(coupon) {
             logger.log(coupon);
-            return coupon.status==='redeemed' && coupon.code && coupon_ids.indexOf(coupon.coupon_group.toString())===-1;
+            return coupon.status==='redeemed' && coupon.code && coupon_ids.indexOf(coupon.issued_for.toString())===-1;
           });
           var pending = [];
           _.each(coupons, function(coupon) {
             var coupon_obj = {
               code: coupon.code,
-              offer_group: coupon.coupon_group,
+              issued_for: coupon.issued_for,
               header: coupon.header,
               line1: coupon.line1,
               line2: coupon.line2,
@@ -301,7 +341,8 @@ function updateEventForMerchant(user, event) {
       _id: ObjectId(event._id),
     }, {
       $set: {
-        "event_meta": event.event_meta
+        "event_meta": event.event_meta,
+        event_outlet: event.event_outlet
       }
     }).exec(function(err, event) {
       if (err || !event) {

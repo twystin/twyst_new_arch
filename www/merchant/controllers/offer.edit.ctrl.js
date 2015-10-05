@@ -175,7 +175,7 @@ angular.module('merchantApp')
       $scope.$watchCollection('offer.offer_type', function(newVal, oldVal) {
         if (!newVal) {
           return;
-        } else if (newVal == 'offer') {
+        } else if (newVal == 'offer' && oldVal!==undefined) {
           if (Object.keys($scope.offer.rule).length) {
             $scope.offer.rule = {};
           }
@@ -190,7 +190,8 @@ angular.module('merchantApp')
       });
 
       $scope.$watchCollection('offer.rule', function(newVal, oldVal) {
-        if (newVal.event_match != oldVal.event_match) {
+        console.log(newVal, oldVal);
+        if (newVal.event_match != oldVal.event_match && oldVal.event_match !== undefined) {
           $scope.offer.rule.friendly_text = '';
           $scope.offer.rule = {
             event_match: newVal.event_match

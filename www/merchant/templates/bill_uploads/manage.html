@@ -24,6 +24,7 @@
         <th>Outlet Name</th>
         <th>Upload Date</th>
         <th>Status</th>
+        <th>Action</th>
       </thead>
       <tbody>
         <tr ng-repeat='bill in bills' ui-sref='merchant.view_bill({bill_id: bill._id})' style='cursor:pointer;'>
@@ -32,6 +33,7 @@
           <td>{{bill.event_meta.outlet_name}}</td>
           <td>{{bill.event_date | date: 'MMM dd, yyyy'}}</td>
           <td>{{bill.event_meta.status}}</td>
+          <th><a class='btn'>View</a></th>
         </tr>
       </tbody>
     </table>

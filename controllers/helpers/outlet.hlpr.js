@@ -32,23 +32,58 @@ module.exports.get_outlet = function(id) {
 
 module.exports.get_all_outlets = function(token) {
   var deferred = Q.defer();
-
+  logger.log();
   AuthHelper.get_user(token).then(function(data) {
-    User.findOne({
-      _id: data.data._id
-    }).select('outlets').populate('outlets').exec(function(err, outlets) {
-      if (err) {
-        deferred.reject({
-          err: err || true,
-          message: 'Couldn\'t get the outlets'
-        });
-      } else {
-        deferred.resolve({
-          data: outlets,
-          message: 'Got your outlets'
-        });
-      }
-    });
+    if(data.data.role>2) {
+      User.findOne({
+        _id: data.data._id
+      }).select('outlets').populate('outlets').exec(function(err, outlets) {
+        if (err) {
+          deferred.reject({
+            err: err || true,
+            message: 'Couldn\'t get the outlets'
+          });
+        } else {
+          deferred.resolve({
+            data: outlets,
+            message: 'Got your outlets'
+          });
+        }
+      });
+    } else {
+      Cache.get('outlets', function(err, reply) {
+        if(err || !reply) {
+          deferred.reject({
+            err: err || true,
+            message: 'Couldn\'t get outlet list'
+          });
+        } else {
+          var list = _.filter(JSON.parse(reply), function(outlet) {
+            if(outlet.outlet_meta.status==='active') {
+              return true;
+            } else {
+              return false;
+            }
+          });
+          var outlets = _.map(list, function(outlet) {
+            return {
+              _id: outlet._id,
+              name: outlet.basics.name,
+              address: outlet.contact.location.address,
+              locality_1: outlet.contact.location.locality_1[0],
+              locality_2: outlet.contact.location.locality_2[0],
+              city: outlet.contact.location.city,
+              pin: outlet.contact.location.pin
+            }
+          });
+
+          deferred.resolve({
+            data: outlets,
+            message: 'Got your outlets'
+          });
+        }
+      });
+    }
   });
 
   return deferred.promise;

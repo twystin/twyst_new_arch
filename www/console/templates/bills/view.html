@@ -67,13 +67,13 @@
         <div class='form-group'>
           <label for='outlet_name' class='col-md-3'><span class='glyphicon gi-lg glyphicon-home'></span> Outlet Name:</label>
           <div class='col-md-8'>
-            <input type='text' class='form-control' ng-model='bill.event_meta.outlet_name' disabled>
+            <input type="text" ng-model="bill.event_meta.outlet_name" typeahead="outlet.name for outlet in outlets | filter:{name: $viewValue} | limitTo:8" class="form-control" typeahead-on-select='updateOutletId($item)'>
           </div>
         </div>
         <div class='form-group'>
           <label for='outlet_location' class='col-md-3'><span class='glyphicon gi-lg glyphicon-map-marker'></span> Outlet Location:</label>
           <div class='col-md-8'>
-            <input type='text' class='form-control' ng-model='bill.event_meta.outlet_location' disabled>
+            <input type="text" ng-model="bill.event_meta.outlet_location" typeahead="outlet.address for outlet in outlets | filter:{address:$viewValue, name: bill.event_meta.outlet_name} | limitTo:8" class="form-control" typeahead-on-select='updateOutletId($item)'>
           </div>
         </div>
         <div class='form-group'>
@@ -129,11 +129,11 @@
       <tbody>
         <tr ng-repeat='item in pending'>
           <td>{{$index +1}}</td>
-          <td>{{item.offer_group}}</td>
+          <td>{{item.issued_for}}</td>
           <td><strong>{{item.header}}<strong>, {{item.line1}}<span ng-if='item.line2'>, {{item.line2}}<span></td>
           <td>{{item.used_time | date: 'MMM dd, yyyy'}}</td>
           <td>{{item.used_time | date: 'hh:mm a'}}</td>
-          <td><a class='btn btn-sm btn-primary' ng-click='linkRedemption(item.offer_group)' ng-if='bill.event_meta.offer_group!==item.offer_group'>Link</a></td>
+          <td><a class='btn btn-sm btn-primary' ng-click='linkRedemption(item.issued_for)' ng-if='bill.event_meta.issued_for!==item.issued_for'>Link</a></td>
         </tr>
       </tbody>
     </table>

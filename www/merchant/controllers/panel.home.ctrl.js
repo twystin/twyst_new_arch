@@ -11,6 +11,13 @@ angular.module('merchantApp')
 				console.log(err);
 			})
 
+			$scope.maxDate = new Date();
+			$scope.minDate = new Date($scope.maxDate.getTime() - (7 * 24 * 60 * 60 * 1000))
+
+			$scope.checkin = {
+				date: new Date()
+			};
+
 			$scope.resetForms = function() {
 				$scope.show_vouchers = false;
 				$scope.show_msg = false;
@@ -75,11 +82,14 @@ angular.module('merchantApp')
 						event_outlet: $scope.choosen_outlet
 					};
 					if($scope.checkin.date) {
+						var today = new Date();
+						$scope.checkin.date.setHours(today.getHours());
+						$scope.checkin.date.setMinutes(today.getMinutes());
 						req_obj.event_meta.date = $scope.checkin.date;
 					}
 					merchantRESTSvc.checkinUser(req_obj)
 						.then(function(res) {
-							$scope.checkin = {};
+							$scope.checkin.number = '';
 							var success_msg;
 							if(_.has(res, 'data.code')) {
 								success_msg = "Checkin successfull, User also unlocked a coupon";
@@ -88,7 +98,7 @@ angular.module('merchantApp')
 							}
 							toastr.success(success_msg);
 						}, function(err) {
-							$scope.checkin = {};
+							$scope.checkin.number = '';
 							var error_msg;
 							if (err.data.indexOf('-')===-1) {
 								error_msg = err.data;
