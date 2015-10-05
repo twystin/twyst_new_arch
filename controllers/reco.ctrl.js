@@ -241,8 +241,16 @@ function calculate_relevance(params) {
     //}
 
     // CURRENT OFFERS RELEVANCE
-    if (val.offers && val.offers.length > 1) {
-      relevance = relevance + val.offers.length * 1000;
+    if (val.offers && val.offers.length > 1) {      
+      for(var i = 0; i < val.offers.length; i++) {
+        if(val.offers[i].offer_type === 'coupon' || val.offers[i].offer_type === 'offer') {
+          relevance = relevance +  1000;    
+        }
+        else if(val.offers[i].offer_type === 'checkin' || val.offers[i].offer_type === 'deal') {
+          relevance = relevance +  500;    
+        }
+      }
+      //relevance = relevance + val.offers.length * 1000;
     }
 
     val.recco = val.recco || {};
@@ -340,8 +348,10 @@ function massage_offers(params) {
           if(offer.type === 'coupon') {
             return -100;
           } else if(offer.offer_type === 'pool') {
+            return -75;
+          } else if(offer.offer_type === 'offer') {
             return -50;
-          } else if(offer.next) {
+          }else if(offer.next) {
             return offer.next;
           } else {
             return 100;
@@ -397,6 +407,7 @@ function massage_offers(params) {
         coupon.line2 = itemd && itemd.line2;
         coupon.lapse_date = itemd && itemd.lapse_date;
         coupon.expiry = itemd && itemd.expiry_date;
+        coupon.issued_at = itemd && itemd.issued_at;
         coupon.meta = {};
         coupon.meta.reward_type = itemd && itemd.meta && itemd.meta.reward_type.type;
         coupon.description = itemd.description;
@@ -404,7 +415,7 @@ function massage_offers(params) {
         coupon.available_now = true;
 
         _.each(item.offers, function(offer) {
-            if(offer._id.toString() === itemd.issued_for.toString()) {
+            if( offer._id && itemd.issued_for && offer._id.toString() === itemd.issued_for.toString()) {
                 coupon.available_now = offer.available_now;
                 if(!coupon.available_now) {
                   coupon.available_next = offer.available_next;
@@ -413,10 +424,10 @@ function massage_offers(params) {
 
             }
         });
-        if (new Date(coupon.lapse_date) <= new Date()) {
-          return false;
-        } else {
+        if (new Date(coupon.lapse_date) >= new Date() && new Date(coupon.issued_at) < new Date(Date.now() - 10800000)) {
           return coupon;
+        } else {
+          return false;
         }
       });
       coupon_map = _.compact(coupon_map);

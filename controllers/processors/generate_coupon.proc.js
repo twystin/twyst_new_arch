@@ -5,6 +5,10 @@ var mongoose = require('mongoose');
 var RecoHelper = require('../helpers/reco.hlpr.js');
 var Outlet = mongoose.model('Outlet');
 var User = mongoose.model('User');
+var Transporter = require('../../transports/transporter.js');
+var Utils = require('../../common/datetime.hlpr.js');
+
+
 
 module.exports.check = function(data) {
   logger.log();
@@ -50,6 +54,19 @@ module.exports.process = function(data) {
                         
                         if(data.coupons && data.coupons.length) {
                             passed_data.user.coupons.push(data.coupons[data.coupons.length-1]);
+                            User.findOne({_id: user}, {phone: 1}, function(err, user_phone){
+                                if(err){
+                                    console.log(err)
+                                    deferred.reject('unable to use coupon')   
+                                } 
+                                else{
+                                    var coupon = passed_data.user.coupons[passed_data.user.coupons.length-1];
+                            
+                                    sendMessageToMerchant(coupon, outlet, user_phone.phone);       
+                                }
+                            })
+                            
+                            
                         }
 
                         deferred.resolve(passed_data);
@@ -151,3 +168,23 @@ function create_coupon(offer, user, outlet) {
   return deferred.promise;
 }
 
+function sendMessageToMerchant(coupon, outlet, user_phone) {
+    var current_time = new Date();    
+    var payload  = {}
+    
+    payload.from = 'TWYSTR'
+    if(outlet.contact.location.locality_1) {
+        payload.message = 'User '+user_phone+' has used offer at '+ outlet.basics.name + ', ' + outlet.contact.location.locality_1.toString()+' on ' +Utils.formatDate(current_time)+ '. Coupon code '+coupon.code+', Offer- '+coupon.header+' '+ coupon.line1+' '+coupon.line2+'.'     
+    }
+    else{
+        payload.message = 'User '+user_phone+' has used offer at '+ outlet.basics.name + ', ' + outlet.contact.location.locality_2.toString()+' on ' +Utils.formatDate(current_time)+ '. Coupon code '+coupon.code+', Offer- '+coupon.header+' '+ coupon.line1+' '+coupon.line2+'.' 
+    }
+    
+    
+    outlet.contact.phones.reg_mobile.forEach (function (phone) {
+        if(phone && phone.num) {
+            payload.phone = phone.num;
+            Transporter.send('sms', 'vf', payload);
+        }
+    });
+}

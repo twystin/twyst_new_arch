@@ -330,7 +330,7 @@ function massage_offers(params) {
         coupon.available_now = true;
 
         _.each(item.offers, function(offer) {
-            if(offer._id.toString() === itemd.issued_for.toString()) {
+            if(offer._id && itemd.issued_for && offer._id.toString() === itemd.issued_for.toString()) {
                 coupon.available_now = offer.available_now;
                 if(!coupon.available_now) {
                   coupon.available_next = offer.available_next;
@@ -577,7 +577,7 @@ module.exports.get_user_coupons = function(req, res) {
             var coupon_outlets = _.map(coupon.outlets, function(outlet) {
               return outlet.toString();
             });
-            logger.info(coupon_outlets);
+            
             if(coupon.status==='active' && new Date(coupon.lapse_date) > new Date() && coupon_outlets.indexOf(outlet_id)!==-1) {
               return true;
             } else {
@@ -671,11 +671,9 @@ function check_merchant_authorization(data) {
 function retrieve_coupon_info(data) {
   logger.log();
   var deferred = Q.defer();
+  
   User.findOne({
-    'coupons.code': data.code,
-    'coupons.outlets': {
-      $in: [ObjectId(data.outlet_id)]
-    }
+      coupons: {$elemMatch: {code: data.code}}
   }).exec(function(err, user) {
     if(err || !user) {
       logger.error(err);
@@ -684,10 +682,12 @@ function retrieve_coupon_info(data) {
         message: 'Unable to find coupon'
       });
     } else {
+      
       data.user = user;
       data.coupon = _.find(user.coupons, function(coupon) {
-        return coupon.status==='active' && new Date(coupon.lapse_date) > new Date();
+        return coupon.code === data.code && coupon.status==='active' && new Date(coupon.lapse_date) > new Date();
       });
+      
       if(data.coupon) {
         deferred.resolve(data);
       } else {
@@ -702,7 +702,6 @@ function retrieve_coupon_info(data) {
 }
 
 function format_response(data) {
-  logger.log(data);
   var deferred = Q.defer();
   var info = {};
   info.user_id = data.user._id;
@@ -710,6 +709,8 @@ function format_response(data) {
   info.coupon_id = data.coupon._id;
   info.header = data.coupon.header;
   info.line1 = data.coupon.line1;
+  info.line2 = data.coupon.line2;
+  info.coupon_code = data.coupon.code;
   info.description = data.coupon.description;
   info.coupon_code = data.coupon.code;
   info.lapse_date = data.coupon.lapse_date;
