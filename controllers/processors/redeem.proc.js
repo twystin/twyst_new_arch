@@ -10,6 +10,8 @@ var QR = mongoose.model('QR');
 var Event = mongoose.model('Event');
 var User = mongoose.model('User');
 var RecoHelper = require('../helpers/reco.hlpr');
+var Transporter = require('../../transports/transporter.js');
+var Utils = require('../../common/datetime.hlpr.js');
 
 
 module.exports.check = function(data) {
@@ -84,10 +86,10 @@ module.exports.process = function(data) {
   var coupon_id = data.coupon._id;
   var outlet_id = data.outlet._id;
   var coupon = data.coupon;
-  coupon.status = "redeemed";
+  coupon.status = "user_redeemed";
   var update = {
     $set: {
-      "coupons.$.status": "redeemed",
+      "coupons.$.status": "user_redeemed",
       "coupons.$.used_details": {
         used_time: new Date(),
         used_by: user_id,
@@ -105,7 +107,7 @@ module.exports.process = function(data) {
       if (err) {
         deferred.reject('Error redeeming the coupon');
       } else {
-        RecoHelper.cache_user_coupons(user);
+        sendMessageToMerchant(coupon, data.outlet, data.user.phone);       
         deferred.resolve(data);
       }
     }
@@ -113,3 +115,24 @@ module.exports.process = function(data) {
 
   return deferred.promise;
 };
+
+function sendMessageToMerchant(coupon, outlet, user_phone) {
+    var current_time = new Date();    
+    var payload  = {}
+    
+    payload.from = 'TWYSTR'
+    if(outlet.contact.location.locality_1) {
+        payload.message = 'User '+user_phone+' has redeemed coupon at '+ outlet.basics.name + ', ' + outlet.contact.location.locality_1.toString()+' on ' +Utils.formatDate(current_time)+ '. Coupon code '+coupon.code+', Offer- '+coupon.header+' '+ coupon.line1+' '+coupon.line2+'.'     
+    }
+    else{
+        payload.message = 'User '+user_phone+' has redeemed coupon at '+ outlet.basics.name + ', ' + outlet.contact.location.locality_2.toString()+' on ' +Utils.formatDate(current_time)+ '. Coupon code '+coupon.code+', Offer- '+coupon.header+' '+ coupon.line1+' '+coupon.line2+'.' 
+    }
+    
+    
+    outlet.contact.phones.reg_mobile.forEach (function (phone) {
+        if(phone && phone.num) {
+            payload.phone = phone.num;
+            Transporter.send('sms', 'vf', payload);
+        }
+    });
+}
