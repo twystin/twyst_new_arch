@@ -319,6 +319,18 @@ function pick_outlet_fields(params) {
       
       return massaged_item;
     });
+    params.outlets = _.each(params.outlets, function(item) {
+      if(item && !item.offers) {
+        return false;
+      }
+      else if(item && item.offer && !item.offers.length) {
+        return false;
+      }
+      else{
+        return item;
+      }
+    })
+      
     params.outlets = _.compact(params.outlets);
 
     deferred.resolve(params);
