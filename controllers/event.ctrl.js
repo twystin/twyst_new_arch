@@ -120,9 +120,13 @@ module.exports.referral_join = function(req, res) {
   create_new(res, setup_event(req, 'referral_join'));
 };
 
+module.exports.batch_checkin = function(req, res) {
+  logger.log();
+  create_new(res, setup_event(req, 'batch_checkin'));
+};
 module.exports.list_events = function(req, res) {
   logger.log();
-  var event_types = ['follow', 'qr_checkin', 'panel_checkin', 'gift', 'grab', 'redeem', 'unfollow', 'feedback', 'submit_offer', 'like_offer', 'unlike_offer', 'upload_bill', 'share_offer', 'share_outlet', 'suggestion', 'extend_offer', 'report_problem', 'write_to_twyst', 'generate_coupon', 'deal_log', 'referral_join' ];
+  var event_types = ['batch_checkin', 'follow', 'qr_checkin', 'panel_checkin', 'gift', 'grab', 'redeem', 'unfollow', 'feedback', 'submit_offer', 'like_offer', 'unlike_offer', 'upload_bill', 'share_offer', 'share_outlet', 'suggestion', 'extend_offer', 'report_problem', 'write_to_twyst', 'generate_coupon', 'deal_log', 'referral_join' ];
   var HttpHelper = require('../common/http.hlpr.js');
   var AuthHelper = require('../common/auth.hlpr.js');
   var EventHelper = require('./helpers/event.hlpr.js');
@@ -350,6 +354,7 @@ function process_event(data) {
     'follow': require('./processors/follow.proc'),
     'qr_checkin': require('./processors/qr_checkin.proc'),
     'panel_checkin': require('./processors/panel_checkin.proc'),
+    'batch_checkin': require('./processors/batch_checkin.proc'),
     'gift': require('./processors/gift.proc'),
     'grab': require('./processors/grab.proc'),
     'redeem': require('./processors/redeem.proc'),
@@ -473,7 +478,7 @@ function create_event(data) {
   var deferred = Q.defer();
   var event = {};
   var passed_data = data;
-  if(passed_data.event_data.event_type === 'qr_checkin' || passed_data.event_data.event_type === 'panel_checkin') {
+  if(passed_data.event_data.event_type === 'qr_checkin' || passed_data.event_data.event_type === 'panel_checkin' || passed_data.event_data.event_type === 'batch_checkin') {
     passed_data.event_data.event_type = 'checkin'
   }
 
