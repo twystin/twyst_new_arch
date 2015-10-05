@@ -128,7 +128,7 @@ angular.module('merchantApp')
 			merchantRESTSvc.getBills = function() {
 				var deferred = Q.defer();
 				var token = $cookies.get('token');
-				$http.get('/api/v4/events?event_type=upload_bill&token=' + token)
+				$http.get('/api/v4/events/upload_bill?token=' + token)
 					.then(function(data) {
 						if(data.data.response) {
 							deferred.resolve(data.data);

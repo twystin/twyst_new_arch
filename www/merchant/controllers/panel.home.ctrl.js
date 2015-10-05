@@ -82,6 +82,9 @@ angular.module('merchantApp')
 						event_outlet: $scope.choosen_outlet
 					};
 					if($scope.checkin.date) {
+						var today = new Date();
+						$scope.checkin.date.setHours(today.getHours());
+						$scope.checkin.date.setMinutes(today.getMinutes());
 						req_obj.event_meta.date = $scope.checkin.date;
 					}
 					merchantRESTSvc.checkinUser(req_obj)

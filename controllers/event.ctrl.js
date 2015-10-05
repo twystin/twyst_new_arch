@@ -9,6 +9,9 @@ var mongoose = require('mongoose');
 var User = mongoose.model('User');
 var Outlet = mongoose.model('Outlet');
 var Event = mongoose.model('Event');
+var HttpHelper = require('../common/http.hlpr');
+var AuthHelper = require('../common/auth.hlpr');
+var EventHelper = require('./helpers/event.hlpr');
 
 module.exports.new = function(req, res) {
   logger.log();
@@ -124,6 +127,7 @@ module.exports.batch_checkin = function(req, res) {
   logger.log();
   create_new(res, setup_event(req, 'batch_checkin'));
 };
+
 module.exports.list_events = function(req, res) {
   logger.log();
   var event_types = ['batch_checkin', 'follow', 'qr_checkin', 'panel_checkin', 'gift', 'grab', 'redeem', 'unfollow', 'feedback', 'submit_offer', 'like_offer', 'unlike_offer', 'upload_bill', 'share_offer', 'share_outlet', 'suggestion', 'extend_offer', 'report_problem', 'write_to_twyst', 'generate_coupon', 'deal_log', 'referral_join' ];
@@ -150,6 +154,30 @@ module.exports.list_events = function(req, res) {
     })
   }
 }
+
+module.exports.list_bills = function(req, res) {
+  logger.log();
+  var token = req.query.token || null;
+  var status = req.query.status || 'Pending';
+  var sort = req.query.sort || 'event_date'
+
+  if(!token) {
+    HttpHelper.error(res, null, "Not authenticated");
+  } else {
+    AuthHelper.get_user(token).then(function(data) {
+      var user = data.data;
+      EventHelper.get_upload_bills(user, status, sort).then(function(data) {
+        HttpHelper.success(res, data.data, data.message);
+      }, function(err) {
+        HttpHelper.error(res, err.err, err.message);
+      });
+    }, function(err) {
+      HttpHelper.error(res, err, "Could not find user");
+    });
+  }
+}
+
+
 
 module.exports.get_event = function(req, res) {
   logger.log();
