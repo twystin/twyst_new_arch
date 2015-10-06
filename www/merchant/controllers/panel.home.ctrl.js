@@ -48,8 +48,12 @@ angular.module('merchantApp')
 					merchantRESTSvc.getVouchersByPhone($scope.choosen_outlet, $scope.search.number)
 						.then(function(data) {
 							$scope.search = {};
+							$scope.today = new Date();
 							$scope.show_vouchers = true;
 							$scope.user_vouchers = data.data;
+							_.each($scope.user_vouchers, function(voucher) {
+								voucher.lapse_date = new Date(voucher.lapse_date);
+							})
 							if(!$scope.user_vouchers.length) {
 								$scope.show_msg = true;
 								toastr.warning("No vouchers found");
@@ -121,12 +125,11 @@ angular.module('merchantApp')
 							$scope.search = {};
 							$scope.show_vouchers = true;
 							$scope.user_vouchers = [data.data];
-							console.log($scope.user_vouchers)
+							data.data.lapse_date = new Date(data.data.lapse_date);
 							if(!$scope.user_vouchers.length) {
 								$scope.show_msg = true;
 								toastr.warning("No active voucher found");
 							} else {
-
 								toastr.success(data.message);
 							}
 							console.log('data', data);

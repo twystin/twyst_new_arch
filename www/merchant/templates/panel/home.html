@@ -64,7 +64,16 @@
 							<div class='clearfix'></div>
 							<hr>
 							<div class='text-center'>
-								<a class='btn btn-block btn-primary' ng-click='redeemUserCoupon(voucher.code)'>Redeem</a>
+								<a class='btn btn-block btn-primary' ng-click='redeemUserCoupon(voucher.code)' ng-if='voucher.status==="active" && voucher.lapse_date > today && !voucher.used_details.used_time' >Redeem</a>
+							</div>
+							<div class='text-center'>
+								<a class='btn btn-block btn-warning' ng-if='voucher.lapse_date <= today && !voucher.used_details.used_time'>Expired</a>
+							</div>
+							<div class='text-center'>
+								<a class='btn btn-block btn-success' ng-if='voucher.lapse_date > today && voucher.status==="social_pool" && !voucher.used_details.used_time'>Social Pool</a>
+							</div>
+							<div class='text-center'>
+								<a class='btn btn-block btn-danger' ng-if='voucher.used_details.used_time'>Redeemed</a>
 							</div>
 						</div>
 					</div>
