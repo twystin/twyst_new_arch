@@ -579,7 +579,7 @@ module.exports.get_user_coupons = function(req, res) {
               return outlet.toString();
             });
             coupon.phone = user.phone;
-            if(new Date(coupon.lapse_date) > new Date() && coupon_outlets.indexOf(outlet_id)!==-1) {
+            if(coupon_outlets.indexOf(outlet_id)!==-1) {
               return true;
             } else {
               return false;

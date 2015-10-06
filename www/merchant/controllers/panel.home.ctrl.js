@@ -22,7 +22,7 @@ angular.module('merchantApp')
 				$scope.show_vouchers = false;
 				$scope.show_msg = false;
 				$scope.search = {};
-				$scope.checkin = {};
+				$scope.checkin.number = '';
 			}
 
 			$scope.redeemUserCoupon = function(code) {
