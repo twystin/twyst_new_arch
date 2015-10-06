@@ -77,5 +77,5 @@ module.exports.populate = function() {
   populateOutlets();
   populateLocations();
   populateTwystBucks();
-  populateCheckinMap();
+  // populateCheckinMap();
 };

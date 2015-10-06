@@ -223,7 +223,7 @@ angular.module('merchantApp')
           return;
         }
 
-        if (newVal.reward_type != oldVal.reward_type) {
+        if (newVal.reward_type != oldVal.reward_type && oldVal.reward_type!==undefined) {
           if (newVal.reward_type == 'custom') {
             $scope.offer.actions.reward.header = '';
             $scope.offer.actions.reward.line1 = '';

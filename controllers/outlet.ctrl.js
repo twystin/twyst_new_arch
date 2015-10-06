@@ -573,18 +573,19 @@ module.exports.get_user_coupons = function(req, res) {
         if(err || !user) {
           HttpHelper.error(res, null, "No coupons found");
         } else {
+          user = user.toJSON();
           var filterd_coupons = _.filter(user.coupons, function(coupon) {
             var coupon_outlets = _.map(coupon.outlets, function(outlet) {
               return outlet.toString();
             });
-            
-            if(coupon.status==='active' && new Date(coupon.lapse_date) > new Date() && coupon_outlets.indexOf(outlet_id)!==-1) {
+            coupon.phone = user.phone;
+            if(new Date(coupon.lapse_date) > new Date() && coupon_outlets.indexOf(outlet_id)!==-1) {
               return true;
             } else {
               return false;
             }
           });
-          HttpHelper.success(res, filterd_coupons, "Pending coupons found!");
+          HttpHelper.success(res, filterd_coupons, "Coupons found!");
         }
       });
     }
@@ -620,9 +621,6 @@ module.exports.get_coupon_by_code = function(req, res) {
   check_merchant_authorization(data)
     .then(function(data) {
       return retrieve_coupon_info(data)
-    })
-    .then(function(data) {
-      return format_response(data)
     })
     .then(function(data) {
       HttpHelper.success(res, data, "Coupon found");
@@ -683,13 +681,15 @@ function retrieve_coupon_info(data) {
       });
     } else {
       
-      data.user = user;
-      data.coupon = _.find(user.coupons, function(coupon) {
-        return coupon.code === data.code && coupon.status==='active' && new Date(coupon.lapse_date) > new Date();
+      data.user = user.toJSON();
+      data.coupon = _.find(data.user.coupons, function(coupon) {
+        return coupon.code === data.code;
       });
       
       if(data.coupon) {
-        deferred.resolve(data);
+        console.log(data.user.phone);
+        data.coupon.phone = data.user.phone;
+        deferred.resolve(data.coupon);
       } else {
         deferred.reject({
           err: null,
