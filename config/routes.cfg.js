@@ -50,7 +50,7 @@ module.exports = function(app) {
     app.post('/api/v4/checkin/bill', EventCtrl.upload_bill);
     app.post('/api/v4/checkin/qr', EventCtrl.qr_checkin);
     app.post('/api/v4/checkin/panel', EventCtrl.panel_checkin);
-    app.post('/api/v4/checkin/batch', EventCtrl.batch_checkin);
+    app.post('/api/v4/checkin/bulk', EventCtrl.bulk_checkin);
 
     app.post('/api/v4/outlet/follow', EventCtrl.follow);
     app.post('/api/v4/outlet/unfollow', EventCtrl.unfollow);
