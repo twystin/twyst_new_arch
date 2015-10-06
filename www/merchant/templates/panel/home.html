@@ -1,36 +1,39 @@
 <div class='container-fluid'>
-	<h1>Control Panel Home</h1>
 	<div class='row'>
 		<div class='col-xs-12 col-md-8'>
 			<div class='row'>
-				<div class='col-xs-12 col-md-6'>
+				<div class='col-xs-12'>
 					<div class='well'>
 						<legend>Outlet
 							<select class='form-control' ng-model='choosen_outlet' ng-change='resetForms()'>
 								<option ng-repeat='outlet in outlets' value='{{outlet._id}}'>{{outlet.basics.name + (outlet.contact.location.locality_1[0]?"," + outlet.contact.location.locality_1[0]: '') + (outlet.contact.location.locality_2[0]?"," + outlet.contact.location.locality_2[0]: '')}}
 							</select>
 						</legend>
-						<h3>{{outlets[choosen_outlet].basics.name}}</h3>
-						<h4>{{(outlets[choosen_outlet].contact.location.locality_1[0]?outlets[choosen_outlet].contact.location.locality_1[0] + ",": '') + (outlets[choosen_outlet].contact.location.locality_2[0]?outlets[choosen_outlet].contact.location.locality_2[0]: '')}}</h4>
+						<!-- <h3>{{outlets[choosen_outlet].basics.name}}</h3>
+						<h4>{{(outlets[choosen_outlet].contact.location.locality_1[0]?outlets[choosen_outlet].contact.location.locality_1[0] + ",": '') + (outlets[choosen_outlet].contact.location.locality_2[0]?outlets[choosen_outlet].contact.location.locality_2[0]: '')}}</h4> -->
 					</div>
-					<div class='well'>
-						<legend>Check-in a User</legend>
+				</div>
+				<div class='col-xs-12 col-sm-4'>
+					<div class='well' style='min-height: 176px;'>
+						<label>Check-in a User</label>
 						<div class='form-group'>
-							<label for='checkin_date' class='col-xs-6 control-label'>Checkin date</label>
-							<div class='col-xs-6'>
-								<input type='text' datepicker-popup="MM/dd/yyyy" show-button-bar='false' min-date='minDate' max-date='maxDate' is-open="date_open" ng-click="date_open = true" class='form-control' ng-model='checkin.date'>
-							</div>
-							<p>&nbsp;</p>
 							<div class='input-group'>
 								<input type='text' ng-model='checkin.number' class='form-control' placeholder='10 digit mobile number'>
 								<div class='input-group-btn'>
 									<a class='btn btn-primary' ng-click='checkinUser()'>Checkin</a>
 								</div>
 							</div>
+							<div>&nbsp;</div>
+							<div class='input-group'>
+								<div class='input-group-addon'>Date</div>
+								<input type='text' datepicker-popup="MM/dd/yyyy" show-button-bar='false' min-date='minDate' max-date='maxDate' is-open="date_open" ng-click="date_open = true" class='form-control' ng-model='checkin.date'>
+							</div>
 						</div>
 					</div>
-					<div class='well'>
-						<legend>Find vouchers by code</legend>
+				</div>
+				<div class='col-xs-12 col-sm-4'>
+					<div class='well' style='min-height: 176px;'>
+						<label>Find vouchers by code</label>
 						<div class='input-group'>
 							<input type='text' class='form-control' ng-model='search.code' placeholder='Voucher code'>
 							<div class='input-group-btn'>
@@ -38,8 +41,10 @@
 							</div>
 						</div>
 					</div>
-					<div class='well'>
-						<legend>Find vouchers by phone number</legend>
+				</div>
+				<div class='col-xs-12 col-sm-4'>
+					<div class='well' style='min-height: 176px;'>
+						<label>Find vouchers by phone number</label>
 						<div class='input-group'>
 							<input type='text' class='form-control' ng-model='search.number' placeholder='10 digit mobile number'>
 							<div class='input-group-btn'>
@@ -48,13 +53,13 @@
 						</div>
 					</div>
 				</div>
-				<div class='col-xs-12 col-md-6 jumbotron'>
+				<div class='col-xs-12 jumbotron'>
 					<div ng-if='show_msg' class='alert alert-warning'>
 						<h4>No matching  coupon found</h4>
 					</div>
 					<div ng-if='show_vouchers'>
 						
-						<div class='col-xs-12 well well-lg' ng-repeat='voucher in user_vouchers'>
+						<div class='col-xs-12 col-sm-6 col-lg-4 well well-lg' ng-repeat='voucher in user_vouchers'>
 							<legend>{{voucher.code}}</legend>
 							<legend>{{voucher.coupon_code}}</legend>
 							<h2>{{voucher.header}}</h2>
@@ -67,13 +72,13 @@
 								<a class='btn btn-block btn-primary' ng-click='redeemUserCoupon(voucher.code)' ng-if='voucher.status==="active" && voucher.lapse_date > today && !voucher.used_details.used_time' >Redeem</a>
 							</div>
 							<div class='text-center'>
-								<a class='btn btn-block btn-warning' ng-if='voucher.lapse_date <= today && !voucher.used_details.used_time'>Expired</a>
+								<a class='btn btn-block btn-warning' ng-if='voucher.lapse_date <= today && !voucher.used_details.used_time' disabled>Expired</a>
 							</div>
 							<div class='text-center'>
-								<a class='btn btn-block btn-success' ng-if='voucher.lapse_date > today && voucher.status==="social_pool" && !voucher.used_details.used_time'>Social Pool</a>
+								<a class='btn btn-block btn-success' ng-if='voucher.lapse_date > today && voucher.status==="social_pool" && !voucher.used_details.used_time' disabled>Social Pool</a>
 							</div>
 							<div class='text-center'>
-								<a class='btn btn-block btn-danger' ng-if='voucher.used_details.used_time'>Redeemed</a>
+								<a class='btn btn-block btn-danger' ng-if='voucher.used_details.used_time' disabled>Redeemed</a>
 							</div>
 						</div>
 					</div>
