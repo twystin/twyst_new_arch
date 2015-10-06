@@ -8,6 +8,7 @@ var mongoose = require('mongoose');
 var ObjectId = mongoose.Types.ObjectId;
 var Event = mongoose.model('Event');
 var User = mongoose.model('User');
+var Transporter = require('../../transports/transporter');
 
 module.exports.get_event_list = function(user, event_type) {
   var deferred = Q.defer();
@@ -351,6 +352,28 @@ function updateEventForMerchant(user, event) {
           message: 'Event Cannot be updated right now'
         });
       } else {
+        User.findById(event.event_user).then(function(err, event_user) {
+          if(err || !user) {
+            logger.error(err);
+          } else {
+            var gcmId = _.find(event_user.push_ids, function(push_id) {
+              return push_id.type === 'gcm';
+            });
+          }
+        })
+        var transporter = require('./transporter');
+
+        var payload = {};
+        payload.body = "Your bill for " + event.event_meta;
+        payload.head = "twyst push";
+        //meta.gcms = 'APA91bHQlY1BZsbAjRn4efqqDL8feNpI8YsCnVdTOf4aSsls5RopM3k4sSnsUvqf447q_bX8e5oClBU6QIjjJIFyHW2DLiG0PItd9-Oy65S3Dovr-MSLgNQ';
+        payload.gcms = 'APA91bGO-CKgji2g3iVY5Cqn-6Z_hnU33gJjHRiXSSctLbBSCthets2FLZIGQFKv6W8e8gAtVWF08eOybtO8OhNozkO0sTjyjZqBk1xtLw2O9O-jMw8ODN4oHEFvByP-oK_ntag8GsCV';
+
+        transporter.send('push', 'gcm', payload).then(function(data) {
+          console.log(data);
+        }, function(err) {
+          console.log(err);
+        })
         deferred.resolve({
           data: event,
           message: 'Event update successful.'
