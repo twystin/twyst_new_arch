@@ -330,11 +330,11 @@ function pick_outlet_fields(params) {
       
       return massaged_item;
     });
-    params.outlets = _.each(params.outlets, function(item) {
+    params.outlets = _.filter(params.outlets, function(item) {
       if(item && !item.offers) {
         return false;
       }
-      else if(item && item.offer && !item.offers.length) {
+      else if(item && item.offers && !item.offers.length) {
         return false;
       }
       else{
