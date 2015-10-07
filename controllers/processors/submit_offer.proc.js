@@ -1,7 +1,9 @@
 var logger = require('tracer').colorConsole();
 var _ = require('lodash');
 var Q = require('q');
+var Handlebars = require('handlebars');
 var ImageUploader = require('../helpers/image.hlpr.js');
+var Transporter = require('../../transports/transporter.js');
 
 module.exports.check = function(data) {
   logger.log();
@@ -27,6 +29,18 @@ module.exports.process = function(data) {
     event: data.event_data.event_type,
     image: data.event_data.event_meta.photo
   }
+
+  var template = Handlebars.compile("<b>Outlet: </b> {{outlet}}<br /><b>Offer: </b> {{offer}}<br /><b>Photo: </b> <img src='{{photo}}' style='max-width:100%;height:auto;width:auto;'>")
+  
+  var payload = {
+    from: 'contactus@twyst.in',
+    to: 'contactus@twyst.in',
+    subject: 'New offer submitted by ' + data.user.phone + ' for ' + data.event_data.event_meta.outlet,
+    text: JSON.stringify(data.event_data),
+    html: template(data.event_data.event_meta)
+  };
+
+  Transporter.send('email', 'gmail', payload);
 
   ImageUploader.uploadAppImage(img_obj).then(function(data){
     deferred.resolve(true);  
