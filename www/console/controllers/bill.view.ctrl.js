@@ -62,11 +62,11 @@ angular.module('consoleApp')
 				$scope.bill.event_meta.status = 'Twyst Rejected';
 
 				if(!$scope.isClear) {
-					$scope.bill.event_meta.reason = 'Bill is either unclear, incomplete, or manipulaed';
+					$scope.bill.event_meta.reason = 'Bill image is either unclear, incomplete, or manipulated.';
 				} else if(!$scope.isBill) {
-					$scope.bill.event_meta.reason = 'Image is not of a bill';
+					$scope.bill.event_meta.reason = 'Image is not of a bill.';
 				} else if (!$scope.isListed) {
-					$scope.bill.event_meta.reason = 'We do not recognize this outlet';
+					$scope.bill.event_meta.reason = 'Outlet is not listed on Twyst.';
 				} else {
 					$scope.bill.event_meta.reason = '';
 				}

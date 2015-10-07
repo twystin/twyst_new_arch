@@ -62,15 +62,11 @@ function validate_request(data) {
     console.log()
     var phone = _.get(passed_data, 'event_data.event_meta.phone'),
         date = _.get(passed_data, 'event_data.event_meta.date'),
+        date = new Date(date),
         today = new Date(),
         message = _.get(passed_data, 'event_data.event_meta.message'),
         sms_sender_id = _.get(passed_data, 'event_data.event_meta.sms_sender_id'),
         outlet = _.get(passed_data, 'event_data.event_meta.outlet');
-    if (!date) {
-        date = new Date();
-    } else {
-        date = new Date(date);
-    }
 
     if (!phone || !/^[0-9]{10}$/.test(phone)) {
         deferred.reject('Phone number missing or invalid');
@@ -116,14 +112,15 @@ function validate_request(data) {
 function already_checked_in(data) {
     logger.log();
     var deferred = Q.defer();
-    var THREE_HOURS = new Date(Date.now() - 10800000);
-    var FIVE_MINS = new Date(Date.now() - 300000);
 
-    var deferred = Q.defer();
+    var date = new Date(data.event_data.event_meta.date);
+    console.log(date)
+    var THREE_HOURS =  new Date(date.getTime() - 10800000);
+    var FIVE_MINS = new Date(date.getTime() -  300000);
 
     var user_id = _.get(data, 'user._id');
     var outlet_id = _.get(data, 'outlet._id');
-
+    console.log(THREE_HOURS)
     Event.find({
         'event_user': user_id,
         'event_type': 'checkin',
@@ -143,6 +140,8 @@ function already_checked_in(data) {
             }
 
             var too_soon = _.find(events, function(event) {
+                //console.log(event.event_date)
+                //console.log(FIVE_MINS)
                 return event.event_date > FIVE_MINS;
             });
 
@@ -176,46 +175,55 @@ function check_and_create_coupon(data) {
         'offer_type': 'checkin'
     }), 'rule.event_count');
     
-    calculate_checkin_counts(data, function(data){
+    calculate_checkin_counts(sorted_checkin_offers, user_id, function(err, offers_with_checkin_count){
+        if(err) {
+            deferred.reject(err);
+        }
+        var matching_offer = find_matching_offer(offers_with_checkin_count);
         
-        //console.log(data.offers)
-        var matching_offer = find_matching_offer(data.offers);
-        
-        console.log(matching_offer);
         if (matching_offer && isNaN(matching_offer)) {
             create_coupon(matching_offer, user_id, outlet_id).then(function(data) {
                 if (data.coupons && data.coupons.length) {
                     passed_data.user.coupons.push(data.coupons[data.coupons.length - 1]);
                 }
-                passed_data.message = 'Check-in successful at '+ passed_data.outlet.basics.name +' on '+ formatDate(new Date(passed_data.event_data.event_meta.date)) +". Reward unlocked! Your voucher will be available on your Twyst app soon. Don't have the app? Get it now at http://twy.st/app";                
+                //console.log(passed_data.outlet)
+                if(passed_data.outlet.contact.location.locality_1) {
+                    passed_data.message = 'Check-in successful at '+ passed_data.outlet.basics.name +','  + passed_data.outlet.contact.location.locality_1.toString()+' on '+ formatDate(new Date(passed_data.event_data.event_meta.date)) +". Reward unlocked! Your voucher will be available on your Twyst app soon. Don't have the app? Get it now at http://twy.st/app";                
+                    
+                }
+                else{
+                    passed_data.message = 'Check-in successful at '+ passed_data.outlet.basics.name +','  + passed_data.outlet.contact.location.locality_2.toString()+' on '+ formatDate(new Date(passed_data.event_data.event_meta.date)) +". Reward unlocked! Your voucher will be available on your Twyst app soon. Don't have the app? Get it now at http://twy.st/app";                                    
+                }
+                
                 deferred.resolve(passed_data);
             }, function(err) {
                 deferred.reject('Could not create coupon' + err);
             })
         } else if (!isNaN(matching_offer)) {
             console.log('locked_offer');
-            passed_data.message = 'Check-in successful at '+ passed_data.outlet.basics.name +' on '+ formatDate(new Date(passed_data.event_data.event_meta.date)) +'. You are '+ matching_offer +' check-in(s) away from your next reward. Find '+ passed_data.outlet.basics.name + ' on Twystat http://twy.st/app';
-            data.checkins_to_go = matching_offer;
-            deferred.resolve(data);
+            if(passed_data.outlet.contact.location.locality_1) {
+                passed_data.message = 'Check-in successful at '+ passed_data.outlet.basics.name + ','  + passed_data.outlet.contact.location.locality_1.toString()+' on '+ formatDate(new Date(passed_data.event_data.event_meta.date)) +'. You are '+ matching_offer +' check-in(s) away from your next reward. Find '+ passed_data.outlet.basics.name + ' on Twystat http://twy.st/app';                
+                
+            }
+            else{
+                passed_data.message = 'Check-in successful at '+ passed_data.outlet.basics.name + ','  + passed_data.outlet.contact.location.locality_2.toString()+' on '+ formatDate(new Date(passed_data.event_data.event_meta.date)) +'. You are '+ matching_offer +' check-in(s) away from your next reward. Find '+ passed_data.outlet.basics.name + ' on Twystat http://twy.st/app';                                    
+            }
+            
+            passed_data.checkins_to_go = matching_offer;
+            deferred.resolve(passed_data);
         } else {
             deferred.reject('no matching offer for user');
-        }
-        
-        return deferred.promise;
-        
-        
+        }        
     })
+    return deferred.promise;
 }
 
-function calculate_checkin_counts(passed_data, callback) {
+function calculate_checkin_counts(sorted_offers, user_id, callback) {
     logger.log();
-    var deferred = Q.defer();
-    var i, next = [],
-        checkins;
-    var count, match, event_start, event_end, start_date, event_date;
+    
     //console.log(passed_data.outlet.offers)
     var offers = [];
-    async.each(passed_data.outlet.offers, function(offer, callback) {
+    async.each(sorted_offers, function(offer, callback) {
         var outlets = _.map(offer.offer_outlets, function(offer_id){
             return ObjectId(offer_id);
         })
@@ -223,7 +231,7 @@ function calculate_checkin_counts(passed_data, callback) {
         var end_date = new Date(offer.offer_end_date);
 
         Event.find({
-            event_user: passed_data.user._id,
+            event_user: user_id,
             event_type: 'checkin',
             event_outlet: {$in: outlets},
             event_date: {$gte: start_date, $lte: end_date}
@@ -231,38 +239,30 @@ function calculate_checkin_counts(passed_data, callback) {
         }).exec(function(err, events) {
             if (err) {
                 console.log(err)
-                deferred.reject('Could not get user events');
+                callback(err);
             } else {
-                //console.log(events.length)
-                offer.checkin_count = events.length;
-                //var start_date = new Date(offer.offer_start_date);
-                //var end_date = new Date(offer.offer_end_date);
-                //checkins = 1; // TO COUNT THIS CHECKIN AS WELL
-                //_.each(events, function(event) {
-                    //if (event.event_date.getTime() >= start_date.getTime() && event.event_date.getTime() <= end_date.getTime()) {
-                    //    checkins += 1;
-                    //}
-                //});
-                //offer.checkin_count = checkins;   
+                offer.checkin_count = events.length+1;                
                 offers.push(offer);
-                //console.log(offer)
                 callback();
             }
         });
         
-    }, function() {
-        passed_data.offers = offers;
-        callback(passed_data);
+    }, function(err) {
+        if(err) {
+            callback(err);    
+        }
+        else{
+            callback(null, offers);    
+        }
+        
     });
 }
 
 function find_matching_offer(offers) {
     logger.log();
-    var deferred = Q.defer();
-    var i, next = [],
-        checkins;
-    var count, match, event_start, event_end, start_date, event_date;
-    //console.log(passed_data.outlet.offers);
+    var i, next = [];
+    var count, match, event_start, event_end ;
+
     for (i = 0; i < offers.length; i++) {
 
         count = _.get(offers[i], 'rule.event_count');
@@ -311,7 +311,7 @@ function find_matching_offer(offers) {
             next.push(checkins_to_go);
         }
     }
-    //console.log('next', next);
+    
     if (next.length) {
         return _.sortBy(next, function(num) {
             return ( num);
@@ -341,7 +341,7 @@ function create_coupon(offer, user, outlet) {
         _id: mongoose.Types.ObjectId(),
         code: code,
         issued_for: offer._id,
-        coupon_source: 'PANEL',
+        coupon_source: 'BULK',
         header: offer.actions.reward.header,
         line1: offer.actions.reward.line1,
         line2: offer.actions.reward.line2,
@@ -382,6 +382,7 @@ function create_coupon(offer, user, outlet) {
 }
 
 function update_checkin_counts(data) {
+    logger.log();
     // UPDATE CACHES?
     var deferred = Q.defer();
     
@@ -414,9 +415,10 @@ function send_sms(data) {
     var deferred = Q.defer();
     
     var payload = {};
-    payload.from = data.event_data.event_meta.sms_sender_id;
+    payload.from = 'TWYSTR';
     payload.message = data.message;
     payload.phone = data.event_data.event_meta.phone;
+    console.log(payload)
     Transporter.send('sms', 'vf', payload);
     
     deferred.resolve(data);
