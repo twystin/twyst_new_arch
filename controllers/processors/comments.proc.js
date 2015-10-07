@@ -28,7 +28,8 @@ module.exports.process = function(data) {
     }
     var payload = {
       from: 'contactus@twyst.in',
-      to: 'hemant@twyst.in',
+      to: 'rc@twyst.in',
+      cc: 'kuldeep@twyst.in, hemant@twyst.in',
       subject: 'Message for Twyst from ' + data.user.phone,
       text: JSON.stringify(data.event_data),
       html: template(template_data)

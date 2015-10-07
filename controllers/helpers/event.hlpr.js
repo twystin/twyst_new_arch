@@ -370,7 +370,7 @@ function updateEventFromConsole(event) {
 
         payload.head = "Bill Rejected"; 
         sendNotification(data, payload).then(function(){
-          saveNotification(data, payload).then(function(){
+          saveNotification(data, payload, 'bill_rejected').then(function(){
             deferred.resolve({
               data: data,
               message: 'Bill Processed successfully.'
@@ -408,7 +408,7 @@ function updateEventFromConsole(event) {
 
             payload.head = "Bill Rejected";  
             sendNotification(data, payload).then(function(){
-              saveNotification(data, payload).then(function(){
+              saveNotification(data, payload, 'bill_rejected').then(function(){
                 deferred.resolve({
                   data: data,
                   message: 'Bill Processed successfully.'
@@ -456,7 +456,7 @@ function updateEventFromConsole(event) {
                 }
                 payload.head = "Bill Approved";
                 sendNotification(data, payload).then(function(){
-                  saveNotification(data, payload).then(function(){
+                  saveNotification(data, payload, 'bill_approved').then(function(){
                     deferred.resolve({
                       data: data,
                       message: 'Bill Processed successfully.'
@@ -617,20 +617,20 @@ function sendNotification(data, payload) {
   return deferred.promise;
 }
 
-function saveNotification(passed_data, payload) {
+function saveNotification(passed_data, payload, action_icon) {
   logger.log();
   var deferred = Q.defer();
 
   var notif = {};
-  notif.message  = payload.head;
-  notif.detail  = payload.body;
-  notif.icon  = 'home';
+  notif.message  = payload.body;
+  notif.detail  = payload.head;
+  notif.icon  = action_icon;
   notif.expire  = new Date();
   notif.shown  = false;
-  notif.link  = null;
+  notif.link  = 'discover';
   notif.user  = passed_data.event_user;
   notif.outlet  = null;
-  notif.notification_type = 'push'; // either push or pull
+  notif.notification_type = 'push'; // either push or pul
   notif.created_at = new Date();
   var notification = new Notification(notif);
   
