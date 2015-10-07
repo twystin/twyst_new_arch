@@ -9,19 +9,25 @@ var ObjectId = mongoose.Types.ObjectId;
 var Event = mongoose.model('Event');
 var User = mongoose.model('User');
 var Transporter = require('../../transports/transporter');
+var OutletHelper = require('./outlet.hlpr');
+var Utils = require('../../common/datetime.hlpr.js');
+var Cache = require('../../common/cache.hlpr');
+var Notification = mongoose.model('Notification');
 
 module.exports.get_event_list = function(user, event_type) {
   var deferred = Q.defer();
 
   if (user.role > 5) {
     rejectUser(deferred);
-  } else if (user.role > 2) {
+  } 
+  else if (user.role > 2) {
     listEventsForMerchant(user, event_type).then(function(data) {
       deferred.resolve({data: data.data, message: data.message});
     }, function(err) {
       deferred.reject({err: err.err, message: err.message});
     });
-  } else {
+  } 
+  else {
     listEventsForAdmin(event_type).then(function(data) {
       deferred.resolve({data: data.data, message: data.message});
     }, function(err) {
@@ -124,7 +130,7 @@ module.exports.update_event = function(user, event) {
       });
     });
   } else {
-    updateEventForAdmin(event).then(function(data) {
+    updateEventFromConsole(event).then(function(data) {
       deferred.resolve({
         data: data.data,
         message: data.message
@@ -165,7 +171,7 @@ function listEventsForMerchant(user, event_type) {
 function listEventsForAdmin(event_type) {
   logger.log();
   var deferred = Q.defer();
-  if(event_type==='upload_bill') {
+  if(event_type === 'upload_bill') {
     getBillListForAdmin().then(function(data) {
       deferred.resolve({data: data.data, message: data.message});
     }, function(err) {
@@ -256,7 +262,7 @@ function getEventForMerchant(user, event_id) {
     } else {
       event = event.toJSON();
       var user_outlets = _.map(user.outlets, function(outlet) { return outlet.toString(); });
-      if(_.has(event, 'event_outlet') && user_outlets.indexOf(event.event_outlet.toString())===-1) {
+      if(_.has(event, 'event_outlet') && user_outlets.indexOf(event.event_outlet.toString()) === -1) {
         deferred.reject({
           err: null,
           message: 'Not authorized'
@@ -286,9 +292,7 @@ function processUploadBillForAdmin(event) {
       });
     } else {
       event = event.toJSON();
-      logger.log(events);
       var coupon_ids = _.map(events, 'event_meta.offer_group');
-      logger.log(coupon_ids);
       User.findOne({
         _id: ObjectId(event.event_user)
       }).exec(function(err, event_user) {
@@ -299,7 +303,6 @@ function processUploadBillForAdmin(event) {
           });
         } else {
           var coupons = _.filter(event_user.coupons, function(coupon) {
-            logger.log(coupon);
             return coupon.status==='redeemed' && coupon.code && coupon_ids.indexOf(coupon.issued_for.toString())===-1;
           });
           var pending = [];
@@ -338,73 +341,314 @@ function updateEventForMerchant(user, event) {
       message: 'Not authorized'
     });
   } else {
-    Event.findOneAndUpdate({
-      _id: ObjectId(event._id),
-    }, {
-      $set: {
-        "event_meta": event.event_meta,
-        event_outlet: event.event_outlet
-      }
-    }).exec(function(err, event) {
-      if (err || !event) {
-        deferred.reject({
-          err: err || true,
-          message: 'Event Cannot be updated right now'
-        });
-      } else {
-        User.findById(event.event_user).then(function(err, event_user) {
-          if(err || !user) {
-            logger.error(err);
-          } else {
-            var gcmId = _.find(event_user.push_ids, function(push_id) {
-              return push_id.type === 'gcm';
-            });
-          }
-        })
-        var transporter = require('./transporter');
-
-        var payload = {};
-        payload.body = "Your bill for " + event.event_meta;
-        payload.head = "twyst push";
-        //meta.gcms = 'APA91bHQlY1BZsbAjRn4efqqDL8feNpI8YsCnVdTOf4aSsls5RopM3k4sSnsUvqf447q_bX8e5oClBU6QIjjJIFyHW2DLiG0PItd9-Oy65S3Dovr-MSLgNQ';
-        payload.gcms = 'APA91bGO-CKgji2g3iVY5Cqn-6Z_hnU33gJjHRiXSSctLbBSCthets2FLZIGQFKv6W8e8gAtVWF08eOybtO8OhNozkO0sTjyjZqBk1xtLw2O9O-jMw8ODN4oHEFvByP-oK_ntag8GsCV';
-
-        transporter.send('push', 'gcm', payload).then(function(data) {
-          console.log(data);
-        }, function(err) {
-          console.log(err);
-        })
-        deferred.resolve({
-          data: event,
-          message: 'Event update successful.'
-        });
-      }
+    deferred.resolve({
+      data: event,
+      message: 'Event update successful.'
     });
+    
   }
   return deferred.promise;
 }
 
-function updateEventForAdmin(event) {
+function updateEventFromConsole(event) {
   logger.log();
   var deferred = Q.defer();
+  if(event.event_meta.status === 'Twyst Rejected') {
+    updateBillStatus(event)
+      .then(function(data){
+        return getUserGcmId(event)
+      })
+      .then(function(data) {
+        return getOutletInfo(data)
+      })
+      .then(function(data) {
+        var payload = {};
+        console.log('rejected')         
+        payload.body = "Your bill for " + data.event_meta.outlet_name + ' dated ' 
+        +data.event_meta.bill_date+
+        ' has been rejected! ' + data.event_meta.reason;  
+
+        payload.head = "Bill Rejected"; 
+        sendNotification(data, payload).then(function(){
+          saveNotification(data, payload).then(function(){
+            deferred.resolve({
+              data: data,
+              message: 'Bill Processed successfully.'
+            }); 
+          }) 
+        })
+      });
+  }
+  else{
+    Event.findOne({
+    _id: {$nin: [event._id]},
+    event_outlet: event.event_outlet,
+    'event_meta.bill_number': event.event_meta.bill_number,
+    'event_meta.bill_amount': event.event_meta.bill_amount
+    }).exec(function(err, already_submitted) {
+      if(err) {
+        console.log(err)
+        deferred.reject({
+          err: err || null, 
+          message: "Unable to retrieve bills" 
+        });
+      } 
+      else if(already_submitted){
+        event.event_meta.status = 'Twyst Rejected';
+        updateBillStatus(event)
+          .then(function(data){
+            return getUserGcmId(event)
+          })
+          .then(function(data){
+            console.log('already uploaded');
+            var payload = {};
+            payload.body = "Your bill for " + data.event_meta.outlet_name + ' dated ' 
+              +data.event_meta.bill_date+
+              ' has been rejected! This bill has been already uploaded on Twyst by someone else. ';  
+
+            payload.head = "Bill Rejected";  
+            sendNotification(data, payload).then(function(){
+              saveNotification(data, payload).then(function(){
+                deferred.resolve({
+                  data: data,
+                  message: 'Bill Processed successfully.'
+                }); 
+              }, function(err) {
+                deferred.reject({
+                  err: err || true,
+                  message: data.message
+                }); 
+              });
+            }, function(err) {
+              deferred.reject({
+                err: err || true,
+                message: data.message
+              }); 
+            });
+            
+          });
+      }
+      else{
+        updateBillStatus(event)
+          .then(function(data){
+            return getUserGcmId(event)
+          })
+          .then(function(data) {
+            return getOutletInfo(data)
+          })
+          .then(function(data) {
+            var payload = {};
+            if(data.event_meta.status === 'Twyst Approved') {
+              console.log('approved');
+        
+              update_twyst_bucks(data).then(function(data){
+                if(data.outlet.data.contact.location.locality_1.toString()) {
+                  payload.body = "Your bill for " + data.outlet.data.basics.name + ','+ 
+                  data.outlet.data.contact.location.locality_1.toString() + 
+                  ',dated '+data.event_meta.bill_date+
+                  ' has been approved! You have checked-in and earned 50 Twyst Bucks';  
+                }
+                else{
+                  payload.body = "Your bill for " + data.outlet.data.basics.name + ','+ 
+                  data.outlet.data.contact.location.locality_2.toString() + 
+                  ',dated '+data.event_meta.bill_date+
+                  ' has been approved! You have checked-in and earned 50 Twyst Bucks';  
+                }
+                payload.head = "Bill Approved";
+                sendNotification(data, payload).then(function(){
+                  saveNotification(data, payload).then(function(){
+                    deferred.resolve({
+                      data: data,
+                      message: 'Bill Processed successfully.'
+                    }); 
+                  }, function(err) {
+                    deferred.reject({
+                      err: err || true,
+                      message: data.message
+                    }); 
+                  });
+                }, function(err) {
+                  deferred.reject({
+                    err: err || true,
+                    message: data.message
+                  }); 
+                });
+
+              }, function(err) {
+                deferred.reject({
+                  err: err || true,
+                  message: data.message
+                }); 
+              });
+                
+            }
+        })
+      }
+    })  
+  }
+
+  return deferred.promise;
+}
+
+function updateBillStatus(passed_data) {
+  logger.log();
+  var deferred = Q.defer();
+
   Event.findOneAndUpdate({
-    _id: ObjectId(event._id),
+    _id: ObjectId(passed_data._id),
   }, {
     $set: {
-      "event_meta": event.event_meta
+      event_meta: passed_data.event_meta,
+      event_outlet: passed_data.event_outlet
     }
-  }).exec(function(err, event) {
-    if (err || !event) {
+  }).exec(function(err, updated_event) {
+    if (err || !updated_event) {
       deferred.reject({
         err: err || true,
         message: 'Event Cannot be updated right now'
       });
-    } else {
+    }       
+    else {
       deferred.resolve({
-        data: event,
-        message: 'Event update successful.'
+        data: passed_data, 
+        message: 'bill status updated' 
       });
     }
+  }); 
+  return deferred.promise; 
+}
+
+function getUserGcmId(passed_data){
+  logger.log();
+  var deferred = Q.defer();
+
+  User.findOne({_id: passed_data.event_user}, {}, function(err, event_user) {
+    if(err || !event_user) {
+      console.log(err);
+      deferred.reject(err);
+    } 
+    else {
+      passed_data.user = event_user;
+
+      deferred.resolve(passed_data);
+        
+    }
+      
+  }) 
+  return deferred.promise;
+}
+
+function getOutletInfo(passed_data){
+  logger.log();
+  var deferred = Q.defer();
+  OutletHelper.get_outlet(passed_data.event_outlet).then(function(data) {
+    passed_data.outlet = data
+    deferred.resolve(passed_data);
+  }, function(err) {
+    deferred.resolve(passed_data);
   });
+  return deferred.promise;
+}
+
+function update_twyst_bucks(data) {
+  logger.log();
+  var deferred = Q.defer();
+
+  var event_type = 'upload_bill';
+  var available_twyst_bucks = data.user.twyst_bucks;
+  var update_twyst_bucks = {
+    $set: {
+
+    }
+  }
+
+  Cache.hget('twyst_bucks', "twyst_bucks_grid", function(err, reply) {
+    if (err || !reply) {
+      deferred.reject('Could not get bucks grid' + err);
+    } else {
+
+      var bucks_grid = JSON.parse(reply);
+
+      _.find(bucks_grid, function(current_event) {
+        if (current_event.event === event_type) {
+         
+          data.user.twyst_bucks = available_twyst_bucks + current_event.bucks;
+          
+          update_twyst_bucks.$set.twyst_bucks = data.user.twyst_bucks;
+
+          User.findOneAndUpdate({
+            _id: data.user._id
+          }, update_twyst_bucks, function(err, user) {
+            if (err) {
+              deferred.reject('Could not update user bucks' + err);
+            } else {
+              console.log('updated bucks')
+              deferred.resolve(data);
+            }
+          });
+        }
+      })
+      
+    }
+  });  
+  
+  return deferred.promise;
+}
+
+function sendNotification(data, payload) {
+  logger.log();
+  var deferred = Q.defer();
+ 
+  if(data.user.push_ids && data.user.push_ids.length) {
+    payload.gcms = data.user.push_ids[data.user.push_ids.length-1].push_id;    
+  }
+
+  Transporter.send('push', 'gcm', payload).then(function(){
+    deferred.resolve({
+      data: data,
+      message: 'notification sent.'
+    });    
+  }, function(err) {
+    deferred.reject({
+      err: err || true,
+      message: data.message
+    }); 
+  });
+  return deferred.promise;
+}
+
+function saveNotification(passed_data, payload) {
+  logger.log();
+  var deferred = Q.defer();
+
+  var notif = {};
+  notif.message  = payload.head;
+  notif.detail  = payload.body;
+  notif.icon  = 'home';
+  notif.expire  = new Date();
+  notif.shown  = false;
+  notif.link  = null;
+  notif.user  = passed_data.event_user;
+  notif.outlet  = null;
+  notif.notification_type = 'push'; // either push or pull
+  notif.created_at = new Date();
+  var notification = new Notification(notif);
+  
+  notification.save(function(err, saved_event){
+    if(err || !saved_event) {
+      console.log(err)
+      deferred.reject({
+        err: err || true,
+        message: data.message
+      }); 
+    }
+    else{
+      console.log('notif saved')
+      deferred.resolve({
+        data: passed_data,
+        message: 'notification listed successfully.'
+      }); 
+    }
+  })
   return deferred.promise;
 }
