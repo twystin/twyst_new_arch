@@ -21,14 +21,17 @@ module.exports.check = function(data) {
 module.exports.process = function(data) {
   var deferred = Q.defer();
   deferred.resolve(true);
-  var template = Handlebars.compile("<b>Comments: </b> {{comments}}<br />");
-    
+  var template = Handlebars.compile("{{#if email}}<b>Email: {{email}}</b><br />{{/if}}<b>Comments: </b> {{comments}}<br />");
+    var template_data = _.cloneDeep(data.event_data.event_meta);
+    if(data.user && data.user.email) {
+      template_data.email = data.user.email;
+    }
     var payload = {
       from: 'contactus@twyst.in',
-      to: 'contactus@twyst.in',
+      to: 'hemant@twyst.in',
       subject: 'Message for Twyst from ' + data.user.phone,
       text: JSON.stringify(data.event_data),
-      html: template(data.event_data.event_meta)
+      html: template(template_data)
     };
     Transporter.send('email', 'gmail', payload);
   return deferred.promise;
