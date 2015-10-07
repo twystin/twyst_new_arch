@@ -35,7 +35,7 @@ function httpCheckin (phone, cb) {
 	event_data.event_meta.phone = phone;
 	event_data.event_meta.event_type = config.event_type;
 	event_data.event_outlet = config.event_outlet;
-	event_data.event_meta.date = new Date();
+	event_data.event_meta.date = new Date('09/15/2015');
 	event_data.event_meta.outlet = config.event_outlet;
 	event_data.event_meta.token = config.token;
 	rest.post(config.checkin_url+'?token='+config.token, {
