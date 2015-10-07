@@ -30,14 +30,17 @@ module.exports.process = function(data) {
 
     ImageUploader.uploadAppImage(img_obj).then(function(res){
       data.event_data.event_meta.photo = res.data.path;
-      var template = Handlebars.compile("<b>Outlet: </b> {{event_outlet}}<br /><b>Offer: </b> {{event_meta.offer}}<br /><b>Issue: </b> {{event_meta.issue}}<br /><b>Comment: </b> {{event_meta.comment}}<br /><img src='{{event_meta.photo}}' style='max-width:100%;width:auto;height:auto;'>");
-      console.log(template);
+      var template = Handlebars.compile("{{#if email}}<b>Email: {{email}}</b><br />{{/if}}<b>Outlet: </b> {{event_outlet}}<br /><b>Offer: </b> {{event_meta.offer}}<br /><b>Issue: </b> {{event_meta.issue}}<br /><b>Comment: </b> {{event_meta.comment}}<br /><img src='{{event_meta.photo}}' style='max-width:100%;width:auto;height:auto;'>");
+      var template_data = _.cloneDeep(data.event_data.event_meta);
+      if(data.user && data.user.email) {
+        template_data.email = data.user.email;
+      }
       var payload = {
         from: 'contactus@twyst.in',
         to: 'contactus@twyst.in',
         subject: 'Feedback submitted by ' + data.user.phone,
         text: JSON.stringify(data.event_data),
-        html: template(data.event_data)
+        html: template(template_data)
       };
       Transporter.send('email', 'gmail', payload);
 
@@ -49,14 +52,17 @@ module.exports.process = function(data) {
       });
     });
   } else {
-    var template = Handlebars.compile("<b>Outlet: </b> {{event_outlet}}<br /><b>Offer: </b> {{event_meta.offer}}<br /><b>Issue: </b> {{event_meta.issue}}<br /><b>Comment: </b> {{event_meta.comment}}");
-    
+    var template = Handlebars.compile("{{#if email}}<b>Email: {{email}}</b><br />{{/if}}<b>Outlet: </b> {{event_outlet}}<br /><b>Offer: </b> {{event_meta.offer}}<br /><b>Issue: </b> {{event_meta.issue}}<br /><b>Comment: </b> {{event_meta.comment}}");
+    var template_data = _.cloneDeep(data.event_data.event_meta);
+    if(data.user && data.user.email) {
+      template_data.email = data.user.email;
+    }
     var payload = {
       from: 'contactus@twyst.in',
       to: 'contactus@twyst.in',
       subject: 'Feedback submitted by ' + data.user.phone + ' for ' + data.outlet.basics.name + ', ' + (data.outlet.contact.location.locality_1[0]?data.outlet.contact.location.locality_1[0] + ', ': '') + data.outlet.contact.location.locality_2[0],
       text: JSON.stringify(data.event_data),
-      html: template(data.event_data)
+      html: template(template_data)
     };
     Transporter.send('email', 'gmail', payload);
     deferred.resolve(true);

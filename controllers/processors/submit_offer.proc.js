@@ -30,14 +30,17 @@ module.exports.process = function(data) {
     image: data.event_data.event_meta.photo
   }
 
-  var template = Handlebars.compile("<b>Outlet: </b> {{outlet}}<br /><b>Offer: </b> {{offer}}<br /><b>Photo: </b> <img src='{{photo}}' style='max-width:100%;height:auto;width:auto;'>")
-  
+  var template = Handlebars.compile("{{#if email}}<b>Email: {{email}}</b><br />{{/if}}<b>Outlet: </b> {{outlet}}<br /><b>Offer: </b> {{offer}}<br /><b>Photo: </b> <img src='{{photo}}' style='max-width:100%;height:auto;width:auto;'>")
+  var template_data = _.cloneDeep(data.event_data.event_meta);
+  if(data.user && data.user.email) {
+    template_data.email = data.user.email;
+  }
   var payload = {
     from: 'contactus@twyst.in',
     to: 'contactus@twyst.in',
     subject: 'New offer submitted by ' + data.user.phone + ' for ' + data.event_data.event_meta.outlet,
     text: JSON.stringify(data.event_data),
-    html: template(data.event_data.event_meta)
+    html: template(template_data)
   };
 
   Transporter.send('email', 'gmail', payload);

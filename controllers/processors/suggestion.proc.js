@@ -22,14 +22,17 @@ module.exports.check = function(data) {
 module.exports.process = function(data) {
   var deferred = Q.defer();
 
-  var template = Handlebars.compile("<b>Outlet: </b> {{outlet}}<br /><b>Location: </b> {{location}}<br /><b>Comment: </b> {{comment}}")
-
+  var template = Handlebars.compile("{{#if email}}<b>Email: {{email}}</b><br />{{/if}}<b>Outlet: </b> {{outlet}}<br /><b>Location: </b> {{location}}<br /><b>Comment: </b> {{comment}}")
+  var template_data = _.cloneDeep(data.event_data.event_meta);
+  if(data.user && data.user.email) {
+    template_data.email = data.user.email;
+  }
   var payload = {
     from: 'contactus@twyst.in',
     to: 'contactus@twyst.in',
     subject: 'New suggesstion from ' + data.user.phone,
     text: JSON.stringify(data.event_data),
-    html: template(data.event_data.event_meta)
+    html: template(template_data)
   };
   Transporter.send('email', 'gmail', payload);
   deferred.resolve(true);
