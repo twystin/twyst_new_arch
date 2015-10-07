@@ -1,6 +1,8 @@
 var logger = require('tracer').colorConsole();
 var _ = require('lodash');
 var Q = require('q');
+var Handlebars = require('handlebars');
+var Transporter = require('../../transports/transporter.js');
 
 var mongoose = require('mongoose');
 var RecoHelper = require('../helpers/reco.hlpr.js');
@@ -28,6 +30,18 @@ module.exports.check = function(data) {
 };
 module.exports.process = function(data) {
   var deferred = Q.defer();
+
+  var template = Handlebars.compile("<b>Outlet: </b> {{event_outlet}}<br /><b>Offer: </b> {{event_meta.offer}}<br /><b>Issue: </b> {{event_meta.issue}}<br /><b>Comment: </b> {{event_meta.comment}}");
+  
+  var payload = {
+    from: 'contactus@twyst.in',
+    to: 'contactus@twyst.in',
+    subject: 'Issue in offer for ' + data.user.phone,
+    text: JSON.stringify(data.event_data),
+    html: template(data.event_data)
+  };
+  Transporter.send('email', 'gmail', payload);
+
   deferred.resolve(true);
   return deferred.promise;
 };
