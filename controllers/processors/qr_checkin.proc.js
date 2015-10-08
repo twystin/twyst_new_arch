@@ -4,6 +4,7 @@ var _ = require('lodash');
 var Q = require('q');
 
 var mongoose = require('mongoose');
+var ObjectId = mongoose.Types.ObjectId;
 require('../../models/qr_code.mdl');
 require('../../models/event.mdl');
 require('../../models/user.mdl');
@@ -203,6 +204,7 @@ function check_and_create_coupon(data) {
     if (matching_offer && isNaN(matching_offer)) {
       create_coupon(matching_offer, user_id, outlet_id).then(function(data) {
         if(data.coupons && data.coupons.length) {
+            passed_data.new_coupon = data.coupons[data.coupons.length-1];
             passed_data.user.coupons.push(data.coupons[data.coupons.length-1]);
         }
         deferred.resolve(passed_data);
@@ -369,17 +371,47 @@ function update_checkin_counts(data) {
       var cmap = JSON.parse(reply);
       if(!cmap)
         cmap = {};
-      if(cmap[data.outlet._id]) {
-        cmap[data.outlet._id] += 1;
+      if(data.new_coupon) {
+        _.each(data.new_coupon.outlets, function(outlet) {
+          if(cmap[outlet]) {
+            cmap[outlet] += 1;
+          } else {
+            cmap[outlet] = 1;
+          }
+        });
+        Cache.hset(data.user._id, "checkin_map", JSON.stringify(cmap), function(err) {
+          if(err) {
+            logger.log(err);
+          }
+          deferred.resolve(data);
+        });
       } else {
-        cmap[data.outlet._id] = 1;
+        User.findOne({
+          role: 3,
+          outlets: {
+            $in: [ObjectId(data.event_data.event_outlet || data.outlet._id)]
+          }
+        }).exec(function(err, merchant_account) {
+          if(err || !merchant_account) {
+            logger.error(err);
+            deferred.resolve(data);
+          } else {
+            _.each(merchant_account.outlets, function(outlet) {
+              if(cmap[outlet]) {
+                cmap[outlet] += 1;
+              } else {
+                cmap[outlet] = 1;
+              }
+            })
+            Cache.hset(data.user._id, "checkin_map", JSON.stringify(cmap), function(err) {
+              if(err) {
+                logger.log(err);
+              }
+              deferred.resolve(data);
+            });
+          }
+        });
       }
-      Cache.hset(data.user._id, "checkin_map", JSON.stringify(cmap), function(err) {
-        if(err) {
-          logger.log(err);
-        }
-        deferred.resolve(data);
-      });
     }
   });
   return deferred.promise;

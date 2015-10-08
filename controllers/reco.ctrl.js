@@ -71,8 +71,10 @@ function set_user_checkins(params) {
         var outlets = params.outlets;
         if (cmap) {
           _.each(cmap, function(value, key) {
-            outlets[key].recco = outlets[key].recco || {};
-            outlets[key].recco.checkins = value;
+            if(outlets[key]) {
+              outlets[key].recco = outlets[key].recco || {};
+              outlets[key].recco.checkins = value;
+            }
           });
           params.outlets = outlets;
           deferred.resolve(params);

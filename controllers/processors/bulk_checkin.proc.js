@@ -135,9 +135,9 @@ function already_checked_in(data) {
             var same_outlet = _.filter(events, {
                 event_outlet: outlet_id
             });
-            if (same_outlet.length !== 0) {
-                deferred.reject('Already checked in here');
-            }
+            // if (same_outlet.length !== 0) {
+            //     deferred.reject('Already checked in here');
+            // }
 
             var too_soon = _.find(events, function(event) {
                 //console.log(event.event_date)
@@ -145,11 +145,11 @@ function already_checked_in(data) {
                 return event.event_date > FIVE_MINS;
             });
 
-            if (too_soon) {
-                deferred.reject('Checked in at another outlet less than 5 minutes ago!');
-            } else {
+            // if (too_soon) {
+            //     deferred.reject('Checked in at another outlet less than 5 minutes ago!');
+            // } else {
                 deferred.resolve(data);
-            }
+            // }
         } else {
             deferred.resolve(data);
         }
@@ -184,6 +184,7 @@ function check_and_create_coupon(data) {
         if (matching_offer && isNaN(matching_offer)) {
             create_coupon(matching_offer, user_id, outlet_id).then(function(data) {
                 if (data.coupons && data.coupons.length) {
+                    passed_data.new_coupon = data.coupons[data.coupons.length-1];
                     passed_data.user.coupons.push(data.coupons[data.coupons.length - 1]);
                 }
                 //console.log(passed_data.outlet)
@@ -382,32 +383,61 @@ function create_coupon(offer, user, outlet) {
 }
 
 function update_checkin_counts(data) {
-    logger.log();
-    // UPDATE CACHES?
-    var deferred = Q.defer();
-    
-    Cache.hget(data.user._id, "checkin_map", function(err, reply) {
-        if (err) {
+  // UPDATE CACHES?
+  var deferred = Q.defer();
+  
+  Cache.hget(data.user._id, "checkin_map", function(err, reply) {
+    if(err) {
+      logger.error(err);
+      deferred.resolve(data);
+    } else {
+      var cmap = JSON.parse(reply);
+      if(!cmap)
+        cmap = {};
+      if(data.new_coupon) {
+        _.each(data.new_coupon.outlets, function(outlet) {
+          if(cmap[outlet]) {
+            cmap[outlet] += 1;
+          } else {
+            cmap[outlet] = 1;
+          }
+        });
+        Cache.hset(data.user._id, "checkin_map", JSON.stringify(cmap), function(err) {
+          if(err) {
+            logger.log(err);
+          }
+          deferred.resolve(data);
+        });
+      } else {
+        User.findOne({
+          role: 3,
+          outlets: {
+            $in: [ObjectId(data.event_data.event_outlet || data.outlet._id)]
+          }
+        }).exec(function(err, merchant_account) {
+          if(err || !merchant_account) {
             logger.error(err);
             deferred.resolve(data);
-        } else {
-            var cmap = JSON.parse(reply);
-            if (!cmap)
-                cmap = {};
-            if (cmap[data.outlet._id]) {
-                cmap[data.outlet._id] += 1;
-            } else {
-                cmap[data.outlet._id] = 1;
-            }
+          } else {
+            _.each(merchant_account.outlets, function(outlet) {
+              if(cmap[outlet]) {
+                cmap[outlet] += 1;
+              } else {
+                cmap[outlet] = 1;
+              }
+            })
             Cache.hset(data.user._id, "checkin_map", JSON.stringify(cmap), function(err) {
-                if (err) {
-                    logger.log(err);
-                }
-                deferred.resolve(data);
+              if(err) {
+                logger.log(err);
+              }
+              deferred.resolve(data);
             });
-        }
-    });
-    return deferred.promise;
+          }
+        });
+      }
+    }
+  });
+  return deferred.promise;
 }
 
 function send_sms(data) {
