@@ -135,9 +135,9 @@ function already_checked_in(data) {
             var same_outlet = _.filter(events, {
                 event_outlet: outlet_id
             });
-            // if (same_outlet.length !== 0) {
-            //     deferred.reject('Already checked in here');
-            // }
+            if (same_outlet.length !== 0) {
+                deferred.reject('Already checked in here');
+            }
 
             var too_soon = _.find(events, function(event) {
                 //console.log(event.event_date)
@@ -145,11 +145,11 @@ function already_checked_in(data) {
                 return event.event_date > FIVE_MINS;
             });
 
-            // if (too_soon) {
-            //     deferred.reject('Checked in at another outlet less than 5 minutes ago!');
-            // } else {
+            if (too_soon) {
+                deferred.reject('Checked in at another outlet less than 5 minutes ago!');
+            } else {
                 deferred.resolve(data);
-            // }
+            }
         } else {
             deferred.resolve(data);
         }
