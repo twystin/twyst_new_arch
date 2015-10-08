@@ -31,9 +31,7 @@ angular.module('consoleApp')
 			});
 
 			$scope.approveBill = function() {
-				if(!$scope.bill.event_meta.merchant) {
-					toastr.error("Merchant Name required", "Validation Error");
-				} else if (!$scope.bill.event_meta.bill_number) {
+				if (!$scope.bill.event_meta.bill_number) {
 					toastr.error("Bill Number required", "Validation Error");
 				} else if (!$scope.bill.event_meta.timestamp) {
 					toastr.error("Bill date and time required", "Validation Error");
@@ -88,7 +86,7 @@ angular.module('consoleApp')
 			}
 
 			$scope.linkRedemption = function(issued_for) {
-				$scope.bill.event_meta.issued_for = issued_for;
+				$scope.bill.event_meta.status = 'Merchant Pending';
 			}
 		}
 	]);
