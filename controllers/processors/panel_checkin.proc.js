@@ -4,6 +4,7 @@ var _ = require('lodash');
 var Q = require('q');
 
 var mongoose = require('mongoose');
+var ObjectId = mongoose.Types.ObjectId;
 var dateFormat = require('dateformat')
 require('../../models/qr_code.mdl');
 require('../../models/event.mdl');
@@ -71,7 +72,7 @@ function validate_request(data) {
         deferred.reject('Phone number missing or invalid');
     }
 
-    if (!date || date.getTime() > today.getTime()) {
+    if (!date) {
         deferred.reject('Checkin-in cannot be set in the future');
     }
 
@@ -183,6 +184,7 @@ function check_and_create_coupon(data) {
         if (matching_offer && isNaN(matching_offer)) {
             create_coupon(matching_offer, user_id, outlet_id).then(function(data) {
                 if (data.coupons && data.coupons.length) {
+                    passed_data.new_coupon = data.coupons[data.coupons.length-1];
                     passed_data.user.coupons.push(data.coupons[data.coupons.length - 1]);
                 }
                 passed_data.message = 'Check-in successful at '+ passed_data.outlet.basics.name +' on '+ formatDate(new Date(passed_data.event_data.event_meta.date)) +". Reward unlocked! Your voucher will be available on your Twyst app soon. Don't have the app? Get it now at http://twy.st/app";                
@@ -339,30 +341,61 @@ function create_coupon(offer, user, outlet) {
 }
 
 function update_checkin_counts(data) {
-    // UPDATE CACHES?
-    var deferred = Q.defer();
-    Cache.hget(data.user._id, "checkin_map", function(err, reply) {
-        if (err) {
+  // UPDATE CACHES?
+  var deferred = Q.defer();
+  
+  Cache.hget(data.user._id, "checkin_map", function(err, reply) {
+    if(err) {
+      logger.error(err);
+      deferred.resolve(data);
+    } else {
+      var cmap = JSON.parse(reply);
+      if(!cmap)
+        cmap = {};
+      if(data.new_coupon) {
+        _.each(data.new_coupon.outlets, function(outlet) {
+          if(cmap[outlet]) {
+            cmap[outlet] += 1;
+          } else {
+            cmap[outlet] = 1;
+          }
+        });
+        Cache.hset(data.user._id, "checkin_map", JSON.stringify(cmap), function(err) {
+          if(err) {
+            logger.log(err);
+          }
+          deferred.resolve(data);
+        });
+      } else {
+        User.findOne({
+          role: 3,
+          outlets: {
+            $in: [ObjectId(data.event_data.event_outlet || data.outlet._id)]
+          }
+        }).exec(function(err, merchant_account) {
+          if(err || !merchant_account) {
             logger.error(err);
             deferred.resolve(data);
-        } else {
-            var cmap = JSON.parse(reply);
-            if (!cmap)
-                cmap = {};
-            if (cmap[data.outlet._id]) {
-                cmap[data.outlet._id] += 1;
-            } else {
-                cmap[data.outlet._id] = 1;
-            }
+          } else {
+            _.each(merchant_account.outlets, function(outlet) {
+              if(cmap[outlet]) {
+                cmap[outlet] += 1;
+              } else {
+                cmap[outlet] = 1;
+              }
+            })
             Cache.hset(data.user._id, "checkin_map", JSON.stringify(cmap), function(err) {
-                if (err) {
-                    logger.log(err);
-                }
-                deferred.resolve(data);
+              if(err) {
+                logger.log(err);
+              }
+              deferred.resolve(data);
             });
-        }
-    });
-    return deferred.promise;
+          }
+        });
+      }
+    }
+  });
+  return deferred.promise;
 }
 
 function send_sms(data) {
