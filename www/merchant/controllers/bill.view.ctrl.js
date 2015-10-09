@@ -9,7 +9,7 @@ angular.module('merchantApp')
 			})
 
 			$scope.approveBill = function() {
-				$scope.bill.event_meta.status = "Verified";
+				$scope.bill.event_meta.status = "verified";
 				merchantRESTSvc.updateBill($scope.bill).then(function(res) {
 					$scope.bill = res.data;
 				}, function(err) {
@@ -18,7 +18,7 @@ angular.module('merchantApp')
 			}
 
 			$scope.rejectBill = function() {
-				$scope.bill.event_meta.status = "Outlet Rejected";
+				$scope.bill.event_meta.status = "outlet_rejected";
 				$scope.bill.event_meta.is_rejected = true;
 				$scope.bill.event_meta.reason = 'Declined by the outlet';
 				merchantRESTSvc.updateBill($scope.bill).then(function(res) {

@@ -33,12 +33,13 @@ module.exports = function(app) {
 
   (function EventRoutes() {
     var EventCtrl = require('../controllers/event.ctrl');
-    app.get('/api/v4/events', EventCtrl.list_events);
-    app.get('/api/v4/events/upload_bill', EventCtrl.list_bills);
+    //app.get('/api/v4/events', EventCtrl.list_events);
+    app.get('/api/v4/events/list/:event_type', EventCtrl.list_events);
     app.get('/api/v4/events/retrieve/:event_id', EventCtrl.get_event);
+    app.put('/api/v4/events/update/:event_id', EventCtrl.update_event);
     var NotifCtrl = require('../controllers/notif.ctrl');
     app.get('/api/v4/events/:event_id', NotifCtrl.get_notif);
-    app.put('/api/v4/events/:event_id', EventCtrl.update_event);
+    
     app.post('/api/v4/events', EventCtrl.new);
 
     app.post('/api/v4/coupon/gift', EventCtrl.gift);

@@ -31,7 +31,7 @@ module.exports.process = function(data) {
     from: 'contactus@twyst.in',
     to: 'rc@twyst.in',
       cc: 'kuldeep@twyst.in, hemant@twyst.in',
-    subject: 'New suggesstion from ' + data.user.phone,
+    subject: 'New suggestion from ' + data.user.phone,
     text: JSON.stringify(data.event_data),
     html: template(template_data)
   };
