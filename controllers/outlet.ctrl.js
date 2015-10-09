@@ -379,7 +379,13 @@ function massage_offers(params) {
         }
         
         if (offer.offer_type === 'checkin') {
-          massaged_offer.checkins = item.recco && item.recco.checkins || 0;
+          massaged_offer.checkins = 0;
+          if(item.recco && item.recco.checkins) {
+            massaged_offer.checkins = _.filter(item.recco.checkins, function(checkin) {
+              return new Date(offer.offer_start_date) <= new Date(checkin) && new Date(offer.offer_end_date) > new Date(checkin);
+            }).length;
+          }
+          item.recco && item.recco.checkins || [];
           if (offer.rule.event_match === 'on every') {
             if(massaged_offer.checkins<offer.rule.event_start) {
               massaged_offer.next = offer.rule.event_start - massaged_offer.checkins; 
@@ -566,6 +572,7 @@ module.exports.get_user_coupons = function(req, res) {
     if(user.role>=6) {
       HttpHelper.error(res, null, "Unauthorized access");
     } else {
+      var THREE_HOURS = new Date(Date.now() - 10800000);
       User.findOne({
         phone: phone
       }).exec(function(err, user) {
@@ -579,7 +586,10 @@ module.exports.get_user_coupons = function(req, res) {
               return outlet.toString();
             });
             coupon.phone = user.phone;
-            if(coupon_outlets.indexOf(outlet_id)!==-1) {
+
+            if(coupon.issued_at>THREE_HOURS) {
+              return false
+            } else if(coupon_outlets.indexOf(outlet_id)!==-1) {
               return true;
             } else {
               return false;
@@ -669,9 +679,11 @@ function check_merchant_authorization(data) {
 function retrieve_coupon_info(data) {
   logger.log();
   var deferred = Q.defer();
-  
+
+  var THREE_HOURS = new Date(Date.now() - 10800000);
+
   User.findOne({
-      coupons: {$elemMatch: {code: data.code}}
+      coupons: {$elemMatch: {code: data.code, issued_at: { $lte: THREE_HOURS}}}
   }).exec(function(err, user) {
     if(err || !user) {
       logger.error(err);
@@ -772,7 +784,10 @@ module.exports.redeem_user_coupon = function(req, res) {
               if (err) {
                 HttpHelper.error(res, null, 'Error redeeming the coupon');
               } else {
-                HttpHelper.success(res, null, "Coupon redeemed successfully");
+                var redeemed_coupon = _.findWhere(user.coupons, {
+                  code: code
+                });
+                HttpHelper.success(res, redeemed_coupon || null, "Coupon redeemed successfully");
               }
             }
           );
