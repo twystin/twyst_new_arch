@@ -519,7 +519,7 @@ function create_event(data) {
     event.event_outlet = passed_data.outlet._id;
   }
 
-  event.event_date = new Date();
+  event.event_date = event.event_date || new Date();
   var created_event = new Event(event);
   created_event.save(function(err, e) {
     if (err || !e) {

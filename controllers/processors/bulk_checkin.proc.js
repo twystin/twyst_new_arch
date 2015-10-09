@@ -142,15 +142,19 @@ function already_checked_in(data) {
             var too_soon = _.find(events, function(event) {
                 //console.log(event.event_date)
                 //console.log(FIVE_MINS)
-                return event.event_date > FIVE_MINS;
+                return event.event_date > FIVE_MINS && event.event_date <= date;
             });
 
             if (too_soon) {
                 deferred.reject('Checked in at another outlet less than 5 minutes ago!');
             } else {
+                data.event_data.event_meta.event_create_date = new Date();
+                data.event_data.event_date = date;
                 deferred.resolve(data);
             }
         } else {
+            data.event_data.event_meta.event_create_date = new Date();
+            data.event_data.event_date = date;
             deferred.resolve(data);
         }
     });
@@ -397,9 +401,9 @@ function update_checkin_counts(data) {
       if(data.new_coupon) {
         _.each(data.new_coupon.outlets, function(outlet) {
           if(cmap[outlet]) {
-            cmap[outlet] += 1;
+            cmap[outlet].push(data.new_coupon.issued_at);
           } else {
-            cmap[outlet] = 1;
+            cmap[outlet] = [data.new_coupon.issued_at];
           }
         });
         Cache.hset(data.user._id, "checkin_map", JSON.stringify(cmap), function(err) {
@@ -421,9 +425,9 @@ function update_checkin_counts(data) {
           } else {
             _.each(merchant_account.outlets, function(outlet) {
               if(cmap[outlet]) {
-                cmap[outlet] += 1;
+                cmap[outlet].push(new Date());
               } else {
-                cmap[outlet] = 1;
+                cmap[outlet] = [new Date()];
               }
             })
             Cache.hset(data.user._id, "checkin_map", JSON.stringify(cmap), function(err) {
@@ -449,7 +453,7 @@ function send_sms(data) {
     payload.message = data.message;
     payload.phone = data.event_data.event_meta.phone;
     console.log(payload)
-    Transporter.send('sms', 'vf', payload);
+    //Transporter.send('sms', 'vf', payload);
     
     deferred.resolve(data);
     return deferred.promise;

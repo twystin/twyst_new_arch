@@ -132,7 +132,7 @@ function already_checked_in(data) {
         }
         if (events.length) {
             var same_outlet = _.filter(events, {
-                event_outlet: outlet_id
+                event_outlet: ObjectId(outlet_id)
             });
             if (same_outlet.length !== 0) {
                 deferred.reject('Already checked in here');
@@ -355,9 +355,9 @@ function update_checkin_counts(data) {
       if(data.new_coupon) {
         _.each(data.new_coupon.outlets, function(outlet) {
           if(cmap[outlet]) {
-            cmap[outlet] += 1;
+            cmap[outlet].push(data.new_coupon.issued_at);
           } else {
-            cmap[outlet] = 1;
+            cmap[outlet] = [data.new_coupon.issued_at];
           }
         });
         Cache.hset(data.user._id, "checkin_map", JSON.stringify(cmap), function(err) {
@@ -379,9 +379,9 @@ function update_checkin_counts(data) {
           } else {
             _.each(merchant_account.outlets, function(outlet) {
               if(cmap[outlet]) {
-                cmap[outlet] += 1;
+                cmap[outlet].push(new Date());
               } else {
-                cmap[outlet] = 1;
+                cmap[outlet] = [new Date()];
               }
             })
             Cache.hset(data.user._id, "checkin_map", JSON.stringify(cmap), function(err) {

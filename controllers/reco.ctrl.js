@@ -478,7 +478,13 @@ function massage_offers(params) {
         }
         
         if (offer.offer_type === 'checkin') {
-          massaged_offer.checkins = item.recco && item.recco.checkins || 0;
+          massaged_offer.checkins = 0;
+          if(item.recco && item.recco.checkins) {
+            massaged_offer.checkins = _.filter(item.recco.checkins, function(checkin) {
+              return new Date(offer.offer_start_date) <= new Date(checkin) && new Date(offer.offer_end_date) > new Date(checkin);
+            }).length;
+          }
+          item.recco && item.recco.checkins || [];
           if (offer.rule.event_match === 'on every') {
             if(massaged_offer.checkins<offer.rule.event_start) {
               massaged_offer.next = offer.rule.event_start - massaged_offer.checkins; 
