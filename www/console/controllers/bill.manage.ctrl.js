@@ -7,7 +7,7 @@ angular.module('consoleApp')
 				'-event_date': 'Newest FIrst'
 			};
 
-			$scope.view_options = ['Submitted', 'Twyst Approved', 'Outlet Pending', 'Twyst Rejected', 'Outlet Rejected', 'Verified', 'All']
+			$scope.view_options = ['Submitted', 'twyst_approved', 'outlet_pending', 'twyst_rejected', 'outlet_rejected', 'verified', 'all']
 
 			$scope.sort = 'event_date';
 			$scope.view_by = 'Submitted';

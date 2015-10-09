@@ -125,11 +125,12 @@ angular.module('merchantApp')
 				return deferred.promise;
 			}
 
-			merchantRESTSvc.getBills = function() {
+			merchantRESTSvc.getBills = function(status, sort) {
 				var deferred = Q.defer();
 				var token = $cookies.get('token');
-				$http.get('/api/v4/events/upload_bill?token=' + token)
+				$http.get('/api/v4/events/list/upload_bill?token=' + token + '&status=' + status + '&sort=' + sort)
 					.then(function(data) {
+						console.log(data)
 						if(data.data.response) {
 							deferred.resolve(data.data);
 						} else {
@@ -160,8 +161,9 @@ angular.module('merchantApp')
 			merchantRESTSvc.updateBill = function(bill) {
 				var deferred = Q.defer();
 				var token = $cookies.get('token');
-				$http.put('/api/v4/events/' + bill._id + '?token=' + token, bill)
+				$http.put('/api/v4/events/update/' + bill._id + '?token=' + token, bill)
 					.then(function(data) {
+						console.log(data)
 						if(data.data.response) {
 							deferred.resolve(data.data);
 						} else {
