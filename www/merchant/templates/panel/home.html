@@ -78,15 +78,18 @@
 								<a class='btn btn-block btn-success' ng-if='voucher.lapse_date > today && voucher.status==="social_pool" && !voucher.used_details.used_time' disabled>Social Pool</a>
 							</div>
 							<div class='text-center'>
-								<a class='btn btn-block btn-danger' ng-if='voucher.used_details.used_time' disabled>Redeemed</a>
+								<a class='btn btn-block btn-danger' ng-if='voucher.used_details.used_time || voucher.status=="merchant_redeemed"' disabled>Redeemed</a>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-		<div class='col-xs-12 col-md-4'>
+		<div class='col-xs-12 col-md-4' ng-init='retrieveNotifications()'>
 			<legend>Notifications</legend>
+			<div class='well well-lg'>
+				
+			</div>
 		</div>
 	</div>
 </div>

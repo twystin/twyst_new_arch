@@ -27,6 +27,11 @@ angular.module('consoleApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angular
 				url: '/home',
 				templateUrl: 'templates/home.html'
 			})
+			.state('console.outlets', {
+				url: '/outlets',
+				templateUrl: 'templates/outlet/manage.html',
+				controller: 'OutletManageController'
+			})
 			.state('console.merchant', {
 				url: '/merchant',
 				templateUrl: 'templates/merchant/register.html',
@@ -41,5 +46,9 @@ angular.module('consoleApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angular
 				url: '/bills/:bill_id',
 				templateUrl: 'templates/bills/view.html',
 				controller: 'BillViewController'
+			})
+			.state('console.qrs', {
+				url: '/qrs',
+				templateUrl: 'templates/qrs/manage.html'
 			})
 	});
