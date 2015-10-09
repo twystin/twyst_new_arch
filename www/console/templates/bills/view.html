@@ -94,11 +94,6 @@
                 </div>
               </div>
             </div>
-            <div class='form-group' ng-if='bill.event_meta.status!=="twyst_approved"'>
-              <div class='col-md-9 col-md-offset-3'>
-                <button class='btn btn-primary pull-right' ng-click='approveBill()'>Submit</button>
-              </div>
-            </div>
           </div>
         </div>        
       </div>
@@ -124,7 +119,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat='item in pending'>
+        <tr ng-repeat='item in pending' ng-if='item.outlets.indexOf(bill.event_outlet)>-1 && (!bill.event_meta.issued_for || bill.event_meta.issued_for==item.issued_for)'>
           <td>{{$index +1}}</td>
           <td>{{item.issued_by}}</td>
           <td>put loc 1</td>
@@ -132,9 +127,16 @@
           <td><strong>{{item.header}}<strong>, {{item.line1}}<span ng-if='item.line2'>, {{item.line2}}<span></td>
           <td>{{item.issued_at | date: 'MMM dd, yyyy'}}</td>
           <td>{{item.issued_at | date: 'hh:mm a'}}</td>
-          <td><a class='btn btn-sm btn-primary' ng-click='linkRedemption(item)' >Link</a></td>
+          <td><a class='btn btn-sm btn-primary' ng-if='!bill.event_meta.issued_for' ng-click='linkRedemption(item)' >Link</a>
+            <a class='btn btn-sm btn-success' disabled ng-if='bill.event_meta.issued_for==item.issued_for'>Linked</a>
+          </td>
         </tr>
       </tbody>
     </table>
+  </div>
+  <div class='form-group' ng-if='bill.event_meta.status!=="twyst_approved" && (isBill===true && isClear===true && isListed===true)' style='padding-bottom:20px;'>
+    <div class='col-xs-10 col-xs-offset-1 col-sm-8 col-sm-2 col-lg-4 col-lg-offset-4 text-center'>
+      <a class='btn btn-primary btn-block' ng-click='approveBill()'>Submit</a>
+    </div>
   </div>
 </div>

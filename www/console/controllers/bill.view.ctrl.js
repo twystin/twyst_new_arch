@@ -40,8 +40,10 @@ angular.module('consoleApp')
 				} else if(!$scope.bill.event_meta.bill_amount) {
 					toastr.error("Bill amount required");
 				} else {
-					if($scope.bill.event_meta.status !== 'outlet_pending') {
+					if(!$scope.bill.event_meta.issued_for) {
 						$scope.bill.event_meta.status = 'twyst_approved';	
+					} else {
+						$scope.bill.event_meta.status = 'outlet_pending';
 					}
 					
 					consoleRESTSvc.updateBill($scope.bill).then(function(res) {
@@ -91,7 +93,6 @@ angular.module('consoleApp')
 			}
 
 			$scope.linkRedemption = function(item) {
-				$scope.bill.event_meta.status = 'outlet_pending';
 				$scope.bill.event_meta.issued_for = item.issued_for;
 				$scope.bill.event_meta.pending_coupon = item._id;
 			}
