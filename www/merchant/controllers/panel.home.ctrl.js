@@ -30,6 +30,9 @@ angular.module('merchantApp')
 				$scope.show_msg = false;
 				merchantRESTSvc.redeemUserCoupon($scope.choosen_outlet, code)
 					.then(function(data) {
+						console.log(data);
+						var show_vouchers = true;
+						$scope.user_vouchers = [data.data];
 						toastr.success(data.message);
 					}, function(err) {
 						toastr.error(err.message, "Error");
@@ -95,7 +98,10 @@ angular.module('merchantApp')
 						.then(function(res) {
 							$scope.checkin.number = '';
 							var success_msg;
-							if(_.has(res, 'data.code')) {
+							if(!_.has(res, 'data.checkins_to_go')) {
+								console.log(res.data);
+								$scope.show_vouchers = true;
+								$scope.user_vouchers = [res.data];
 								success_msg = "Checkin successfull, User also unlocked a coupon";
 							} else {
 								success_msg = "Checkin successfull";
@@ -140,6 +146,15 @@ angular.module('merchantApp')
 							console.log('err', err);
 						})
 				}
+			}
+
+			$scope.retrieveNotifications = function(outlet_id) {
+				merchantRESTSvc.getNotifications(outlet_id).then(function(data) {
+					console.log(data);
+					$scope.notifictions = data.data;
+				}, function(err) {
+					console.log(err);
+				})
 			}
 		}
 	]);

@@ -130,28 +130,23 @@ module.exports.bulk_checkin = function(req, res) {
 
 module.exports.list_events = function(req, res) {
   logger.log();
-  var event_types = ['bulk_checkin', 'follow', 'qr_checkin', 'panel_checkin', 'gift', 'grab', 'redeem', 'unfollow', 'feedback', 'submit_offer', 'like_offer', 'unlike_offer', 'upload_bill', 'share_offer', 'share_outlet', 'suggestion', 'extend_offer', 'report_problem', 'write_to_twyst', 'generate_coupon', 'deal_log', 'referral_join' ];
-  var HttpHelper = require('../common/http.hlpr.js');
-  var AuthHelper = require('../common/auth.hlpr.js');
-  var EventHelper = require('./helpers/event.hlpr.js');
   var token = req.query.token || null;
-  var event_type = req.query.event_type || null;
-  
+  var status = req.query.status || 'submitted';
+  var event_type = req.params.event_type;
+
   if(!token) {
     HttpHelper.error(res, null, "Not authenticated");
-  } else if(event_types.indexOf(event_type)===-1) {
-    HttpHelper.error(res, null, "Event type is invalid");
   } else {
     AuthHelper.get_user(token).then(function(data) {
       var user = data.data;
-      EventHelper.get_event_list(user, event_type).then(function(data) {
+      EventHelper.get_event_list(user, event_type, status).then(function(data) {
         HttpHelper.success(res, data.data, data.message);
       }, function(err) {
         HttpHelper.error(res, err.err, err.message);
-      })
+      });
     }, function(err) {
       HttpHelper.error(res, err, "Could not find user");
-    })
+    });
   }
 }
 
@@ -176,8 +171,6 @@ module.exports.list_bills = function(req, res) {
     });
   }
 }
-
-
 
 module.exports.get_event = function(req, res) {
   logger.log();
@@ -519,7 +512,7 @@ function create_event(data) {
     event.event_outlet = passed_data.outlet._id;
   }
 
-  event.event_date = new Date();
+  event.event_date = event.event_date || new Date();
   var created_event = new Event(event);
   created_event.save(function(err, e) {
     if (err || !e) {

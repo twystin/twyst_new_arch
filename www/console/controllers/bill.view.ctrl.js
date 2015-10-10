@@ -15,14 +15,16 @@ angular.module('consoleApp')
 			})
 
 			consoleRESTSvc.getBill($stateParams.bill_id).then(function(res) {
-				if(res.data.event_meta.timestamp) {
-					res.data.event_meta.timestamp = new Date(res.data.event_meta.timestamp);
+				if(res.data.data.event_meta.timestamp) {
+					res.data.data.event_meta.timestamp = new Date(res.data.data.event_meta.timestamp);
 				}
-				$scope.bill = res.data;
-				if($scope.bill.pending) {
-					$scope.pending = angular.copy($scope.bill.pending);
-					delete $scope.bill.pending;
+				$scope.bill = res.data.data;
+
+				if(res.data.pending) {
+					$scope.pending = angular.copy(res.data.pending);
+					
 				}
+				
 			}, function(err) {
 				if (err.message) {
 					toastr.error(err.message, "Error");
@@ -38,7 +40,12 @@ angular.module('consoleApp')
 				} else if(!$scope.bill.event_meta.bill_amount) {
 					toastr.error("Bill amount required");
 				} else {
-					$scope.bill.event_meta.status = 'Twyst Approved';
+					if(!$scope.bill.event_meta.issued_for) {
+						$scope.bill.event_meta.status = 'twyst_approved';	
+					} else {
+						$scope.bill.event_meta.status = 'outlet_pending';
+					}
+					
 					consoleRESTSvc.updateBill($scope.bill).then(function(res) {
 						toastr.success(res.message);
 						$scope.bill = res.data;
@@ -57,7 +64,7 @@ angular.module('consoleApp')
 
 			$scope.rejectBill = function() {
 				$scope.bill.event_meta.is_rejected = true;
-				$scope.bill.event_meta.status = 'Twyst Rejected';
+				$scope.bill.event_meta.status = 'twyst_rejected';
 
 				if(!$scope.isClear) {
 					$scope.bill.event_meta.reason = 'Bill image is either unclear, incomplete, or manipulated.';
@@ -85,8 +92,9 @@ angular.module('consoleApp')
 				}
 			}
 
-			$scope.linkRedemption = function(issued_for) {
-				$scope.bill.event_meta.status = 'Merchant Pending';
+			$scope.linkRedemption = function(item) {
+				$scope.bill.event_meta.issued_for = item.issued_for;
+				$scope.bill.event_meta.pending_coupon = item._id;
 			}
 		}
 	]);

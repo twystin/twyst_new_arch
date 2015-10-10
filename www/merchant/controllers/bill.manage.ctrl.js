@@ -17,7 +17,7 @@ angular.module('merchantApp')
 			}
 
 			$scope.sort = 'oldest_first';
-			$scope.view_by = 'pending';
+			$scope.view_by = 'outlet_pending';
 
 			$scope.updateSortOrder = function(sort) {
 				$scope.sort = sort;
@@ -27,9 +27,8 @@ angular.module('merchantApp')
 				$scope.view_by = val;
 			}
 
-			merchantRESTSvc.getBills().then(function(res) {
+			merchantRESTSvc.getBills($scope.view_by, $scope.sort).then(function(res) {
 				$scope.bills = res.data;
-				console.log(res);
 			}, function(err) {
 				console.log(err);
 			})
