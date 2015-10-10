@@ -131,7 +131,7 @@ module.exports.bulk_checkin = function(req, res) {
 module.exports.list_events = function(req, res) {
   logger.log();
   var token = req.query.token || null;
-  var status = req.query.status || 'pending';
+  var status = req.query.status || 'submitted';
   var event_type = req.params.event_type;
 
   if(!token) {
