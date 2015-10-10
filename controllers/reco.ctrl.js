@@ -248,8 +248,11 @@ function calculate_relevance(params) {
         if(val.offers[i].offer_type === 'coupon' || val.offers[i].offer_type === 'offer') {
           relevance = relevance +  1000;    
         }
-        else if(val.offers[i].offer_type === 'checkin' || val.offers[i].offer_type === 'deal') {
+        else if(val.offers[i].offer_type === 'deal') {
           relevance = relevance +  500;    
+        }
+        else if(val.offers[i].offer_type === 'checkin') {
+          relevance = relevance +  400; 
         }
       }
       //relevance = relevance + val.offers.length * 1000;
@@ -332,7 +335,25 @@ function pick_outlet_fields(params) {
         return item;
       }
     })
-      
+   params.offers = _.sortBy(params.offers, function(offer) {
+        if(offer.type === 'coupon') {
+          return -100;
+        } else if(offer.offer_type === 'pool') {
+          return -75;
+        } else if(offer.offer_type === 'offer') {
+          return -50;
+        }
+        else if(offer.offer_type === 'deal') {
+          return -25;
+        }
+        else if(offer.offer_type === 'checkin') {
+          return -10;
+        }else if(offer.next) {
+          return offer.next;
+        } else {
+          return 100;
+        }
+      }); 
     params.outlets = _.compact(params.outlets);
 
     deferred.resolve(params);
@@ -358,19 +379,7 @@ function massage_offers(params) {
         item = add_user_coupons(
           pick_offer_fields(
             select_relevant_checkin_offer(item), params.user._id, params.query.date, params.query.time), coupon_map && coupon_map[item._id] && coupon_map[item._id].coupons);
-        item.offers = _.sortBy(item.offers, function(offer) {
-          if(offer.type === 'coupon') {
-            return -100;
-          } else if(offer.offer_type === 'pool') {
-            return -75;
-          } else if(offer.offer_type === 'offer') {
-            return -50;
-          }else if(offer.next) {
-            return offer.next;
-          } else {
-            return 100;
-          }
-        });
+        
         return item;
       });
       deferred.resolve(params);
