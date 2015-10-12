@@ -499,11 +499,6 @@ function create_event(data) {
   var deferred = Q.defer();
   var event = {};
   var passed_data = data;
-  if(passed_data.event_data.event_type === 'qr_checkin' || 
-    passed_data.event_data.event_type === 'panel_checkin' || 
-    passed_data.event_data.event_type === 'bulk_checkin') {
-    passed_data.event_data.event_type = 'checkin'
-  }
 
   event = _.extend(event, passed_data.event_data);
   event.event_user = passed_data.user._id;

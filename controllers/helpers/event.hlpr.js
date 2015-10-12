@@ -10,6 +10,7 @@ var Event = mongoose.model('Event');
 var User = mongoose.model('User');
 var Transporter = require('../../transports/transporter');
 var OutletHelper = require('./outlet.hlpr');
+var CheckinHelper = require('./checkin.hlpr');
 var Utils = require('../../common/datetime.hlpr.js');
 var Cache = require('../../common/cache.hlpr');
 var Notification = mongoose.model('Notification');
@@ -590,17 +591,17 @@ function sendNotification(data, payload) {
     payload.gcms = data.user.push_ids[data.user.push_ids.length-1].push_id;    
   }
 
-  Transporter.send('push', 'gcm', payload).then(function(){
+  //Transporter.send('push', 'gcm', payload).then(function(){
     deferred.resolve({
       data: data,
       message: 'notification sent.'
     });    
-  }, function(err) {
-    deferred.reject({
-      err: err || true,
-      message: data.message
-    }); 
-  });
+  //}, function(err) {
+    //deferred.reject({
+     // err: err || true,
+      //message: data.message
+    //}); 
+  //});
   return deferred.promise;
 }
 
@@ -643,8 +644,30 @@ function saveNotification(passed_data, payload, action_icon) {
 function checkinUser(passed_data) {
   logger.log();
   var deferred = Q.defer();
-
-  deferred.resolve(passed_data);
+  var obj = {};
+  obj.event_data = {};
+  obj.event_data.event_meta = {};
+  obj.event_data.event_meta.phone = passed_data.user.phone;
+  obj.event_data.event_meta.date = new Date(passed_data.event_date);
+  obj.event_data.event_meta.outlet = passed_data.outlet.data;
+  
+  console.log(obj)
+  CheckinHelper.validate_request(obj)
+    .then(function(data) {
+      return CheckinHelper.already_checked_in(data);
+    })
+    .then(function(data) {
+      return CheckinHelper.check_and_create_coupon(data)
+    })
+    .then(function(data) {
+        return CheckinHelper.update_checkin_counts(data);
+    })
+    .then(function(data) {
+        deferred.resolve(passed_data);
+    })
+    .fail(function(err) {
+        deferred.reject(err);
+    })
 
   return deferred.promise;
 
