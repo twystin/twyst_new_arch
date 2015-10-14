@@ -437,6 +437,13 @@ function updateEventFromConsole(event) {
               }); 
             });
         })
+        .fail(function(err) {
+          console.log(err);
+          deferred.reject({
+            err: err || true,
+            message: 'Unknown error'
+          });
+        })
       }
     })  
   }
@@ -650,6 +657,8 @@ function checkinUser(passed_data) {
   obj.event_data.event_meta.phone = passed_data.user.phone;
   obj.event_data.event_meta.date = new Date(passed_data.event_date);
   obj.event_data.event_meta.outlet = passed_data.outlet.data;
+  obj.outlet = passed_data.outlet.data;
+  obj.event_data.event_outlet = passed_data.outlet.data._id;
   
   console.log(obj)
   CheckinHelper.validate_request(obj)

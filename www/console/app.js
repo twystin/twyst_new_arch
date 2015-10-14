@@ -49,6 +49,22 @@ angular.module('consoleApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angular
 			})
 			.state('console.qrs', {
 				url: '/qrs',
-				templateUrl: 'templates/qrs/manage.html'
+				templateUrl: 'templates/qrs/manage.html',
+				controller: 'QRListController'
+			})
+			.state('console.suggested_outlets', {
+				url: '/suggested_outlets',
+				templateUrl: 'templates/suggested_outlets/manage.html',
+				controller: 'SuggestedOutletsController'
+			})
+			.state('console.submitted_offers', {
+				url: '/submitted_offers',
+				templateUrl: 'templates/submitted_offers/manage.html',
+				controller: 'SubmittedOffersController'
+			})
+			.state('console.user_feedback', {
+				url: '/user_feedback',
+				templateUrl: 'templates/user_feedback/manage.html',
+				controller: 'UserFeedbackController'
 			})
 	});

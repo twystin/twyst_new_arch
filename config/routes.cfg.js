@@ -120,6 +120,7 @@ module.exports = function(app) {
 
   (function QR_Routes() {
       var QrCtrl = require('../controllers/qr.ctrl');
+      app.get('/api/v4/qr', QrCtrl.qr_list);
       app.post('/api/v4/qr/outlets',  QrCtrl.qr_create);
   })();
 
