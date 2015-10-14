@@ -23,7 +23,7 @@ module.exports.check = function(data) {
 module.exports.process = function(data) {
     logger.log();
     var deferred = Q.defer();
-
+    console.log(data.event_data);
     CheckinHelper.check_and_create_coupon(data)
         .then(function(data) {
             return CheckinHelper.update_checkin_counts(data);

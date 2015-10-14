@@ -598,17 +598,17 @@ function sendNotification(data, payload) {
     payload.gcms = data.user.push_ids[data.user.push_ids.length-1].push_id;    
   }
 
-  //Transporter.send('push', 'gcm', payload).then(function(){
+  Transporter.send('push', 'gcm', payload).then(function(){
     deferred.resolve({
       data: data,
       message: 'notification sent.'
     });    
-  //}, function(err) {
-    //deferred.reject({
-     // err: err || true,
-      //message: data.message
-    //}); 
-  //});
+  }, function(err) {
+    deferred.reject({
+      err: err || true,
+      message: data.message
+    }); 
+  });
   return deferred.promise;
 }
 
@@ -651,6 +651,7 @@ function saveNotification(passed_data, payload, action_icon) {
 function checkinUser(passed_data) {
   logger.log();
   var deferred = Q.defer();
+
   var obj = {};
   obj.event_data = {};
   obj.event_data.event_meta = {};
@@ -659,14 +660,17 @@ function checkinUser(passed_data) {
   obj.event_data.event_meta.outlet = passed_data.outlet.data;
   obj.outlet = passed_data.outlet.data;
   obj.event_data.event_outlet = passed_data.outlet.data._id;
+  obj.event_data.event_type = 'upload_bill'
   
-  console.log(obj)
   CheckinHelper.validate_request(obj)
     .then(function(data) {
       return CheckinHelper.already_checked_in(data);
     })
     .then(function(data) {
       return CheckinHelper.check_and_create_coupon(data)
+    })
+    .then(function(data) {
+      return logCheckinEvent(data)
     })
     .then(function(data) {
         return CheckinHelper.update_checkin_counts(data);
@@ -680,4 +684,30 @@ function checkinUser(passed_data) {
 
   return deferred.promise;
 
+}
+
+function logCheckinEvent(passed_data) {
+  logger.log();
+
+  var deferred = Q.defer();
+  var event = {};
+  console.log(passed_data)
+  event = _.extend(event, passed_data.event_data);
+  event.event_user = passed_data.user._id;
+
+  if (passed_data.outlet) {
+    event.event_outlet = passed_data.outlet._id;
+  }
+
+  event.event_date = event.event_date || new Date();
+  var created_event = new Event(event);
+  created_event.save(function(err, e) {
+    if (err || !e) {
+      deferred.reject('Could not save the event - ' + JSON.stringify(err));
+    } else {
+      deferred.resolve(passed_data);
+    }
+  });
+
+  return deferred.promise;
 }
