@@ -34,6 +34,11 @@ angular.module('consoleApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angular
 			})
 			.state('console.merchant', {
 				url: '/merchant',
+				templateUrl: 'templates/merchant/manage.html',
+				controller: 'MerchantManageController'
+			})
+			.state('console.register_merchant', {
+				url: '/merchant/register',
 				templateUrl: 'templates/merchant/register.html',
 				controller: 'MerchantRegisterController'
 			})

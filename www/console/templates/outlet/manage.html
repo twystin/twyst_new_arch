@@ -32,16 +32,16 @@
 			</thead>
 			<tbody class='text-justify'>
 				<tr ng-repeat='outlet in visible_outlets'>
-					<td>{{outlet.name}}</td>
+					<td>{{outlet.basics.name}}</td>
 					<td>{{outlet._id}}</td>
-					<td>{{outlet.locality_1}}</td>
-					<td>{{outlet.locality_2}}</td>
-					<td>{{outlet.city}}</td>
+					<td>{{outlet.contact.location.locality_1[0]}}</td>
+					<td>{{outlet.contact.location.locality_2[0]}}</td>
+					<td>{{outlet.contact.location.city}}</td>
 					<th>
 						<div class="btn-group">
-					        <label class="btn btn-primary" ng-model="outlet.status" ng-change='updateOutletStatus(outlet)' btn-radio="'active'">Active</label>
-					        <label class="btn btn-primary" ng-model="outlet.status" ng-change='updateOutletStatus(outlet)' btn-radio="'draft'">Draft</label>
-					        <label class="btn btn-primary" ng-model="outlet.status" ng-change='updateOutletStatus(outlet)' btn-radio="'archived'">Archived</label>
+					        <label class="btn btn-primary" ng-model="outlet.outlet_meta.status" ng-change='updateOutletStatus(outlet)' btn-radio="'active'">Active</label>
+					        <label class="btn btn-primary" ng-model="outlet.outlet_meta.status" ng-change='updateOutletStatus(outlet)' btn-radio="'draft'">Draft</label>
+					        <label class="btn btn-primary" ng-model="outlet.outlet_meta.status" ng-change='updateOutletStatus(outlet)' btn-radio="'archived'">Archived</label>
 					    </div>
 					</th>
 				</tr>
