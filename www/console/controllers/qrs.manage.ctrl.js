@@ -25,7 +25,7 @@ angular.module('consoleApp').controller('QRListController', ['$scope', 'toastr',
 				} else {
 					var regex = new RegExp($scope.qrFilter, 'i');
 					var filtered_qrs = _.filter($scope.qrs, function(qr) {
-						return regex.test(qr.code);
+						return regex.test(qr.code) ||  regex.test(qr.outlet_id.basics.name) || regex.test(qr.outlet_id.contact.location.locality_1[0]) || regex.test(qr.outlet_id.contact.location.locality_2[0]);
 					});
 					$scope.qrCount = filtered_qrs.length
 					$scope.visible_qrs = filtered_qrs.slice(($scope.current_page-1)*$scope.per_page, ($scope.current_page)*$scope.per_page);
