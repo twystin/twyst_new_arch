@@ -22,11 +22,13 @@ module.exports.send = function(payload) {
 
   http.get(send_sms_url, function(res) {
     var body = '';
+    console.log(res.statusCode);
     res.on('data', function(chunk) {
       body += chunk;
     });
 
     res.on('end', function() {
+      console.log(body);
       deferred.resolve(body);
     });
 

@@ -10,6 +10,8 @@ module.exports = function(app) {
   (function WepAppRoutes() {
     app.get('', function(req, res) { res.redirect('/home'); });
     app.get('/', function(req, res) { res.redirect('/home'); });
+    app.get('/api/v4/earn/more', function(req, res) { res.redirect('/home'); });
+    app.get('/api/v4/faq', function(req, res) { res.redirect('/home'); });
   })();
 
   (function AccountRoutes() {

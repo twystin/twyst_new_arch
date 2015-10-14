@@ -23,11 +23,12 @@ var Transporter = require('../../transports/transporter.js');
 module.exports.validate_request = function(data) {
     logger.log();
     var deferred = Q.defer();
-
+    
     var passed_data = data;
     var phone = _.get(passed_data, 'event_data.event_meta.phone'),
         date = _.get(passed_data, 'event_data.event_meta.date'),
         today = new Date();
+        
     if (!date) {
         date = new Date();
     } else {
@@ -66,7 +67,7 @@ module.exports.validate_request = function(data) {
                 deferred.reject('could not create user')
             })
         }
-        else{            
+        else{
             passed_data.user = user;
             deferred.resolve(passed_data);
         }
@@ -90,7 +91,6 @@ function check_outlet(data) {
 module.exports.already_checked_in = function(data) {
     logger.log();
     var deferred = Q.defer();
-    console.log('now here')
     var THREE_HOURS = new Date(Date.now() - 10800000);
     var FIVE_MINS = new Date(Date.now() - 300000);
 
@@ -182,7 +182,6 @@ module.exports.check_and_create_coupon = function(data) {
     var user_id = _.get(passed_data, 'user._id');
     var outlet_id = _.get(passed_data, 'outlet._id');
     var event_type = _.get(passed_data, 'event_data.event_type');
-    console.log(event_type)
 
     var offers = _.get(data, 'outlet.offers');
     var sorted_checkin_offers = _.filter(offers, function(offer) {
@@ -199,7 +198,7 @@ module.exports.check_and_create_coupon = function(data) {
         var matching_offer = find_matching_offer(offers_with_checkin_count);
         
         if (matching_offer && isNaN(matching_offer)) {
-            create_coupon(matching_offer, user_id, outlet_id, event_type).then(function(data) {
+            create_coupon(matching_offer, user_id, outlet_id, event_type, passed_data.event_data.event_meta.date).then(function(data) {
                 if (data.coupons && data.coupons.length) {
                     passed_data.new_coupon = data.coupons[data.coupons.length-1];
                     passed_data.user.coupons.push(data.coupons[data.coupons.length - 1]);
@@ -299,7 +298,7 @@ function find_matching_offer(offers) {
     }
 }
 
-function create_coupon(offer, user, outlet, event_type) {
+function create_coupon(offer, user, outlet, event_type, event_date) {
     logger.log();
     var keygen = require('keygenerator');
     var code = keygen._({
@@ -333,7 +332,7 @@ function create_coupon(offer, user, outlet, event_type) {
             }
         },
         status: 'active',
-        issued_at: new Date(),
+        issued_at: event_date,
         issued_by: outlet,
         outlets: offer.offer_outlets
     }
@@ -361,7 +360,6 @@ function create_coupon(offer, user, outlet, event_type) {
 
 module.exports.update_checkin_counts = function(data) {
   // UPDATE CACHES?
-
   var deferred = Q.defer();
   
   Cache.hget(data.user._id, "checkin_map", function(err, reply) {
@@ -374,11 +372,10 @@ module.exports.update_checkin_counts = function(data) {
         cmap = {};
       if(data.new_coupon) {
         _.each(data.new_coupon.outlets, function(outlet) {
-            console.log(outlet);
           if(cmap[outlet]) {
-            outlet.push(data.new_coupon.issued_at);
+            cmap[outlet].push(data.new_coupon.issued_at);
           } else {
-            outlet = [data.new_coupon.issued_at];
+            cmap[outlet] = [data.new_coupon.issued_at];
           }
         });
         Cache.hset(data.user._id, "checkin_map", JSON.stringify(cmap), function(err) {
