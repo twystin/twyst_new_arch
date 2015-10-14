@@ -126,3 +126,34 @@ module.exports.qr_create = function (req, res) {
     });
   }
 }
+
+module.exports.qr_list = function(req, res) {
+  logger.log();
+
+  var token = req.query.token || null;
+
+  if(!token) {
+    HttpHelper.error(res, null, "Not authenticated");
+  } else {
+    AuthHelper.get_user(token).then(function(data) {
+      var user = data.data;
+      if(user.role > 2) {
+        HttpHelper.error(res, null, "Unauthorized access");
+      } else {
+        var today = new Date();
+        Qr.find({
+          'validity.end': {$gt: today}
+        }).exec(function(err, qrs) {
+          if(err || !qrs) {
+            HttpHelper.error(res, null, "Unable to load QRs");
+          } else {
+            HttpHelper.success(res, qrs, "Found the QRs");
+          }
+        });
+      }
+    }, function(err) {
+      console.log('negative');
+      HttpHelper.error(res, null, "Unable to authorize")
+    })
+  }
+}

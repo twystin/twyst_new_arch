@@ -24,7 +24,7 @@
             <p>{{bill.event_meta.reason}}</p>
             </div>
           <div class='row'><p>&nbsp;</p></div>
-          <div class='row' ng-if='bill.event_meta.status==="Submitted"'>
+          <div class='row' ng-if='bill.event_meta.status==="submitted"'>
             <label for='is_image_clear' class='control-label'>Clear, complete, non-manipulated image?</label>
             <div class='pull-right'>
               <a class='btn' ng-class='{"btn-default": isClear!==true, "btn-primary": isClear===true}' ng-click='updateCheck("isClear", true)'>YES</a>
