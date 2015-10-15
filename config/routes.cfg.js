@@ -114,6 +114,7 @@ module.exports = function(app) {
   (function LocationRoutes() {
     var LocationCtrl = require('../controllers/location.ctrl');
     app.get('/api/v4/locations', LocationCtrl.get_locations);
+    app.get('/api/v4/locations/outlets', LocationCtrl.get_outlet_locations);
   })();
 
   (function SearchRoutes() {
