@@ -36,15 +36,15 @@ function populateOutletsLocations() {
     } else {
       var reduced_outlets = _.reduce(outlets, function(memo, item) {
         var obj = {};
-        obj._id = item._id;
+        obj.name = item.basics.name;
 
         obj.address = item.contact.location.address;
-        memo[item.basics.name] = obj;
+        memo[item._id] = obj;
         return memo;
       }, {});
       Cache.set('outlets_location', JSON.stringify(reduced_outlets), function(err) {
         if (!err) {
-          logger.info('Populated cache with outlets');
+          logger.info('Populated cache with outlets locations');
         }
       });
     }
