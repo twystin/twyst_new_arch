@@ -31,17 +31,20 @@ module.exports.process = function(data) {
       image: data.event_data.event_meta.photo
     }
 
-    ImageUploader.uploadAppImage(img_obj).then(function(data){
+    ImageUploader.uploadAppImage(img_obj).then(function(res){
+      data.event_data.event_meta.photo = res.data.path;      
       deferred.resolve(true);  
     },function(err) {
         deferred.reject({
             err: err || true,
-            message: "Couldn\'t upload bill"
+            message: "Couldn\'t submit offer"
         });
         
     }) 
   }
+  else{
+    deferred.resolve(true);
+  }
   
-
   return deferred.promise;
 };
