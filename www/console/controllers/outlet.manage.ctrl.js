@@ -20,7 +20,7 @@ angular.module('consoleApp')
 			}
 
 			$scope.updateOutletStatus = function(outlet) {
-				consoleRESTSvc.updateOutletStatus(outlet._id, outlet.status)
+				consoleRESTSvc.updateOutletStatus(outlet)
 					.then(function(res) {
 						console.log(res);
 						toastr.success("Outlet status updated")

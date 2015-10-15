@@ -15,6 +15,7 @@ angular.module('consoleApp')
 			})
 
 			consoleRESTSvc.getBill($stateParams.bill_id).then(function(res) {
+				console.log(res);
 				if(res.data.data.event_meta.timestamp) {
 					res.data.data.event_meta.timestamp = new Date(res.data.data.event_meta.timestamp);
 				}

@@ -2,6 +2,7 @@
 /*jslint node: true */
 
 var logger = require('tracer').colorConsole();
+var async = require('async');
 var _ = require('lodash');
 var Q = require('q');
 var Cache = require('../common/cache.hlpr');
@@ -17,114 +18,112 @@ var AdmZip = require('adm-zip');
 var Qr = mongoose.model('QR');
 
 
-module.exports.qr_create = function (req, res) {
-    logger.log();
-    var deferred = Q.defer();
-  var zip = new AdmZip();
+module.exports.qr_create = function(req, res) {
+  logger.log();
+  var deferred = Q.defer();
+  var token = req.query.token || null;
 
-  validateQrCreate();
-  var qr;
-  var num;
-  var outlet;
-  var count = 0;
+  if(!token) {
+    HttpHelper.error(res, null, "Not authenticated");
+  } else {
+    AuthHelper.get_user(token).then(function(data) {
+      var user = data.data;
+      if(user.role>2) {
+        HttpHelper.error(res, null, "Not authorized");
+      } else {
+        var req_obj = {};
+        req_obj = _.extend(req_obj, req.body);
+        var data = {};
+        data.req_obj = req_obj;
+        validateQrCreate(data)
+          .then(function(data) {
+            return generateQrs(data);
+          })
+          .then(function(data) {
+            HttpHelper.success(res, data.qrs, data.message);
+          })
+          .fail(function(err) {
+            logger.error(err.stack);
+            HttpHelper.error(res, err.err, err.message);
+          });
+      }
+    }, function(err) {
+      HttpHelper.error(res, err.data, err.message);
+    });
+  }
   
-
-  function validateQrCreate() {
-    if(req.body) {
-      if(req.body.outlet) {
-        outlet = req.body.outlet;
-        if(req.body.num) {
-          num = Number(req.body.num);
-          if(req.body.max_use_limit) {
-            if(req.body.validity.start && req.body.validity.end) {
-              if(req.body.type) {
-                qr = {};
-                qr.outlet_id = req.body.outlet;
-                qr.max_use_limit = req.body.max_use_limit;
-                qr.validity = req.body.validity;
-                qr.type = req.body.type;
-                generateQrCode(num, qr);
-              }
-              else {
-                deferred.reject('QR code type not selected');
-                
-              }
-            }
-            else {
-                deferred.reject('validity field not selected');
-              
-          }
-        }
-          else {
-            deferred.reject('Max use limit not filled');
-            
-        }
-      }
-        else {
-            deferred.reject('Add number of QR to be generated');
-         
-      }
-    }
-      else {
-        deferred.reject('Please select Outlet');
-        
-    }
-  }
-    else {
-        deferred.reject('Request body empty')
-     
-  }
 }
 
-  function generateQrCode (num, qr_n) {
-    var qr = {};
-    qr = _.extend(qr, qr_n);
+var validateQrCreate = function(data) {
+  logger.log();
+  var deferred = Q.defer();
 
-    for (var i = 0; i < num; i++) {
-      var qrcode = keygen._({forceUppercase: true, length: 6, exclude:['O', '0', 'L', '1']});
-
-      qr.code = qrcode;
-      saveQr(qr, i);
-    };
+  if (!data.req_obj) {
+    deferred.reject({
+      err: false,
+      message: 'Request object missing'
+    });
+  } else if (!data.req_obj.outlet) {
+    deferred.reject({
+      err: false,
+      message: 'Outlet must be specified'
+    });
+  } else if (!data.req_obj.num) {
+    deferred.reject({
+      err: false,
+      message: 'Number of QRs must be specified'
+    });
+  } else if (!data.req_obj.type || ['single', 'multi'].indexOf(data.req_obj.type)===-1) {
+    deferred.reject({
+      err: false,
+      message: 'Valid QR type must be selected'
+    });
+  } else if (!data.req_obj.max_use_limit) {
+    deferred.reject({
+      err: false,
+      message: 'Max QR usage limit must be specified'
+    });
+  } else if (!data.req_obj.validity || !data.req_obj.validity.start || !data.req_obj.validity.end) {
+    deferred.reject({
+      err: false,
+      message: "validity info required"
+    });
+  } else {
+    data.qr_obj = {
+      outlet_id: data.req_obj.outlet,
+      max_use_limit: data.req_obj.max_use_limit,
+      type: data.req_obj.type,
+      validity: {
+        start: new Date(data.req_obj.validity.start),
+        end: new Date(data.req_obj.validity.end)
+      }
+    }
+    deferred.resolve(data);
   }
 
-  function saveQr (qr, lim) {
-    var qr = new Qr(qr);
-    qr.save(function (err, qr) {
+  return deferred.promise;
+}
+
+var generateQrs = function(data) {
+  logger.log();
+  var deferred = Q.defer();
+  var gen_qrs = [];
+  var qrs = _.range(data.req_obj.num).map(function(x) { return {}; });
+  async.each(qrs, function(qr, callback) {
+    var new_qr = new Qr(data.qr_obj);
+    new_qr.code = keygen._({forceUppercase: true, length: 6, exclude:['O', '0', 'L', '1']});
+    new_qr.save(function(err) {
       if(err) {
-        // Do nothing
-        console.log(err);
-        ++count;    
-        if(count === num) {
-          writeOnDisk(zip);
-        }
+        logger.error(err);
       }
-      else {
-        qr.code = twyst_url + qr.code;
-        getZipped(qr.code, lim);
-      }
-    })
-  }
-
-  function getZipped(qrcode, lim) {
-    QrLib(qrcode, 1.5, function(err, png) {
-      zip.addFile(qrcode.toLowerCase() +".png", png);
-      ++count;    
-      if(count === num) {
-        writeOnDisk(zip);
-      }
+      gen_qrs.push(new_qr);
+      callback();
     });
-  }
-
-  function writeOnDisk(zip) {
-
-    var time = Date.now();
-    zip.writeZip(__dirname + '/../../Twyst-Web-Apps/common/'+outlet+"_"+time+".zip");
-    deferred.resolve({
-      data: "/common/"+outlet+"_"+time+".zip",
-      message: 'Successfully saved QR code for Outlet'
-    });
-  }
+  }, function() {
+    data.qrs = gen_qrs;
+    deferred.resolve(data);
+  })
+  return deferred.promise;
 }
 
 module.exports.qr_list = function(req, res) {
@@ -141,13 +140,14 @@ module.exports.qr_list = function(req, res) {
         HttpHelper.error(res, null, "Unauthorized access");
       } else {
         var today = new Date();
-        Qr.find({
-          'validity.end': {$gt: today}
-        }).exec(function(err, qrs) {
+        Qr.find({}).populate('outlet_id', 'basics.name contact.location.locality_1 contact.location.locality_2').sort({'validity.end': -1, 'validity.start': -1}).exec(function(err, qrs) {
           if(err || !qrs) {
             HttpHelper.error(res, null, "Unable to load QRs");
           } else {
-            HttpHelper.success(res, qrs, "Found the QRs");
+            var valid_qrs = _.filter(qrs, function(qr) {
+              return qr.outlet_id;
+            })
+            HttpHelper.success(res, valid_qrs, "Found the QRs");
           }
         });
       }
