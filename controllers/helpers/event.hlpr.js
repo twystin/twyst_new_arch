@@ -10,6 +10,7 @@ var Event = mongoose.model('Event');
 var User = mongoose.model('User');
 var Transporter = require('../../transports/transporter');
 var OutletHelper = require('./outlet.hlpr');
+var CheckinHelper = require('./checkin.hlpr');
 var Utils = require('../../common/datetime.hlpr.js');
 var Cache = require('../../common/cache.hlpr');
 var Notification = mongoose.model('Notification');
@@ -436,6 +437,13 @@ function updateEventFromConsole(event) {
               }); 
             });
         })
+        .fail(function(err) {
+          console.log(err);
+          deferred.reject({
+            err: err || true,
+            message: 'Unknown error'
+          });
+        })
       }
     })  
   }
@@ -644,8 +652,62 @@ function checkinUser(passed_data) {
   logger.log();
   var deferred = Q.defer();
 
-  deferred.resolve(passed_data);
+  var obj = {};
+  obj.event_data = {};
+  obj.event_data.event_meta = {};
+  obj.event_data.event_meta.phone = passed_data.user.phone;
+  obj.event_data.event_meta.date = new Date(passed_data.event_date);
+  obj.event_data.event_meta.outlet = passed_data.outlet.data;
+  obj.outlet = passed_data.outlet.data;
+  obj.event_data.event_outlet = passed_data.outlet.data._id;
+  obj.event_data.event_type = 'upload_bill'
+  
+  CheckinHelper.validate_request(obj)
+    .then(function(data) {
+      return CheckinHelper.already_checked_in(data);
+    })
+    .then(function(data) {
+      return CheckinHelper.check_and_create_coupon(data)
+    })
+    .then(function(data) {
+      return logCheckinEvent(data)
+    })
+    .then(function(data) {
+        return CheckinHelper.update_checkin_counts(data);
+    })
+    .then(function(data) {
+        deferred.resolve(passed_data);
+    })
+    .fail(function(err) {
+        deferred.reject(err);
+    })
 
   return deferred.promise;
 
+}
+
+function logCheckinEvent(passed_data) {
+  logger.log();
+
+  var deferred = Q.defer();
+  var event = {};
+  console.log(passed_data)
+  event = _.extend(event, passed_data.event_data);
+  event.event_user = passed_data.user._id;
+
+  if (passed_data.outlet) {
+    event.event_outlet = passed_data.outlet._id;
+  }
+
+  event.event_date = event.event_date || new Date();
+  var created_event = new Event(event);
+  created_event.save(function(err, e) {
+    if (err || !e) {
+      deferred.reject('Could not save the event - ' + JSON.stringify(err));
+    } else {
+      deferred.resolve(passed_data);
+    }
+  });
+
+  return deferred.promise;
 }

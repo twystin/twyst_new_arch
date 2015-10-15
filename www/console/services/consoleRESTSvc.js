@@ -40,10 +40,10 @@ angular.module('consoleApp').factory('consoleRESTSvc', ['$http', '$q', '$cookies
 				return deferred.promise;
 			}
 
-			consoleRESTSvc.getBills = function(status, sort) {
+			consoleRESTSvc.getEvents = function(event_type, status, sort) {
 				var deferred = Q.defer();
 				var token = $cookies.get('token');
-				$http.get('/api/v4/events/list/upload_bill?token=' + token + '&status=' + status + '&sort=' + sort)
+				$http.get('/api/v4/events/list/' + event_type + '?token=' + token + '&status=' + status + '&sort=' + sort)
 					.then(function(data) {
 						if(data.data.response) {
 							deferred.resolve(data.data);
@@ -98,6 +98,73 @@ angular.module('consoleApp').factory('consoleRESTSvc', ['$http', '$q', '$cookies
 							deferred.resolve(data.data);
 						} else {
 							deferred.reject(data.data);	
+						}
+					}, function(err) {
+						deferred.reject(err);
+					});
+				return deferred.promise;
+			}
+
+			consoleRESTSvc.updateOutletStatus = function(outlet) {
+				var deferred = Q.defer();
+				var token = $cookies.get('token');
+				$http.put('/api/v4/outlets/' + outlet._id + '?token=' + token, outlet)
+					.then(function(data) {
+						if(data.data.response) {
+							deferred.resolve(data.data);
+						} else {
+							deferred.reject(data.data);
+						}
+					}, function(err) {
+						deferred.reject(err);
+					});
+				return deferred.promise;
+			}
+
+			consoleRESTSvc.getQRs = function() {
+				var deferred = Q.defer();
+				var token = $cookies.get('token');
+				$http.get('/api/v4/qr?token=' + token)
+					.then(function(data) {
+						console.log(data);
+						if(data.data.response) {
+							deferred.resolve(data.data);
+						} else {
+							deferred.reject(data.data);
+						}
+					}, function(err) {
+						console.log(err);
+						deferred.reject(err);
+					});
+				return deferred.promise;
+			}
+
+			consoleRESTSvc.createQr = function(req_obj) {
+				var deferred = Q.defer();
+				var token = $cookies.get('token');
+				$http.post('/api/v4/qr/outlets?token=' + token, req_obj)
+					.then(function(data) {
+						if(data.data.response) {
+							deferred.resolve(data.data);
+						} else {
+							deferred.reject(data.data);
+						}
+					}, function(err) {
+						console.log(err);
+						deferred.reject(err);
+					});
+				return deferred.promise;
+			}
+
+			consoleRESTSvc.getMerchantAccounts = function() {
+				var deferred = Q.defer();
+				var token = $cookies.get('token');
+				$http.get('/api/v4/accounts/list?token=' + token)
+					.then(function(data) {
+						if(data.data.response) {
+							deferred.resolve(data.data);
+						} else {
+							deferred.reject(data.data);
 						}
 					}, function(err) {
 						deferred.reject(err);

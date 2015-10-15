@@ -295,7 +295,7 @@ var OutletSchema = new Schema({
     status: {
       type: String,
       //enum: ['active', 'archived', 'draft'],
-      default: 'draft'
+      default: 'active'
     },
     links: [{
       type: Schema.ObjectId,

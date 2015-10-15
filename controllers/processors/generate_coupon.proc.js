@@ -112,17 +112,18 @@ function getMatchingOffer(offers, offer_id){
 }
 
 function check_enough_twyst_buck (offer, bucks) {
-    if(offer.offer_cost <= bucks) {
+    //if(offer.offer_cost <= bucks) {
         return true;
-    }
-    else{
-        return false;
-    }
+    //}
+    //else{
+    //    return false;
+    //}
 }
 
 
 function create_coupon(offer, user, outlet) {
   logger.log();
+  var deferred = Q.defer();
   var keygen = require('keygenerator');
   var code = keygen._({
     forceUppercase: true,
@@ -130,39 +131,44 @@ function create_coupon(offer, user, outlet) {
     exclude: ['O', '0', 'L', '1']
   });
 
-  var deferred = Q.defer();
-  var outlets = [];
-  outlets.push(outlet);
-  var update = {
-    $push: {
-      coupons: {
-        _id: mongoose.Types.ObjectId(),
-        code: code,
-        issued_for: offer._id,
-        coupon_source:  'exclusive_offer',
-        header: offer.actions.reward.header,
-        line1: offer.actions.reward.line1,
-        line2: offer.actions.reward.line2,        
-        expiry_date: new Date(),
-        meta: {
+  
+  var coupon = {
+      _id: mongoose.Types.ObjectId(),
+      code: code,
+      issued_for: offer._id,
+      coupon_source: 'exclusive_offer',
+      header: offer.actions.reward.header,
+      line1: offer.actions.reward.line1,
+      line2: offer.actions.reward.line2,
+      terms: offer.terms,
+      description: offer.actions.reward.description,
+      meta: {
           reward_type: {
-            type: offer.actions.reward.reward_meta.reward_type
+              type: offer.actions.reward.reward_meta.reward_type
           }
-        },
-        status: 'active',
-        issued_at: new Date(),
-        issued_by: outlet,
-        outlets: offer.offer_outlets
+      },
+      status: 'active',
+      issued_at: new Date(),
+      issued_by: outlet,
+      outlets: offer.offer_outlets
+  }
+
+  User.findOne({
+        _id: user
+  }).exec(function(err, user) {
+      if (err || !user) {
+          console.log('user save err', err);
+          deferred.reject('Could not update user');
+      } else {
+          user.coupons.push(coupon);
+          user.save(function(err) {
+              if (err) {
+                  console.log('user save err', err);
+              } else {
+                  deferred.resolve(user);
+              }
+          });
       }
-    }
-  };
-  User.findOneAndUpdate({
-    _id: user
-  }, update, function(err, updated_user) {
-    if (err || !user) {
-      deferred.reject('Could not update user');
-    } else
-      deferred.resolve(updated_user);
   });
 
   return deferred.promise;
@@ -172,14 +178,14 @@ function sendMessageToMerchant(coupon, outlet, user_phone) {
     var current_time = new Date();    
     var payload  = {}
     
-    payload.from = 'TWYSTR'
-    if(outlet.contact.location.locality_1) {
-        payload.message = 'User '+user_phone+' has used offer at '+ outlet.basics.name + ', ' + outlet.contact.location.locality_1.toString()+' on ' +Utils.formatDate(current_time)+ '. Coupon code '+coupon.code+', Offer- '+coupon.header+' '+ coupon.line1+' '+coupon.line2+'.'     
+    payload.from = 'TWYSTR';
+    if(outlet.contact.location.locality_1 && outlet.contact.location.locality_1[0] !== '') {
+        payload.message = 'User '+user_phone+' has used offer at '+ outlet.basics.name + ', ' + outlet.contact.location.locality_1.toString()+' on ' +Utils.formatDate(current_time)+ '. Coupon code '+coupon.code+', Offer- '+coupon.header+', '+ coupon.line1+', '+coupon.line2+'.';     
     }
     else{
-        payload.message = 'User '+user_phone+' has used offer at '+ outlet.basics.name + ', ' + outlet.contact.location.locality_2.toString()+' on ' +Utils.formatDate(current_time)+ '. Coupon code '+coupon.code+', Offer- '+coupon.header+' '+ coupon.line1+' '+coupon.line2+'.' 
+        payload.message = 'User '+user_phone+' has used offer at '+ outlet.basics.name + ', ' + outlet.contact.location.locality_2.toString()+' on ' +Utils.formatDate(current_time)+ '. Coupon code '+coupon.code+', Offer- '+coupon.header+', '+ coupon.line1+', '+coupon.line2+'.'; 
     }
-    
+    payload.message = payload.message.replace(/%/g, ' percent');
     
     outlet.contact.phones.reg_mobile.forEach (function (phone) {
         if(phone && phone.num) {

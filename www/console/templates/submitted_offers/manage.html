@@ -1,0 +1,39 @@
+<div class='col-xs-12 col-sm-10 col-sm-offset-1' ng-init='loadSubmittedOffers()'>
+	<div class='panel panel-default table-responsive'>
+		<div class='panel-heading'>
+			<ol class='breadcrumb' style='margin-bottom:0px;'>
+				<li><a>Submitted Offers</a></li>
+				<li class='active'>List</li>
+			</ol>
+		</div>
+		<div class='panel-body'>
+			<ul class='nav nav-pills nav-justified'>
+				<li role='presentation' class='dropdown'>
+					<a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Sort By: {{sort_order[sort]}} <span class="caret"></span></a>
+					<ul class="dropdown-menu">
+						<li ng-repeat='(sort, text) in sort_order'><a ng-click='updateSortOrder(sort)'>{{text}}</a></li>
+					</ul>
+				</li>
+				<li role='presentation' ng-repeat='(val, text) in view_options' ng-class='{"active": view_by==text}' ng-click='updateViewBy(val)'><a>{{text}}</a></li>
+			</ul>
+		</div>
+		<table class='table table-stripped table-hover'>
+			<thead>
+				<th>S No</th>
+				<th>Outlet</th>
+				<th>Location</th>
+				<th>Offer</th>
+				<th>Photo Attached?</th>
+			</thead>
+			<tbody>
+				<tr ng-repeat='offer in submitted_offers'>
+					<td>{{$index + 1}}</td>
+					<td>{{offer.event_meta.outlet}}</td>
+					<td>{{offer.event_meta.location}}</td>
+					<td>{{offer.event_meta.offer}}</td>
+					<td><i class='fa' ng-class='{"offer.event_meta.photo": "fa-check-square", "!offer.event_meta.photo": "fa-square-o"}'></i></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

@@ -3,7 +3,9 @@
 var Cache = require('../../common/cache.hlpr');
 var Q = require('q');
 var _ = require('underscore');
+var ld = require('lodash');
 var mongoose = require('mongoose');
+require('../../models/outlet.mdl');
 var Outlet = mongoose.model('Outlet');
 var User = mongoose.model('User');
 var AuthHelper = require('../../common/auth.hlpr.js');
@@ -58,24 +60,9 @@ module.exports.get_all_outlets = function(token) {
             message: 'Couldn\'t get outlet list'
           });
         } else {
-          var list = _.filter(JSON.parse(reply), function(outlet) {
-            if(outlet.outlet_meta.status==='active') {
-              return true;
-            } else {
-              return false;
-            }
-          });
-          var outlets = _.map(list, function(outlet) {
-            return {
-              _id: outlet._id,
-              name: outlet.basics.name,
-              address: outlet.contact.location.address,
-              locality_1: outlet.contact.location.locality_1[0],
-              locality_2: outlet.contact.location.locality_2[0],
-              city: outlet.contact.location.city,
-              pin: outlet.contact.location.pin
-            }
-          });
+          var outlets = _.map(JSON.parse(reply), function(obj) {
+            return obj; 
+          });;
 
           deferred.resolve({
             data: outlets,
@@ -97,36 +84,73 @@ module.exports.update_outlet = function(token, updated_outlet) {
   delete updated_outlet.__v;
 
   AuthHelper.get_user(token).then(function(data) {
-    outlets = (data.data.outlets && data.data.outlets.toString().split(',')) || null;
-    if (_.includes(outlets, id)) {
-      Outlet.findOneAndUpdate({
-          _id: id
-        }, {
-          $set: updated_outlet
-        }, {
-          upsert: true
-        },
-        function(err, o) {
-          if (err || !o) {
-            deferred.reject({
-              err: err || true,
-              message: 'Couldn\'t update the outlet'
-            });
-          } else {
-            updated_outlet._id = id;
-            _updateOutletInCache(updated_outlet);
-            deferred.resolve({
-              data: o,
-              message: 'Updated outlet successfully'
-            });
-          }
-        }
-      );
-    } else {
+    if(data.data.role>5) {
       deferred.reject({
         err: true,
-        message: 'No permissions to update the outlet'
+        message: 'Unauthorized access'
       });
+    } else if(data.data.role>2) {
+      outlets = (data.data.outlets && data.data.outlets.toString().split(',')) || null;
+      if (_.includes(outlets, id)) {
+        Outlet.findOneAndUpdate({
+            _id: id
+          }, {
+            $set: updated_outlet
+          }, {
+            upsert: true
+          },
+          function(err, o) {
+            if (err || !o) {
+              logger.log(err);
+              deferred.reject({
+                err: err || true,
+                message: 'Couldn\'t update the outlet'
+              });
+            } else {
+              updated_outlet._id = id;
+              _updateOutletInCache(updated_outlet);
+              deferred.resolve({
+                data: o,
+                message: 'Updated outlet successfully'
+              });
+            }
+          }
+        );
+      } else {
+        deferred.reject({
+          err: true,
+          message: 'No permissions to update the outlet'
+        });
+      }
+    } else {
+      console.log(id);
+      Outlet.findById(id).exec(function(err, outlet) {
+        if(err || !outlet) {
+          console.log(err);
+          deferred.reject({
+            err: err || true,
+            message: 'Couldn\'t find the outlet'
+          });
+        } else {
+          outlet = ld.merge(outlet, updated_outlet);
+          outlet.basics.is_paying = outlet.basics.is_paying || false;
+          outlet.save(function(err) {
+            if(err) {
+              console.log(err);
+              deferred.reject({
+                err: err || true,
+                message: 'Couldn\'t update the outlet'
+              });
+            } else {
+              _updateOutletInCache(outlet);
+              deferred.resolve({
+                data: outlet,
+                message: 'Updated outlet successfully'
+              });
+            }
+          })
+        }
+      })
     }
   }, function(err) {
     deferred.reject({

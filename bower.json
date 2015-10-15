@@ -8,23 +8,23 @@
     "angular": "1.4.1",
     "angular-animate": "1.4.1",
     "angular-aria": "1.4.1",
-    "angular-bootstrap": "0.13.0",
+    "angular-bootstrap": "~0.13.4",
     "angular-cookies": "1.4.1",
+    "angular-google-maps": "2.1.5",
     "angular-loading-bar": "0.8.0",
     "angular-material": "0.10.0",
     "angular-moment": "0.10.1",
     "angular-toastr": "1.4.1",
     "angular-ui-router": "0.2.15",
     "angular-wizard": "0.5.3",
+    "angularjs-ordinal-filter": "*",
+    "async": "1.4.2",
     "bootstrap": "3.3.5",
     "jquery": "2.1.4",
     "lodash": "3.9.3",
-    "ngstorage": "0.3.7",
-    "async": "1.4.2",
-    "angular-google-maps": "2.1.5",
     "ng-file-upload": "6.2.1",
     "ng-file-upload-shim": "6.2.1",
-    "angularjs-ordinal-filter": "*"
+    "ngstorage": "0.3.7"
   },
   "resolutions": {
     "lodash": "3.9.3"

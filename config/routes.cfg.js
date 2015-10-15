@@ -10,11 +10,14 @@ module.exports = function(app) {
   (function WepAppRoutes() {
     app.get('', function(req, res) { res.redirect('/home'); });
     app.get('/', function(req, res) { res.redirect('/home'); });
+    app.get('/api/v4/earn/more', function(req, res) { res.redirect('/home'); });
+    app.get('/api/v4/faq', function(req, res) { res.redirect('/home'); });
   })();
 
   (function AccountRoutes() {
     var AccountCtrl = require('../controllers/account.ctrl');
     app.post('/api/v4/auth/register', AccountCtrl.register_merchant);
+    app.get('/api/v4/accounts/list', AccountCtrl.list_accounts);
     app.post('/api/v4/accounts/login', function(req, res, next) {
         next();
       }, passport.authenticate('account'),
@@ -120,6 +123,7 @@ module.exports = function(app) {
 
   (function QR_Routes() {
       var QrCtrl = require('../controllers/qr.ctrl');
+      app.get('/api/v4/qr', QrCtrl.qr_list);
       app.post('/api/v4/qr/outlets',  QrCtrl.qr_create);
   })();
 

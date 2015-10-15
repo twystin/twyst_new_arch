@@ -7,13 +7,20 @@ angular.module('consoleApp')
 				'-event_date': 'Newest FIrst'
 			};
 
-			$scope.view_options = ['Submitted', 'twyst_approved', 'outlet_pending', 'twyst_rejected', 'outlet_rejected', 'verified', 'all']
+			$scope.view_options = {
+				'submitted': 'Submitted',
+				'twyst_approved': 'Twyst Approved',
+				'outlet_pending': 'Outlet Pending',
+				'twyst_rejected': 'Twyst Rejected',
+				'outlet_rejected': 'Outlet Rejected',
+				'verified': 'Verified'
+			}
 
 			$scope.sort = 'event_date';
-			$scope.view_by = 'Submitted';
+			$scope.view_by = 'submitted';
 
 			$scope.getBills = function() {
-				consoleRESTSvc.getBills($scope.view_by, $scope.sort).then(function(res) {
+				consoleRESTSvc.getEvents('upload_bill', $scope.view_by, $scope.sort).then(function(res) {
 					$scope.bills = res.data;
 				}, function(err) {
 					if (err.message) {
@@ -29,7 +36,8 @@ angular.module('consoleApp')
 			}
 
 			$scope.updateViewBy = function(val) {
-				$scope.view_by = $scope.view_options[val];
+				console.log(val);
+				$scope.view_by = val;
 				$scope.getBills();
 			}
 		}

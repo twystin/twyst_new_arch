@@ -34,6 +34,11 @@ angular.module('consoleApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angular
 			})
 			.state('console.merchant', {
 				url: '/merchant',
+				templateUrl: 'templates/merchant/manage.html',
+				controller: 'MerchantManageController'
+			})
+			.state('console.register_merchant', {
+				url: '/merchant/register',
 				templateUrl: 'templates/merchant/register.html',
 				controller: 'MerchantRegisterController'
 			})
@@ -49,6 +54,27 @@ angular.module('consoleApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angular
 			})
 			.state('console.qrs', {
 				url: '/qrs',
-				templateUrl: 'templates/qrs/manage.html'
+				templateUrl: 'templates/qrs/manage.html',
+				controller: 'QRListController'
+			})
+			.state('console.qr_create', {
+				url: '/qrs/create',
+				templateUrl: 'templates/qrs/create.html',
+				controller: 'QRCreateController'
+			})
+			.state('console.suggested_outlets', {
+				url: '/suggested_outlets',
+				templateUrl: 'templates/suggested_outlets/manage.html',
+				controller: 'SuggestedOutletsController'
+			})
+			.state('console.submitted_offers', {
+				url: '/submitted_offers',
+				templateUrl: 'templates/submitted_offers/manage.html',
+				controller: 'SubmittedOffersController'
+			})
+			.state('console.user_feedback', {
+				url: '/user_feedback',
+				templateUrl: 'templates/user_feedback/manage.html',
+				controller: 'UserFeedbackController'
 			})
 	});

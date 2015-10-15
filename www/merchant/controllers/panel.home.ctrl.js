@@ -149,12 +149,12 @@ angular.module('merchantApp')
 			}
 
 			$scope.retrieveNotifications = function(outlet_id) {
-				merchantRESTSvc.getNotifications(outlet_id).then(function(data) {
-					console.log(data);
-					$scope.notifictions = data.data;
-				}, function(err) {
-					console.log(err);
-				})
+				// merchantRESTSvc.getNotifications(outlet_id).then(function(data) {
+				// 	console.log(data);
+				// 	$scope.notifictions = data.data;
+				// }, function(err) {
+				// 	console.log(err);
+				// })
 			}
 		}
 	]);
