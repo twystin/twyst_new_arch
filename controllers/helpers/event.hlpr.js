@@ -137,7 +137,7 @@ function listEventsForMerchant(user, event_type, status) {
 function listEventForConsole(event_type, status) {
   logger.log();
   var deferred = Q.defer();
-
+  console.log(status + ' ' + event_type);
   Event.find({
     event_type: event_type,
     'event_meta.status': status
@@ -399,16 +399,34 @@ function updateEventFromConsole(event) {
         
             update_twyst_bucks(data).then(function(data){
               if(data.outlet.data.contact.location.locality_1.toString()) {
-                payload.body = "Your bill for " + data.outlet.data.basics.name + ','+ 
+                if(data.is_checkin) {
+                  payload.body = "Your bill for " + data.outlet.data.basics.name + ','+ 
                 data.outlet.data.contact.location.locality_1.toString() + 
                 ',dated '+data.event_meta.bill_date+
-                ' has been approved! You have checked-in and earned ' + twyst_bucks_earn+ ' Twyst Bucks';  
+                ' has been approved! You have checked-in and earned ' + twyst_bucks_earn+ ' Twyst Bucks';    
+                }
+                else{
+                  payload.body = "Your bill for " + data.outlet.data.basics.name + ','+ 
+                data.outlet.data.contact.location.locality_1.toString() + 
+                ',dated '+data.event_meta.bill_date+
+                ' has been approved! You have earned ' + twyst_bucks_earn+ ' Twyst Bucks';  
+                }
+                
               }
               else{
-                payload.body = "Your bill for " + data.outlet.data.basics.name + ','+ 
+                if(data.is_checkin) {
+                  payload.body = "Your bill for " + data.outlet.data.basics.name + ','+ 
                 data.outlet.data.contact.location.locality_2.toString() + 
                 ',dated '+data.event_meta.bill_date+
-                ' has been approved! You have checked-in and earned ' + twyst_bucks_earn+ ' Twyst Bucks';  
+                ' has been approved! You have checked-in and earned ' + twyst_bucks_earn+ ' Twyst Bucks';    
+                }
+                else {
+                  payload.body = "Your bill for " + data.outlet.data.basics.name + ','+ 
+                data.outlet.data.contact.location.locality_2.toString() + 
+                ',dated '+data.event_meta.bill_date+
+                ' has been approved! You have earned ' + twyst_bucks_earn+ ' Twyst Bucks';  
+                }
+                
               }
               payload.head = "Bill Approved";
               sendNotification(data, payload).then(function(){
@@ -624,6 +642,7 @@ function saveNotification(passed_data, payload, action_icon) {
   notif.shown  = false;
   notif.link  = 'discover';
   notif.user  = passed_data.event_user;
+  notif.status = 'sent';
   notif.outlet  = null;
   notif.notification_type = 'push'; // either push or pul
   notif.created_at = new Date();
@@ -652,35 +671,47 @@ function checkinUser(passed_data) {
   logger.log();
   var deferred = Q.defer();
 
-  var obj = {};
-  obj.event_data = {};
-  obj.event_data.event_meta = {};
-  obj.event_data.event_meta.phone = passed_data.user.phone;
-  obj.event_data.event_meta.date = new Date(passed_data.event_date);
-  obj.event_data.event_meta.outlet = passed_data.outlet.data;
-  obj.outlet = passed_data.outlet.data;
-  obj.event_data.event_outlet = passed_data.outlet.data._id;
-  obj.event_data.event_type = 'upload_bill'
+  var checkin_offers = _.filter(passed_data.outlet.offers, {
+      'offer_type': 'checkin'
+  })
+
+  if(checkin_offers && checkin_offers.length) {
+    var obj = {};
+    obj.event_data = {};
+    obj.event_data.event_meta = {};
+    obj.event_data.event_meta.phone = passed_data.user.phone;
+    obj.event_data.event_meta.date = new Date(passed_data.event_date);
+    obj.event_data.event_meta.outlet = passed_data.outlet.data;
+    obj.outlet = passed_data.outlet.data;
+    obj.event_data.event_outlet = passed_data.outlet.data._id;
+    obj.event_data.event_type = 'upload_bill'
+    
+    CheckinHelper.validate_request(obj)
+      .then(function(data) {
+        return CheckinHelper.already_checked_in(data);
+      })
+      .then(function(data) {
+        return CheckinHelper.check_and_create_coupon(data)
+      })
+      .then(function(data) {
+        return logCheckinEvent(data)
+      })
+      .then(function(data) {
+          return CheckinHelper.update_checkin_counts(data);
+      })
+      .then(function(data) {
+        passed_data.is_checkin = true;
+          deferred.resolve(passed_data);
+      })
+      .fail(function(err) {
+          deferred.reject(err);
+      })
+  }
+  else{
+    passed_data.is_checkin = false;
+    deferred.resolve(passed_data);
+  }
   
-  CheckinHelper.validate_request(obj)
-    .then(function(data) {
-      return CheckinHelper.already_checked_in(data);
-    })
-    .then(function(data) {
-      return CheckinHelper.check_and_create_coupon(data)
-    })
-    .then(function(data) {
-      return logCheckinEvent(data)
-    })
-    .then(function(data) {
-        return CheckinHelper.update_checkin_counts(data);
-    })
-    .then(function(data) {
-        deferred.resolve(passed_data);
-    })
-    .fail(function(err) {
-        deferred.reject(err);
-    })
 
   return deferred.promise;
 
@@ -688,18 +719,21 @@ function checkinUser(passed_data) {
 
 function logCheckinEvent(passed_data) {
   logger.log();
-
   var deferred = Q.defer();
+
   var event = {};
-  console.log(passed_data)
-  event = _.extend(event, passed_data.event_data);
+  event.event_meta = {};
   event.event_user = passed_data.user._id;
+  event.event_type = 'checkin';
+  event.event_date = new Date();
+  event.event_meta.event_type = 'upload_bill';
+  event.event_meta.event_date = passed_data.event_data.event_meta.date;
+  event.event_meta.phone = passed_data.event_data.event_meta.phone;
 
   if (passed_data.outlet) {
     event.event_outlet = passed_data.outlet._id;
   }
-
-  event.event_date = event.event_date || new Date();
+  
   var created_event = new Event(event);
   created_event.save(function(err, e) {
     if (err || !e) {
