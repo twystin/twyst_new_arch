@@ -314,6 +314,7 @@ function pick_outlet_fields(params) {
       massaged_item.open = !item.recco.closed;
       massaged_item.phone = item.contact.phones.mobile[0] && item.contact.phones.mobile[0].num;
       massaged_item.offers = item.offers;
+      massaged_item.is_paying =  item.is_paying;
       if (fmap && fmap[item._id]) {
         massaged_item.following = true;
       } else {

@@ -211,6 +211,7 @@ function pick_outlet_fields(params) {
     massaged_item.phone = params.outlet.contact.phones.mobile[0] && params.outlet.contact.phones.mobile[0].num;
     massaged_item.offers = params.outlet.offers;
     massaged_item.attributes = params.outlet.attributes;
+    massaged_item.is_paying =  params.outlet.is_paying;
     if (fmap && fmap[params.outlet._id]) {
       massaged_item.following = true;
     } else {

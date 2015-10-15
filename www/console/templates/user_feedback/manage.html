@@ -23,15 +23,15 @@
 				<th>User</th>
 				<th>Issue</th>
 				<th>Comment</th>
-				<th>Offer ID</th>
+				<th>Picture</th>
 			</thead>
 			<tbody>
 				<tr ng-repeat='feedback in feedbacks'>
 					<td>{{$index + 1}}</td>
 					<td>{{feedback.event_user}}</td>
-					<td>{{feedback.event_meta.issue}}</td>
-					<td>{{feedback.event_meta.comments}}</td>
-					<td>{{feedback.event_meta.offer}}</td>
+					<td>{{feedback.event_meta.type}}</td>
+					<td>{{feedback.event_meta.comment}}</td>
+					<td>{{feedback.event_meta.photo}}</td>
 				</tr>
 			</tbody>
 		</table>
