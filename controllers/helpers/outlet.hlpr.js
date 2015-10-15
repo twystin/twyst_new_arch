@@ -5,6 +5,7 @@ var Q = require('q');
 var _ = require('underscore');
 var ld = require('lodash');
 var mongoose = require('mongoose');
+require('../../models/outlet.mdl');
 var Outlet = mongoose.model('Outlet');
 var User = mongoose.model('User');
 var AuthHelper = require('../../common/auth.hlpr.js');
