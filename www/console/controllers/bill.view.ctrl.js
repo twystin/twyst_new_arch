@@ -6,7 +6,18 @@ angular.module('consoleApp')
 			};
 
 			consoleRESTSvc.getAllOutlets().then(function(res) {
-				$scope.outlets = res.data;
+				$scope.outlets = _.map(res.data, function(outlet) {
+	                   return {
+	                           _id: outlet._id,
+	                           name: outlet.basics.name,
+	                           address: outlet.contact.location.address,
+	                           locality_1: outlet.contact.location.locality_1[0],
+	                           locality_2: outlet.contact.location.locality_2[0],
+	                           city: outlet.contact.location.city,
+	                           pin: outlet.contact.location.pin
+	                   }
+	           });
+
 			}, function(err) {
 				if (err.message) {
 					toastr.error(err.message, "Error");

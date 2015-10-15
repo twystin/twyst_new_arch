@@ -12,6 +12,7 @@ var Notification = new Schema({
   message : {type: String},
   detail : {type: String},
   icon : {type: String},
+  status: {type: String, default: 'draft'},
   expire : {type: Date},
   shown : {type: Boolean},
   link : {},
