@@ -32,6 +32,11 @@ angular.module('consoleApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angular
 				templateUrl: 'templates/outlet/manage.html',
 				controller: 'OutletManageController'
 			})
+			.state('console.outlet_view', {
+				url: '/outlets/view/:outlet_id',
+				templateUrl: 'templates/outlet/view.html',
+				controller: 'OutletViewController'
+			})
 			.state('console.merchant', {
 				url: '/merchant',
 				templateUrl: 'templates/merchant/manage.html',

@@ -105,6 +105,22 @@ angular.module('consoleApp').factory('consoleRESTSvc', ['$http', '$q', '$cookies
 				return deferred.promise;
 			}
 
+			consoleRESTSvc.getOutlet = function(outlet_id) {
+				var deferred = Q.defer();
+				var token = $cookies.get('token');
+				$http.get('/api/v4/outlets/' + outlet_id + '?token=' + token)
+					.then(function(data) {
+						if(data.data.response) {
+							deferred.resolve(data.data);
+						} else {
+							deferred.reject(data.data);
+						}
+					}, function(err) {
+						deferred.reject(err);
+					});
+				return deferred.promise;
+			}
+
 			consoleRESTSvc.updateOutletStatus = function(outlet) {
 				var deferred = Q.defer();
 				var token = $cookies.get('token');
