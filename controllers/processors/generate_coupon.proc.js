@@ -194,7 +194,7 @@ function sendMessageToMerchant(coupon, outlet, user_phone) {
     outlet.contact.phones.reg_mobile.forEach (function (phone) {
         if(phone && phone.num) {
             payload.phone = phone.num;
-            //Transporter.send('sms', 'vf', payload);
+            Transporter.send('sms', 'vf', payload);
         }
     });
 }
