@@ -693,7 +693,6 @@ function checkinUser(passed_data) {
           return CheckinHelper.update_checkin_counts(data);
       })
       .then(function(data) {
-        passed_data.is_checkin = true;
           deferred.resolve(passed_data);
       })
       .fail(function(err) {
@@ -701,7 +700,6 @@ function checkinUser(passed_data) {
       })
   }
   else{
-    passed_data.is_checkin = false;
     deferred.resolve(passed_data);
   }
   
