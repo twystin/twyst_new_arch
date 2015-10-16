@@ -31,7 +31,7 @@
 				<th>Status</th>
 			</thead>
 			<tbody class='text-justify'>
-				<tr ng-repeat='outlet in visible_outlets'>
+				<tr ng-repeat='outlet in visible_outlets' ui-sref='console.outlet_view({outlet_id: outlet._id})' style='cursor:pointer;'>
 					<td>{{outlet.basics.name}}</td>
 					<td>{{outlet._id}}</td>
 					<td>{{outlet.contact.location.locality_1[0]}}</td>
