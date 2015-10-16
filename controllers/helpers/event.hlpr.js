@@ -399,18 +399,11 @@ function updateEventFromConsole(event) {
         
             update_twyst_bucks(data).then(function(data){
               if(data.outlet.data.contact.location.locality_1.toString()) {
-                if(data.is_checkin) {
+                
                   payload.body = "Your bill for " + data.outlet.data.basics.name + ','+ 
                 data.outlet.data.contact.location.locality_1.toString() + 
                 ',dated '+data.event_meta.bill_date+
                 ' has been approved! You have checked-in and earned ' + twyst_bucks_earn+ ' Twyst Bucks';    
-                }
-                else{
-                  payload.body = "Your bill for " + data.outlet.data.basics.name + ','+ 
-                data.outlet.data.contact.location.locality_1.toString() + 
-                ',dated '+data.event_meta.bill_date+
-                ' has been approved! You have earned ' + twyst_bucks_earn+ ' Twyst Bucks';  
-                }
                 
               }
               else{
@@ -671,7 +664,7 @@ function checkinUser(passed_data) {
   logger.log();
   var deferred = Q.defer();
 
-  var checkin_offers = _.filter(passed_data.outlet.offers, {
+  var checkin_offers = _.filter(passed_data.outlet.data.offers, {
       'offer_type': 'checkin'
   })
 
@@ -700,7 +693,6 @@ function checkinUser(passed_data) {
           return CheckinHelper.update_checkin_counts(data);
       })
       .then(function(data) {
-        passed_data.is_checkin = true;
           deferred.resolve(passed_data);
       })
       .fail(function(err) {
@@ -708,7 +700,6 @@ function checkinUser(passed_data) {
       })
   }
   else{
-    passed_data.is_checkin = false;
     deferred.resolve(passed_data);
   }
   

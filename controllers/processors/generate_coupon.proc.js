@@ -92,14 +92,18 @@ module.exports.process = function(data) {
 }
 
 function isOutletClosed(outlet) {
+    var date = new Date();
+    var time = date.getHours() +':'+date.getMinutes();
+    date = date.getMonth()+ '-'+ date.getDate()+'-'+date.getFullYear();
+
     if (outlet && outlet.business_hours ) {
-        if(RecoHelper.isClosed('dummy', 'dummy', outlet.business_hours)) {
-            return true;
-        }
-    }
-    else{
-      return false;
-    }
+      if(RecoHelper.isClosed(date, time, outlet.business_hours)) {
+          return true;
+      }
+  }
+  else{
+    return false;
+  }
 }
 
 function getMatchingOffer(offers, offer_id){
@@ -112,12 +116,12 @@ function getMatchingOffer(offers, offer_id){
 }
 
 function check_enough_twyst_buck (offer, bucks) {
-    //if(offer.offer_cost <= bucks) {
+    if(offer.offer_cost <= bucks) {
         return true;
-    //}
-    //else{
-    //    return false;
-    //}
+    }
+    else{
+        return false;
+    }
 }
 
 
