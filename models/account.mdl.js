@@ -8,7 +8,7 @@ require('./user.mdl');
 var User = mongoose.model('User');
 
 var Account = new Schema({
-    user: {type: Schema.ObjectId, ref: User},
+    user: {type: Schema.ObjectId, ref: 'User'},
     role: {type: Number, default: 6},
     created_at: {type: Date, default: Date.now}
 });

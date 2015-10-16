@@ -194,7 +194,7 @@ function calculate_relevance(params) {
 
     // USER CHECKIN RELEVANCE
     if (val.recco.checkins) {
-      relevance = relevance + val.recco.checkins * 10;
+      //relevance = relevance + val.recco.checkins * 10;
     }
     // USER FOLLOW RELEVANCE
     if (params.user) {
@@ -202,7 +202,7 @@ function calculate_relevance(params) {
         if (reply) {
           var fmap = JSON.parse(reply);
           if (fmap && fmap[val._id]) {
-            relevance = relevance + 10000;
+            relevance = relevance + 1000;
           }
         }
       });
@@ -245,15 +245,13 @@ function calculate_relevance(params) {
     // CURRENT OFFERS RELEVANCE
     if (val.offers && val.offers.length > 1) {      
       for(var i = 0; i < val.offers.length; i++) {
-        if(val.offers[i].offer_type === 'coupon' || val.offers[i].offer_type === 'offer') {
-          relevance = relevance +  1000;    
+        if(val.offers[i].offer_type === 'offer') {
+          relevance = relevance +  1500;    
         }
         else if(val.offers[i].offer_type === 'deal') {
-          relevance = relevance +  500;    
+          relevance = relevance +  1000;    
         }
-        else if(val.offers[i].offer_type === 'checkin') {
-          relevance = relevance +  400; 
-        }
+        
       }
       //relevance = relevance + val.offers.length * 1000;
     }
@@ -308,6 +306,7 @@ function pick_outlet_fields(params) {
       massaged_item.open = !item.recco.closed;
       massaged_item.phone = item.contact.phones.mobile[0] && item.contact.phones.mobile[0].num;
       massaged_item.offers = item.offers;
+      massaged_item.is_paying =  item.is_paying;
       if (fmap && fmap[item._id]) {
         massaged_item.following = true;
       } else {
@@ -348,10 +347,6 @@ function pick_outlet_fields(params) {
         }
         else if(offer.offer_type === 'checkin') {
           return -10;
-        }else if(offer.next) {
-          return offer.next;
-        } else {
-          return 100;
         }
       }); 
     params.outlets = _.compact(params.outlets);
@@ -379,7 +374,21 @@ function massage_offers(params) {
         item = add_user_coupons(
           pick_offer_fields(
             select_relevant_checkin_offer(item), params.user._id, params.query.date, params.query.time), coupon_map && coupon_map[item._id] && coupon_map[item._id].coupons);
-        
+        item.offers = _.sortBy(item.offers, function(offer) {
+          if(offer.type === 'coupon') {
+            return -100;
+          } else if(offer.offer_type === 'pool') {
+            return -75;
+          } else if(offer.offer_type === 'offer') {
+            return -50;
+          }
+          else if(offer.offer_type === 'deal') {
+            return -25;
+          }
+          else if(offer.offer_type === 'checkin') {
+            return -10;
+          }
+        }); 
         return item;
       });
       deferred.resolve(params);
@@ -439,12 +448,10 @@ function massage_offers(params) {
 
         _.each(item.offers, function(offer) {
             if( offer._id && itemd.issued_for && offer._id.toString() === itemd.issued_for.toString()) {
-                coupon.available_now = offer.available_now;
-                if(!coupon.available_now) {
-                  coupon.available_next = offer.available_next;
-                }
-                
-
+              coupon.available_now = offer.available_now;
+              if(!coupon.available_now) {
+                coupon.available_next = offer.available_next;
+              }
             }
         });
         if (new Date(coupon.lapse_date) >= new Date() && new Date(coupon.issued_at) < new Date(Date.now() - 10800000)) {

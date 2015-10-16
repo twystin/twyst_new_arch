@@ -17,7 +17,6 @@ module.exports = function(app) {
   (function AccountRoutes() {
     var AccountCtrl = require('../controllers/account.ctrl');
     app.post('/api/v4/auth/register', AccountCtrl.register_merchant);
-    app.get('/api/v4/accounts/list', AccountCtrl.list_accounts);
     app.post('/api/v4/accounts/login', function(req, res, next) {
         next();
       }, passport.authenticate('account'),
@@ -114,6 +113,7 @@ module.exports = function(app) {
   (function LocationRoutes() {
     var LocationCtrl = require('../controllers/location.ctrl');
     app.get('/api/v4/locations', LocationCtrl.get_locations);
+    app.get('/api/v4/locations/outlets', LocationCtrl.get_outlet_locations);
   })();
 
   (function SearchRoutes() {

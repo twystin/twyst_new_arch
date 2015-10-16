@@ -159,7 +159,7 @@ angular.module('consoleApp').factory('consoleRESTSvc', ['$http', '$q', '$cookies
 			consoleRESTSvc.getMerchantAccounts = function() {
 				var deferred = Q.defer();
 				var token = $cookies.get('token');
-				$http.get('/api/v4/accounts/list?token=' + token)
+				$http.get('/api/v4/outlets?token=' + token)
 					.then(function(data) {
 						if(data.data.response) {
 							deferred.resolve(data.data);

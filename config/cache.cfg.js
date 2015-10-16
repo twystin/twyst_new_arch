@@ -29,6 +29,28 @@ function populateOutlets() {
   });
 }
 
+function populateOutletsLocations() {
+  Outlet.find({}).lean().exec(function(err, outlets) {
+    if (err || outlets.length === 0) {
+      logger.error("Error populating cache");
+    } else {
+      var reduced_outlets = _.reduce(outlets, function(memo, item) {
+        var obj = {};
+        obj.name = item.basics.name;
+
+        obj.address = item.contact.location.address;
+        memo[item._id] = obj;
+        return memo;
+      }, {});
+      Cache.set('outlets_location', JSON.stringify(reduced_outlets), function(err) {
+        if (!err) {
+          logger.info('Populated cache with outlets locations');
+        }
+      });
+    }
+  });
+}
+
 function populateLocations() {
   Cache.hset('locations', 'location_map', JSON.stringify(LocationHandler.locations), function(err) {
     if (!err) {
@@ -77,5 +99,6 @@ module.exports.populate = function() {
   populateOutlets();
   populateLocations();
   populateTwystBucks();
+  populateOutletsLocations();
   // populateCheckinMap();
 };

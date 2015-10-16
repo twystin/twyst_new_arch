@@ -23,7 +23,7 @@ module.exports.check = function(data) {
 module.exports.process = function(data) {
     logger.log();
     var deferred = Q.defer();
-    console.log(data.event_data);
+    
     CheckinHelper.check_and_create_coupon(data)
         .then(function(data) {
             return CheckinHelper.update_checkin_counts(data);
@@ -33,6 +33,7 @@ module.exports.process = function(data) {
         })
         .then(function(data) {
             data.event_data.event_type = 'checkin';
+            data.event_data.event_meta.event_type = 'panel_checkin';
             deferred.resolve(data);
         })
         .fail(function(err) {

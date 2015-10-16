@@ -12,6 +12,8 @@ var CheckinHelper = require('../helpers/checkin.hlpr');
 module.exports.check = function(data) {
   logger.log();
   var deferred = Q.defer();
+
+  data.event_data.event_meta.date = new Date();
   validate_qr(data)
     .then(function(data) {
       return CheckinHelper.already_checked_in(data);
@@ -37,6 +39,7 @@ module.exports.process = function(data) {
     })
     .then(function(data) {
       data.event_data.event_type = 'checkin';
+      data.event_data.event_meta.event_type = 'qr_checkin';
       deferred.resolve(data);
     })
     .fail(function(err) {

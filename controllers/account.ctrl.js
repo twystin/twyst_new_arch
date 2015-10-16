@@ -5,8 +5,6 @@ var mongoose = require('mongoose');
 require('../models/auth_code.mdl.js');
 var AuthCode = mongoose.model('AuthCode');
 var Event = mongoose.model('Event');
-var User = mongoose.model('User');
-var Account = mongoose.model('Account');
 
 var HttpHelper = require('../common/http.hlpr.js');
 var DTHelper = require('../common/datetime.hlpr.js');
@@ -165,45 +163,6 @@ module.exports.register_merchant = function(req, res) {
     }, function(err) {
       HttpHelper.error(res, err.error, err.message);
     });
-  }
-}
-
-module.exports.list_accounts = function(req, res) {
-  logger.log();
-
-  var token = req.query.token || null;
-  logger.log(token);
-  if (!token) {
-    HttpHelper.error(res, null, "Not authenticated");
-  } else {
-    AuthHelper.get_user(token).then(function(data) {
-      var user = data.data;
-      logger.log(user);
-      if(user.role>2) {
-        HttpHelper.error(res, null, "Not authorized");
-      } else {
-        Account.find({
-          role: {
-            $in: [3, 4, 5]
-          }
-        }).populate('user').exec(function(err, accounts) {
-          if(err || !accounts) {
-            HttpHelper.error(res, null, "Unable to retrieve merchant accounts");
-          } else {
-            var merchants = _.map(accounts, function(account) { 
-              return {
-                _id: account._id,
-                username: account.username,
-                outlets: account.user.outlets.length
-              }
-            });
-            HttpHelper.success(res, merchants, "Merchant accounts found");
-          }
-        })
-      }
-    }, function(err) {
-      HttpHelper.error(res, err, "Error logging in");
-    })
   }
 }
 

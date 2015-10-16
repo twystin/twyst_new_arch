@@ -43,6 +43,14 @@ var OutletSchema = new Schema({
       type: Date,
       default: Date.now
     },
+    live_at: {
+      type: Date,
+      default: Date.now
+    },
+    archived_at: {
+      type: Date,
+      default: Date.now
+    },
     featured: Boolean,
     is_paying: {type: Boolean, required: true, default: false }
   },
@@ -295,7 +303,7 @@ var OutletSchema = new Schema({
     status: {
       type: String,
       //enum: ['active', 'archived', 'draft'],
-      default: 'draft'
+      default: 'active'
     },
     links: [{
       type: Schema.ObjectId,

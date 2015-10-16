@@ -11,7 +11,7 @@ angular.module('consoleApp').controller('UserFeedbackController', ['$scope', 'to
 		$scope.view_by = 'submitted';
 
 		$scope.loadFeedbacks = function() {
-			consoleRESTSvc.getEvents('write_to_twyst', $scope.view_by, $scope.sort).then(function(res) {
+			consoleRESTSvc.getEvents('feedback', $scope.view_by, $scope.sort).then(function(res) {
 				console.log(res);
 				$scope.feedbacks = res.data;
 			}, function(err) {
