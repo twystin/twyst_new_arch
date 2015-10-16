@@ -76,8 +76,8 @@
       <h3>Timings</h3>
       <div class='row' ng-repeat='day in days'>
         <h4>{{day | uppercase}}</h4>
-        <span class='label label-warning' ng-if='offer.actions.reward.reward_hours.closed'>Closed</span>
-        <span class='label label-success' ng-if='!offer.actions.reward.reward_hours.closed'>Open</span>
+        <span class='label label-warning' ng-if='offer.actions.reward.reward_hours[day].closed'>Closed</span>
+        <span class='label label-success' ng-if='!offer.actions.reward.reward_hours[day].closed'>Open</span>
         <span ng-repeat='timing in offer.actions.reward.reward_hours[day].timings' style='margin-left:10px;margin-right:10px;'><span class='label label-primary'>{{timing.open.time | date: 'hh:mm a'}}</span> to <span class='label label-primary'>{{timing.close.time | date: 'hh:mm a'}}</span></span>
       </div>
     </div>

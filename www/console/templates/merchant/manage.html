@@ -4,7 +4,7 @@
 		<div class='panel-body'>
 			<ul >
 				<li class='pull-left'>
-					<input type='text' placeholder='Search...' ng-model='merchantFilter' ng-change='filterMerchants(true)' typeahead="outlet.basics.name for outlet in merchants">
+					<input type='text' placeholder='Search...' ng-model='merchantFilter' ng-change='filterMerchants(true)' typeahead="outlet.name + ', ' + outlet.loc2 for outlet in merchants | filter:{name: $viewValue}">
 				</li>
 				<li class='pull-right'>
 					<a class='btn btn-default' ui-sref='console.register_merchant'>Create New</a>

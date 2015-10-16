@@ -44,7 +44,7 @@ angular.module('consoleApp')
 				} else {
 					var regex = new RegExp($scope.outletFilter, 'i');
 					var filtered_outlets = _.filter($scope.outlets, function(outlet) {
-						return regex.test(outlet.name) || regex.test(outlet.address) || regex.test(outlet.locality_1) || regex.test(outlet.locality_2) || regex.test(outlet.city) || regex.test(outlet.pin) || regex.test(outlet._id);
+						return regex.test(outlet.basics.name) || regex.test(outlet.contact.location.address) || regex.test(outlet.contact.location.locality_1) || regex.test(outlet.contact.location.locality_2) || regex.test(outlet.contact.location.city) || regex.test(outlet.contact.location.pin) || regex.test(outlet._id) || regex.test(outlet.outlet_meta.status);
 					});
 					$scope.outletCount = filtered_outlets.length
 					$scope.visible_outlets = filtered_outlets.slice(($scope.current_page-1)*$scope.per_page, ($scope.current_page)*$scope.per_page);
