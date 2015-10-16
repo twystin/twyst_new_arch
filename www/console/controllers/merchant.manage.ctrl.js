@@ -8,7 +8,15 @@ angular.module('consoleApp')
 			$scope.loadMerchants = function() {
 				consoleRESTSvc.getMerchantAccounts().then(function(data) {
 					console.log(data);
-					$scope.merchants = data.data;
+					$scope.merchants = _.map(data.data, function(outlet) {
+						return {
+							name: outlet.basics.name,
+							loc1: outlet.contact.location.locality_1[0],
+							loc2: outlet.contact.location.locality_2[0],
+							city: outlet.contact.location.city,
+							pin: outlet.contact.location.pin
+						};
+					});
 					$scope.visible_merchants = $scope.merchants.slice(($scope.current_page-1)*$scope.per_page, ($scope.current_page)*$scope.per_page);
 					$scope.merchant_count = $scope.merchants.length;
 					console.log(data);
