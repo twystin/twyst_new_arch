@@ -202,7 +202,7 @@ module.exports.isClosed = function(date, tm, business_hours) {
     today = business_hours[day];
 
   if (!_.has(today, 'timings') || _.isEmpty(today.timings))
-    return false;
+    return true;
 
   if (today.closed)
     return true;

@@ -628,8 +628,8 @@ function saveNotification(passed_data, payload, action_icon) {
   var deferred = Q.defer();
 
   var notif = {};
-  notif.message  = payload.body;
-  notif.detail  = payload.head;
+  notif.message  = payload.head;
+  notif.detail  = payload.body;
   notif.icon  = action_icon;
   notif.expire  = new Date();
   notif.shown  = false;

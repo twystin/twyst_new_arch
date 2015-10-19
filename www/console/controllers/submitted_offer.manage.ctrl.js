@@ -21,12 +21,12 @@ angular.module('consoleApp').controller('SubmittedOffersController', ['$scope', 
 
 		$scope.updateSortOrder = function(sort) {
 			$scope.sort = sort;
-			$scope.loadSuggestions();
+			$scope.loadSubmittedOffers();
 		}
 
 		$scope.updateViewBy = function(val) {
 			$scope.view_by = $scope.view_options[val];
-			$scope.loadSuggestions();
+			$scope.loadSubmittedOffers();
 		}
 	}
 ]);

@@ -29,23 +29,9 @@ module.exports.check = function(data) {
   return deferred.promise;
 };
 module.exports.process = function(data) {
+  logger.log();
   var deferred = Q.defer();
-
-  var template = Handlebars.compile("{{#if email}}<b>Email: {{email}}</b><br />{{/if}}<b>Outlet: </b> {{event_outlet}}<br /><b>Offer: </b> {{event_meta.offer}}<br /><b>Issue: </b> {{event_meta.issue}}<br /><b>Comment: </b> {{event_meta.comment}}");
-  var template_data = _.cloneDeep(data.event_data.event_meta);
-  if(data.user && data.user.email) {
-    template_data.email = data.user.email;
-  }
-  var payload = {
-    from: 'contactus@twyst.in',
-    to: 'rc@twyst.in',
-    cc: 'kuldeep@twyst.in, hemant@twyst.in',
-    subject: 'Issue in offer for ' + data.user.phone,
-    text: JSON.stringify(data.event_data),
-    html: template(template_data)
-  };
-  Transporter.send('email', 'gmail', payload);
-
+  data.event_data.event_meta.status = 'submitted';
   deferred.resolve(true);
   return deferred.promise;
 };
