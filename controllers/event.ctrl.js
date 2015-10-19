@@ -577,7 +577,7 @@ function update_from_user_twyst_bucks(user) {
     logger.log();
     var deferred = Q.defer();
     var available_twyst_bucks = user.twyst_bucks;
-    user.twyst_bucks = available_twyst_bucks + 100;
+    user.twyst_bucks = available_twyst_bucks + 250;
     var update_twyst_bucks = {
         $set: {
 
