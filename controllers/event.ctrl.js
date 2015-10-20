@@ -128,6 +128,11 @@ module.exports.bulk_checkin = function(req, res) {
   create_new(res, setup_event(req, 'bulk_checkin'));
 };
 
+module.exports.mrl_checkin = function(req, res) {
+  logger.log();
+  create_new(res, setup_event(req, 'mrl_checkin'));
+};
+
 module.exports.list_events = function(req, res) {
   logger.log();
   var token = req.query.token || null;
@@ -376,6 +381,7 @@ function process_event(data) {
     'qr_checkin': require('./processors/qr_checkin.proc'),
     'panel_checkin': require('./processors/panel_checkin.proc'),
     'bulk_checkin': require('./processors/bulk_checkin.proc'),
+    'mrl_checkin': require('./processors/mrl_checkin.proc'),
     'gift': require('./processors/gift.proc'),
     'grab': require('./processors/grab.proc'),
     'redeem': require('./processors/redeem.proc'),
