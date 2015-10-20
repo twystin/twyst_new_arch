@@ -37,6 +37,16 @@ angular.module('consoleApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angular
 				templateUrl: 'templates/outlet/view.html',
 				controller: 'OutletViewController'
 			})
+			.state('console.offers', {
+				url: '/offers',
+				templateUrl: 'templates/offers/manage.html',
+				controller: 'OfferManageController'
+			})
+			.state('console.offer_view', {
+				url: '/offers/:offer_id',
+				templateUrl: 'templates/offers/view.html',
+				controller: 'OfferViewController'
+			})
 			.state('console.merchant', {
 				url: '/merchant',
 				templateUrl: 'templates/merchant/manage.html',
@@ -56,16 +66,6 @@ angular.module('consoleApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angular
 				url: '/bills/:bill_id',
 				templateUrl: 'templates/bills/view.html',
 				controller: 'BillViewController'
-			})
-			.state('console.qrs', {
-				url: '/qrs',
-				templateUrl: 'templates/qrs/manage.html',
-				controller: 'QRListController'
-			})
-			.state('console.qr_create', {
-				url: '/qrs/create',
-				templateUrl: 'templates/qrs/create.html',
-				controller: 'QRCreateController'
 			})
 			.state('console.suggested_outlets', {
 				url: '/suggested_outlets',

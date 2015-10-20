@@ -56,6 +56,22 @@ angular.module('consoleApp').factory('consoleRESTSvc', ['$http', '$q', '$cookies
 				return deferred.promise;
 			}
 
+			consoleRESTSvc.getEvent = function(event_id) {
+				var deferred = Q.defer();
+				var token = $cookies.get('token');
+				$http.get('/api/v4/events/retrieve/' + event_id + '?token=' + token)
+					.then(function(data) {
+						if(data.data.response) {
+							deferred.resolve(data.data);
+						} else {
+							deferred.reject(data.data);
+						}
+					}, function(err) {
+						deferred.reject(err);
+					});
+				return deferred.promise;
+			}
+
 			consoleRESTSvc.getBill = function(bill_id) {
 				var deferred = Q.defer();
 				var token = $cookies.get('token');
@@ -121,6 +137,38 @@ angular.module('consoleApp').factory('consoleRESTSvc', ['$http', '$q', '$cookies
 				return deferred.promise;
 			}
 
+			consoleRESTSvc.getAllOffers = function() {
+				var deferred = Q.defer();
+				var token = $cookies.get('token');
+				$http.get('/api/v4/offers?token=' + token)
+					.then(function(data) {
+						if(data.data.response) {
+							deferred.resolve(data.data);
+						} else {
+							deferred.reject(data.data);
+						}
+					}, function(err) {
+						deferred.reject(err);
+					})
+				return deferred.promise;
+			}
+
+			consoleRESTSvc.getOffer = function(offer_id) {
+				var deferred = Q.defer();
+				var token = $cookies.get('token');
+				$http.get('/api/v4/offers/' + offer_id + '?token=' + token)
+					.then(function(data) {
+						if(data.data.response) {
+							deferred.resolve(data.data);
+						} else {
+							deferred.reject(data.data);
+						}
+					}, function(err) {
+						deferred.reject(err);
+					});
+				return deferred.promise;
+			}
+
 			consoleRESTSvc.updateOutletStatus = function(outlet) {
 				var deferred = Q.defer();
 				var token = $cookies.get('token');
@@ -137,10 +185,26 @@ angular.module('consoleApp').factory('consoleRESTSvc', ['$http', '$q', '$cookies
 				return deferred.promise;
 			}
 
-			consoleRESTSvc.getQRs = function() {
+			consoleRESTSvc.updateOfferStatus = function(offer) {
 				var deferred = Q.defer();
 				var token = $cookies.get('token');
-				$http.get('/api/v4/qr?token=' + token)
+				$http.put('/api/v4/offers/' + offer._id + '?token=' + token, offer)
+					.then(function(data) {
+						if (data.data.response) {
+							deferred.resolve(data.data);
+						} else {
+							deferred.reject(data.data);
+						}
+					}, function(err) {
+						deferred.reject(err);
+					});
+				return deferred.promise;
+			}
+
+			consoleRESTSvc.getQRs = function(outlet_id) {
+				var deferred = Q.defer();
+				var token = $cookies.get('token');
+				$http.get('/api/v4/qr?token=' + token + '&outlet=' + outlet_id)
 					.then(function(data) {
 						console.log(data);
 						if(data.data.response) {

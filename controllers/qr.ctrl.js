@@ -130,9 +130,12 @@ module.exports.qr_list = function(req, res) {
   logger.log();
 
   var token = req.query.token || null;
+  var outlet_id = req.query.outlet || null
 
   if(!token) {
     HttpHelper.error(res, null, "Not authenticated");
+  } else if (!outlet_id) {
+    HttpHelper.error(res, null, "Please specify the outlet")
   } else {
     AuthHelper.get_user(token).then(function(data) {
       var user = data.data;
@@ -140,7 +143,9 @@ module.exports.qr_list = function(req, res) {
         HttpHelper.error(res, null, "Unauthorized access");
       } else {
         var today = new Date();
-        Qr.find({}).populate('outlet_id', 'basics.name contact.location.locality_1 contact.location.locality_2').sort({'validity.end': -1, 'validity.start': -1}).exec(function(err, qrs) {
+        Qr.find({
+          outlet_id: outlet_id
+        }).sort({'validity.end': -1, 'validity.start': -1}).exec(function(err, qrs) { //populate('outlet_id', 'basics.name contact.location.locality_1 contact.location.locality_2')
           if(err || !qrs) {
             HttpHelper.error(res, null, "Unable to load QRs");
           } else {

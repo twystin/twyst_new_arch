@@ -1,5 +1,5 @@
-angular.module('consoleApp').controller('OutletViewController', ['$scope', 'toastr', 'consoleRESTSvc', '$stateParams',
-    function($scope, toastr, consoleRESTSvc, $stateParams) {
+angular.module('consoleApp').controller('OutletViewController', ['$scope', 'toastr', 'consoleRESTSvc', '$stateParams', '$modal',
+    function($scope, toastr, consoleRESTSvc, $stateParams, $modal) {
         
         $scope.days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
@@ -55,5 +55,143 @@ angular.module('consoleApp').controller('OutletViewController', ['$scope', 'toas
         }, function(err) {
             $log.log('err', err);
         });
+
+        $scope.listQrCodes = function() {
+            console.log($modal);
+            var modalInstance = $modal.open({
+                animation: true,
+                templateUrl: 'templates/partials/qrListTemplate.html',
+                controller: 'QrListController',
+                size: 'lg',
+                resolve: {
+                    outlet_id: function() {
+                        return $stateParams.outlet_id
+                    }
+                }
+            });
+
+            modalInstance.result.then(function(selectedQr) {
+                console.log(selectedQr);
+            }, function() {
+                console.info('Modal dismissed at: ' + new Date());
+            });
+        };
+
+        $scope.createQrCode = function() {
+            var modalInstance = $modal.open({
+                animation: true,
+                templateUrl: 'templates/partials/qrCreateTemplate.html',
+                controller: 'QrCreateController',
+                size: 'lg',
+                resolve: {
+                    outlet_id: function() {
+                        return $stateParams.outlet_id
+                    }
+                }
+            });
+
+            modalInstance.result.then(function(created_qrs) {
+                console.log(created_qrs);
+            }, function() {
+                console.info('Modal dismissed at: ' + new Date());
+            });
+        };
     }
-])
+]).controller('QrListController', function($scope, $modalInstance, consoleRESTSvc, outlet_id) {
+    $scope.per_page = 12;
+    $scope.current_page = 1;
+    consoleRESTSvc.getQRs(outlet_id).then(function(data) {
+        $scope.qrs = data.data;
+        $scope.visible_qrs = $scope.qrs.slice(($scope.current_page - 1) * $scope.per_page, $scope.current_page * $scope.per_page);
+        $scope.qrCount = $scope.qrs.length;
+    }, function(err) {
+        console.log(err);
+    });
+
+    $scope.filterQRs = function(reset_page) {
+        if(reset_page) {
+            $scope.current_page = 1;
+        }
+
+        if(!$scope.qrFilter) {
+            $scope.visible_qrs = $scope.qrs.slice(($scope.current_page - 1) * $scope.per_page, $scope.current_page * $scope.per_page);
+            $scope.qrCount = $scope.qrs.length;
+        } else {
+            var regex = new RegExp($scope.qrFilter, 'i');
+            var filtered_qrs = _.filter($scope.qrs, function(qr) {
+                return regex.test(qr.code) ||  regex.test(qr.outlet_id.basics.name) || regex.test(qr.outlet_id.contact.location.locality_1[0]) || regex.test(qr.outlet_id.contact.location.locality_2[0]);
+            });
+            $scope.qrCount = filtered_qrs.length;
+            $scope.visible_qrs = filtered_qrs.slice(($scope.current_page-1)*$scope.per_page, ($scope.current_page)*$scope.per_page);
+        }
+    }
+}).controller('QrCreateController', function($scope, $modalInstance, consoleRESTSvc, outlet_id, toastr) {
+
+    $scope.minDate = new Date(Date.now() - (7 * 24 * 60 * 60 * 1000));
+    $scope.maxDate = new Date(Date.now() + (180 * 24 * 60 * 60 * 1000));
+
+    $scope.qr_req = {
+        outlet: outlet_id,
+        num: 1,
+        type: 'single',
+        max_use_limit: 1,
+    };
+
+    $scope.updateOutletId = function(item) {
+        $scope.qr_req.outlet = item._id;
+    }
+
+    $scope.updateQrLimit = function() {
+        if($scope.qr_req.type==='single') {
+            $scope.qr_req.max_use_limit = 1;
+        } else {
+            $scope.qr_req.max_use_limit = 5;
+        }
+    }
+
+    $scope.updateValidityEnd = function() {
+        if(!$scope.qr_req.validity || !$scope.qr_req.validity.start) {
+            return;
+        }
+        $scope.qr_req.validity.end = new Date($scope.qr_req.validity.start.getTime() + (30*24*60*60*1000));
+    }
+
+    $scope.generateQR = function() {
+        if (!$scope.qr_req.outlet) {
+            toastr.error("Please choose an outlet first", "Outlet missing");
+        } else if (!$scope.qr_req.num) {
+            toastr.error("Please provide the number of QRs required", "QR count missing");
+        } else if (!$scope.qr_req.type) {
+            toastr.error("Please specify a QR type ", "QR type missing");
+        } else if (!$scope.qr_req.max_use_limit) {
+            toastr.error("Please specify a QR usage limit");
+        } else if (!$scope.qr_req.max_use_limit) {
+            toastr.error("Please specify a max usage limit", "Usage limit missing");
+        } else if (!$scope.qr_req.validity || !$scope.qr_req.validity.start || !$scope.qr_req.validity.end) {
+            toastr.error("Both validity start and end are mandatory", "Validity info missing");
+        } else  if(new Date($scope.qr_req.validity.start.getTime() + (7*24*60*60*1000))>$scope.qr_req.validity.end) {
+                toastr.error("QR must be valid for alteast one week", "Validity duration invalid.");
+        } else {
+            consoleRESTSvc.createQr($scope.qr_req).then(function(data) {
+                console.log(data);
+                $scope.generated_qrs = data.data
+            }, function(err) {
+                if(err.message) {
+                    toastr.error(err.message, "Error");
+                } else {
+                    toastr.error("Something went wrong", "Error");
+                }
+            });
+        }
+    }
+
+    $scope.closeModal = function() {
+        $modalInstance.close($scope.generated_qrs);
+    }
+
+    $scope.cancel = function() {
+        $modalInstance.dismiss('cancel');
+    }
+
+    console.log(outlet_id);
+})

@@ -72,3 +72,19 @@ module.exports.delete = function(req, res) {
         HttpHelper.error(res, err.err || true, err.message);
     });
 }
+
+module.exports.all = function(req, res) {
+	logger.log();
+	var token = req.query.token || null;
+
+	if (!token) {
+		HttpHelper.error(res, null, "Not Authenticated");
+	}
+
+	OfferHelper.get_all_offers(token).then(function(data) {
+		HttpHelper.success(res, data.data, data.message);
+	}, function(err) {
+		HttpHelper.error(res, err.err || null, err.message);
+	});
+
+}
