@@ -9,6 +9,7 @@ var ObjectId = mongoose.Types.ObjectId;
 var Outlet = mongoose.model('Outlet');
 var User = mongoose.model('User');
 var Friend = mongoose.model('Friend');
+var Contact = mongoose.model('Contact');
 var AuthHelper = require('../../common/auth.hlpr.js');
 var async = require('async');
 var logger = require('tracer').colorConsole();
@@ -93,10 +94,50 @@ module.exports.update_user = function(token, updated_user) {
 module.exports.update_friends = function(token, friend_list) {
     logger.log();
     var deferred = Q.defer();
+    
     AuthHelper.get_user(token).then(function(data) {
         var user = data.data;
-        var update_query = { $pushAll: { friends: [] } };
-        async.each(friend_list.list, function(friend, callback) {
+        var obj = {};
+        var friend = [];
+        _.each(friend_list.list, function(user_friend){
+            if (friend_list.source === 'GOOGLE' || friend_list.source === 'FACEBOOK') {
+            
+            obj.social_id = friend.id;
+            obj.email = user_friend.email;
+            obj.phone = user_friend.phone;
+            obj.name = user_friend.name;
+            obj.add_date = new Date();
+        
+            }
+            else {
+
+                obj.phone = user_friend.phone;
+                obj.name = user_friend.name;
+                obj.add_date = new Date();
+
+            }    
+            friend.push(obj);
+        })
+        var contact = new Contact();
+        contact.friends = friend;
+        contact.user = user._id;
+        contact.save(function(err) { 
+            if(err) { 
+                logger.error(err); 
+                deferred.reject({
+                        data: err,
+                        message: 'error in updating user'
+                    });
+            } 
+            else { 
+                deferred.resolve({
+                    data: user,
+                    message: 'Updated user'
+                });
+            }
+        });
+        //var update_query = { $pushAll: { friends: [] } };
+        /*async.each(friend_list.list, function(friend, callback) {
             var index;
             if (friend_list.source === 'GOOGLE' || friend_list.source === 'FACEBOOK') {
                 index = _.findIndex(user.friends, function(existing_friend) { return existing_friend.social_id == friend.id; });
@@ -176,8 +217,8 @@ module.exports.update_friends = function(token, friend_list) {
                     });
                 }
             });
-        }
-    )}, function(err) {
+        }*/
+    }, function(err) {
         deferred.reject({
           err: err || true,
           message: "Couldn\'t find user"
