@@ -58,7 +58,6 @@ angular.module('consoleApp')
 						toastr.error("QR must be valid for alteast one week", "Validity duration invalid.");
 				} else {
 					consoleRESTSvc.createQr($scope.qr_req).then(function(data) {
-						console.log(data);
 						$scope.generated_qrs = data.data
 					}, function(err) {
 						if(err.message) {

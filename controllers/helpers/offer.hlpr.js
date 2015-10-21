@@ -212,3 +212,33 @@ module.exports.delete_offer = function(token, offerId) {
     });
     return deferred.promise;
 }
+
+module.exports.get_all_offers = function(token) {
+    logger.log();
+    var deferred = Q.defer();
+    Cache.get('outlets', function(err, reply) {
+        if(err || !reply) {
+            deferred.reject({
+                err: false,
+                message: 'Unable to load offers right now'
+            });
+        } else {
+            var offer_ids = [];
+            var offers = [];
+            var outlets = JSON.parse(reply);
+            _.each(outlets, function(outlet) {
+                _.each(outlet.offers, function(offer) {
+                    if(offer_ids.indexOf(offer._id.toString())===-1) {
+                        offer_ids.push(offer._id.toString());
+                        offers.push(offer);
+                    }
+                });
+            });
+            deferred.resolve({
+                data: offers,
+                message: 'All offers loaded from server'
+            });
+        }
+    });
+    return deferred.promise;
+}

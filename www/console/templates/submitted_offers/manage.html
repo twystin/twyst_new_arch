@@ -20,20 +20,25 @@
 		<table class='table table-stripped table-hover'>
 			<thead>
 				<th>S No</th>
+				<th ng-if='view_by==="submitted"'>User Phone No.</th>
+				<th>Offer</th>
 				<th>Outlet</th>
 				<th>Location</th>
-				<th>Offer</th>
-				<th>Photo Attached?</th>
+				<th ng-if='view_by==="processed"'>Action Taken</th>
+				<th>Date/Time</th>
 			</thead>
 			<tbody>
-				<tr ng-repeat='offer in submitted_offers'>
+				<tr ng-repeat='offer in submitted_offers' ui-sref='console.submitted_offer_view({submitted_offer_id: offer._id})' style='cursor:pointer;'>
 					<td>{{$index + 1}}</td>
+					<td ng-if='view_by==="submitted"'>{{offer.event_user.phone}}</td>
+					<td>{{offer.event_meta.offer}}</td>
 					<td>{{offer.event_meta.outlet}}</td>
 					<td>{{offer.event_meta.location}}</td>
-					<td>{{offer.event_meta.offer}}</td>
-					<td><i class='fa' ng-class='{"offer.event_meta.photo": "fa-check-square", "!offer.event_meta.photo": "fa-square-o"}'></i></td>
+					<td ng-if='view_by==="processed"'>{{offer.event_meta.status}}</td>
+					<td>{{offer.event_date | date: 'MMM dd, yyyy hh:mm a'}}</td>
 				</tr>
 			</tbody>
 		</table>
+		<pagination total-items="submittedOffersCount" ng-model="current_page" items-per-page='per_page' ng-change="filterOutlets()"></pagination>
 	</div>
 </div>
