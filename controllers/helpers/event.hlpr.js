@@ -145,7 +145,19 @@ function listEventForConsole(event_type, status) {
     if(err || !events) {
       deferred.reject({err: err || null, message: "Unable to retrieve events list" });
     } else {
-      deferred.resolve({data: events, message: 'Found the list' });
+      if(event_type=='submit_offer') {
+        User.populate(events, {
+            path: 'event_user'
+          }, function(err, populated) {
+            if(err || !populated) {
+              deferred.reject({err: err || null, message: 'Unable to retrieve events list' });
+            } else {
+              deferred.resolve({data: populated, message: 'Found the list' });
+            }
+          })
+      } else {
+        deferred.resolve({data: events, message: 'Found the list' });
+      }
     }
   });
   
@@ -178,16 +190,21 @@ function getEventForConsole(event_id) {
       });
     } 
     else {
-      getUserDetail(event).then(function(data) {
-        deferred.resolve({
-          data: data.data,
-          message: data.message
-        });
-      }, function(err) {
-        deferred.reject({
-          err: err.err,
-          message: err.message
-        });
+      event.event_meta.user = event.event_user;
+      User.populate(event, {
+        path: 'event_meta.user'
+      }, function(err, populated) {
+        if(err || !populated) {
+          deferred.reject({
+            err: err || null,
+            message: 'Unable to retrieve'
+          })
+        } else {
+          deferred.resolve({
+            data: populated,
+            message: 'Retrieval successful'
+          });
+        }
       });
     }
   });

@@ -92,6 +92,7 @@ module.exports = function(app) {
   (function OfferRoutes() {
     var OfferCtrl = require('../controllers/offer.ctrl');
     app.post('/api/v4/offers', OfferCtrl.new);
+    app.get('/api/v4/offers', OfferCtrl.all);
     app.put('/api/v4/offers/:offer_id', mustBe.authorized('outlet.update', OfferCtrl.update));
     app.get('/api/v4/offers/:offer_id', mustBe.authorized('outlet.view', OfferCtrl.get));
     app.delete('/api/v4/offers/:offer_id', mustBe.authorized('outlet.update', OfferCtrl.delete));
