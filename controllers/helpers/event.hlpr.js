@@ -144,20 +144,17 @@ function listEventForConsole(event_type, status) {
   }).exec(function(err, events) {
     if(err || !events) {
       deferred.reject({err: err || null, message: "Unable to retrieve events list" });
-    } else {
-      if(event_type=='submit_offer') {
-        User.populate(events, {
-            path: 'event_user'
-          }, function(err, populated) {
-            if(err || !populated) {
-              deferred.reject({err: err || null, message: 'Unable to retrieve events list' });
-            } else {
-              deferred.resolve({data: populated, message: 'Found the list' });
-            }
-          })
-      } else {
-        deferred.resolve({data: events, message: 'Found the list' });
-      }
+    } 
+    else {
+      User.populate(events, {
+          path: 'event_user'
+        }, function(err, populated) {
+          if(err || !populated) {
+            deferred.reject({err: err || null, message: 'Unable to retrieve events list' });
+          } else {
+            deferred.resolve({data: populated, message: 'Found the list' });
+          }
+        })
     }
   });
   
