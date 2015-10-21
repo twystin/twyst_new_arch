@@ -82,4 +82,14 @@ angular.module('consoleApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angular
 				templateUrl: 'templates/user_feedback/manage.html',
 				controller: 'UserFeedbackController'
 			})
+			.state('console.write_to_twyst', {
+				url: '/write_to_twyst',
+				templateUrl: 'templates/write_to_twyst/manage.html',
+				controller: 'WriteToTwystController'
+			})
+			.state('console.report_problem', {
+				url: '/report_problem',
+				templateUrl: 'templates/report_problem/manage.html',
+				controller: 'ReportProblemController'
+			})
 	});
