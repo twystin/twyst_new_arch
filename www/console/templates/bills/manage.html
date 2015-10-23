@@ -20,17 +20,15 @@
     <table class='table table-striped table-hover'>
       <thead>
         <th>S.No.</th>
-        <th>User ID</th>
+        <th>User Phone</th>
         <th>Upload Date</th>
-        <th>Status</th>
         <th>Actions</th>
       </thead>
       <tbody>
         <tr ng-repeat='bill in bills' ui-sref='console.view_bill({bill_id: bill._id})' style='cursor:pointer;'>
           <td class='text-right'>{{$index+1}}</td>
-          <td>{{bill.event_user}}</td>
+          <td>{{bill.event_user.phone}}</td>
           <td>{{bill.event_date | date: 'MMM dd, yyyy hh:mm a'}}</td>
-          <td>{{bill.event_meta.status}}</td>
           <th><a class='btn'>View</a></th>
         </tr>
       </tbody>

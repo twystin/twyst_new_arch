@@ -23,13 +23,15 @@
 				<th>User </th>
 				<th>Outlet</th>
 				<th>Location</th>
+				<th>Date</th>
 			</thead>
 			<tbody class='text-justify'>
 				<tr ng-repeat='suggestion in suggestions'>
 					<td class='text-right'>{{$index + 1}}</td>
-					<td>{{suggestion.event_user}}</td>
+					<td>{{suggestion.event_user.phone}}</td>
 					<td>{{suggestion.event_meta.outlet}}</td>
 					<td>{{suggestion.event_meta.location}}</td>
+					<td>{{suggestion.event_date}}</td>
 				</tr>
 			</tbody>
 		</table>

@@ -5,7 +5,7 @@ angular.module('consoleApp').controller('UserFeedbackController', ['$scope', 'to
 			'-event_date': 'Newest FIrst'
 		};
 
-		$scope.view_options = ['submitted', 'declined', 'accepted'];
+		$scope.view_options = ['submitted', 'processed'];
 
 		$scope.sort = 'event_date';
 		$scope.view_by = 'submitted';

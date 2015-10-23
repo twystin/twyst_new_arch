@@ -16,20 +16,18 @@
 		<table class='table table-striped table-hover'>
 			<thead class='text-center'>
 				<th>S No</th>
-				<th>Offer ID</th>
-				<th>Header</th>
-				<th>Line 1</th>
-				<th>Line 2</th>
+				<th>Offer Type</th>
+				<th>Start Date</th>
+				<th>End Date</th>
 				<th># Outlets</th>
 				<th>Status</th>
 			</thead>
 			<tbody class='text-justify'>
 				<tr ng-repeat='offer in visible_offers' ui-sref='console.offer_view({offer_id: offer._id})' style='cursor:pointer;'>
 					<td>{{(current_page-1) * per_page + $index + 1}}</td>
-					<td>{{offer._id}}</td>
-					<td>{{offer.actions.reward.header}}</td>
-					<td>{{offer.actions.reward.line1}}</td>
-					<td>{{offer.actions.reward.line2}}</td>
+					<td>{{offer.offer_type}}</td>
+					<td>{{offer.offer_start_date}}</td>
+					<td>{{offer.offer_start_date}}</td>
 					<td>{{offer.offer_outlets.length}}</td>
 					<th>
 						<div class="btn-group">
