@@ -108,7 +108,16 @@ angular.module('consoleApp').controller('OutletViewController', ['$scope', 'toas
     }
 
     consoleRESTSvc.getQRs(outlet_id).then(function(data) {
-        $scope.qrs = data.data;
+        var today = new Date();
+        $scope.qrs = _.filter(data.data, function(obj) {
+            var validity_end = new Date(obj.validity.end);
+            if (validity_end < today) {
+                return false;
+            } else {
+                return true;
+            }
+            
+        })
         $scope.visible_qrs = $scope.qrs.slice(($scope.current_page - 1) * $scope.per_page, $scope.current_page * $scope.per_page);
         $scope.qrCount = $scope.qrs.length;
     }, function(err) {
