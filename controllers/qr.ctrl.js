@@ -162,3 +162,39 @@ module.exports.qr_list = function(req, res) {
     })
   }
 }
+
+module.exports.qr_update = function(req, res) {
+  logger.log();
+
+  var token = req.query.token || null;
+  var qr_id = req.params.qr_id || null;
+  var updated_qr = {};
+  updated_qr = _.extend(updated_qr, req.body);
+
+  if(!token) {
+    HttpHelper.error(res, null, "Not authenticated");
+  } else if (!qr_id) {
+    HttpHelper.error(res, null, "Please specify the qr to update");
+  } else {
+    AuthHelper.get_user(token).then(function(data) {
+      var user = data.data;
+      if(user.role > 2) {
+        HttpHelper.error(res, null, "Unauthorized access");
+      } else {
+        Qr.findOneAndUpdate({
+          _id: qr_id
+        }, {
+          $set: updated_qr
+        }, function(err, qr) {
+          if(err) {
+            HttpHelper.error(res, err || null, "Unable to update qr");
+          } else {
+            HttpHelper.success(res, qr || null, "Updated qr successfully");
+          }
+        });
+      }
+    }, function(err) {
+      HttpHelper.error(res, null, "UNable to authorize");
+    })
+  }
+}

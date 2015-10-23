@@ -1,1 +1,8 @@
 .gi-lg{color: #9e9e9e;}
+
+qrcode a canvas {
+	max-width: 16px;
+    max-height: 16px;
+    height: auto;
+    width: auto;
+}

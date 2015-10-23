@@ -1,4 +1,4 @@
-angular.module('consoleApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angularMoment', 'toastr', 'angular-loading-bar', 'ngAnimate', 'ngStorage', 'ngFileUpload', 'ordinal'])
+angular.module('consoleApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angularMoment', 'toastr', 'angular-loading-bar', 'ngAnimate', 'ngStorage', 'ngFileUpload', 'ordinal', 'monospaced.qrcode'])
 	.run(function($rootScope, $state, $cookies) {
 		$rootScope.token = $cookies.get('token');
 	})
@@ -76,6 +76,11 @@ angular.module('consoleApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angular
 				url: '/submitted_offers',
 				templateUrl: 'templates/submitted_offers/manage.html',
 				controller: 'SubmittedOffersController'
+			})
+			.state('console.submitted_offer_view', {
+				url: '/submitted_offers/:submitted_offer_id',
+				templateUrl: 'templates/submitted_offers/view.html',
+				controller: 'SubmittedOfferViewController'
 			})
 			.state('console.user_feedback', {
 				url: '/user_feedback',
