@@ -25,7 +25,7 @@ angular.module('consoleApp').controller('OfferManageController', ['$scope', 'toa
 			} else {
 				var regex = new RegExp($scope.offerFilter, 'i');
 				var filtered_offers = _.filter($scope.offers, function(offer) {
-					return regex.test(offer._id) || regex.test(offer.actions.reward.header) || regex.test(offer.actions.reward.line1) || regex.test(offer.actions.reward.line2) || regex.test(offer.offer_status);
+					return regex.test(offer._id) || regex.test(offer.outlet.name) || regex.test(offer.outlet.loc1) || regex.test(offer.outlet.loc2) || regex.test(offer.offer_type) || regex.test(offer.actions.reward.header) || regex.test(offer.actions.reward.line1) || regex.test(offer.actions.reward.line2) || regex.test(offer.offer_status);
 				});
 				$scope.offerCount = filtered_offers.length;
 				$scope.visible_offers = filtered_offers.slice(($scope.current_page-1)*$scope.per_page, ($scope.current_page)*$scope.per_page);
@@ -33,6 +33,8 @@ angular.module('consoleApp').controller('OfferManageController', ['$scope', 'toa
 		}
 
 		$scope.updateOfferStatus = function(offer) {
+			var updated_offer = _.cloneDeep(offer);
+			delete updated_offer.outlet;
 			consoleRESTSvc.updateOfferStatus(offer)
 				.then(function(res) {
 					console.log(res);
