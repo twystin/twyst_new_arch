@@ -53,7 +53,9 @@
 				</form>
 				<div ng-show='generated_qrs'>
 					<div class='col-xs-12 col-sm-6 col-lg-4 well well-lg' ng-repeat='qr in generated_qrs'>
-						<legend>{{qr.code}}</legend>
+						<legend>{{qr.code}}
+							<qrcode class='pull-right' version="4" error-correction-level="M" size='256' data='{{qr.code}}' download></qrcode>
+						</legend>
 						<h3>Use limit: {{qr.max_use_limit}}</h3>
 						<h3>Type: {{qr.type}}</h3>
 					</div>

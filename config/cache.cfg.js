@@ -12,11 +12,12 @@ var _ = require('lodash');
 var logger = require('tracer').colorConsole();
 
 function populateOutlets() {
-  Outlet.find({}).lean().exec(function(err, outlets) {
+  Outlet.find({}).exec(function(err, outlets) {
     if (err || outlets.length === 0) {
       logger.error("Error populating cache");
     } else {
       var reduced_outlets = _.reduce(outlets, function(memo, item) {
+        item = item.toJSON();
         memo[item._id] = item;
         return memo;
       }, {});
