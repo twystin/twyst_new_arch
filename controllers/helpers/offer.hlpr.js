@@ -230,6 +230,12 @@ module.exports.get_all_offers = function(token) {
                 _.each(outlet.offers, function(offer) {
                     if(offer_ids.indexOf(offer._id.toString())===-1) {
                         offer_ids.push(offer._id.toString());
+                        offer.outlet = {
+                            _id: outlet._id,
+                            name: outlet.basics.name,
+                            loc1: outlet.contact.location.locality_1[0],
+                            loc2: outlet.contact.location.locality_2[0]
+                        };
                         offers.push(offer);
                     }
                 });

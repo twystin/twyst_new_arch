@@ -97,16 +97,58 @@ angular.module('consoleApp').controller('OutletViewController', ['$scope', 'toas
             });
         };
     }
-]).controller('QrListController', function($scope, $modalInstance, consoleRESTSvc, outlet_id) {
+]).controller('QrListController', function($scope, $modalInstance, consoleRESTSvc, outlet_id, toastr) {
     $scope.per_page = 12;
     $scope.current_page = 1;
+    $scope.selectedOutlets = {};
+    $scope.choosenOutlets = [];
+
+    $scope.extend_by = {
+        days: 10
+    }
+
     consoleRESTSvc.getQRs(outlet_id).then(function(data) {
-        $scope.qrs = data.data;
+        var today = new Date();
+        $scope.qrs = _.filter(data.data, function(obj) {
+            var validity_end = new Date(obj.validity.end);
+            if (validity_end < today) {
+                return false;
+            } else {
+                return true;
+            }
+            
+        })
         $scope.visible_qrs = $scope.qrs.slice(($scope.current_page - 1) * $scope.per_page, $scope.current_page * $scope.per_page);
         $scope.qrCount = $scope.qrs.length;
     }, function(err) {
         console.log(err);
     });
+
+    $scope.extendQrs = function() {
+        async.each($scope.choosenOutlets, function(qr_id, callback) {
+            var qr = _.find($scope.qrs, function(obj) {
+                return obj._id == qr_id
+            })
+            if(qr) {
+                qr.validity.end = new Date(qr.validity.end);
+                qr.validity.end.setDate(qr.validity.end.getDate() + $scope.extend_by.days);
+                consoleRESTSvc.updateQr(qr).then(function(data) {
+                    callback();
+                }, function(err) {
+                    console.log(err);
+                    callback();
+                })
+            } else {
+                console.log('qr not found', qr_id);
+                callback();
+            }
+        }, function(err) {
+            toastr.success("Updated QRs successfully");
+            $timeout(function() {
+                $modalInstance.dismiss('cancel');
+            }, 800);
+        })
+    }
 
     $scope.filterQRs = function(reset_page) {
         if(reset_page) {
@@ -125,6 +167,16 @@ angular.module('consoleApp').controller('OutletViewController', ['$scope', 'toas
             $scope.visible_qrs = filtered_qrs.slice(($scope.current_page-1)*$scope.per_page, ($scope.current_page)*$scope.per_page);
         }
     }
+
+    $scope.updateChoosenOutlets = function() {
+        $scope.choosenOutlets = [];
+        _.each($scope.selectedOutlets, function(val, key) {
+            if(val) {
+                $scope.choosenOutlets.push(key);
+            }
+        });
+    }
+
 }).controller('QrCreateController', function($scope, $modalInstance, consoleRESTSvc, outlet_id, toastr) {
 
     $scope.minDate = new Date(Date.now() - (7 * 24 * 60 * 60 * 1000));
