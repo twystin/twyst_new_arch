@@ -35,7 +35,10 @@ function populateOutletsLocations() {
     if (err || outlets.length === 0) {
       logger.error("Error populating cache");
     } else {
-      var reduced_outlets = _.reduce(outlets, function(memo, item) {
+      var active_outlets = _.filter(outlets, function(outlet) {
+        return outlet.outlet_meta.status === 'active';
+      });
+      var reduced_outlets = _.reduce(active_outlets, function(memo, item) {
         var obj = {};
         obj.name = item.basics.name;
 

@@ -35,6 +35,7 @@ module.exports = function(app) {
 
   (function EventRoutes() {
     var EventCtrl = require('../controllers/event.ctrl');
+    var PosEventCtrl = require('../controllers/processors/pos_checkin.proc');
     //app.get('/api/v4/events', EventCtrl.list_events);
     app.get('/api/v4/events/list/:event_type', EventCtrl.list_events);
     app.get('/api/v4/events/retrieve/:event_id', EventCtrl.get_event);
@@ -55,7 +56,7 @@ module.exports = function(app) {
     app.post('/api/v4/checkin/panel', EventCtrl.panel_checkin);
     app.post('/api/v4/checkin/bulk', EventCtrl.bulk_checkin);
     app.post('/api/v4/checkin/mrl', EventCtrl.mrl_checkin);
-    app.post('/api/v4/checkin/pos', EventCtrl.pos_checkin);
+    app.post('/api/v4/checkin/pos', PosEventCtrl.pos_checkin);
 
     app.post('/api/v4/outlet/follow', EventCtrl.follow);
     app.post('/api/v4/outlet/unfollow', EventCtrl.unfollow);
