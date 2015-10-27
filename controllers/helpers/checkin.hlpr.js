@@ -424,7 +424,7 @@ module.exports.send_sms = function(data) {
     payload.from = 'TWYSTR';
     payload.message = data.message;
     payload.phone = data.event_data.event_meta.phone;
-    //Transporter.send('sms', 'vf', payload);
+    Transporter.send('sms', 'vf', payload);
     deferred.resolve(data);
     return deferred.promise;
 }
