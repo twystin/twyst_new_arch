@@ -518,7 +518,6 @@ function massage_offers(params) {
           }
 
           if (offer.rule.evnet_match === 'after' && offer.rule.event_start>massaged_offer.checkins) { // to remove
-            console.log('after next', offers[i].checkin_count, event_start);
             var checkins_to_go = offer.rule.event_start - massaged_offer.checkins;
             massaged_offer.next = checkins_to_go;
           } else if(offer.rule.event_match === 'after' && offer.rule.event_start<=massaged_offer.checkins && offer.rule.event_end>massaged_offer.checkins) {
