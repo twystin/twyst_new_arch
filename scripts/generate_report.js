@@ -25,6 +25,7 @@ Account.find({
                     merchant_id: account.username,
                     created_on: account.created_at,
                     paying: account.user.is_paying ? 'Y' : 'N',
+                    id: outlet._id,
                     outlet: outlet.basics.name,
                     loc1: outlet.contact.location.locality_1[0],
                     loc2: outlet.contact.location.locality_2[0],
@@ -60,19 +61,3 @@ Account.find({
         });
     });
 });
-
-// Account.find({
-//     role: 3
-// }).populate('user', 'is_paying outlets').exec(function(err, accounts) {
-//     console.log(err);
-//     ld.each(accounts, function(account) {
-//     	ld.each(account.user.outlets, function(outlet) {
-//     		outlet_ids.push(outlet.toString());
-//     	});
-//     });
-//     var fields = Object.keys(results[0]);
-//     json2csv({ data: results, fields: fields }, function(e, r) {
-//         console.log(e);
-//         csv=r;
-//     })
-// });
