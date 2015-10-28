@@ -72,6 +72,9 @@
 								<a class='btn btn-block btn-primary' ng-click='redeemUserCoupon(voucher.code)' ng-if='voucher.status==="active" && voucher.lapse_date > today || voucher.status==="user_redeemed" && voucher.lapse_date > today'>Redeem</a>
 							</div>
 							<div class='text-center'>
+								<a class='btn btn-block btn-primary' ng-click='redeemUserCoupon(voucher.code)' ng-if='voucher.status==="user_redeemed" && voucher.lapse_date > today'>User Redeemed</a>
+							</div>
+							<div class='text-center'>
 								<a class='btn btn-block btn-warning' ng-if='voucher.lapse_date <= today && !voucher.used_details.used_time' disabled>Expired</a>
 							</div>
 							<div class='text-center'>
