@@ -30,7 +30,7 @@
 					<td>{{(offer.outlet.loc1? offer.outlet.loc1 + ', ': '') + offer.outlet.loc2}}
 					<td>{{offer.offer_type}}</td>
 					<td>{{offer.offer_start_date | date: 'dd MMM yyyy'}}</td>
-					<td>{{offer.offer_start_date | date: 'dd MMM yyyy'}}</td>
+					<td>{{offer.offer_end_date | date: 'dd MMM yyyy'}}</td>
 					<th>
 						<div class="btn-group">
 					        <label class="btn btn-primary" ng-model="offer.offer_status" ng-change='updateOfferStatus(offer)' btn-radio="'active'">Active</label>
