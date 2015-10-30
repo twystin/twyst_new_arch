@@ -74,6 +74,8 @@ module.exports = function(app) {
     app.post('/api/v4/referral/join', EventCtrl.referral_join);
 
     app.post('/api/v4/comments/', EventCtrl.comments);
+    app.post('/api/v4/contact_us', EventCtrl.contact_us);
+    app.post('/api/v4/apply', EventCtrl.apply);
   })();
 
   (function OutletRoutes() {
