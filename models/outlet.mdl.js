@@ -52,7 +52,8 @@ var OutletSchema = new Schema({
       default: Date.now
     },
     featured: Boolean,
-    is_paying: {type: Boolean, required: true, default: false }
+    is_paying: {type: Boolean, required: true, default: false },
+    account_mgr_email: {type: String}
   },
   contact: {
     location: {

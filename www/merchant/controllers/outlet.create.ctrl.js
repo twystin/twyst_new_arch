@@ -264,7 +264,8 @@ angular.module('merchantApp')
                 } else if (!_.has($scope.outlet, 'contact.location.coords.longitude') || !_.has($scope.outlet, 'contact.location.coords.latitude') || !_.has($scope.outlet, 'contact.location.map_url')) {
                     $scope.handleErrors('Geo Location data missing');
                     deferred.reject();
-                } else {
+                } 
+                else {
                     async.each($scope.outlet.contact.phones.mobile, function(number, callback) {
                         if(!number.num) {
                             callback("One or more outlet numbers left blank");
@@ -297,7 +298,11 @@ angular.module('merchantApp')
                                     } else if (!_.has($scope.outlet, 'contact.emails.email') && $rootScope.isPaying) {
                                         $scope.handleErrors("Contact person's Email ID required");
                                         deferred.reject();
-                                    } else {
+                                    } else if (!_.has($scope.outlet, 'basics.account_mgr_email') ) {
+                                        $scope.handleErrors('Account manager email is missing');
+                                        deferred.reject();
+                                    } 
+                                    else {
                                         $scope.scrollToTop();
                                         $scope.formFailure = false;
                                         deferred.resolve(true);
