@@ -5,11 +5,14 @@ var HttpHelper = require('../common/http.hlpr.js');
 var AuthHelper = require('../common/auth.hlpr.js');
 var OutletHelper = require('./helpers/outlet.hlpr.js');
 var RecoHelper = require('./helpers/reco.hlpr.js');
+var CheckinHelper = require('./helpers/checkin.hlpr.js');
+var NotifHelper = require('./helpers/notif.hlpr.js');
 var _ = require('underscore');
 var ld = require('lodash');
 var mongoose = require('mongoose');
 var Outlet = mongoose.model('Outlet');
 var User = mongoose.model('User');
+var Event = mongoose.model('Event');
 var Q = require('q');
 var ObjectId = mongoose.Types.ObjectId;
 var Cache = require('../common/cache.hlpr');
@@ -246,19 +249,22 @@ function massage_offers(params) {
       params.outlet = add_user_coupons(
         pick_offer_fields(
           select_relevant_checkin_offer(params.outlet), params.user._id, params.query.date, params.query.time), coupon_map && coupon_map[params.outlet._id] && coupon_map[params.outlet._id].coupons);
+    
       params.outlet.offers = _.sortBy(params.outlet.offers, function(offer) {
-          
         if(offer.type === 'coupon') {
           return -100;
         } else if(offer.offer_type === 'pool') {
+          return -75;
+        } else if(offer.offer_type === 'offer') {
           return -50;
-        } else if(offer.next) {
-          return offer.next;
-        } else {
-          return 100;
         }
-          
-      });
+        else if(offer.offer_type === 'deal') {
+          return -25;
+        }
+        else if(offer.offer_type === 'checkin') {
+          return -10;
+        }
+      }); 
       deferred.resolve(params);
 
     });
@@ -266,7 +272,21 @@ function massage_offers(params) {
     params.outlet =
       pick_offer_fields(
         select_relevant_checkin_offer(params.outlet), params.user._id, params.query.date, params.query.time);
-    deferred.resolve(params);
+    params.outlet.offers = _.sortBy(params.outlet.offers, function(offer) {
+      if(offer.type === 'coupon') {
+        return -100;
+      } else if(offer.offer_type === 'pool') {
+        return -75;
+      } else if(offer.offer_type === 'offer') {
+        return -50;
+      }
+      else if(offer.offer_type === 'deal') {
+        return -25;
+      }
+      else if(offer.offer_type === 'checkin') {
+        return -10;
+      }
+    }); 
     deferred.resolve(params);
   }
   return deferred.promise;
@@ -349,6 +369,7 @@ function massage_offers(params) {
       coupon_map = _.compact(coupon_map);
       item.offers = item.offers.concat(coupon_map);
     }
+    
     return item;
   }
 
@@ -700,7 +721,6 @@ function retrieve_coupon_info(data) {
       });
       
       if(data.coupon) {
-        console.log(data.user.phone);
         data.coupon.phone = data.user.phone;
         deferred.resolve(data.coupon);
       } else {
@@ -737,7 +757,7 @@ module.exports.redeem_user_coupon = function(req, res) {
   var token = req.query.token || null;
   var code = ld.get(req, 'body.code');
   var outlet_id = ld.get(req, 'body.outlet_id');
-  var user;
+  var outlet_user;
   console.error(token, code, outlet_id);
   if (!token) {
     HttpHelper.error(res, null, "Not authenticated");
@@ -752,8 +772,8 @@ module.exports.redeem_user_coupon = function(req, res) {
   }
 
   AuthHelper.get_user(token).then(function(data) {
-    user = data.data;
-    if(user.role >=6) {
+    outlet_user = data.data;
+    if(outlet_user.role >=6) {
       HttpHelper.error(res, null, 'Unauthorized access detected');
     } else {
       User.findOne({
@@ -788,7 +808,22 @@ module.exports.redeem_user_coupon = function(req, res) {
                 var redeemed_coupon = _.findWhere(user.coupons, {
                   code: code
                 });
-                HttpHelper.success(res, redeemed_coupon || null, "Coupon redeemed successfully");
+                
+                autoCheckinUser(u, outlet_id).then(function(data) {
+                  var redeem_message = 'Your voucher at '+ data.outlet.basics.name+ ' for '+ 
+                  redeemed_coupon.header + ', '+ redeemed_coupon.line1+', '+ redeemed_coupon.line2
+                  +' has been redeemed by merchant.'
+                  NotifHelper.send_notification(data, redeem_message, 'Coupon Redeemed').then(function(){
+                  
+                    HttpHelper.success(res, redeemed_coupon || null, "Coupon redeemed successfully");                  
+                  }, function(err) {
+                    deferred.reject(err);
+                  });  
+                }, function(err) {
+                  deferred.reject(err);
+                }); 
+                
+                
               }
             }
           );
@@ -800,3 +835,81 @@ module.exports.redeem_user_coupon = function(req, res) {
     HttpHelper.error(res, null, "Authorization failure");
   })
 };
+
+function autoCheckinUser(user, outlet_id) {
+  logger.log();
+  var deferred = Q.defer();
+
+  Outlet.findOne({_id: outlet_id}).exec(function(err, outlet) {
+    if(err || !outlet) {
+      deferred.reject({
+        data: null,
+        message: 'Unable to find outlet to checkin '
+      });
+    } 
+    else {
+      var data = {};
+      data.event_data = {};
+      data.event_data.event_meta= {};
+      data.event_data.event_meta.phone = user.phone;
+      data.event_data.event_meta.event_type = 'auto_checkin';
+      data.event_data.event_outlet = outlet._id;
+      data.event_data.event_meta.date = new Date();
+      data.event_data.event_date = new Date();
+
+      data.user = user;
+      data.outlet = outlet;
+
+      CheckinHelper.already_checked_in(data)
+        .then(function(data) {
+          return CheckinHelper.check_and_create_coupon(data);
+        })
+        .then(function(data) {
+          return CheckinHelper.update_checkin_counts(data);
+        })
+        .then(function(data) {
+            return NotifHelper.send_notification(data, data.checkin_message, 'Checkin Successful');
+        })
+        .then(function() {
+            return create_event(data);
+        })
+        .then(function(data) {
+            data.event_data.event_type = 'checkin';
+            deferred.resolve(data);
+        })
+        .fail(function(err) {
+          deferred.reject(err);
+        })        
+    }
+  });
+
+  return deferred.promise;
+  
+}
+
+function create_event(data) {
+  logger.log();
+
+  var deferred = Q.defer();
+  var event = {};
+  var passed_data = data;
+  event = _.extend(event, passed_data.event_data);
+  event.event_user = passed_data.user._id;
+  event.event_type = 'checkin';
+
+  if (passed_data.outlet) {
+    event.event_outlet = passed_data.outlet._id;
+  }
+
+  event.event_date = event.event_date || new Date();
+  var created_event = new Event(event);
+  created_event.save(function(err, e) {
+    if (err || !e) {
+      deferred.reject('Could not save the event - ' + JSON.stringify(err));
+    } else {
+      deferred.resolve(passed_data);
+    }
+  });
+
+  return deferred.promise;
+}

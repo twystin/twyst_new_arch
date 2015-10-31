@@ -212,7 +212,15 @@ function load_outlet_info_from_cache(data) {
                     date = (today.getMonth() + 1) + '-' + today.getDate() + '-' + today.getFullYear(),
                     time = (today.getHours() + 5) + ':' + (today.getMinutes() + 30);
                     if(coupon.issued_by) {
-                        outlet = outlets[coupon.issued_by.toString()];            
+                        outlet = outlets[coupon.issued_by.toString()];
+                        if(!outlet) {
+                            console.log('ppppppp')
+                            console.log(coupon.issued_by)
+                        }
+                        else{
+                            console.log('here')
+                            console.log(coupon.issued_by);
+                        }
                     }
                     
                                     
