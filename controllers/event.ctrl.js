@@ -8,6 +8,7 @@ var Cache = require('../common/cache.hlpr');
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
 var Outlet = mongoose.model('Outlet');
+var ContactUs = mongoose.model('ContactUs');
 var Event = mongoose.model('Event');
 var HttpHelper = require('../common/http.hlpr');
 var AuthHelper = require('../common/auth.hlpr');
@@ -229,6 +230,53 @@ module.exports.update_event = function(req, res) {
       })
     }, function(err) {
       HttpHelper.error(res, err || false, "Could not find user");
+    });
+  }
+}
+
+module.exports.contact_us = function(req, res) {
+  logger.log();
+  if (!req.body.name) {
+    HttpHelper.error(res, null, "Name required");
+  } else if (!req.body.email) {
+    HttpHelper.error(res, null, "Email ID required");
+  } else if (!req.body.comments) {
+    HttpHelper.error(res, null, "Comments cannot be left blank.");
+  } else {
+    var contact_us = new ContactUs(req.body);
+    contact_us.save(function(error) {
+      if(error) {
+        HttpHelper.error(res, error || null, "Something went wrong. Please try after sometime.");
+      } else {
+        HttpHelper.success(res, null, "Thank you for reaching out. We'll get back with yuo shortly.");
+      }
+    });
+  }
+}
+
+module.exports.apply = function(req, res) {
+  logger.log();
+  var AWSHelper = require('./helpers/aws.hlpr.js');
+  if (!req.body.resume) {
+    HttpHelper.error(res, null, "Resume file required");
+  } else if (!req.body.format) {
+    HttpHelper.error(res, null, "file format required");
+  } else {
+    var buff = new Buffer(req.body.resume.replace(/^data:application\/\w+;base64,/, ''), 'base64');
+    var timestamp = Date.now();
+
+    var req_obj = {
+      Bucket: 'retwyst-app',
+      ACL: 'public-read',
+      ContentType: req.body.format,
+      Key: 'retwyst_resume/' + timestamp,
+      Body: buff
+    }
+    console.log('retwyst_resume/' + timestamp)
+    AWSHelper.uploadImage(req_obj).then(function(data) {
+      HttpHelper.success(res, null, "Application submitted. We will get back shortly");
+    }, function(err) {
+      HttpHelper.error(res, null, "something went wrong. Please try after sometime.");
     });
   }
 }
