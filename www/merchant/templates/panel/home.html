@@ -79,7 +79,7 @@
 								<a class='btn btn-block btn-danger' ng-if=' voucher.status=="merchant_redeemed" ||  voucher.status=="redeemed"' disabled> Redeemed</a>
 							</div>
 							<div class='text-center'>
-								<a class='btn btn-block btn-warning' ng-if='voucher.lapse_date <= today' disabled>Expired</a>
+								<a class='btn btn-block btn-warning' ng-if='voucher.lapse_date <= today && !voucher.used_details.used_time' disabled>Expired</a>
 							</div>
 						</div>
 					</div>
