@@ -213,11 +213,11 @@ module.exports.check_and_create_coupon = function(data) {
                 }
                 //console.log(passed_data.outlet)
                 if(passed_data.outlet.contact.location.locality_1) {
-                    passed_data.checkin_message = 'Check-in successful at '+ passed_data.outlet.basics.name +', '  + passed_data.outlet.contact.location.locality_1.toString()+' on '+ formatDate(new Date(passed_data.event_data.event_meta.date)) +". Reward unlocked! Your voucher will be available soon.";                
+                    passed_data.checkin_message = 'Check-in successful at '+ passed_data.outlet.basics.name +', '  + passed_data.outlet.contact.location.locality_1.toString()+' on '+ formatDate(new Date(passed_data.event_data.event_date)) +". Reward unlocked! Your voucher will be available soon.";                
                     
                 }
                 else{
-                    passed_data.checkin_message = 'Check-in successful at '+ passed_data.outlet.basics.name +', '  + passed_data.outlet.contact.location.locality_2.toString()+' on '+ formatDate(new Date(passed_data.event_data.event_meta.date)) +". Reward unlocked! Your voucher will be available soon.";                                    
+                    passed_data.checkin_message = 'Check-in successful at '+ passed_data.outlet.basics.name +', '  + passed_data.outlet.contact.location.locality_2.toString()+' on '+ formatDate(new Date(passed_data.event_data.event_date)) +". Reward unlocked! Your voucher will be available soon.";                                    
                 }
                 
                 deferred.resolve(passed_data);
@@ -227,11 +227,11 @@ module.exports.check_and_create_coupon = function(data) {
         } else if (!isNaN(matching_offer)) {
             console.log('locked_offer');
             if(passed_data.outlet.contact.location.locality_1) {
-                passed_data.checkin_message = 'Check-in successful at '+ passed_data.outlet.basics.name + ', '  + passed_data.outlet.contact.location.locality_1.toString()+' on '+ formatDate(new Date(passed_data.event_data.event_meta.date)) +'. You are '+ matching_offer +' check-in(s) away from your next reward.';                
+                passed_data.checkin_message = 'Check-in successful at '+ passed_data.outlet.basics.name + ', '  + passed_data.outlet.contact.location.locality_1.toString()+' on '+ formatDate(new Date(passed_data.event_data.event_date)) +'. You are '+ matching_offer +' check-in(s) away from your next reward.';                
                 
             }
             else{
-                passed_data.checkin_message = 'Check-in successful at '+ passed_data.outlet.basics.name + ', '  + passed_data.outlet.contact.location.locality_2.toString()+' on '+ formatDate(new Date(passed_data.event_data.event_meta.date)) +'. You are '+ matching_offer +' check-in(s) away from your next reward.';                                    
+                passed_data.checkin_message = 'Check-in successful at '+ passed_data.outlet.basics.name + ', '  + passed_data.outlet.contact.location.locality_2.toString()+' on '+ formatDate(new Date(passed_data.event_data.event_date)) +'. You are '+ matching_offer +' check-in(s) away from your next reward.';                                    
             }
             
             passed_data.checkins_to_go = matching_offer;

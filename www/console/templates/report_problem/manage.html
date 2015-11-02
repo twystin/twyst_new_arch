@@ -21,6 +21,7 @@
 			<thead>
 				<th>S No</th>
 				<th>Phone</th>
+				<th>Email</th>
 				<th>Comment</th>
 				<th>Date</th>
 				
@@ -30,6 +31,7 @@
 				<tr ng-repeat='report in report_problems'>
 					<td>{{$index + 1}}</td>
 					<td>{{report.event_user.phone}}</td>
+					<td>{{report.event_user.email}}</td>
 					<td>{{report.event_meta.comment}}</td>
 					<td>{{report.event_date}}</td>
 					

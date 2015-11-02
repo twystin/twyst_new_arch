@@ -19,7 +19,18 @@
 
     <link rel="stylesheet" href="creative.css" type="text/css">
     <link rel='stylesheet' href='style.css' type='text/css'>
-    <srcipt src='js/creative.js'></script>
+    <link rel='stylesheet' href="../bower_components/angular-toastr/dist/angular-toastr.css"></link>
+    <script src='/bower_components/jquery/dist/jquery.js'></script>
+    <script src='/bower_components/angular/angular.js'></script>
+    <script src='/bower_components/ng-file-upload-shim/ng-file-upload-shim.js'></script>
+    <script src='/bower_components/ng-file-upload-shim/ng-file-upload.js'></script>
+    <script src='/bower_components/angular-bootstrap/ui-bootstrap-tpls.js'></script>
+    <script src='/bower_components/bootstrap/dist/js/bootstrap.js'></script>
+    <script src='/bower_components/FitText.js/jquery.fittext.js'></script>
+    <script src='/bower_components/wow/dist/wow.js'></script>
+    <script src='js/creative.js'></script>
+    <script src='js/app.js'></script>
+    <script src='js/file_handler.directive.js'></script>
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -30,7 +41,7 @@
 
 </head>
 
-<body id="page-top" on-load='onload()'>
+<body id="page-top" on-load='onload()' ng-app='twystHome' ng-controller='MainCtrl'>
 
     <nav id="mainNav" class="navbar navbar-default navbar-fixed-top">
         <div class="container-fluid">
@@ -122,9 +133,9 @@
           </div>
           <div class="col-xs-12 col-md-4 text-left">
             <h3 class="text-left">Connect</h3>
-            <button class="btn btn-lg btn-danger">Get in Touch</button><span>&nbsp;&nbsp;&nbsp;</span>
+            <button class="btn btn-lg btn-danger" ng-click='contactUs()'>Get in Touch</button><span>&nbsp;&nbsp;&nbsp;</span>
             <div class='clearfix'>&nbsp;</div>
-            <button class="btn btn-lg btn-danger">Work With Us</button>
+            <button class="btn btn-lg btn-danger" ng-click='applyToTwyst()'>Work With Us</button>
           </div>
         </div>
         <div style="margin-top:50px" class="row">
@@ -140,11 +151,70 @@
     <script src="../bower_components/jquery/dist/jquery.js"></script>
 
     <script src="../bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-
+    <script src="../bower_components/angular-toastr/dist/angular-toastr.tpls.js"></script>
     <script src="../bower_components/jquery.easing/js/jquery.easing.min.js"></script>
     <script src="../bower_components/FitText.js/jquery.fittext.js"></script>
     <script src="../bower_components/WOW/dist/wow.min.js"></script>
 
+    <script type='text/ng-template' id='contact_form.html'>
+        <div class='container-fluid'>
+            <div class='well well-lg'>
+                <form class='form-horizontal' ng-submit='submitComments()'>
+                    <fieldset>
+                        <legend>Contact Us</legend>
+                        <div class='form-group' ng-if='errorMessage'>
+                            <div class='col-sm-offset-1 col-sm-8 alert alert-danger text-center'>{{errorMessage}}</div>
+                        </div>
+                        <div class='form-group'>
+                            <label class='col-sm-3 control-label'>Name</label>
+                            <div class='col-sm-9 col-md-6'>
+                                <input class='form-control' type='text' ng-model='contact.name'>
+                            </div>
+                        </div>
+                        <div class='form-group'>
+                            <label class='col-sm-3 control-label'>Email</label>
+                            <div class='col-sm-9 col-md-6'>
+                                <input class='form-control' type='email' ng-model='contact.email'>
+                            </div>
+                        </div>
+                        <div class='form-group'>
+                            <label class='col-sm-3 control-label'>Comments</label>
+                            <div class='col-sm-9 col-md-6'>
+                                <textarea class='form-control' ng-model='contact.comments' rows='5' style='overflow:auto;resize:none'></textarea>
+                            </div>
+                        </div>
+                        <div class='form-group'>
+                            <div class='col-sm-offset-3 col-sm-6 col-md-4'>
+                                <button type='submit' class='btn btn-block btn-primary'>Submit</button>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </script>
+    <script type="text/ng-template" id='apply.html'>
+        <div class='container-fluid'>
+            <div class='well well-lg'>
+                <form class='form-horizontal' ng-submit='submitApplication()'>
+                    <fieldset>
+                        <legend>Join Twyst</legend>
+                        <div class='form-group'>
+                            <label class='col-sm-3 control-label'>Resume</label>
+                            <div class='col-sm-9 col-md-6'>
+                                <input type="file" ngf-select ng-model="application.resume" name="file" accept="application/*" ngf-max-size="20MB" required>
+                            </div>
+                        </div>
+                        <div class='form-group'>
+                            <div class='col-sm-offset-3 col-sm-6 col-md-4'>
+                                <button type='submit' class='btn btn-block btn-primary'>Apply</button>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </script>
 
 </body>
 
