@@ -21,6 +21,7 @@
 			<thead>
 				<th>S No</th>
 				<th>Phone</th>
+				<th>Email</th>
 				<th>Comment</th>
 				<th>Date</th>
 				
@@ -30,6 +31,7 @@
 				<tr ng-repeat='write in write_to_twyst'>
 					<td>{{$index + 1}}</td>
 					<td>{{write.event_user.phone}}</td>
+					<td>{{write.event_user.email}}</td>
 					<td>{{write.event_meta.comments}}</td>
 					<td>{{write.event_date}}</td>
 					
