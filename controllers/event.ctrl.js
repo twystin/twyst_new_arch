@@ -553,7 +553,7 @@ function create_event(data) {
   var deferred = Q.defer();
   var event = {};
   var passed_data = data;
-  console.log(passed_data)
+
   event = _.extend(event, passed_data.event_data);
   event.event_user = passed_data.user._id;
 
