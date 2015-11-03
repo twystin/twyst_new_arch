@@ -424,19 +424,6 @@ module.exports.update_checkin_counts = function(data) {
   return deferred.promise;
 }
 
-module.exports.send_sms = function(data) {
-    logger.log();
-    var deferred = Q.defer();
-    
-    var payload = {};
-    payload.from = 'TWYSTR';
-    payload.message = data.message;
-    payload.phone = data.event_data.event_meta.phone;
-    Transporter.send('sms', 'vf', payload);
-    deferred.resolve(data);
-    return deferred.promise;
-}
-
 var formatDate = function(date) {
     return dateFormat(date, "dd mmm yyyy");
 };
