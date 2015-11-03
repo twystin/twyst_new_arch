@@ -31,7 +31,7 @@ module.exports.process = function(data) {
         .then(function(data) {
             return NotifHelper.send_notification(data, data.checkin_message, 'Checkin Successful');
         })
-        .then(function(data) {
+        .then(function() {
             data.event_data.event_type = 'checkin';
             deferred.resolve(data);
         })
