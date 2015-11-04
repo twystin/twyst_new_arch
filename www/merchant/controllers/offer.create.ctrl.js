@@ -400,6 +400,8 @@ angular.module('merchantApp')
         var def = Q.defer();
         if (!$scope.offer.offer_type) {
           def.reject("Offer type must be selected");
+        } else if ($scope.offer.user_sourced && (!$scope.offer.offer_user_source || !/.{24}/i.test($scope.offer.offer_user_source))) {
+          def.reject("Valid offer user ID required for user sourced offer");
         } else {
           def.resolve(true);
         }

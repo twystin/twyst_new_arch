@@ -17,6 +17,18 @@
                 </select>
               </div>
             </div>
+            <div class='form-group' ng-class='{"has-error": formFailure && offer.user_sourced && !offer.offer_user_source}'>
+              <label for='is_user_sourced' class='col-md-2 control-label'>User Sourced?</label>
+              <div class='col-md-6'>
+                <button type='button' class='btn btn-success' ng-model='offer.user_sourced' btn-checkbox>{{offer.user_sourced?'YES': 'NO'}}</button>
+              </div>
+            </div>
+            <div class='form-group' ng-class='{"has-error": formFailure && offer.user_sourced && !offer.offer_user_source}' ng-if='offer.user_sourced'>
+              <label for='user_source' class='col-md-2 control-label'>User ID</label>
+              <div class='col-md-6'>
+                <input type='text' ng-model='offer.offer_user_source' class='form-control'>
+              </div>
+            </div>
           </fieldset>
         </form>
       </div>
