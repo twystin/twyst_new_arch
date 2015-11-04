@@ -33,7 +33,6 @@ module.exports.process = function(data) {
     data.event_data.event_meta.status = 'submitted';
     data.event_data.event_meta.phone = data.user.phone;
     data.event_data.event_meta.email = data.user.email;
-    data.event_data.event_meta.outlet_location = data.outlet && data.outlet.contact && data.outlet.contact.location && data.outlet.contact.location.address;
     deferred.resolve(true);  
   },function(err) {
         deferred.reject({

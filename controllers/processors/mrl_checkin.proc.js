@@ -3,6 +3,7 @@ var logger = require('tracer').colorConsole();
 var _ = require('lodash');
 var Q = require('q');
 var CheckinHelper = require('../helpers/checkin.hlpr');
+var NotifHelper = require('../helpers/notif.hlpr');
 
 module.exports.check = function(data) {
     logger.log();
@@ -28,9 +29,9 @@ module.exports.process = function(data) {
             return CheckinHelper.update_checkin_counts(data);
         })
         .then(function(data) {
-            return CheckinHelper.send_sms(data);
+            return NotifHelper.send_notification(data, data.checkin_message, 'Checkin Successful');
         })
-        .then(function(data) {
+        .then(function() {
             data.event_data.event_type = 'checkin';
             deferred.resolve(data);
         })

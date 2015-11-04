@@ -32,6 +32,8 @@ module.exports.process = function(data) {
     }
 
     ImageUploader.uploadAppImage(img_obj).then(function(res){
+      data.event_data.event_meta.phone = data.user.phone;
+      data.event_data.event_meta.email = data.user.email;
       data.event_data.event_meta.photo = res.data.path;      
       deferred.resolve(true);  
     },function(err) {

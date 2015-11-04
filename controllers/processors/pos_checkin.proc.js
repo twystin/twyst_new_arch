@@ -54,7 +54,7 @@ function check(data){
   return deferred.promise;
 }
 
-module.exports.process = function(data) {
+function process(data) {
     logger.log();
     var deferred = Q.defer();
     CheckinHelper.check_and_create_coupon(data)

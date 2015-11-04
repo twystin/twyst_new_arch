@@ -141,7 +141,7 @@ function listEventForConsole(event_type, status) {
   Event.find({
     event_type: event_type,
     'event_meta.status': status
-  }).exec(function(err, events) {
+  }).populate('event_outlet').exec(function(err, events) {
     if(err || !events) {
       deferred.reject({err: err || null, message: "Unable to retrieve events list" });
     } 
@@ -302,7 +302,7 @@ function updateEventFromConsole(event) {
   if(event.event_meta.status === 'archived' ) {
     updateBillStatus(event).then(function(data) {
       deferred.resolve({
-        data: data,
+        data: data.data,
         message: 'Bill Processed successfully.'
       });
     }, function(err) {

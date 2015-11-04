@@ -1,4 +1,4 @@
-<div class='col-xs-12 col-sm-10 col-sm-offset-1' ng-init='loadReportProblem()'>
+<div class='col-xs-12 col-sm-12 ' ng-init='loadReportProblem()'>
 	<div class='panel panel-default table-responsive'>
 		<div class='panel-heading'>
 			<ol class='breadcrumb' style='margin-bottom:0px;'>
@@ -21,6 +21,10 @@
 			<thead>
 				<th>S No</th>
 				<th>Phone</th>
+				<th>Email</th>
+				<th>Outlet</th>
+				<th>Offer</th>
+				<th>Issue</th>
 				<th>Comment</th>
 				<th>Date</th>
 				
@@ -30,6 +34,10 @@
 				<tr ng-repeat='report in report_problems'>
 					<td>{{$index + 1}}</td>
 					<td>{{report.event_user.phone}}</td>
+					<td>{{report.event_user.email}}</td>
+					<td>{{report.event_outlet.basics.name}}</td>
+					<td>{{report.event_meta.offer}}</td>
+					<td>{{report.event_meta.issue}}</td>
 					<td>{{report.event_meta.comment}}</td>
 					<td>{{report.event_date}}</td>
 					

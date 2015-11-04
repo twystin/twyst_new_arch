@@ -334,7 +334,7 @@ function pick_outlet_fields(params) {
         return item;
       }
     })
-   params.offers = _.sortBy(params.offers, function(offer) {
+    params.offers = _.sortBy(params.offers, function(offer) {
         if(offer.type === 'coupon') {
           return -100;
         } else if(offer.offer_type === 'pool') {

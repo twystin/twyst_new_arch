@@ -177,12 +177,19 @@ function calculate_checkin_counts(sorted_offers, user_id, callback) {
 module.exports.check_and_create_coupon = function(data) {
     logger.log();
     var deferred = Q.defer();
+    
     var passed_data = data;
     var today = new Date();
     var user_id = _.get(passed_data, 'user._id');
     var outlet_id = _.get(passed_data, 'outlet._id');
     var event_type = _.get(passed_data, 'event_data.event_type');
-
+    var event_date;
+    if(passed_data.event_data.event_date) {
+        event_date = passed_data.event_data.event_date;
+    }
+    else{
+        event_date = new Date();
+    }
     var offers = _.get(data, 'outlet.offers');
     var sorted_checkin_offers = _.filter(offers, function(offer) {
         return offer.offer_status === 'active' && new Date(offer.offer_start_date) <= today && new Date(offer.offer_end_date) >= today;
@@ -195,21 +202,22 @@ module.exports.check_and_create_coupon = function(data) {
         if(err) {
             deferred.reject(err);
         }
+        
         var matching_offer = find_matching_offer(offers_with_checkin_count);
         
         if (matching_offer && isNaN(matching_offer)) {
-            create_coupon(matching_offer, user_id, outlet_id, event_type, passed_data.event_data.event_meta.date).then(function(data) {
+            create_coupon(matching_offer, user_id, outlet_id, event_type, event_date).then(function(data) {
                 if (data.coupons && data.coupons.length) {
                     passed_data.new_coupon = data.coupons[data.coupons.length-1];
                     passed_data.user.coupons.push(data.coupons[data.coupons.length - 1]);
                 }
                 //console.log(passed_data.outlet)
                 if(passed_data.outlet.contact.location.locality_1) {
-                    passed_data.message = 'Check-in successful at '+ passed_data.outlet.basics.name +','  + passed_data.outlet.contact.location.locality_1.toString()+' on '+ formatDate(new Date(passed_data.event_data.event_meta.date)) +". Reward unlocked! Your voucher will be available on your Twyst app soon. Don't have the app? Get it now at http://twy.st/app";                
+                    passed_data.checkin_message = 'Check-in successful at '+ passed_data.outlet.basics.name +', '  + passed_data.outlet.contact.location.locality_1.toString()+' on '+ formatDate(new Date(passed_data.event_data.event_date)) +". Reward unlocked! Your voucher will be available soon.";                
                     
                 }
                 else{
-                    passed_data.message = 'Check-in successful at '+ passed_data.outlet.basics.name +','  + passed_data.outlet.contact.location.locality_2.toString()+' on '+ formatDate(new Date(passed_data.event_data.event_meta.date)) +". Reward unlocked! Your voucher will be available on your Twyst app soon. Don't have the app? Get it now at http://twy.st/app";                                    
+                    passed_data.checkin_message = 'Check-in successful at '+ passed_data.outlet.basics.name +', '  + passed_data.outlet.contact.location.locality_2.toString()+' on '+ formatDate(new Date(passed_data.event_data.event_date)) +". Reward unlocked! Your voucher will be available soon.";                                    
                 }
                 
                 deferred.resolve(passed_data);
@@ -219,11 +227,11 @@ module.exports.check_and_create_coupon = function(data) {
         } else if (!isNaN(matching_offer)) {
             console.log('locked_offer');
             if(passed_data.outlet.contact.location.locality_1) {
-                passed_data.message = 'Check-in successful at '+ passed_data.outlet.basics.name + ','  + passed_data.outlet.contact.location.locality_1.toString()+' on '+ formatDate(new Date(passed_data.event_data.event_meta.date)) +'. You are '+ matching_offer +' check-in(s) away from your next reward. Find '+ passed_data.outlet.basics.name + ' on Twystat http://twy.st/app';                
+                passed_data.checkin_message = 'Check-in successful at '+ passed_data.outlet.basics.name + ', '  + passed_data.outlet.contact.location.locality_1.toString()+' on '+ formatDate(new Date(passed_data.event_data.event_date)) +'. You are '+ matching_offer +' check-in(s) away from your next reward.';                
                 
             }
             else{
-                passed_data.message = 'Check-in successful at '+ passed_data.outlet.basics.name + ','  + passed_data.outlet.contact.location.locality_2.toString()+' on '+ formatDate(new Date(passed_data.event_data.event_meta.date)) +'. You are '+ matching_offer +' check-in(s) away from your next reward. Find '+ passed_data.outlet.basics.name + ' on Twystat http://twy.st/app';                                    
+                passed_data.checkin_message = 'Check-in successful at '+ passed_data.outlet.basics.name + ', '  + passed_data.outlet.contact.location.locality_2.toString()+' on '+ formatDate(new Date(passed_data.event_data.event_date)) +'. You are '+ matching_offer +' check-in(s) away from your next reward.';                                    
             }
             
             passed_data.checkins_to_go = matching_offer;
@@ -414,19 +422,6 @@ module.exports.update_checkin_counts = function(data) {
     }
   });
   return deferred.promise;
-}
-
-module.exports.send_sms = function(data) {
-    logger.log();
-    var deferred = Q.defer();
-    
-    var payload = {};
-    payload.from = 'TWYSTR';
-    payload.message = data.message;
-    payload.phone = data.event_data.event_meta.phone;
-    Transporter.send('sms', 'vf', payload);
-    deferred.resolve(data);
-    return deferred.promise;
 }
 
 var formatDate = function(date) {

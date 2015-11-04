@@ -76,7 +76,7 @@ angular.module('merchantApp')
 				$scope.show_vouchers = false;
 				$scope.show_msg = false;
 				if (!$scope.checkin || !$scope.checkin.number) {
-					toastr.error("Please finn-in the customer's number", "Error");
+					toastr.error("Please enter the customer's number", "Error");
 				} else if (!/^[0-9]{10}$/.test($scope.checkin.number)) {
 					toastr.error("Number entered is invalid. Please recheck", "Error");
 				} else if(!$scope.checkin.date) {
@@ -92,7 +92,8 @@ angular.module('merchantApp')
 						var today = new Date();
 						$scope.checkin.date.setHours(today.getHours());
 						$scope.checkin.date.setMinutes(today.getMinutes());
-						req_obj.event_meta.date = $scope.checkin.date;
+						req_obj.event_date = $scope.checkin.date;
+						req_obj.event_meta.date = new Date();
 					}
 					merchantRESTSvc.checkinUser(req_obj)
 						.then(function(res) {

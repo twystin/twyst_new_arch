@@ -107,7 +107,8 @@ module.exports.process = function(data) {
       if (err) {
         deferred.reject('Error redeeming the coupon');
       } else {
-        sendMessageToMerchant(coupon, data.outlet, data.user.phone);       
+        sendMessageToMerchant(coupon, data.outlet, data.user.phone);
+             
         deferred.resolve(data);
       }
     }
