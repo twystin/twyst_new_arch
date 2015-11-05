@@ -475,7 +475,7 @@ function massage_offers(params) {
         }
 
         if(massaged_offer.expiry && (new Date(massaged_offer.expiry) <= new Date())) {
-          return false;
+          return massaged_offer;
         }
         else{
           return massaged_offer;  
@@ -487,6 +487,20 @@ function massage_offers(params) {
     item.offers = _.compact(item.offers);
     return item;
   }
+}
+
+function remove_expired_offers(params) {
+  var deferred = Q.defer();
+  params.outlet.offers = _.compact(_.map(params.outlet.offers, function(offer) {
+    if(offer.expiry && (new Date(offer.expiry) <= new Date())) {
+      return false
+    } else {
+      return offer;
+    }
+  }));
+  deferred.resolve(params);
+
+  return deferred.promise;
 }
 
 module.exports.get = function(req, res) {
@@ -514,6 +528,9 @@ module.exports.get = function(req, res) {
     })
     .then(function(data) {
       return pick_outlet_fields(data);
+    })
+    .then(function(data) {
+      return remove_expired_offers(data);
     })
     .then(function(data) {
         var outlet = data.outlet;

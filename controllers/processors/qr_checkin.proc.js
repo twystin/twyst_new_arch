@@ -107,7 +107,7 @@ function isUsedTooMany(qr) {
 
 function isOutletClosed(qr) {
   var date = new Date();
-    var time = parseInt(date.getHours())+5 +':'+parseInt(date.getMinutes())+30;
+    var time = (parseInt(date.getHours())+5) +':'+(parseInt(date.getMinutes())+30);
     date = parseInt(date.getMonth())+1+ '-'+ date.getDate()+'-'+date.getFullYear();
 
     if (qr.outlet && qr.outlet.business_hours ) {
