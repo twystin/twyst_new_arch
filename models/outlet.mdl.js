@@ -3,6 +3,7 @@
 
 var mongoose = require('mongoose'),
   Schema = mongoose.Schema,
+  ObjectId = Schema.Types,ObjectId,
   hours = require("./partials/hours.mdl")
     , textSearch = require('mongoose-search-plugin');
 
@@ -412,6 +413,12 @@ var OutletSchema = new Schema({
     }],
     offer_source: {
       type: String
+    },
+    user_sourced: {
+      type: Boolean
+    },
+    offer_user_source: {
+      type: ObjectId
     },
     offer_cost:{
       type: Number
