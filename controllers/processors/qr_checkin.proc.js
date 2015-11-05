@@ -106,8 +106,18 @@ function isUsedTooMany(qr) {
 }
 
 function isOutletClosed(qr) {
-  // CHECK IF THE OUTLET IS CURRENTLY CLOSED
-  return false;
+  var date = new Date();
+    var time = parseInt(date.getHours())+5 +':'+parseInt(date.getMinutes())+30;
+    date = parseInt(date.getMonth())+1+ '-'+ date.getDate()+'-'+date.getFullYear();
+
+    if (qr.outlet && qr.outlet.business_hours ) {
+      if(RecoHelper.isClosed(date, time, outlet.business_hours)) {
+          return true;
+      }
+  }
+  else{
+    return false;
+  }
 }
 
 function update_qr_count(data) {
