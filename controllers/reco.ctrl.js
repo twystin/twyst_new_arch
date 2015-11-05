@@ -343,7 +343,9 @@ function pick_outlet_fields(params) {
         return item;
       }
     })
+
     params.offers = _.sortBy(params.offers, function(offer) {
+      
       if(offer.type === 'coupon') {
         return -100;
       } else if(offer.offer_type === 'pool') {
@@ -586,7 +588,7 @@ function massage_offers(params) {
         } 
 
         if(massaged_offer.expiry && (new Date(massaged_offer.expiry) <= new Date())) {
-          return false;
+          return massaged_offer;
         }
         else{
           return massaged_offer;  
@@ -597,6 +599,24 @@ function massage_offers(params) {
     item.offers = _.compact(item.offers);
     return item;
   }
+}
+
+function remove_expired_offers(params) {
+  var deferred = Q.defer();
+  params.outlets = _.map(params.outlets, function(item) {
+    item.offers = _.compact(_.map(item.offers, function(offer) {
+      if(offer.expiry && (new Date(offer.expiry) <= new Date())) {
+        return false
+      } else {
+        return offer;
+      }
+    }));
+
+    return item;
+  });
+  deferred.resolve(params);
+  return deferred.promise;
+
 }
 
 function paginate(params) {
@@ -642,6 +662,9 @@ module.exports.get = function(req, res) {
     })
     .then(function(data) {
       return pick_outlet_fields(data);
+    })
+    .then(function(data) {
+      return remove_expired_offers(data);
     })
     .then(function(data) {
       return paginate(data);
