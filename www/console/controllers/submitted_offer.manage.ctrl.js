@@ -8,7 +8,7 @@ angular.module('consoleApp').controller('SubmittedOffersController', ['$scope', 
 			'-event_date': 'Newest FIrst'
 		};
 
-		$scope.view_options = ['submitted', 'processed'];
+		$scope.view_options = ['submitted', 'twyst_approved', 'twyst_rejected'];
 
 		$scope.sort = 'event_date';
 		$scope.view_by = 'submitted';
