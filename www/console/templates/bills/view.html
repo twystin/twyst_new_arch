@@ -6,7 +6,8 @@
         <li class='active'>{{bill._id}}</li>
         <li class='pull-right' ng-if='bill.event_meta.status=="Submitted"'><a class='btn btn-warning'>PENDING</a></li>
         <li class='pull-right' ng-if='bill.event_meta.status=="twyst_approved"'><a class='btn btn-success'>Twyst Approved</a></li>
-        <li class='pull-right' ng-if='bill.event_meta.status=="twyst_rejected"'><a class='btn btn-danger'>REJECTED</a></li>
+        <li class='pull-right' ng-if='bill.event_meta.status=="twyst_rejected" || 
+        bill.event_meta.status=="archived"'><a class='btn btn-danger'>REJECTED</a></li>
       </ol>
     </div>
     <div class='panel-body'>
@@ -19,12 +20,28 @@
           <div class='row'><div class='col-xs-6'>User ID:</div><label class='col-xs-6 text-right'>{{bill.event_user}}</label></div>
           <div class='row'><div class='col-xs-6'>User Phone:</div><label class='col-xs-6 text-right'>{{bill.event_meta.phone}}</label></div>
           <div class='row'><div class='col-xs-6'>User Email:</div><label class='col-xs-6 text-right'>{{bill.event_meta.email}}</label></div>
-          <div class='alert alert-danger' ng-if='bill.event_meta.status=="twyst_rejected"'>
-            <strong>Bill Rejected. Reason: </strong>
+          <div class='alert alert-danger' ng-if='bill.event_meta.status=="twyst_rejected" || bill.event_meta.status=="archived"'>
+            <strong>Bill Rejected Reason: </strong>
             <p>{{bill.event_meta.reason}}</p>
             </div>
           <div class='row'><p>&nbsp;</p></div>
-          <div class='row' ng-if='bill.event_meta.status==="submitted"'>
+          <div class='row'  ng-if='bill.event_meta.status==="submitted"' >
+            <label for='is_archived_bill' class='control-label'>Archive this Bill?</label>
+            <div class='pull-right'>
+              <a class='btn' ng-class='{"btn-default": isDuplicate!==true, "btn-primary": isDuplicate==true}' ng-click='updateCheck("isDuplicate", true)'>YES</a>
+              <a class='btn' ng-class='{"btn-default": isDuplicate!==false, "btn-warning": isDuplicate==false}' ng-click='updateCheck("isDuplicate", false)'>NO</a>
+            </div>
+          </div>
+          <div class='row'><p>&nbsp;</p></div>
+          <div class='row' ng-if='isDuplicate===false' ng-if='bill.event_meta.status==="submitted"' >
+            <label for='is_image_bill' class='control-label'>Image of a bill?</label>
+            <div class='pull-right'>
+              <a class='btn' ng-class='{"btn-default": isBill!==true, "btn-primary": isBill==true}' ng-click='updateCheck("isBill", true)'>YES</a>
+              <a class='btn' ng-class='{"btn-default": isBill!==false, "btn-warning": isBill==false}' ng-click='updateCheck("isBill", false)'>NO</a>
+            </div>
+          </div>
+          <div class='row'><p>&nbsp;</p></div>
+          <div class='row' ng-if='isBill===true' ng-if='bill.event_meta.status!=="twyst_approved" && bill.event_meta.status!=="rejected"'>
             <label for='is_image_clear' class='control-label'>Clear, complete, non-manipulated image?</label>
             <div class='pull-right'>
               <a class='btn' ng-class='{"btn-default": isClear!==true, "btn-primary": isClear===true}' ng-click='updateCheck("isClear", true)'>YES</a>
@@ -32,13 +49,7 @@
             </div>
           </div>
           <div class='row' ng-if='bill.event_meta.status!=="twyst_approved" && bill.event_meta.status!=="twyst_rejected"'>&nbsp;</div>
-          <div class='row' ng-if='isClear===true' ng-if='bill.event_meta.status!=="twyst_approved" && bill.event_meta.status!=="rejected"'>
-            <label for='is_image_bill' class='control-label'>Image of a bill?</label>
-            <div class='pull-right'>
-              <a class='btn' ng-class='{"btn-default": isBill!==true, "btn-primary": isBill==true}' ng-click='updateCheck("isBill", true)'>YES</a>
-              <a class='btn' ng-class='{"btn-default": isBill!==false, "btn-warning": isBill==false}' ng-click='updateCheck("isBill", false)'>NO</a>
-            </div>
-          </div>
+          
           <div class='row'>&nbsp;</div>
           <div class='row' ng-if='isBill===true && isClear==true'>
             <label for='is_outlet_listed' class='control-label'>Outlet listed on Twyst</label>
@@ -47,7 +58,7 @@
               <a class='btn' ng-class='{"btn-default": isListed!==false, "btn-warning": isListed==false}' ng-click='updateCheck("isListed", false)'>NO</a>
             </div>
           </div>
-          <div class='row' ng-if='(isClear===false || isBill===false || isListed===false) && bill.event_meta.status!=="Twyst Approved"'>
+          <div class='row' ng-if='(isClear===false || isBill===false || isListed===false ||  isDuplicate===true) && bill.event_meta.status!=="Twyst Approved"'>
             <div class='col-xs-12'><br /></div>
             <div class='col-xs-12 text-center'>
               <a class='btn btn-warning btn-lg' ng-click='rejectBill()'>Reject</a>
