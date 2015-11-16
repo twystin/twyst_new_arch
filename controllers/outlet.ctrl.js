@@ -827,10 +827,6 @@ module.exports.redeem_user_coupon = function(req, res) {
                 });
                 
                 autoCheckinUser(u, outlet_id).then(function(data) {
-                  console.log(data.outlet.basics.name)
-                  console.log(redeemed_coupon.header)
-                  console.log(redeemed_coupon.line1)
-                  console.log(redeemed_coupon.line2)
                   var redeem_message = 'Your voucher at '+ data.outlet.basics.name+ ' for '+ 
                   redeemed_coupon.header + ', '+ redeemed_coupon.line1+', '+ redeemed_coupon.line2
                   +' has been redeemed by merchant.'
