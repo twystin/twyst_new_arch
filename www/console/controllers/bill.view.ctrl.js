@@ -78,11 +78,14 @@ angular.module('consoleApp')
 				$scope.bill.event_meta.is_rejected = true;
 				$scope.bill.event_meta.status = 'twyst_rejected';
 
-				if(!$scope.isClear) {
-					$scope.bill.event_meta.reason = 'Bill image is either unclear, incomplete, or manipulated.';
+				if($scope.isDuplicate) {
+					$scope.bill.event_meta.status = 'archived';
+					$scope.bill.event_meta.reason = 'Bill is duplicate';
 				} else if(!$scope.isBill) {
 					$scope.bill.event_meta.reason = 'Image is not of a bill.';
-				} else if (!$scope.isListed) {
+				} else if(!$scope.isClear) {
+					$scope.bill.event_meta.reason = 'Bill image is either unclear, incomplete, or manipulated.';
+				}  else if (!$scope.isListed) {
 					$scope.bill.event_meta.reason = 'Outlet is not listed on Twyst.';
 				} else {
 					$scope.bill.event_meta.reason = '';
@@ -90,9 +93,10 @@ angular.module('consoleApp')
 
 				if($scope.bill.event_meta.reason) {
 					consoleRESTSvc.updateBill($scope.bill).then(function(res) {
-						toastr.success(res.message);
 						$scope.bill = res.data;
+						console.log($scope.bill)
 						$scope.isClear = $scope.isBill = $scope.isListed = false;
+						toastr.success(res.message);
 					}, function(err) {
 						if (err.message) {
 							toastr.error(err.message, "Error");

@@ -13,7 +13,7 @@ angular.module('consoleApp')
 				'outlet_pending': 'Outlet Pending',
 				'twyst_rejected': 'Twyst Rejected',
 				'outlet_rejected': 'Outlet Rejected',
-				'verified': 'Verified'
+				'archived': 'Archived'
 			}
 
 			$scope.sort = 'event_date';

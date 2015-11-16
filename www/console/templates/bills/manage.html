@@ -1,4 +1,4 @@
-<div class='col-xs-12 col-sm-10 col-sm-offset-1' ng-init='getBills()'>
+<div class='col-xs-12 col-sm-12 ' ng-init='getBills()'>
   <div class='panel panel-default table-responsive'>
     <div class='panel-heading'>
       <ol class='breadcrumb' style='margin-bottom:0;'>
@@ -26,7 +26,7 @@
       </thead>
       <tbody>
         <tr ng-repeat='bill in bills' ui-sref='console.view_bill({bill_id: bill._id})' style='cursor:pointer;'>
-          <td class='text-right'>{{$index+1}}</td>
+          <td >{{$index+1}}</td>
           <td>{{bill.event_user.phone}}</td>
           <td>{{bill.event_date | date: 'MMM dd, yyyy hh:mm a'}}</td>
           <th><a class='btn'>View</a></th>

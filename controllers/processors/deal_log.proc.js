@@ -45,12 +45,16 @@ module.exports.process = function(data) {
 }
 
 function isOutletClosed(outlet) {
+  var date = new Date();
+    var time = (parseInt(date.getHours())+5) +':'+(parseInt(date.getMinutes())+30);
+    date = parseInt(date.getMonth())+1+ '-'+ date.getDate()+'-'+date.getFullYear();
+
     if (outlet && outlet.business_hours ) {
-        if(RecoHelper.isClosed('dummy', 'dummy', outlet.business_hours)) {
-            return true;
-        }
-    }
-    else{
-      return false;
-    }
+      if(RecoHelper.isClosed(date, time, outlet.business_hours)) {
+          return true;
+      }
+  }
+  else{
+    return false;
+  }
 }

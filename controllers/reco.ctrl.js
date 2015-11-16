@@ -245,11 +245,20 @@ function calculate_relevance(params) {
     // CURRENT OFFERS RELEVANCE
     if (val.offers && val.offers.length > 1) {      
       for(var i = 0; i < val.offers.length; i++) {
-        if(val.offers[i].offer_type === 'offer') {
+        if(val.offers[i].type === 'offer' && val.offers[i].available_now) {
           relevance = relevance +  1500;    
         }
-        else if(val.offers[i].offer_type === 'deal') {
+        else if(val.offers[i].type === 'deal' && val.offers[i].available_now) {
           relevance = relevance +  1000;    
+        }
+        else if(val.offers[i].type === 'bank_deal' && val.offers[i].available_now) {
+          relevance = relevance +  500;    
+        }
+        else if(val.offers[i].type === 'checkin' && val.offers[i].available_now) {
+          relevance = relevance +  100;    
+        }
+        else{
+          relevance = relevance; 
         }
         
       }
@@ -334,21 +343,24 @@ function pick_outlet_fields(params) {
         return item;
       }
     })
+
     params.offers = _.sortBy(params.offers, function(offer) {
-        if(offer.type === 'coupon') {
-          return -100;
-        } else if(offer.offer_type === 'pool') {
-          return -75;
-        } else if(offer.offer_type === 'offer') {
-          return -50;
-        }
-        else if(offer.offer_type === 'deal') {
-          return -25;
-        }
-        else if(offer.offer_type === 'checkin') {
-          return -10;
-        }
-      }); 
+      
+      if(offer.type === 'coupon') {
+        return -100;
+      } else if(offer.offer_type === 'pool') {
+        return -75;
+      } else if(offer.offer_type === 'offer') {
+        return -50;
+      }
+      else if(offer.offer_type === 'deal') {
+        return -25;
+      }
+      else if(offer.offer_type === 'checkin') {
+        return -10;
+      }
+    }); 
+    
     params.outlets = _.compact(params.outlets);
 
     deferred.resolve(params);
@@ -388,6 +400,15 @@ function massage_offers(params) {
           else if(offer.offer_type === 'checkin') {
             return -10;
           }
+        }); 
+        item.offers = _.sortBy(item.offers, function(offer) {
+          if(offer.available_now === true) {
+            return -100;
+          } 
+          else  {
+            return -50;
+          }
+          
         }); 
         return item;
       });
@@ -564,21 +585,38 @@ function massage_offers(params) {
         // massaged_offer.valid_days = offer.actions.reward.valid_days;
         if(massaged_offer.next<=0) {
           return false;
-        }
+        } 
 
         if(massaged_offer.expiry && (new Date(massaged_offer.expiry) <= new Date())) {
-          return false;
+          return massaged_offer;
         }
         else{
           return massaged_offer;  
-        }
-        
+        }       
       }
 
     });
     item.offers = _.compact(item.offers);
     return item;
   }
+}
+
+function remove_expired_offers(params) {
+  var deferred = Q.defer();
+  params.outlets = _.map(params.outlets, function(item) {
+    item.offers = _.compact(_.map(item.offers, function(offer) {
+      if(offer.expiry && (new Date(offer.expiry) <= new Date())) {
+        return false
+      } else {
+        return offer;
+      }
+    }));
+
+    return item;
+  });
+  deferred.resolve(params);
+  return deferred.promise;
+
 }
 
 function paginate(params) {
@@ -624,6 +662,9 @@ module.exports.get = function(req, res) {
     })
     .then(function(data) {
       return pick_outlet_fields(data);
+    })
+    .then(function(data) {
+      return remove_expired_offers(data);
     })
     .then(function(data) {
       return paginate(data);

@@ -62,7 +62,7 @@
                     	</div>
                     </div>
                     <div class='col-xs-12'>&nbsp;</div>
-                    <div class='col-xs-12 text-center' ng-if='isValidInput===true && offerOnTwyst===false'>
+                    <div class='col-xs-12 text-center' ng-if='isValidInput===true && offerOnTwyst===false && offer.event_meta.actual_offer && offer.event_meta.status=="submitted"'>
                     	<a type='button' class='btn btn-lg btn-success' ng-click='processOffer()'>Approve</a>
                     </div>
                     <div class='col-xs-12 text-center' ng-if='isValidInput===false || offerOnTwyst===true'>

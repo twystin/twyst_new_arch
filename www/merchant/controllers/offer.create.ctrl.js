@@ -41,7 +41,7 @@ angular.module('merchantApp')
       $scope.days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
       $scope.offer_types = { 'checkin': 'Checkin Offer', 'offer': 'Offer', 'deal': 'Deal', 'bank_deal': 'Bank Deal' }
       $scope.reward_types = {'buyonegetone': 'Buy One Get One', 'discount': 'Discount', 'flatoff': 'Flat Off', 'free': 'Free', 'happyhours': 'Happy Hours', 'reduced': 'Reduced Price', 'custom': 'Custom', 'unlimited': 'Unlimited', 'onlyhappyhours': 'Only Happy Hours', 'combo': 'Combo', 'buffet': 'Buffet'};
-      $scope.offer_sources = { 'hdfc': 'HDFC Bank', 'sbi': 'State Bank Of India', 'hsbc': 'HSBC Bank', 'citibank': 'Citi Bank', 'axis': 'Axis Bank', 'icici': 'ICICI Bank', 'american_express': 'American Express' };
+      $scope.offer_sources = { 'HDFC': 'HDFC Bank', 'SBI': 'State Bank Of India', 'HSBC': 'HSBC Bank', 'Citi Bank': 'Citi Bank', 'Axis Bank': 'Axis Bank', 'ICICI': 'ICICI Bank', 'American Express': 'American Express' };
       $scope.event_matches = [{name: 'On every', value: 'on every'}, {name: 'After', value: 'after'}, {name: 'On only', value: 'on only'}]
       
       $scope.updateTiming = function(day, list) {
@@ -308,7 +308,7 @@ angular.module('merchantApp')
           }
         } else if (newVal.reward_type == 'onlyhappyhours') {
           if (newVal.title && newVal.conditions) {
-            $scope.offer.actions.reward.header = 'Happy hours';
+            $scope.offer.actions.reward.header = 'Happy Hours';
             $scope.offer.actions.reward.line1 = 'get ' + newVal.title;
             $scope.offer.actions.reward.line2 = 'on ' + newVal.conditions;
           } else {
@@ -400,6 +400,8 @@ angular.module('merchantApp')
         var def = Q.defer();
         if (!$scope.offer.offer_type) {
           def.reject("Offer type must be selected");
+        } else if ($scope.offer.user_sourced && (!$scope.offer.offer_user_source || !/.{24}/i.test($scope.offer.offer_user_source))) {
+          def.reject("Valid offer user ID required for user sourced offer");
         } else {
           def.resolve(true);
         }
