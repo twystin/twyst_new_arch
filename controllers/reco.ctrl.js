@@ -311,6 +311,8 @@ function pick_outlet_fields(params) {
       massaged_item.address = item.contact.location.address;
       massaged_item.locality_1 = item.contact.location.locality_1[0];
       massaged_item.locality_2 = item.contact.location.locality_2[0];
+      massaged_item.lat = item.contact.location.coords.latitude || null;
+      massaged_item.long = item.contact.location.coords.longitude || null;
       massaged_item.distance = item.recco.distance || null;
       massaged_item.open = !item.recco.closed;
       massaged_item.phone = item.contact.phones.mobile[0] && item.contact.phones.mobile[0].num;
@@ -603,17 +605,22 @@ function massage_offers(params) {
 
 function remove_expired_offers(params) {
   var deferred = Q.defer();
-  params.outlets = _.map(params.outlets, function(item) {
-    item.offers = _.compact(_.map(item.offers, function(offer) {
-      if(offer.expiry && (new Date(offer.expiry) <= new Date())) {
-        return false
-      } else {
-        return offer;
-      }
-    }));
+  params.outlets =_.compact(_.map(params.outlets, function(item) {
+   item.offers = _.compact(_.map(item.offers, function(offer) {
+     if(offer.expiry && (new Date(offer.expiry) <= new Date())) {
+       return false
+     } else {
+       return offer;
+     }
+   }));
 
-    return item;
-  });
+   if(item.offers && item.offers.length) {
+     return item;
+   } else {
+     return false;
+   }
+ }));
+  
   deferred.resolve(params);
   return deferred.promise;
 

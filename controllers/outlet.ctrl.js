@@ -827,6 +827,10 @@ module.exports.redeem_user_coupon = function(req, res) {
                 });
                 
                 autoCheckinUser(u, outlet_id).then(function(data) {
+                  console.log(data.outlet.basics.name)
+                  console.log(redeemed_coupon.header)
+                  console.log(redeemed_coupon.line1)
+                  console.log(redeemed_coupon.line2)
                   var redeem_message = 'Your voucher at '+ data.outlet.basics.name+ ' for '+ 
                   redeemed_coupon.header + ', '+ redeemed_coupon.line1+', '+ redeemed_coupon.line2
                   +' has been redeemed by merchant.'
@@ -837,7 +841,15 @@ module.exports.redeem_user_coupon = function(req, res) {
                     deferred.reject(err);
                   });  
                 }, function(err) {
-                  deferred.reject(err);
+                  var redeem_message = 'Your voucher at '+ data.outlet.basics.name+ ' for '+ 
+                  redeemed_coupon.header + ', '+ redeemed_coupon.line1+', '+ redeemed_coupon.line2
+                  +' has been redeemed by merchant.'
+                  NotifHelper.send_notification(data, redeem_message, 'Coupon Redeemed').then(function(){
+                  
+                    HttpHelper.success(res, redeemed_coupon || null, "Coupon redeemed successfully");                  
+                  }, function(err) {
+                    deferred.reject(err);
+                  }); 
                 }); 
                 
                 
