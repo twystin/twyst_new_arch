@@ -837,7 +837,15 @@ module.exports.redeem_user_coupon = function(req, res) {
                     deferred.reject(err);
                   });  
                 }, function(err) {
-                  deferred.reject(err);
+                  var redeem_message = 'Your voucher at '+ data.outlet.basics.name+ ' for '+ 
+                  redeemed_coupon.header + ', '+ redeemed_coupon.line1+', '+ redeemed_coupon.line2
+                  +' has been redeemed by merchant.'
+                  NotifHelper.send_notification(data, redeem_message, 'Coupon Redeemed').then(function(){
+                  
+                    HttpHelper.success(res, redeemed_coupon || null, "Coupon redeemed successfully");                  
+                  }, function(err) {
+                    deferred.reject(err);
+                  }); 
                 }); 
                 
                 
