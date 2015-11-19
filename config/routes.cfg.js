@@ -101,6 +101,14 @@ module.exports = function(app) {
     app.delete('/api/v4/offers/:offer_id', mustBe.authorized('outlet.update', OfferCtrl.delete));
   })();
 
+  (function MenuRoutes() {
+    var MenuCtrl = require('../controllers/menu.ctrl');
+    app.post('/api/v4/menu', MenuCtrl.new);
+    app.get('/api/v4/menu', MenuCtrl.all);
+    app.put('/api/v4/menus/:menu', mustBe.authorized('outlet.update', MenuCtrl.update));
+    app.get('/api/v4/menus/:menu', mustBe.authorized('outlet.view', MenuCtrl.get));    
+  })();
+
   (function ImageRoutes() {
     var ImageCtrl = require('../controllers/image.ctrl');
     app.post('/api/v4/images', ImageCtrl.uploadImage);
