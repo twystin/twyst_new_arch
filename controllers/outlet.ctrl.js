@@ -722,7 +722,7 @@ function retrieve_coupon_info(data) {
   var THREE_HOURS = new Date(Date.now() - 10800000);
 
   User.findOne({
-      coupons: {$elemMatch: {code: data.code, issued_at: { $lte: THREE_HOURS}}}
+      coupons: {$elemMatch: {code: data.code}}
   }).exec(function(err, user) {
     if(err || !user) {
       logger.error(err);

@@ -33,6 +33,7 @@ module.exports.process = function(data) {
         })
         .then(function() {
             data.event_data.event_type = 'checkin';
+            data.event_data.event_meta.event_type = 'panel_checkin';
             deferred.resolve(data);
         })
         .fail(function(err) {
