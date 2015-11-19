@@ -111,6 +111,10 @@ var User = new Schema({
     type: Schema.ObjectId,
     ref: 'Outlet'
   }],
+  orders: [{
+    type: Schema.ObjectId,
+    ref: 'Order'
+  }],
   coupons: [{
     _id: Schema.ObjectId,
     code: {type: String, default: ''},
@@ -163,11 +167,11 @@ var User = new Schema({
       ref: 'Outlet'
     }],
     issued_at: Date
-    }],
-    friends: {
-      type: Schema.ObjectId,
-      ref: 'Friend'
-    },
+  }],
+  friends: {
+    type: Schema.ObjectId,
+    ref: 'Friend'
+  },
   user_meta: {
     calculated_cuisines: [],
     calculated_restaurant_types: [],

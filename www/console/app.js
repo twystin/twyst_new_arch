@@ -97,4 +97,9 @@ angular.module('consoleApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angular
 				templateUrl: 'templates/report_problem/manage.html',
 				controller: 'ReportProblemController'
 			})
+			.state('console.bulk_checkin', {
+				url: '/bulk_checkin',
+				templateUrl: 'templates/bulk_checkin/manage.html',
+				controller: 'BulCheckinController'
+			})
 	});

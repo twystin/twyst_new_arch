@@ -197,7 +197,12 @@ var OutletSchema = new Schema({
       delivery_area: String,
       delivery_estimated_time: String,
       delivery_timings: hours.hours,
-      delivery_conditions: String
+      delivery_conditions: String,
+      delivery_coords: [],
+      min_amt_for_delivery: Number,
+      free_delivery_amt: Number,
+      delivery_charge: Number
+
     },
     home_delivery: {
       type: Boolean
@@ -483,43 +488,68 @@ var OutletSchema = new Schema({
       ref: 'Outlet'
     }]
   }],
-  menu: [{
+  orders: [{
+    type: Schema.ObjectId,
+    ref: 'Order'
+  }],
+  menus: [{
     status: {
       type: String
     },
-    name: {
-      type: String
+    //name: {
+      //type: String
+    //},
+    menu_type: {
+      type: String// Dine-in / Takeaway / Delivery / Weekend / Dinner / All
     },
     last_updated: {
       type: Date
     },
-    menu_description: {
-      type: String
-    },
-    sections: [{
-      section_name: {
-        type: String
+    menu_description: [{
+      menu_catagery: {
+        type: String//Indian / Desserts / Cakes / Chinese / Soup
       },
-      section_description: {
-        type: String
-      },
-      items: [{
-        item_name: {
+      sections: [{
+        section_name: { //veg starters/no veg starters /veg_main course /non veg main course
           type: String
         },
-        item_description: {
+        section_description: {
           type: String
         },
-        item_photo: {
-          type: String
-        },
-        item_tags: [{
-          type: String
-        }],
-        item_cost: {
-          type: String
-        }
-      }]
+        items: [{
+          item_name: {
+            type: String
+          },
+          item_description: {
+            type: String
+          },
+          item_photo: {
+            type: String
+          },
+          item_tags: [{
+            type: String
+          }],
+          item_cost: {     //base price
+            type: String
+          },
+          item_options:[{
+            option: {
+              type: String 
+            },
+            option_cost: {
+              type: Number
+            },
+            add_on: [{
+              add_on_item: {
+                type: String
+              },
+              add_on_item_cost:{
+                type: Number
+              }   
+            }]            
+          }] 
+        }]
+      }]  
     }]
   }]
 });
