@@ -25,13 +25,13 @@ module.exports.new = function(req, res) {
 module.exports.get = function(req, res) {
 	logger.log();
 	var token = req.query.token || null,
-		offer_id = req.params.offer_id;
+		menu_id = req.params.menu_id;
 
 	if(!token) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
 
-	MenuHelper.get_offer(token, offer_id).then(function(data) {
+	MenuHelper.get_offer(token, menu_id).then(function(data) {
 		HttpHelper.success(res, data.data, data.message);
 	}, function(err) {
 		HttpHelper.error(res, err.err, err.message);
@@ -41,15 +41,15 @@ module.exports.get = function(req, res) {
 module.exports.update = function(req, res) {
 	logger.log();
 	var token = req.query.token || null,
-		offer_id = req.params.offer_id;
+		menu_id = req.params.menu_id;
 
 	if(!token) {
 		HttpHelper.error(res, null, 'Not Authenticated');
 	}
-	var updated_offer = {};
-	updated_offer = _.extend(updated_offer, req.body);
+	var updated_menu = {};
+	updated_menu = _.extend(updated_menu, req.body);
 
-	MenuHelper.update_offer(token, updated_offer)
+	MenuHelper.update_menu(token, updated_menu)
 		.then(function(data) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
@@ -60,13 +60,13 @@ module.exports.update = function(req, res) {
 module.exports.delete = function(req, res) {
     logger.log();
     var token = req.query.token || null,
-    offer_id = req.params.offer_id;
+    menu_id = req.params.menu_id;
 
     if(!token) {
         HttpHelper.error(res, null, "Not Authenticated");
     }
 
-    MenuHelper.delete_offer(token, offer_id).then(function(data) {
+    MenuHelper.delete_menu(token, menu_id).then(function(data) {
         HttpHelper.success(res, data.data, data.message);
     }, function(err) {
         HttpHelper.error(res, err.err || true, err.message);
