@@ -239,6 +239,67 @@ angular.module('merchantApp')
 				return deferred.promise;
 			}
 
+			merchantRESTSvc.getAllMenus = function() {
+				var deferred = Q.defer();
+				var token = $cookies.get('token');
+				$http.get('/api/v4/menu?token=' + token).then(
+					function(data) {
+						if(data.data.response) {
+							deferred.resolve(data.data);
+						} else {
+							deferred.reject(data.data);
+						}
+					}, function(error) {
+						deferred.reject(error);
+					});
+				return deferred.promise;
+			}
+
+			merchantRESTSvc.createMenu = function(req_obj) {
+				var deferred = Q.defer();
+				var token = $cookies.get('token');
+				$http.post('/api/v4/menu?token=' + token, req_obj).then(function(data) {
+					if(data.data.response) {
+						deferred.resolve(data.data);
+					} else {
+						deferred.reject(data.data);
+					}
+				}, function(error) {
+					deferred.reject(error);
+				});
+				return deferred.promise;
+			}
+
+			merchantRESTSvc.getMenu = function(menu_id) {
+				var deferred = Q.defer();
+				var token = $cookies.get('token');
+				$http.get('/api/v4/menus/' + menu_id + '?token=' + token).then(function(data) {
+					if (data.data.response) {
+						deferred.resolve(data.data);
+					} else {
+						deferred.reject(data.data);
+					}
+				}, function(error) {
+					deferred.reject(error);
+				})
+				return deferred.promise;
+			}
+
+			merchantRESTSvc.updateMenu = function(req_obj) {
+				var deferred = Q.defer();
+				var token = $cookies.get('token');
+				$http.put('/api/v4/menus/' + req_obj._id + '?token=' + token, req_obj).then(function(data) {
+					if (data.data.response) {
+						deferred.resolve(data.data);
+					} else {
+						deferred.reject(data.data);
+					}
+				}, function(err) {
+					deferred.reject(err);
+				});
+				return deferred.promise;
+			}
+
 			return merchantRESTSvc;
 		}
 	])

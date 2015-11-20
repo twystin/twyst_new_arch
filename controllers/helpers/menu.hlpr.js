@@ -24,20 +24,20 @@ module.exports.create_menu = function(token, new_menu) {
             if (err || !reply) {
                 deferred.reject('Could not find outlets');
             } else {
-                Outlet.find({
-                    _id:  menu.outlet
-                }).exec(function(err, outlet) {
+                Outlet.findById(menu.outlet).exec(function(err, outlet) {
                     if(err || !outlet) {
                         deferred.reject({
                             err: err || true,
                             message: "Couldn't add the menu"
                         })
                     } else {
-                        
+                        outlet.menus = outlet.menus || [];
                         outlet.menus.push(menu);
+                        logger.log(outlet);
                         outlet.save(function(err) {
                             if(err) {
-                                logger.error(err);
+                                console.log(err);
+                                // logger.error(err);
                             }
                         });
                         
