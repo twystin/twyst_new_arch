@@ -1,0 +1,23 @@
+<div class='col-xs-12 col-sm-10 col-sm-offset-1 col-lg-8 col-lg-offset-2' ng-init='getMenus()'>
+	<div class='well well-lg'>
+		<legend ng-if='menus.length !== 0'>Create More Menus</legend>
+		<legend ng-if='menus.length === 0'>Create Your First Menu</legend>
+		<div class='form-group'>
+			<button class='btn btn-primary' ui-sref='merchant.create_menu'>Create Menu</button>
+		</div>
+	</div>
+	<div class='well well-lg'>
+		<legend>Menus</legend>
+		<div class='row' ng-if='menus.length'>
+			<div class='col-md-4' ng-repeat='menu in menus'>
+				<div class='panel panel-primary'>
+					<div class='panel-heading'>{{menu.menu_type}}</div>
+					<div class='panel-footer'>
+						<a class='btn btn-link' ui-sref='merchant.edit_menu({menu_id: menu._id})'>Update</a>
+						<a class='btn btn-link' >Delete</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
