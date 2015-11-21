@@ -54,6 +54,21 @@ angular.module('merchantApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angula
 				templateUrl: 'templates/outlets/edit.html',
 				controller: 'OutletEditController'
 			})
+			.state('merchant.menus', {
+				url: '/menus',
+				templateUrl: 'templates/menus/manage.html',
+				controller: 'MenuManageController'
+			})
+			.state('merchant.create_menu', {
+				url: '/menus/create',
+				templateUrl: 'templates/menus/create.html',
+				controller: 'MenuCreateController'
+			})
+			.state('merchant.edit_menu', {
+				url: '/menus/:menu_id',
+				templateUrl: 'templates/menus/update.html',
+				controller: 'MenuEditController'
+			})
 			.state('merchant.offers', {
 				url: '/offers',
 				templateUrl: 'templates/offers/manage.html',

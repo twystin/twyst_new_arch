@@ -15,7 +15,7 @@ module.exports.new = function(req, res) {
 	}
 
 	new_menu = _.extend(new_menu, req.body);
-	MenuHelper.create_offer(token, new_menu).then(function(data) {
+	MenuHelper.create_menu(token, new_menu).then(function(data) {
 		HttpHelper.success(res, data.data, data.message);
 	}, function(err) {
 		HttpHelper.error(res, err.err, err.message);
@@ -31,7 +31,7 @@ module.exports.get = function(req, res) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
 
-	MenuHelper.get_offer(token, menu_id).then(function(data) {
+	MenuHelper.get_menu(token, menu_id).then(function(data) {
 		HttpHelper.success(res, data.data, data.message);
 	}, function(err) {
 		HttpHelper.error(res, err.err, err.message);
@@ -80,8 +80,8 @@ module.exports.all = function(req, res) {
 	if (!token) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
-
-	MenuHelper.get_all_offers(token).then(function(data) {
+	console.log(100);
+	MenuHelper.get_all_menus(token).then(function(data) {
 		HttpHelper.success(res, data.data, data.message);
 	}, function(err) {
 		HttpHelper.error(res, err.err || null, err.message);

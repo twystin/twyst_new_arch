@@ -18,41 +18,38 @@ module.exports.create_menu = function(token, new_menu) {
     var menu = {};
     menu = _.extend(menu, new_menu);
     menu._id = new ObjectId();
-    var outletIds = _.map(menu.menu_outlets, function(obj) { return ObjectId(obj); });
 
     AuthHelper.get_user(token).then(function(data) {
         Cache.get('outlets', function(err, reply) {
             if (err || !reply) {
                 deferred.reject('Could not find outlets');
             } else {
-                Outlet.find({
-                    _id: {
-                        $in: outletIds
-                    }
-                }).exec(function(err, outlets) {
-                    if(err || !outlets) {
+                Outlet.findById(menu.outlet).exec(function(err, outlet) {
+                    if(err || !outlet) {
                         deferred.reject({
                             err: err || true,
                             message: "Couldn't add the menu"
                         })
                     } else {
-                        _.each(outlets, function(outlet) {
-                            outlet.menus.push(menu);
-                            outlet.save(function(err) {
-                                if(err) {
-                                    logger.error(err);
-                                }
-                            });
-                        });
-                        var outlets = JSON.parse(reply);
-                        _.each(outletIds, function(outletId) {
-                            if(outlets[outletId.toString()]) {
-                                if (!outlets[outletId.toString()].menus) {
-                                    outlets[outletId.toString()].menus = [];
-                                }
-                                outlets[outletId.toString()].menus.push(menu);
+                        outlet.menus = outlet.menus || [];
+                        outlet.menus.push(menu);
+                        logger.log(outlet);
+                        outlet.save(function(err) {
+                            if(err) {
+                                console.log(err);
+                                // logger.error(err);
                             }
                         });
+                        
+                        var outlets = JSON.parse(reply);
+                        
+                        if(outlets[menu.outlet.toString()]) {
+                            if (!outlets[menu.outlet.toString()].menus) {
+                                outlets[menu.outlet.toString()].menus = [];
+                            }
+                            outlets[menu.outlet.toString()].menus.push(menu);
+                        }
+                        
                         Cache.set('outlets', JSON.stringify(outlets), function(err) {
                             if(err) {
                                 logger.error("Error setting outlets ", err);
