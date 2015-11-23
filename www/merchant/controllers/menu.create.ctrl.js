@@ -1,7 +1,7 @@
-angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'merchantRESTSvc', 'toastr', 'WizardHandler',
-	function($scope, merchantRESTSvc, toastr, WizardHandler) {
+angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'merchantRESTSvc', 'toastr', 'WizardHandler', '$timeout', '$state',
+	function($scope, merchantRESTSvc, toastr, WizardHandler, $timeout, $state) {
 		$scope.menu = {
-			status: 'draft',
+			status: 'active',
 			menu_description: []
 		};
 
@@ -136,8 +136,19 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 		$scope.createMenu = function() {
 			merchantRESTSvc.createMenu($scope.menu).then(function(res) {
 				console.log(res);
+				toastr.success("Menu created successfully");
+				$timeout(function() {
+					$state.go('merchant.menus', {}, {
+						reload: true
+					});
+				}, 800);
 			}, function(error) {
 				console.log(error);
+				if(error.message) {
+					toastr.error(error.message, "Error");
+				} else {
+					toastr.error("Something went wrong", "Error");
+				}
 			});
 		}
 

@@ -177,7 +177,9 @@
     				<fieldset>
     					<legend>Item Options</legend>
     					<div ng-repeat='option in current_item.item_options'>
-    						<h3>Option # {{$index + 1}}</h3>
+    						<h3>Option # {{$index + 1}}
+                                <button type='button' class='btn btn-danger pull-right' ng-click='removeItemOption()'><i class='fa fa-times'></i></button> 
+                            </h3>
 	    					<div class='form-group'>
 	    						<label for='item_option' class='col-md-2 control-label'>Option Name</label>
 	    						<div class='col-md-6'>
@@ -197,7 +199,9 @@
 	    						<label for='addons' class='col-md-2 control-label'>Addons</label>
 	    						<div class='col-md-8'>
 	    							<div class='form-group' ng-repeat='add_on in option.add_on'>
-	    								<h4>Addon # {{$index + 1}}</h4>
+	    								<h4>Addon # {{$index + 1}}
+                                            <button type='button' class='btn btn-danger pull-right' ng-click='removeAddon(option.add_on, $index)'><i class='fa fa-times'></i></button>
+                                        </h4>
 		    							<div class='form-group'>
 		    								<label class='col-md-3 control-label'>Add-on Name</label>
 		    								<div class='col-md-6'>

@@ -300,6 +300,21 @@ angular.module('merchantApp')
 				return deferred.promise;
 			}
 
+			merchantRESTSvc.deleteMenu = function(menu_id) {
+				var deferred = Q.defer();
+				var token = $cookies.get('token');
+				$http.delete('/api/v4/menus/' + menu_id + '?token=' + token).then(function(res) {
+					if(data.data.response) {
+						deferred.resolve(data.data);
+					} else {
+						deferred.reject(data.data);
+					}
+				}, function(err) {
+					deferred.reject(err);
+				})
+				return deferred.promise;
+			}
+
 			return merchantRESTSvc;
 		}
 	])

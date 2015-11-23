@@ -14,5 +14,15 @@ angular.module('merchantApp')
 					}
 				})
 			}
+
+			$scope.deleteMenu = function(menu_id) {
+				if(confirm("Are you sure you want to delete?")) {
+					merchantRESTSvc.deleteMenu(menu_id).then(function(res) {
+						console.log(res);
+					}, function(err) {
+						console.log(err);
+					});
+				}
+			}
 		}
 	])
