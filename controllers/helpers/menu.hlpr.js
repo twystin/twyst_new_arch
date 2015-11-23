@@ -83,7 +83,6 @@ module.exports.get_menu = function(token, menuId) {
         } else {
             outlet = outlet.toJSON();
             var menu = _.filter(outlet.menus, function(menu) {
-                logger.error(menu._id.toString() === menuId);
                 return menu._id.toString() === menuId;
             });
             if(menu.length) {
@@ -116,54 +115,41 @@ module.exports.update_menu = function(token, updated_menu, menu_id) {
                     outlet.menus.splice(i, 1);
                 }
             }
+            outlet.menus.push(updated_menu);
             outlet.save(function(err) {
-                logger.error(err);
+                console.log(err);
             });
             old_outlet = outlet._id.toString();
-            Outlet.findById(updated_menu.outlet).exec(function(err, outlet) {
-                if(err || !outlet) {
-                    deferred.reject({
-                        err: err || true,
-                        message: "Couldn't add the menu"
-                    })
+            
+            Cache.get('outlets', function(err, reply) {
+                if (err || !reply) {
+                    deferred.reject('Could not find outlets');
                 } else {
-                    outlet.menus = outlet.menus || [];
-                    outlet.menus.push(updated_menu);
-                    outlet.save(function(err) {
+                    var outlets = JSON.parse(reply);
+                
+                    if(outlets[old_outlet] && outlets[old_outlet].menus) {
+                        outlets[old_outlet].menus = _.compact(_.map(outlets[old_outlet].menus, function(menu) {
+                            return menu._id.toString() !== updated_menu._id;
+                        }));
+                        outlets[updated_menu.outlet.toString()].menus = outlets[updated_menu.outlet.toString()].menus || [];
+                        outlets[updated_menu.outlet.toString()].menus.push(updated_menu);
+                    } else {
+                        outlets[updated_menu.outlet.toString()].menus = outlets[updated_menu.outlet.toString()].menus || [];
+                        outlets[updated_menu.outlet.toString()].menus.push(updated_menu);
+                    }
+                    Cache.set('outlets', JSON.stringify(outlets), function(err) {
                         if(err) {
-                            logger.error(err);
+                            logger.error("Error setting outlets ", err);
                         }
                     });
-                    Cache.get('outlets', function(err, reply) {
-                        if (err || !reply) {
-                            deferred.reject('Could not find outlets');
-                        } else {
-                            var outlets = JSON.parse(reply);
-                        
-                            if(outlets[old_outlet] && outlets[old_outlet].menus) {
-                                outlets[old_outlet].menus = _.compact(_.map(outlets[old_outlet].menus, function(menu) {
-                                    return menu._id.toString() !== updated_menu._id;
-                                }));
-                                outlets[updated_menu.outlet.toString()].menus = outlets[updated_menu.outlet.toString()].menus || [];
-                                outlets[updated_menu.outlet.toString()].menus.push(updated_menu);
-                            } else {
-                                outlets[updated_menu.outlet.toString()].menus = outlets[updated_menu.outlet.toString()].menus || [];
-                                outlets[updated_menu.outlet.toString()].menus.push(updated_menu);
-                            }
-                            Cache.set('outlets', JSON.stringify(outlets), function(err) {
-                                if(err) {
-                                    logger.error("Error setting outlets ", err);
-                                }
-                            });
-                            
-                            deferred.resolve({
-                                data: updated_menu,
-                                message: 'Successfully added the menu'
-                            });
-                        }
+                    
+                    deferred.resolve({
+                        data: updated_menu,
+                        message: 'Successfully added the menu'
                     });
                 }
-            })
+            });
+                
         }
     })
     return deferred.promise;
