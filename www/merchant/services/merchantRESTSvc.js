@@ -303,7 +303,7 @@ angular.module('merchantApp')
 			merchantRESTSvc.deleteMenu = function(menu_id) {
 				var deferred = Q.defer();
 				var token = $cookies.get('token');
-				$http.delete('/api/v4/menus/' + menu_id + '?token=' + token).then(function(res) {
+				$http.delete('/api/v4/menus/' + menu_id + '?token=' + token).then(function(data) {
 					if(data.data.response) {
 						deferred.resolve(data.data);
 					} else {
@@ -312,6 +312,20 @@ angular.module('merchantApp')
 				}, function(err) {
 					deferred.reject(err);
 				})
+				return deferred.promise;
+			}
+
+			merchantRESTSvc.cloneMenu = function(menu_id, outlet_id) {
+				var deferred = Q.defer();
+				var token = $cookies.get('token');
+				$http.post('/api/v4/menus/clone?token=' + token, {
+					menu: menu_id,
+					outlet: outlet_id
+				}).then(function(res) {
+					deferred.resolve(res);
+				}, function(err) {
+					deferred.reject(err);
+				});
 				return deferred.promise;
 			}
 

@@ -1,6 +1,6 @@
 <div class='col-xs-12 col-sm-10 col-sm-offset-1 col-lg-8 col-lg-offset-2' style='min-height:100vh;padding-bottom:50px;'>
     <wizard on-finish='createMenu()'>
-        <wz-step title='Menu Basics' canexit='validateStep1'>
+        <wz-step title='Menu Basics' canexit='validateBasics'>
             <div class='well well-lg'>
                 <form class='form-horizontal'>
                     <fieldset>
@@ -17,8 +17,13 @@
                                 <input type='text' ng-model='menu.outlet' typeahead='outlet._id as (outlet.basics.name + (outlet.contact.location.locality_1[0]? ", "+outlet.contact.location.locality_1[0]:"") + ", " + outlet.contact.location.locality_2[0]) for outlet in outlets | filter:$viewValue | limitTo: 8' class='form-control'>
                             </div>
                         </div>
-                    	<h4>Menu Description</h4>
+                    	<h4>Menu Categories</h4>
                     	<div class='form-group'>
+                            <div class='col-xs-12' ng-if='!menu.menu_description.length'>
+                                <div class='alert alert-warning'>
+                                    <p class='text-center'>No category defined yet.</p>
+                                </div>
+                            </div>
                     		<div class='col-xs-12'>
                     			<div ng-repeat='description in menu.menu_description'>
                     				<div class='col-md-2 control-label'># {{$index + 1}}</div>
@@ -59,8 +64,13 @@
         				</div>
         				<h3>Sections</h3>
         				<div class='form-group'>
+                            <div class='col-xs-12' ng-if='!menu.menu_description[descIndex].sections.length'>
+                                <div class='alert alert-warning'>
+                                    <p class='text-center'>No section added to this category yet</p>
+                                </div>
+                            </div>
         					<div class='col-xs-12' ng-repeat='section in menu.menu_description[descIndex].sections'>
-        						<div class='col-md-2'># {{$index + 1}}</div>
+        						<div class='col-md-2 control-label'># {{$index + 1}}</div>
         						<div class='input-group col-md-8'>
         							<input type='text' ng-model='section.section_name' typeahead='mSection for mSection in section_names | filter:$viewValue | limitTo: 8' class='form-control'>
         							<span class='input-group-btn'>
