@@ -12,6 +12,10 @@
 			<div class='col-md-4' ng-repeat='menu in menus'>
 				<div class='panel panel-primary'>
 					<div class='panel-heading'>{{menu.menu_type}}</div>
+					<div class="panel-body" style='min-height:100px;'>
+			          <p>{{menu.outlet.name}}</p>
+			          <p>{{menu.outlet.loc1 + (menu.outlet.loc1?', ':'') + menu.outlet.loc2}}</p>
+			        </div>
 					<div class='panel-footer'>
 						<a class='btn btn-link' ui-sref='merchant.edit_menu({menu_id: menu._id})'>Update</a>
 						<a class='btn btn-link' >Delete</a>

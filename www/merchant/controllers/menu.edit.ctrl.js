@@ -1,13 +1,14 @@
-angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merchantRESTSvc', 'toastr', 'WizardHandler', '$stateParams',
-	function($scope, merchantRESTSvc, toastr, WizardHandler, $stateParams) {
+angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merchantRESTSvc', 'toastr', 'WizardHandler', '$stateParams', '$state', '$timeout',
+	function($scope, merchantRESTSvc, toastr, WizardHandler, $stateParams, $state, $timeout) {
 		$scope.menu = {
 			status: 'draft',
 			menu_description: []
 		};
 
 		merchantRESTSvc.getMenu($stateParams.menu_id).then(function(res) {
-			console.log(res);
+			$scope.menu = res.data;
 		}, function(err) {
+			$scope.menu = {};
 			console.log(err);
 		})
 
@@ -70,7 +71,7 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 			console.log(index, $scope.menu.menu_description[$scope.descIndex].sections[$scope.sectionIndex].items[index]);
 			$scope.new_item = false;
 			$scope.itemIndex = index;
-			$scope.current_item = angular.copy($scope.menu.menu_description[$scope.descIndex].sections[$scope.sectionIndex].items[index]);
+			$scope.current_item = _.clone($scope.menu.menu_description[$scope.descIndex].sections[$scope.sectionIndex].items[index]);
 			WizardHandler.wizard().goTo("Manage Item");
 		}
 
@@ -142,8 +143,19 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 		$scope.updateMenu = function() {
 			merchantRESTSvc.updateMenu($scope.menu).then(function(res) {
 				console.log(res);
+				toastr.success("Menu updated successfully");
+				$timeout(function() {
+					$state.go('merchant.menus', {}, {
+						reload: true
+					});
+				}, 800);
 			}, function(error) {
 				console.log(error);
+				if(error.message) {
+					toastr.error(error.message, "Error");
+				} else {
+					toastr.error("Something went wrong", "Error");
+				}	
 			});
 		}
 

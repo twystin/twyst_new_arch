@@ -507,7 +507,7 @@ var OutletSchema = new Schema({
       type: Date
     },
     menu_description: [{
-      menu_catagery: {
+      menu_category: {
         type: String//Indian / Desserts / Cakes / Chinese / Soup
       },
       sections: [{
@@ -531,7 +531,7 @@ var OutletSchema = new Schema({
             type: String
           }],
           item_cost: {     //base price
-            type: String
+            type: Number
           },
           item_options:[{
             option: {
