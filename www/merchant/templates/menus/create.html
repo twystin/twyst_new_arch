@@ -259,7 +259,7 @@
                         <th>{{section.section_name}}</th>
                     </tr>
                     <tr ng-repeat='item in section.items'>
-                        <td>{{item.item_name}}</td>
+                        <td>{{item.item_name}} @ Rs.{{item.item_cost}}</td>
                         <td ng-repeat='option in item.item_options'>{{option.option}} @ Rs.{{option.option_cost}} /- </td>
                     </tr>
                 </table>
