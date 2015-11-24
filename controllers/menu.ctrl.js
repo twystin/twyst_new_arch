@@ -101,7 +101,7 @@ module.exports.clone = function(req, res) {
 	} else if (!outlet_id) {
 		HttpHelper.error(res, null, 'Outlet info required');
 	}
-	MenuHelper.clone_menu(menu_id, outlet_id).then(function(res) {
+	MenuHelper.clone_menu(menu_id, outlet_id).then(function(data) {
 		HttpHelper.success(res, data.data, data.message);
 	}, function(err) {
 		HttpHelper.error(res, err.err || null, err.message);

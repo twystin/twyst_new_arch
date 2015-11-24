@@ -101,57 +101,43 @@ module.exports.update_menu = function(token, updated_menu, menu_id) {
     logger.log();
     var deferred = Q.defer();
     var old_outlet;
-    Outlet.findOne({
-        'menus._id': menu_id
-    }).exec(function(err, outlet) {
-        if(err || !outlet) {
+    Outlet.update({
+        'menus._id': updated_menu._id
+    }, {
+        $set: {
+            'menus.$': updated_menu
+        }
+    }).exec(function(err) {
+        if(err) {
             deferred.reject({
-                err: err || true,
+                err: err || false,
                 message: 'Failed to update menu'
-            })
-        } else {
-            for (var i=0; i<outlet.menus.length; i++) {
-                if(outlet.menus[i]._id.toString() === menu_id) {
-                    outlet.menus.splice(i, 1);
-                }
-            }
-            outlet.menus.push(updated_menu);
-            outlet.save(function(err) {
-                console.log(err);
             });
-            old_outlet = outlet._id.toString();
-            
+        } else {
             Cache.get('outlets', function(err, reply) {
-                if (err || !reply) {
-                    deferred.reject('Could not find outlets');
+                if(err || !reply) {
+                    deferred.reject({
+                        err: err || false,
+                        message: 'Could not find outlets'
+                    });
                 } else {
                     var outlets = JSON.parse(reply);
-                
-                    if(outlets[old_outlet] && outlets[old_outlet].menus) {
-                        outlets[old_outlet].menus = _.compact(_.map(outlets[old_outlet].menus, function(menu) {
-                            return menu._id.toString() !== updated_menu._id;
-                        }));
-                        outlets[updated_menu.outlet.toString()].menus = outlets[updated_menu.outlet.toString()].menus || [];
-                        outlets[updated_menu.outlet.toString()].menus.push(updated_menu);
-                    } else {
-                        outlets[updated_menu.outlet.toString()].menus = outlets[updated_menu.outlet.toString()].menus || [];
-                        outlets[updated_menu.outlet.toString()].menus.push(updated_menu);
+                    if(outlets[updated_menu.outlet] && outlets[updated_menu.outlet].menus) {
+                        _.each(outlets[updated_menu.outlet].menus, function(menu) {
+                            if(menu._id == updated_menu._id) {
+                                menu = _.extend(menu, updated_menu);
+                            }
+                        });
+                        Cache.set('outlets', JSON.stringify(outlets));
                     }
-                    Cache.set('outlets', JSON.stringify(outlets), function(err) {
-                        if(err) {
-                            logger.error("Error setting outlets ", err);
-                        }
-                    });
-                    
                     deferred.resolve({
                         data: updated_menu,
                         message: 'Successfully added the menu'
                     });
                 }
             });
-                
         }
-    })
+    });
     return deferred.promise;
 }
 
@@ -196,6 +182,19 @@ module.exports.delete_menu = function(token, menuId) {
                             callback();
                         }
                     });
+                    Cache.get('outlets', function(err, reply) {
+                        if(err || !reply) {
+                            logger.error(err);
+                        } else {
+                            var outlets = JSON.parse(reply);
+                            if (outlets[outlet._id] && outlets[outlet._id].menus) {
+                                outlets[outlet._id].menus = _.compact(_.each(outlets[outlet._id].menus, function(menu) {
+                                    return menu._id.toString() !== menuId;
+                                }));
+                                Cache.set('outlets', JSON.stringify(outlets));
+                            }
+                        }
+                    })
                 } else {
                     callback();
                 }
@@ -268,7 +267,7 @@ module.exports.get_all_menus = function(token) {
 }
 
 module.exports.clone_menu = function(menu_id, outlet_id) {
-    logger.log();
+    logger.log(menu_id, outlet_id);
     var deferred = Q.defer();
     Outlet.findOne({
         'menus._id': menu_id
@@ -279,6 +278,7 @@ module.exports.clone_menu = function(menu_id, outlet_id) {
                 message: 'Unable to find the menu'
             });
         } else {
+            outlet = outlet.toJSON();
             var menu = _.filter(outlet.menus, function(menu) {
                 return menu._id.toString() === menu_id;
             });
@@ -287,7 +287,7 @@ module.exports.clone_menu = function(menu_id, outlet_id) {
                 menu = _.clone(menu[0]);
                 menu._id = new ObjectId();
                 Outlet.findOneAndUpdate({
-                    _id: ObjectId(outlet_id)
+                    _id: outlet_id
                 }, {
                     $push: {
                         'menus': menu
@@ -304,14 +304,17 @@ module.exports.clone_menu = function(menu_id, outlet_id) {
                                 logger.error(err);
                             } else {
                                 var outlets = JSON.parse(reply);
-                                outlets[outlet_id].menus = outlets[outlet_id].menus || [];
-                                outlets[outlet_id].menus.push(menu);
-                                Cache.set('outlets', JSON.stringify(outlets));
-                                deferred.resolve({
-                                    data: menu,
-                                    message: 'Menu cloned successfully'
-                                });
+                                logger.error(Object.keys(outlets));
+                                if(outlets[outlet_id]) {
+                                    outlets[outlet_id].menus = outlets[outlet_id].menus || [];
+                                    outlets[outlet_id].menus.push(menu);
+                                    Cache.set('outlets', JSON.stringify(outlets));
+                                }
                             }
+                        });
+                        deferred.resolve({
+                            data: {},
+                            message: 'Menu cloned successfully'
                         });
                     }
                 });
