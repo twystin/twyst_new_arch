@@ -260,12 +260,11 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 		}
 
 		$scope.reviewMenu = function() {
+			var deferred = $q.defer();
 			if (!$scope.menu.menu_type) {
-				toastr.error('Menu Type required');
+				deferred.reject('Menu Type required');
 			} else if (!$scope.menu.outlet) {
-				toastr.error('Outlet id required');
-			} else if (!$scope.menu.menu_description || !$scope.menu.menu_description.length) {
-				toastr.error('Atleast one menu category must be added');
+				deferred.reject('Outlet id required');
 			} else {
 				async.each($scope.menu.menu_description, function(description, callback) {
 					if(!description.menu_category) {
@@ -287,30 +286,35 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 					}
 				}, function(err) {
 					if(err) {
-						toastr.error(err, 'ERROR')
+						deferred.reject(err)
 					} else {
-						WizardHandler.wizard().goTo('Review');
+						deferred.resolve(true);
 					}
 				});
 			}
+			return deferred.promise;
 		}
 
 		$scope.createMenu = function() {
-			merchantRESTSvc.createMenu($scope.menu).then(function(res) {
-				console.log(res);
-				toastr.success("Menu created successfully");
-				$timeout(function() {
-					$state.go('merchant.menus', {}, {
-						reload: true
-					});
-				}, 800);
-			}, function(error) {
-				console.log(error);
-				if(error.message) {
-					toastr.error(error.message, "Error");
-				} else {
-					toastr.error("Something went wrong", "Error");
-				}
+			$scope.reviewMenu().then(function() {
+				merchantRESTSvc.createMenu($scope.menu).then(function(res) {
+					console.log(res);
+					toastr.success("Menu created successfully");
+					$timeout(function() {
+						$state.go('merchant.menus', {}, {
+							reload: true
+						});
+					}, 800);
+				}, function(error) {
+					console.log(error);
+					if(error.message) {
+						toastr.error(error.message, "Error");
+					} else {
+						toastr.error("Something went wrong", "Error");
+					}
+				});
+			}, function(err) {
+				toastr.error(err);
 			});
 		}
 
