@@ -1,5 +1,5 @@
-angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'merchantRESTSvc', 'toastr', 'WizardHandler', '$timeout', '$state', '$q',
-	function($scope, merchantRESTSvc, toastr, WizardHandler, $timeout, $state, $q) {
+angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'merchantRESTSvc', 'toastr', 'WizardHandler', '$timeout', '$state', '$q', '$modal',
+	function($scope, merchantRESTSvc, toastr, WizardHandler, $timeout, $state, $q, $modal) {
 		$scope.menu = {
 			status: 'active',
 			menu_description: []
@@ -12,7 +12,24 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 		$scope.section_names = ['Veg Starters', 'Non Veg Starters', 'Veg Main Course', 'Non Veg Main Course'];
 
 		$scope.addDesc = function() {
-			$scope.menu.menu_description.push({sections: []});
+			var modalInstance = $modal.open({
+				animation: true,
+				templateUrl: 'menuCategoryTemplate.html',
+				controller: 'MenuCategoryController',
+				size: 'lg',
+				resolve: {
+					menu_category: {
+						sections: []
+					},
+					is_new: true,
+				}
+			});
+
+			modalInstance.result.then(function(category) {
+				$scope.menu.menu_description.push(category);
+			}, function() {
+				console.log('Modal dismissed at: ', new Date());
+			});
 		}
 
 		merchantRESTSvc.getOutlets().then(function(res) {
@@ -23,11 +40,26 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 		})
 
 		$scope.manageDesc = function(index) {
-			if($scope.menu.menu_description && $scope.menu.menu_description[index] && !$scope.menu.menu_description[index].menu_category) {
-				toastr.error("Menu category name missing for " + (index + 1), "ERROR");
+			if(!$scope.menu.menu_description || !$scope.menu.menu_description[index]) {
+				toastr.error("Menu category out of bounds");
 			} else {
 				$scope.descIndex = index;
-				WizardHandler.wizard().goTo('Manage Desc');
+				var modalInstance = $modal.open({
+					animation: true,
+					templateUrl: 'menuCategoryTemplate.html',
+					controller: 'MenuCategoryController',
+					size: 'lg',
+					resolve: {
+						menu_category: _.clone($scope.menu.menu_description[index] || {}),
+						is_new: false,
+					}
+				});
+
+				modalInstance.result.then(function(category) {
+					$scope.menu.menu_description[$scope.descIndex] = category;
+				}, function() {
+					console.log('Modal dismissed at: ', new Date());
+				});
 			}
 		}
 
@@ -37,20 +69,47 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 			}
 		}
 
-		$scope.addSection = function() {
-			if (!$scope.descIndex && $scope.descIndex !== 0) {
-				toastr.error("Description Index required", "ERROR");
-			} else {
-				$scope.menu.menu_description[$scope.descIndex].sections.push({items: []});
-			}
+		$scope.addSection = function(index) {
+			var modalInstance = $modal.open({
+				animation: true,
+				templateUrl: 'menuSectionTemplate.html',
+				controller: 'MenuSectionController',
+				size: 'lg',
+				resolve: {
+					section: {
+						items: []
+					},
+					is_new: true
+				}
+			});
+
+			modalInstance.result.then(function(section) {
+				$scope.menu.menu_description[index].sections.push(section);
+			}, function() {
+				console.log('Modal dismissed at: ', new Date());
+			})
 		}
 
 		$scope.manageSection = function(index) {
-			if($scope.menu.menu_description[$scope.descIndex] && $scope.menu.menu_description[$scope.descIndex].sections && $scope.menu.menu_description[$scope.descIndex].sections[index] && !$scope.menu.menu_description[$scope.descIndex].sections[index].section_name) {
-				toastr.error("Section name missing for #" + (index + 1) + " in category #" + ($scope.descIndex + 1));
+			if(!category || !category.sections || !category.sections[index]) {
+				toastr.error("Section out of bounds");
 			} else {
-				$scope.sectionIndex = index;
-				WizardHandler.wizard().goTo('Manage Section');
+				var modalInstance = $modal.open({
+					animation: true,
+					templateUrl: 'menuSectionTemplate.html',
+					controller: 'MenuSectionController',
+					size: 'lg',
+					resolve: {
+						section: _.clone(category.sections[index] || {}),
+						is_new: false
+					}
+				});
+
+				modalInstance.result.then(function(section) {
+					category.sections[index] = section;
+				}, function() {
+					console.log('Modal dismissed at: ', new Date());
+				});
 			}
 		}
 
@@ -60,20 +119,46 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 			}
 		}
 
-		$scope.addItem = function() {
-			$scope.new_item = true;
-			$scope.current_item = {
-				item_options: []
-			}
-			WizardHandler.wizard().goTo("Manage Item");
+		$scope.addItem = function(section) {
+			var modalInstance = $modal.open({
+				animation: true,
+				templateUrl: 'menuItemTemplate.html',
+				controller: 'MenuItemController',
+				size: 'lg',
+				resolve: {
+					item: {item_options: []},
+					is_new: true
+				}
+			});
+
+			modalInstance.result.then(function(item) {
+				section.items.push(item);
+			}, function() {
+				console.log('Modal dismissed at: ', new Date());
+			});
 		}
 
 		$scope.editItem = function(index) {
-			console.log(index, $scope.menu.menu_description[$scope.descIndex].sections[$scope.sectionIndex].items[index]);
-			$scope.new_item = false;
-			$scope.itemIndex = index;
-			$scope.current_item = angular.copy($scope.menu.menu_description[$scope.descIndex].sections[$scope.sectionIndex].items[index]);
-			WizardHandler.wizard().goTo("Manage Item");
+			if(!section || !section.items || !section.items[index]) {
+				toastr.error("Item out of bounds");
+			} else {
+				var modalInstance = $modal.open({
+					animation: true,
+					templateUrl: 'menuItemTemplate.html',
+					controller: 'MenuItemController',
+					size: 'lg',
+					resolve: {
+						item: _.clone(section.items[index] || {item_options: []}),
+						is_new: false
+					}
+				});
+
+				modalInstance.result.then(function(item) {
+					section.items[index] = item;
+				}, function() {
+					console.log('Modal dismissed at: ', new Date());
+				});
+			}
 		}
 
 		$scope.deleteItem = function(index) {
@@ -175,12 +260,11 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 		}
 
 		$scope.reviewMenu = function() {
+			var deferred = $q.defer();
 			if (!$scope.menu.menu_type) {
-				toastr.error('Menu Type required');
+				deferred.reject('Menu Type required');
 			} else if (!$scope.menu.outlet) {
-				toastr.error('Outlet id required');
-			} else if (!$scope.menu.menu_description || !$scope.menu.menu_description.length) {
-				toastr.error('Atleast one menu category must be added');
+				deferred.reject('Outlet id required');
 			} else {
 				async.each($scope.menu.menu_description, function(description, callback) {
 					if(!description.menu_category) {
@@ -202,30 +286,35 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 					}
 				}, function(err) {
 					if(err) {
-						toastr.error(err, 'ERROR')
+						deferred.reject(err)
 					} else {
-						WizardHandler.wizard().goTo('Review');
+						deferred.resolve(true);
 					}
 				});
 			}
+			return deferred.promise;
 		}
 
 		$scope.createMenu = function() {
-			merchantRESTSvc.createMenu($scope.menu).then(function(res) {
-				console.log(res);
-				toastr.success("Menu created successfully");
-				$timeout(function() {
-					$state.go('merchant.menus', {}, {
-						reload: true
-					});
-				}, 800);
-			}, function(error) {
-				console.log(error);
-				if(error.message) {
-					toastr.error(error.message, "Error");
-				} else {
-					toastr.error("Something went wrong", "Error");
-				}
+			$scope.reviewMenu().then(function() {
+				merchantRESTSvc.createMenu($scope.menu).then(function(res) {
+					console.log(res);
+					toastr.success("Menu created successfully");
+					$timeout(function() {
+						$state.go('merchant.menus', {}, {
+							reload: true
+						});
+					}, 800);
+				}, function(error) {
+					console.log(error);
+					if(error.message) {
+						toastr.error(error.message, "Error");
+					} else {
+						toastr.error("Something went wrong", "Error");
+					}
+				});
+			}, function(err) {
+				toastr.error(err);
 			});
 		}
 
@@ -272,4 +361,4 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 		}
 
 	}
-])
+]);
