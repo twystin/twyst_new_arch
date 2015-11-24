@@ -1,286 +1,208 @@
 <div class='col-xs-12 col-sm-10 col-sm-offset-1 col-lg-8 col-lg-offset-2' style='min-height:100vh;padding-bottom:50px;'>
-    <wizard on-finish='createMenu()'>
-        <wz-step title='Menu Basics' canexit='validateBasics'>
-            <div class='well well-lg'>
-                <form class='form-horizontal'>
-                    <fieldset>
-                    	<legend>Menu Basics</legend>
-                    	<div class='form-group' ng-class='{"has-error": formFailure && !menu.menu_type}'>
-                    		<label for='menu_type' class='col-md-2 control-label'>Menu Type <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
-                    		<div class='col-md-8'>
-                    			<input type='text' ng-model='menu.menu_type' typeahead='mType for mType in menu_types | filter:$viewValue | limitTo: 8' class='form-control'>
-                    		</div>
-                    	</div>
-                        <div class='form-group'>
-                            <label for='outlet' class='col-md-2 control-label'>Outlet</label>
-                            <div class='col-md-8'>
-                                <input type='text' ng-model='menu.outlet' typeahead='outlet._id as (outlet.basics.name + (outlet.contact.location.locality_1[0]? ", "+outlet.contact.location.locality_1[0]:"") + ", " + outlet.contact.location.locality_2[0]) for outlet in outlets | filter:$viewValue | limitTo: 8' class='form-control'>
+    <div class='well well-lg'>
+        <form class='form-horizontal'>
+            <fieldset>
+                <legend>Menu Basics</legend>
+                <div class='form-group' ng-class='{"has-error": formFailure && !menu.menu_type}'>
+                    <label for='menu_type' class='col-md-2 control-label'>Menu Type <span class='glyphicon glyphicon-asterisk glyphicon-sm'>
+                    </span></label>
+                    <div class='col-md-8'>
+                        <input type='text' ng-model='menu.menu_type' typeahead='mType for mType in menu_types | filter:$viewValue | limitTo: 8' class='form-control'>
+                    </div>
+                </div>
+                <div class='form-group' ng-class='{"has-error": formFailure && !menu.outlet}'>
+                    <label for='outlet' class='col-md-2 control-label'>Outlet</label>
+                    <div class='col-md-8'>
+                        <input type='text' ng-model='menu.outlet' typeahead='outlet._id as outlet.basics.name for outlet in outlets | filter:$viewValue | limitTo: 8' class='form-control'>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+    <div class='well well-lg'>
+        <legend>Menu Categories</legend>
+        <div class='form-group'>
+            <accordion close-others='true'>
+                <accordion-group ng-repeat='description in menu.menu_description' heading='{{description.menu_category}}'>
+                    <accordion-heading>
+                        {{description.menu_category}}
+                        <button class='btn btn-sm btn-link pull-right' ng-click='manageDesc($index)'>Edit</button>
+                    </accordion-heading>
+                    <accordion close-others='true'>
+                        <accordion-group ng-repeat='section in description.sections' heading='{{section.section_name}}'>
+                            <accordion-heading>
+                                {{section.section_name}}
+                                <button class='btn btn-sm btn-link pull-right' ng-click='manageSection(description, $index)'>Edit</button>
+                            </accordion-heading>
+                            <p class='alert alert-info text-justify'>{{section.section_description}}</p>
+                            <accordion close-others='true'>
+                                <accordion-group ng-repeat='item in section.items' heading='{{"Item #" + $index + " " + item.item_name}}'>
+                                    <accordion-heading>
+                                        Item # {{($index + 1) + item.item_name}}
+                                        <button class='btn btn-sm btn-link pull-right' ng-click='editItem(section, $index)'>Edit</button>
+                                    </accordion-heading>
+                                    <div class='col-md-4' ng-repeat='option in item.item_options'>
+                                        <div class='panel panel-primary'>
+                                            <div class='panel-heading'>{{option.option + ": Rs." + option.option_cost}}</div>
+                                            <div class='panel-body'>
+                                                <p ng-repeat='add_on in option.add_on'>{{add_on.add_on_item + ": Rs." + add_on.add_on_item_cost}}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </accordion-group>
+                                <div>&nbsp;</div>
+                                <button class='btn btn-sm btn-primary' ng-click='addItem(section)'><i class='fa fa-plus'></i> Add Item</button>
+                            </accordion>
+                        </accordion-group>
+                        <div>&nbsp;</div>
+                        <button class='btn btn-primary' ng-click='addSection($index)'><i class='fa fa-plus'></i> Add Section</button>
+                    </accordion>
+                </accordion-group>
+                <div>&nbsp;</div>
+                <button class='btn btn-lg btn-primary' ng-click='addDesc()'><i class='fa fa-plus'></i> Add Category</button>
+            </accordion>
+        </div>
+    </div>
+
+    {{menu}}
+    <script type='text/ng-template' id='menuCategoryTemplate.html'>
+        <div class='modal-header'>
+            <legend ng-if='is_new'>Add New Category</legend>
+            <legend ng-if='!is_new'>Update Category</legend>
+        </div>
+        <div class='modal-body'>
+            <div class='form-group'>
+                <div class='col-xs-3 control-label'>Category Name</div>
+                <div class='col-xs-6'>
+                    <input type='text' ng-model='current_category.menu_category' typeahead='mCategory for mCategory in menu_categories | filter:$viewValue | limitTo: 8' class='form-control'>
+                </div>
+            </div>
+            <div class='clearfix'></div>
+            <div class='form-group'>
+                <button type='button' class='btn btn-primary' ng-click='resolveCategory()' ng-if='is_new'><i class='fa fa-plus'></i> Add</button>
+                <button type='button' class='btn btn-primary' ng-click='resolveCategory()' ng-if='!is_new'> Update</button>
+                <button type='button' class='btn btn-warning' ng-click='discardCategory()'>Discard</button>
+            </div>
+        </div>
+    </script>
+    <script type='text/ng-template' id='menuSectionTemplate.html'>
+        <div class='model-header'>
+            <legend ng-if='is_new'>Add New Section</legend>
+            <legend ng-if='!is_new'>Update Section</legend>
+        </div>
+        <div class='modal-body'>
+            <div class='form-group'>
+                <div class='col-xs-3 control-label'>Section Name</div>
+                <div class='col-xs-6'>
+                    <input type='text' ng-model='current_section.section_name' typeahead='mSection for mSection in section_names | filter:$viewValue | limitTo: 8' class='form-control'>
+                </div>
+            </div>
+        </div>
+        <div class='clearfix'></div>
+        <div class='form-group'>
+            <button type='button' class='btn btn-primary' ng-click='resolveSection()' ng-if='is_new'><i class='fa fa-plus'></i> Add</button>
+            <button type='button' class='btn btn-primary' ng-click='resolveSection()' ng-if='!is_new'> Update</button>
+            <button type='button' class='btn btn-warning' ng-click='discardSection()'> Discard</button>
+        </div>
+    </script>
+    <script type='text/ng-template' id='menuItemTemplate.html'>
+        <div class='model-header'>
+            <legend ng-if='is_new'>Add New Item</legend>
+            <legend ng-if='!is_new'>Update Item</legend>
+        </div>
+        <div class='modal-body'>
+            <div class='form-group'>
+                <label class='col-xs-4 control-label'>Item Name</label>
+                <div class='col-xs-6'>
+                    <input type='text' class='form-control' ng-model='current_item.item_name'>
+                </div>
+            </div>
+            <p>&nbsp;</p>
+            <div class='form-group'>
+                <label class='col-xs-4 control-label'>Item Description</label>
+                <div class='col-xs-6'>
+                    <textarea class='form-control' ng-model='current_item.item_description'></textarea>
+                </div>
+            </div>
+            <p>&nbsp;</p>
+            <div class='form-group'>
+                <label class='col-xs-4 control-label'>Item Tags</label>
+                <div class='col-xs-6'>
+                    <input ng-model='current_item.item_tags' ng-list class='form-control'>
+                </div>
+            </div>
+            <p>&nbsp;</p>
+            <div class='form-group'>
+                <label class='col-xs-4 control-label'>Item Cost</label>
+                <div class='col-xs-6'>
+                    <div class='input-group'>
+                        <span class='input-group-addon'>Rs. </span>
+                        <input type='number' class='form-control' ng-model='current_item.item_cost'>
+                    </div>
+                </div>
+            </div>
+            <p>&nbsp;</p>
+            <div class='form-group'>
+                <label class='col-xs-4 control-label'>Item Options</label>
+                <div class='col-xs-12'>
+                    <div class='row' ng-repeat='option in current_item.item_options'>
+                        <div class='col-xs-2 control-label'># {{$index + 1}}
+                            <button type='button' class='btn btn-warning btn-link' ng-click='removeItemOption($index)'><i class='fa fa-times'></i></button>
+                        </div>
+                        <div class='col-xs-8'>
+                            <div class='row'>
+                                <label class='col-xs-4 control-label'>Option Name</label>
+                                <div class='col-xs-8'>
+                                    <input type='text' class='form-control' ng-model='option.option'>
+                                </div>
+                            </div>
+                            <div class='row'>
+                                <label class='col-xs-4 control-label'>Option Cost</label>
+                                <div class='col-xs-8'>
+                                    <div class='input-group'>
+                                        <span class='input-group-addon'>Rs. </span>
+                                        <input type='number' class='form-control' ng-model='option.option_cost'>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class='row'>
+                                <label class='col-xs-4 control-label'>Addons</label>
+                                <div class='col-xs-12' ng-repeat='addon in option.add_on'>
+                                    <div class='row text-justify'>Addon # {{$index + 1}}
+                                        <button type='button' class='btn btn-warning btn-link' ng-click='removeAddon(option, $index)'><i class='fa fa-times'></i></button>
+                                    </div>
+                                    <div class='row'>
+                                        <label class='col-xs-2 control-label'>Addon Name</label>
+                                        <div class='col-xs-8'>
+                                            <input type='text' ng-model='addon.add_on_item' class='form-control'>
+                                        </div>
+                                    </div>
+                                    <div class='row'>
+                                        <label class='col-xs-2 control-label'>Addon Cost</label>
+                                        <div class='col-xs-8'>
+                                            <input type='number'  ng-model='addon.add_on_item_cost' class='form-control'>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class='col-xs-12'>
+                                    <button type='button' class='btn btn-primary' ng-click='addAddon($index)'><i class='fa fa-plus'></i> Add Addon</button>
+                                </div>
+                                <div class='col-xs-12'>&nbsp;</div>
                             </div>
                         </div>
-                    	<h4>Menu Categories</h4>
-                    	<div class='form-group'>
-                            <div class='col-xs-12' ng-if='!menu.menu_description.length'>
-                                <div class='alert alert-warning'>
-                                    <p class='text-center'>No category defined yet.</p>
-                                </div>
-                            </div>
-                    		<div class='col-xs-12'>
-                    			<div ng-repeat='description in menu.menu_description'>
-                    				<div class='col-md-2 control-label'># {{$index + 1}}</div>
-		                    		<div class='input-group col-md-8'>
-		                    			<input type='text' ng-model='description.menu_category' typeahead='mCategory for mCategory in menu_categories | filter:$viewValue | limitTo: 8' class='form-control'>
-		                    			<span class='input-group-btn'>
-		                    				<button class='btn btn-primary' type='button' ng-click='manageDesc($index)'>Manage</button>
-		                    			</span>
-		                    			<span class='input-group-btn'>
-		                    				<button class='btn btn-warning' type='button' ng-click='removeDesc($index)'>Delete</button>
-		                    			</span>
-		                    		</div>
-		                    	</div>
-	                    	</div>
-                    	</div>
-                    	<div class='form-group'>
-                    		<button type='button' class='btn btn-primary' ng-click='addDesc()' ><i class='fa fa-plus'></i> Add</button>
-                    	</div>
-                    </fieldset>
-                </form>
+                    </div>
+                </div>
+                <div class='col-xs-12'>
+                    <button type='button' class='btn btn-primary' ng-click='addItemOption()'><i class='fa fa-plus'></i> Add Option</button>
+                </div>
+                <div class='col-xs-12'>&nbsp;</div>
             </div>
-            <div class='wall wall-lg'>
-            	<span class='button-group' style='display: inline-block !important;'>
-            		<button type='button' class='btn btn-success' ng-click='reviewMenu()'>Finalize</button>
-            	</span>
-            </div>
-        </wz-step>
-        <wz-step title='Manage Desc' canexit='validateDesc'>
-        	<div class='well well-lg'>
-        		<form class='form-horizontal'>
-        			<fieldset>
-        				<legend>Menu Description</legend>
-        				<div class='form-group'>
-        					<label for='menu_category' class='col-md-2 control-label'>Menu Category</label>
-        					<div class='col-md-8'>
-    							<input type='text' ng-model='menu.menu_description[descIndex].menu_category' typeahead='mCategory for mCategory in menu_categories | filter:$viewValue | limitTo: 8' class='form-control'>
-        					</div>
-        				</div>
-        				<h3>Sections</h3>
-        				<div class='form-group'>
-                            <div class='col-xs-12' ng-if='!menu.menu_description[descIndex].sections.length'>
-                                <div class='alert alert-warning'>
-                                    <p class='text-center'>No section added to this category yet</p>
-                                </div>
-                            </div>
-        					<div class='col-xs-12' ng-repeat='section in menu.menu_description[descIndex].sections'>
-        						<div class='col-md-2 control-label'># {{$index + 1}}</div>
-        						<div class='input-group col-md-8'>
-        							<input type='text' ng-model='section.section_name' typeahead='mSection for mSection in section_names | filter:$viewValue | limitTo: 8' class='form-control'>
-        							<span class='input-group-btn'>
-        								<button class='btn btn-primary' type='button' ng-click='manageSection($index)'>Manage</button>
-        							</span>
-        							<span class='input-group-btn'>
-        								<button class='btn btn-warning' type='button' ng-click='removeSection($index)'>Delete</button>
-        							</span>
-        						</div>
-        					</div>
-        				</div>
-        				<div class='form-group'>
-        					<button type='button' class='btn btn-primary' ng-click='addSection()'><i class='fa fa-plus'></i>&nbsp;Add Section</button>
-        				</div>
-        			</fieldset>
-        		</form>
-        	</div>
-        	<div class='well well-lg'>
-        		<span class='button-group' style='display: inline-block !important;'>
-        			<button type='button' class='btn btn-primary' ng-click='backToDesc()'>Back To First Step</button>
-        			<button type='button' class='btn btn-success' ng-click='reviewMenu()'>Finalize</button>
-        		</span>
-        	</div>
-    	</wz-step>
-    	<wz-step title='Manage Section' canexit='validateSection'>
-    		<div class='well well-lg'>
-    			<form class='form-horizontal'>
-    				<fieldset>
-    					<legend>Section Management</legend>
-    					<div class='form-group'>
-    						<label for='section_name' class='col-md-2 control-label'>Section Name</label>
-    						<div class='col-md-8'>
-    							<input type='text' ng-model='menu.menu_description[descIndex].sections[sectionIndex].section_name' typeahead='mSection for mSection in section_names | filter:$viewValue | limitTo: 8' class='form-control'>
-    						</div>
-    					</div>
-    					<div class='form-group'>
-    						<label for='section_desc' class='col-md-2 control-label'>Section Description</label>
-    						<div class='col-md-8'>
-    							<textarea ng-model='menu.menu_description[descIndex].sections[sectionIndex].section_description' class='form-control'></textarea>
-    						</div>
-    					</div>
-    					<div class='form-group'>
-                            <div class='col-xs-2'>Items
-                            </div>
-    						<div class='col-xs-8'>
-                                <div ng-repeat='item in menu.menu_description[descIndex].sections[sectionIndex].items'>
-                                    <div class='col-md-2'># {{$index + 1}}</div>
-        							<div class='input-group col-md-8'>
-        								<input type='text' ng-model='item.item_name' class='form-control'>
-        								<span class='input-group-btn'>
-        									<button class='btn btn-primary' type='button' ng-click='editItem($index)'>Update</button>
-        								</span>
-        								<span class='input-group-btn'>
-        									<button class='btn btn-warning' type='button' ng-click='deleteItem($index)'>Delete</button>
-        								</span>
-        							</div>
-                                </div>
-    						</div>
-    					</div>
-    					<div class='form-group'>
-    						<button type='button' class='btn btn-primary' ng-click='addItem()'><i class='fa fa-plus'></i>&nbsp;Add Item</button>
-    					</div>
-    				</fieldset>
-    			</form>
-    		</div>
-    		<div class='well well-lg'>
-    			<span class='button-group' style='display: inline-block !important;'>
-    				<button type='button' class='btn btn-warning' ng-click='backToDesc()'>Back to First Step</button>
-    				<button type='button' class='btn btn-warning' ng-click='backToSection()'>Back to Sections</button>
-    				<button type='button' class='btn btn-success' ng-click='reviewMenu()'>Finalize</button>
-    			</span>
-    		</div>
-    	</wz-step>
-    	<wz-step title='Manage Item' canexit='validateItem'>
-    		<div class='well well-lg'>
-    			<form class='form-horizontal'>
-    				<fieldset>
-    					<legend>Item Management</legend>
-    					<div class='form-group'>
-    						<label for='item_name' class='col-md-2 control-label'>Item Name</label>
-    						<div class='col-md-8'>
-    							<input type='text' ng-model='current_item.item_name' class='form-control'>
-    						</div>
-    					</div>
-    					<div class='form-group'>
-    						<label for='item_description' class='col-md-2 control-label'>Item Description</label>
-    						<div class='col-md-8'>
-    							<textarea ng-model='current_item.item_description' class='form-control'></textarea>
-    						</div>
-    					</div>
-    					<div class='form-group'>
-    						<label for='item_photo' class='col-md-2 control-label'>Item Photo</label>
-    					</div>
-    					<div class='form-group'>
-    						<label for='item_tags' class='col-md-2 control-label'>Item Tags</label>
-    						<div class='col-md-8'>
-    							<input ng-model='current_item.item_tags' ng-list class='form-control'>
-    						</div>
-    					</div>
-    					<div class='form-group'>
-    						<label for='item_cost' class='col-md-2 control-label'>Item Cost</label>
-    						<div class='col-md-6'>
-    							<div class='input-group'>
-    								<span class='input-group-addon'>Rs.</span>
-    								<input type='number' ng-model='current_item.item_cost' class='form-control'>
-    							</div>
-    						</div>
-    					</div>
-    				</fieldset>
-    			</form>
-    		</div>
-    		<div class='well well-lg'>
-    			<form class='form-horizontal'>
-    				<fieldset>
-    					<legend>Item Options</legend>
-    					<div ng-repeat='option in current_item.item_options'>
-    						<h3>Option # {{$index + 1}}
-                                <button type='button' class='btn btn-danger pull-right' ng-click='removeItemOption()'><i class='fa fa-times'></i></button> 
-                            </h3>
-	    					<div class='form-group'>
-	    						<label for='item_option' class='col-md-2 control-label'>Option Name</label>
-	    						<div class='col-md-6'>
-	    							<input type='text' ng-model='option.option' class='form-control'>
-	    						</div>
-	    					</div>
-	    					<div class='form-group'>
-	    						<label for='option_cost' class='col-md-2 control-label'>Option Cost</label>
-	    						<div class='col-md-6'>
-	    							<div class='input-group'>
-	    								<span class='input-group-addon'>Rs. </span>
-	    								<input type='number' ng-model='option.option_cost' class='form-control'>
-	    							</div>
-	    						</div>
-	    					</div>
-	    					<div class='form-group'>
-	    						<label for='addons' class='col-md-2 control-label'>Addons</label>
-	    						<div class='col-md-8'>
-	    							<div class='form-group' ng-repeat='add_on in option.add_on'>
-	    								<h4>Addon # {{$index + 1}}
-                                            <button type='button' class='btn btn-danger pull-right' ng-click='removeAddon(option.add_on, $index)'><i class='fa fa-times'></i></button>
-                                        </h4>
-		    							<div class='form-group'>
-		    								<label class='col-md-3 control-label'>Add-on Name</label>
-		    								<div class='col-md-6'>
-		    									<input type='text' ng-model='add_on.add_on_item' class='form-control'>
-		    								</div>
-		    							</div>
-		    							<div class='form-group'>
-		    								<label class='col-md-3 control-label'>Add-on Cost</label>
-		    								<div class='col-md-6'>
-		    									<div class='input-group'>
-		    										<span class='input-group-addon'>Rs. </span>
-		    										<input type='text' ng-model='add_on.add_on_item_cost' class='form-control'>
-		    									</div>
-		    								</div>
-		    							</div>
-		    						</div>
-		    						<div class='form-group'>
-			    						<button type='button' class='btn btn-sm btn-primary' ng-click='addAddon($index)'><i class='fa fa-plus'></i> Add Addon</button>
-			    					</div>
-	    						</div>
-	    					</div>
-	    					
-	    				</div>
-	    				<div class='form-group'>
-	    					<button type='button' class='btn btn-primary' ng-click='addItemOption()'><i class='fa fa-plus'></i> Add Option</button>
-	    				</div>
-
-    				</fieldset>
-    			</form>
-    		</div>
-    		<div class='well well-lg'>
-				<div class='btn-group' style='display: inline-block !important;'>
-					<button type='button' class='btn btn-success' ng-click='addNewItem()' ng-if='new_item'>Add Item & Continue</button>
-					<button type='button' class='btn btn-success' ng-click='updateItem()' ng-if='!new_item'>Update Item & Continue</button>
-					<button type='button' class='btn btn-default' ng-click='addAnotherItem()'>Add Another Item</button>
-					<button type='button' class='btn btn-warning' ng-click='cancelItem()'>Discard Changes</button>
-				</div>
-    		</div>
-    	</wz-step>
-    	<wz-step title='Review'>
-    		<div class='well well-lg table-responsive' ng-repeat='desc in menu.menu_description'>
-    			<legend>{{desc.menu_category}}</legend>
-                <table class='table' ng-repeat='section in desc.sections'>
-                    <tr>
-                        <th>{{section.section_name}}</th>
-                    </tr>
-                    <tr ng-repeat='item in section.items'>
-                        <td>{{item.item_name}} @ Rs.{{item.item_cost}}</td>
-                        <td ng-repeat='option in item.item_options'>{{option.option}} @ Rs.{{option.option_cost}} /- </td>
-                    </tr>
-                </table>
-    			<!-- <div class='form-group' ng-repeat='section in desc.sections'>
-    				<label for='section_name' class='col-md-2 control-label'>{{section.section_name}}</label>
-    				<div class='col-xs-12'>
-    					<accordion close-others='true'>
-    						<accordion-group ng-repeat='item in section.items' heading='{{item.item_name}}'>
-    							{{item.item_description}}<br />Rs. {{item.item_cost}} /-
-    						</accordion-group>
-    					</accordion>
-    				</div>
-    			</div> -->
-    		</div>
-    		<div class='well well-lg'>
-                <span class='button-group'>
-                    <button type='button' class='btn btn-warning' ng-click='backToDesc()'>Back to First Step</button>
-    			    <button type='button' class='btn btn-primary' ng-click='createMenu()'>Create</button>
-                </span>
-    		</div>
-    	</wz-step>
-    </wizard>
-    {{menu}}
+        </div>
+        <div class='clearfix'></div>
+        <div class='form-group'>
+            <button type='button' class='btn btn-primary' ng-click='resolveItem()' ng-if='is_new'><i class='fa fa-plus'></i> Add</button>
+            <button type='button' class='btn btn-primary' ng-click='resolveItem()' ng-if='!is_new'> Update</button>
+            <button type='button' class='btn btn-warning' ng-click='discardItem()'> Discard</button>
+        </div>
+    </script>
 </div>
