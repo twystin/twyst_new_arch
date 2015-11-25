@@ -18,29 +18,26 @@
                 </div>
             </fieldset>
         </form>
-    </div>
-    <div class='well well-lg'>
-        <legend>Menu Categories</legend>
+        <h3>Menu Categories</h3>
         <div class='form-group'>
             <accordion close-others='true'>
                 <accordion-group ng-repeat='description in menu.menu_description' heading='{{description.menu_category}}'>
                     <accordion-heading>
                         {{description.menu_category}}
-                        <button class='btn btn-sm btn-link pull-right' ng-click='manageDesc($index)'>Edit</button>
+                       
                     </accordion-heading>
                     <accordion close-others='true'>
                         <accordion-group ng-repeat='section in description.sections' heading='{{section.section_name}}'>
                             <accordion-heading>
                                 {{section.section_name}}
-                                <button class='btn btn-sm btn-link pull-right' ng-click='manageSection(description, $index)'>Edit</button>
+                                
                             </accordion-heading>
                             <p class='alert alert-info text-justify'>{{section.section_description}}</p>
                             <accordion close-others='true'>
                                 <accordion-group ng-repeat='item in section.items' heading='{{"Item #" + $index + " " + item.item_name}}'>
                                     <accordion-heading>
-                                        Item # {{($index + 1) + item.item_name}}
-                                        <button class='btn btn-sm btn-link pull-right' ng-click='editItem(section, $index)'>Edit</button>
-                                    </accordion-heading>
+                                        # {{($index + 1) + item.item_name + (item.item_cost?'Rs. ' + item.item_cost: '')}}
+                                       
                                     <div class='col-md-4' ng-repeat='option in item.item_options'>
                                         <div class='panel panel-primary'>
                                             <div class='panel-heading'>{{option.option + ": Rs." + option.option_cost}}</div>
@@ -51,30 +48,22 @@
                                     </div>
                                 </accordion-group>
                                 <div>&nbsp;</div>
-                                <button class='btn btn-sm btn-primary' ng-click='addItem(section)'><i class='fa fa-plus'></i> Add Item</button>
+                                
                             </accordion>
                         </accordion-group>
                         <div>&nbsp;</div>
-                        <button class='btn btn-primary' ng-click='addSection($index)'><i class='fa fa-plus'></i> Add Section</button>
+                        
                     </accordion>
                 </accordion-group>
                 <div>&nbsp;</div>
-                <button class='btn btn-lg btn-primary' ng-click='addDesc()'><i class='fa fa-plus'></i> Add Category</button>
+                
             </accordion>
         </div>
-    </div>
-    <div class='well well-lg'>
-        <span class='button-group'>
-            <button type='button' class='btn btn-primary' ng-click='updateMenu()'>Update Menu</button>
-        </span>
     </div>
 
     {{menu}}
     <script type='text/ng-template' id='menuCategoryTemplate.html'>
-        <div class='modal-header'>
-            <legend ng-if='is_new'>Add New Category</legend>
-            <legend ng-if='!is_new'>Update Category</legend>
-        </div>
+        
         <div class='modal-body'>
             <div class='form-group'>
                 <div class='col-xs-3 control-label'>Category Name</div>
@@ -83,18 +72,10 @@
                 </div>
             </div>
             <div class='clearfix'></div>
-            <div class='form-group'>
-                <button type='button' class='btn btn-primary' ng-click='resolveCategory()' ng-if='is_new'><i class='fa fa-plus'></i> Add</button>
-                <button type='button' class='btn btn-primary' ng-click='resolveCategory()' ng-if='!is_new'> Update</button>
-                <button type='button' class='btn btn-warning' ng-click='discardCategory()'>Discard</button>
-            </div>
         </div>
     </script>
     <script type='text/ng-template' id='menuSectionTemplate.html'>
-        <div class='model-header'>
-            <legend ng-if='is_new'>Add New Section</legend>
-            <legend ng-if='!is_new'>Update Section</legend>
-        </div>
+        
         <div class='modal-body'>
             <div class='form-group'>
                 <div class='col-xs-3 control-label'>Section Name</div>
@@ -104,17 +85,10 @@
             </div>
         </div>
         <div class='clearfix'></div>
-        <div class='form-group'>
-            <button type='button' class='btn btn-primary' ng-click='resolveSection()' ng-if='is_new'><i class='fa fa-plus'></i> Add</button>
-            <button type='button' class='btn btn-primary' ng-click='resolveSection()' ng-if='!is_new'> Update</button>
-            <button type='button' class='btn btn-warning' ng-click='discardSection()'> Discard</button>
-        </div>
+         
     </script>
     <script type='text/ng-template' id='menuItemTemplate.html'>
-        <div class='model-header'>
-            <legend ng-if='is_new'>Add New Item</legend>
-            <legend ng-if='!is_new'>Update Item</legend>
-        </div>
+        
         <div class='modal-body'>
             <div class='form-group'>
                 <label class='col-xs-4 control-label'>Item Name</label>
@@ -204,10 +178,5 @@
             </div>
         </div>
         <div class='clearfix'></div>
-        <div class='form-group'>
-            <button type='button' class='btn btn-primary' ng-click='resolveItem()' ng-if='is_new'><i class='fa fa-plus'></i> Add</button>
-            <button type='button' class='btn btn-primary' ng-click='resolveItem()' ng-if='!is_new'> Update</button>
-            <button type='button' class='btn btn-warning' ng-clikc='discardItem()'> Discard</button>
-        </div>
     </script>
 </div>
