@@ -18,10 +18,14 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 				controller: 'MenuCategoryController',
 				size: 'lg',
 				resolve: {
-					menu_category: {
-						sections: []
+					menu_category: function() {
+						return {
+							sections: [{section_name: 'Default', items: []}]
+						};
 					},
-					is_new: true,
+					is_new: function() {
+						return true
+					}
 				}
 			});
 
@@ -50,8 +54,12 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 					controller: 'MenuCategoryController',
 					size: 'lg',
 					resolve: {
-						menu_category: _.clone($scope.menu.menu_description[index] || {}),
-						is_new: false,
+						menu_category: function() {
+							return _.clone($scope.menu.menu_description[index] || {});
+						},
+						is_new: function() {
+							return false;
+						}
 					}
 				});
 
@@ -76,10 +84,14 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 				controller: 'MenuSectionController',
 				size: 'lg',
 				resolve: {
-					section: {
-						items: []
+					section: function() {
+						return {
+							items: []
+						};
 					},
-					is_new: true
+					is_new: function() {
+						return true
+					}
 				}
 			});
 
@@ -100,8 +112,12 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 					controller: 'MenuSectionController',
 					size: 'lg',
 					resolve: {
-						section: _.clone(category.sections[index] || {}),
-						is_new: false
+						section: function() {
+							return _.clone(category.sections[index] || {});
+						},
+						is_new: function() {
+							return false;
+						}
 					}
 				});
 
@@ -113,9 +129,13 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 			}
 		}
 
-		$scope.removeSection = function(index) {
+		$scope.removeSection = function(desc, index) {
 			if(confirm('Are you sure?')) {
-				$scope.menu.menu_description[$scope.descIndex].sections.splice(index, 1);
+				if(desc && desc.sections && desc.sections[index]) {
+					desc.sections.splice(index, 1);
+				} else {
+					toastr.error('Section out of bounds');
+				}
 			}
 		}
 
@@ -126,8 +146,12 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 				controller: 'MenuItemController',
 				size: 'lg',
 				resolve: {
-					item: {item_options: []},
-					is_new: true
+					item: function() {
+						return {item_options: []};
+					},
+					is_new: function() {
+						return true;
+					}
 				}
 			});
 
@@ -148,8 +172,12 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 					controller: 'MenuItemController',
 					size: 'lg',
 					resolve: {
-						item: _.clone(section.items[index] || {item_options: []}),
-						is_new: false
+						item: function() {
+							return _.clone(section.items[index] || {item_options: []})
+						},
+						is_new: function() {
+							return false
+						}
 					}
 				});
 
@@ -161,9 +189,13 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 			}
 		}
 
-		$scope.deleteItem = function(index) {
+		$scope.deleteItem = function(section, index) {
 			if(confirm("Are you sure?")) {
-				$scope.menu.menu_description[$scope.descIndex].sections[$scope.sectionIndex].items.splice(index, 1);
+				if(section && section.items && section.items[index]) {
+					section.items.splice(index, 1);
+				} else {
+					toastr.error("Iten out of bounds");
+				}
 			}
 		}
 
