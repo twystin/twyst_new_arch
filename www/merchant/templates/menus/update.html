@@ -29,7 +29,7 @@
                         {{description.menu_category}}
                         <button class='btn btn-sm btn-link pull-right' ng-click='removeDesc($index)' ng-if='menu.menu_description.length > 1'>Delete</button>
                         <button class='btn btn-sm btn-link pull-right' ng-click='manageDesc($index)'>Edit</button>
-                        <button class='btn btn-sm btn-link pull-right' ng-click='addSection($index)'>Add</button>
+                        
                     </accordion-heading>
                     <accordion close-others='true'>
                         <accordion-group ng-repeat='section in description.sections' heading='{{section.section_name}}'>
@@ -37,7 +37,7 @@
                                 {{section.section_name}}
                                 <button class='btn btn-sm btn-link pull-right' ng-click='removeSection(description, $index)' ng-if='description.sections.length > 1'>Delete</button>
                                 <button class='btn btn-sm btn-link pull-right' ng-click='manageSection(description, $index)'>Edit</button>
-                                <button class='btn btn-sm btn-link pull-right' ng-click='addItem(section)'>Add</button>
+                                
                             </accordion-heading>
                             <p class='alert alert-info text-justify' ng-if='section.section_description'>{{section.section_description}}</p>
                             <accordion close-others='true'>
