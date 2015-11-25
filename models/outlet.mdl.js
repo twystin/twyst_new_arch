@@ -202,8 +202,11 @@ var OutletSchema = new Schema({
       delivery_coords: [],
       min_amt_for_delivery: Number,
       free_delivery_amt: Number,
-      delivery_charge: Number
-
+      delivery_charge: Number,
+      order_accepts_till: {
+        hr: {type: Number},
+        min: {type: Number}
+      }
     },
     home_delivery: {
       type: Boolean
@@ -449,6 +452,7 @@ var OutletSchema = new Schema({
         _id: {
           type: Schema.Types.ObjectId
         },
+        reward_type: {type: String},
         reward_meta: {}, // the structured rewards
         reward_hours: hours.hours,
         applicability: {},
@@ -487,7 +491,48 @@ var OutletSchema = new Schema({
     offer_outlets: [{
       type: Schema.Types.ObjectId,
       ref: 'Outlet'
-    }]
+    }],
+    offer_items: {
+      all: {type: Boolean},
+      sections: [{
+        section_name: { //veg starters/no veg starters /veg_main course /non veg main course
+          type: String
+        },
+        section_description: {
+          type: String
+        },
+        items: [{
+          item_name: {
+            type: String
+          },
+          item_description: {
+            type: String
+          },
+          item_tags: [{
+            type: String
+          }],
+          item_cost: {     //base price
+            type: String
+          },
+          item_options:[{
+            option: {
+              type: String 
+            },
+            option_cost: {
+              type: Number
+            },
+            add_on: [{
+              add_on_item: {
+                type: String
+              },
+              add_on_item_cost:{
+                type: Number
+              }   
+            }]            
+          }] 
+        }]
+      }],  
+    }
   }],
   orders: [{
     type: Schema.ObjectId,
