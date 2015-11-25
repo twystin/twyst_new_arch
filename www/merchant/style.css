@@ -58,3 +58,7 @@ imagereader.background img.img-polaroid {
 }
 
 .glyphicon-sm {font-size: 0.67em;}
+
+.collapsing {
+    transition: height 0.6s;
+}

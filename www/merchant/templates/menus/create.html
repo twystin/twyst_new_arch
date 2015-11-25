@@ -18,9 +18,7 @@
                 </div>
             </fieldset>
         </form>
-    </div>
-    <div class='well well-lg'>
-        <legend>Menu Categories</legend>
+        <h3>Menu Categories</h3>
         <div class='form-group'>
             <accordion close-others='true'>
                 <accordion-group ng-repeat='description in menu.menu_description' heading='{{description.menu_category}}'>
@@ -38,7 +36,7 @@
                             <accordion close-others='true'>
                                 <accordion-group ng-repeat='item in section.items' heading='{{"Item #" + $index + " " + item.item_name}}'>
                                     <accordion-heading>
-                                        Item # {{($index + 1) + item.item_name}}
+                                        # {{($index + 1) + item.item_name + (item.item_cost?'Rs. ' + item.item_cost: '')}}
                                         <button class='btn btn-sm btn-link pull-right' ng-click='editItem(section, $index)'>Edit</button>
                                     </accordion-heading>
                                     <div class='col-md-4' ng-repeat='option in item.item_options'>
