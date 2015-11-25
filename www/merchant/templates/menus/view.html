@@ -36,8 +36,11 @@
                             <accordion close-others='true'>
                                 <accordion-group ng-repeat='item in section.items' heading='{{"Item #" + $index + " " + item.item_name}}'>
                                     <accordion-heading>
-                                        # {{($index + 1) + item.item_name + (item.item_cost?'Rs. ' + item.item_cost: '')}}
-                                       
+                                        # {{($index + 1) + " " + item.item_name + (item.item_cost?' Rs. ' + item.item_cost: '')}}
+                                    </accordion-heading>
+                                    <div class='alert alert-warning' ng-if='item.item_options.length === 0'>
+                                        No options defined.
+                                    </div>
                                     <div class='col-md-4' ng-repeat='option in item.item_options'>
                                         <div class='panel panel-primary'>
                                             <div class='panel-heading'>{{option.option + ": Rs." + option.option_cost}}</div>
