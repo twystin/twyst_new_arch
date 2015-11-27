@@ -452,14 +452,12 @@ var OutletSchema = new Schema({
         _id: {
           type: Schema.Types.ObjectId
         },
-        reward_type: {type: String},
         reward_meta: {}, // the structured rewards
         reward_hours: hours.hours,
         applicability: {},
         valid_days: {
           type: Number
-        },
-        // New fields
+        },        // New fields
         header: {
           type: String
         },
@@ -495,39 +493,12 @@ var OutletSchema = new Schema({
     offer_items: {
       all: {type: Boolean},
       sections: [{
-        section_name: { //veg starters/no veg starters /veg_main course /non veg main course
-          type: String
-        },
-        section_description: {
-          type: String
-        },
         items: [{
-          item_name: {
-            type: String
-          },
-          item_description: {
-            type: String
-          },
-          item_tags: [{
-            type: String
-          }],
-          item_cost: {     //base price
-            type: String
-          },
+          
           item_options:[{
-            option: {
-              type: String 
-            },
-            option_cost: {
-              type: Number
-            },
+            
             add_on: [{
-              add_on_item: {
-                type: String
-              },
-              add_on_item_cost:{
-                type: Number
-              }   
+                 
             }]            
           }] 
         }]
@@ -555,11 +526,11 @@ var OutletSchema = new Schema({
       menu_category: {
         type: String//Indian / Desserts / Cakes / Chinese / Soup
       },
-      sections: [{
-        section_name: { //veg starters/no veg starters /veg_main course /non veg main course
+      sub_category: [{
+        sub_category_name: { //veg starters/no veg starters /veg_main course /non veg main course
           type: String
         },
-        section_description: {
+        sub_category_description: {
           type: String
         },
         items: [{
@@ -579,12 +550,23 @@ var OutletSchema = new Schema({
             type: Number
           },
           item_options:[{
-            option: {
+            option_name: {
+              type: String 
+            },
+            option_value: {
               type: String 
             },
             option_cost: {
               type: Number
             },
+            sub_option_set: [{
+              sub_option_name: {
+                type: String
+              },
+              sub_option_cost:{
+                type: Number
+              }   
+            }],
             add_on: [{
               add_on_item: {
                 type: String
