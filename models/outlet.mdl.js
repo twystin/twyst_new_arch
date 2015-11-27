@@ -451,13 +451,14 @@ var OutletSchema = new Schema({
       reward: {
         _id: {
           type: Schema.Types.ObjectId
-        },
+        }, 
         reward_meta: {}, // the structured rewards
         reward_hours: hours.hours,
         applicability: {},
         valid_days: {
           type: Number
-        },        // New fields
+        },
+        // New fields
         header: {
           type: String
         },
@@ -492,17 +493,12 @@ var OutletSchema = new Schema({
     }],
     offer_items: {
       all: {type: Boolean},
-      sections: [{
-        items: [{
-          
-          item_options:[{
-            
-            add_on: [{
-                 
-            }]            
-          }] 
-        }]
-      }],  
+      category_id: Schema.Types.ObjectId,
+      sub_category_id: Schema.Types.ObjectId,
+      item_id: Schema.Types.ObjectId,
+      option_set_id: Schema.Types.ObjectId,
+      option_id: Schema.Types.ObjectId,
+      addon_id: Schema.Types.ObjectId
     }
   }],
   orders: [{
@@ -522,11 +518,11 @@ var OutletSchema = new Schema({
     last_updated: {
       type: Date
     },
-    menu_description: [{
-      menu_category: {
+    menu_categories: [{
+      category_name: {
         type: String//Indian / Desserts / Cakes / Chinese / Soup
       },
-      sub_category: [{
+      sub_categories: [{
         sub_category_name: { //veg starters/no veg starters /veg_main course /non veg main course
           type: String
         },
@@ -546,36 +542,40 @@ var OutletSchema = new Schema({
           item_tags: [{
             type: String
           }],
-          item_cost: {     //base price
+          is_vegetarian: {
+            type: Boolean,
+            default: true
+          },
+          item_cost: {     //base price or lowest option price
             type: Number
           },
-          item_options:[{
-            option_name: {
-              type: String 
+          option_sets: [{
+            option_set_name: {
+              type: String
             },
-            option_value: {
-              type: String 
+            option_set_value: {
+              type: String
             },
-            option_cost: {
-              type: Number
+            option_set_cost: {
+              type: String
             },
-            sub_option_set: [{
-              sub_option_name: {
+            options: [{
+              option_name: {
                 type: String
               },
-              sub_option_cost:{
+              option_cost: {
                 type: Number
-              }   
+              }
             }],
-            add_on: [{
-              add_on_item: {
-                type: String
+            addons: [{
+              addon_name: {
+                type: String,
               },
-              add_on_item_cost:{
-                type: Number
-              }   
-            }]            
-          }] 
+              addon_cost: {
+                type: Number,
+              }
+            }]
+          }]
         }]
       }]  
     }]
