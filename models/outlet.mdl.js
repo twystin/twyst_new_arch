@@ -451,8 +451,7 @@ var OutletSchema = new Schema({
       reward: {
         _id: {
           type: Schema.Types.ObjectId
-        },
-        reward_type: {type: String},
+        }, 
         reward_meta: {}, // the structured rewards
         reward_hours: hours.hours,
         applicability: {},
@@ -494,44 +493,12 @@ var OutletSchema = new Schema({
     }],
     offer_items: {
       all: {type: Boolean},
-      sections: [{
-        section_name: { //veg starters/no veg starters /veg_main course /non veg main course
-          type: String
-        },
-        section_description: {
-          type: String
-        },
-        items: [{
-          item_name: {
-            type: String
-          },
-          item_description: {
-            type: String
-          },
-          item_tags: [{
-            type: String
-          }],
-          item_cost: {     //base price
-            type: String
-          },
-          item_options:[{
-            option: {
-              type: String 
-            },
-            option_cost: {
-              type: Number
-            },
-            add_on: [{
-              add_on_item: {
-                type: String
-              },
-              add_on_item_cost:{
-                type: Number
-              }   
-            }]            
-          }] 
-        }]
-      }],  
+      category_id: Schema.Types.ObjectId,
+      sub_category_id: Schema.Types.ObjectId,
+      item_id: Schema.Types.ObjectId,
+      option_set_id: Schema.Types.ObjectId,
+      option_id: Schema.Types.ObjectId,
+      addon_id: Schema.Types.ObjectId
     }
   }],
   orders: [{
@@ -551,15 +518,15 @@ var OutletSchema = new Schema({
     last_updated: {
       type: Date
     },
-    menu_description: [{
-      menu_category: {
+    menu_categories: [{
+      category_name: {
         type: String//Indian / Desserts / Cakes / Chinese / Soup
       },
-      sections: [{
-        section_name: { //veg starters/no veg starters /veg_main course /non veg main course
+      sub_categories: [{
+        sub_category_name: { //veg starters/no veg starters /veg_main course /non veg main course
           type: String
         },
-        section_description: {
+        sub_category_description: {
           type: String
         },
         items: [{
@@ -575,25 +542,40 @@ var OutletSchema = new Schema({
           item_tags: [{
             type: String
           }],
-          item_cost: {     //base price
+          is_vegetarian: {
+            type: Boolean,
+            default: true
+          },
+          item_cost: {     //base price or lowest option price
             type: Number
           },
-          item_options:[{
-            option: {
-              type: String 
+          option_sets: [{
+            option_set_name: {
+              type: String
             },
-            option_cost: {
-              type: Number
+            option_set_value: {
+              type: String
             },
-            add_on: [{
-              add_on_item: {
+            option_set_cost: {
+              type: String
+            },
+            options: [{
+              option_name: {
                 type: String
               },
-              add_on_item_cost:{
+              option_cost: {
                 type: Number
-              }   
-            }]            
-          }] 
+              }
+            }],
+            addons: [{
+              addon_name: {
+                type: String,
+              },
+              addon_cost: {
+                type: Number,
+              }
+            }]
+          }]
         }]
       }]  
     }]
