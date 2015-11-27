@@ -4,7 +4,7 @@ angular.module('merchantApp')
 
             $scope.cuisines = ["African", "American", "Andhra", "Arabic", "Armenian", "Asian", "Assamese", "Awadhi", "Bangladeshi", "Belgian", "Bengali", "Biryani", "British", "Burmese", "Chettinad", "Chinese", "Continental", "Costal", "Desserts", "European", "Fast Food", "Finger Food", "French", "German", "Goan", "Greek", "Gujarati", "Healthy Food", "Hyderabadi", "Ice creams", "Indian", "Indonesian", "Italian", "Japanese", "Kashmiri", "Konkan", "Malayali", "Korean", "Lebanese", "Lucknowi", "Maharashtrian", "Malaysian", "Mangalorean", "Mediterranean", "Mexican", "Moroccan", "Mughlai", "Naga", "Nepalese", "North Eastern", "North Indian", "Oriya", "Pakistani", "Parsi", "Pizza", "Portuguese", "Punjabi", "Rajasthani", "Russian", "Sri Lankan", "Sindhi", "Singaporean", "South American", "South Indian", "Spanish", "Street Food", "Sushi", "Tex-Mex", "Thai", "Tibetan", "Turkish", "Vietnamese", "Wraps", "Bakery", "Beverages", "Burgers", "Cafe", "Salads", "Sandwiches", "Seafood", "Middle Eastern", "Steaks", "Sizzlers"];
             $scope.days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-            $scope.map = { center: { latitude: 28.466276810692897, longitude: 77.06915080547333 }, zoom: 14 }; $scope.options = { scrollwheel: true };
+            $scope.map = { center: { latitude: 40.1451, longitude: -99.6680 }, zoom: 5 }; $scope.options = { scrollwheel: true };
             $scope.isPaying = $rootScope.isPaying;
             $scope.outlet_types = [{ value:'bakery', name:'Bakery'}, { value:'cafe', name:'Cafe'}, { value:'delivery', name:'Delivery Only'}, { value:'desserts', name:'Desserts'}, { value:'pub_lounge', name:'Pub/Lounge'}, { value:'fast_food', name:'QSR/Fast Food'}, { value:'restaurant', name:'Restaurant'}];
 
@@ -14,9 +14,43 @@ angular.module('merchantApp')
                 $scope.outlet.contact.phones.reg_mobile.push({num: '', num_type: ''});
                 console.log($scope.outlet.contact);
             }
-            $scope.marker = { id: 0, coords: { latitude: 28.466276810692897, longitude: 77.06915080547333 }, options: { draggable: true }, events: { dragend: function(marker, eventName, args) { var lat = marker.getPosition().lat(); var lon = marker.getPosition().lng(); $scope.outlet.contact.location.coords.longitude = lon; $scope.outlet.contact.location.coords.latitude = lat; $scope.outlet.contact.location.map_url = 'https://maps.google.com/maps/?q=' + lat + ',' + lon + '&z=' + $scope.map.zoom; $scope.marker.options = { draggable: true, labelAnchor: "100 0", labelClass: "marker-labels" }; } } };
+            $scope.marker = { id: 0, coords: { latitude: 40.1451, longitude: -99.6680 }, options: { draggable: true }, events: { dragend: function(marker, eventName, args) { var lat = marker.getPosition().lat(); var lon = marker.getPosition().lng(); $scope.outlet.contact.location.coords.longitude = lon; $scope.outlet.contact.location.coords.latitude = lat; $scope.outlet.contact.location.map_url = 'https://maps.google.com/maps/?q=' + lat + ',' + lon + '&z=' + $scope.map.zoom; $scope.marker.options = { draggable: true, labelAnchor: "100 0", labelClass: "marker-labels" }; } } };
 
             $scope.mapEvents = { click: function(binding, event_type, click_obj) { var lat = click_obj[0].latLng.A; var lon = click_obj[0].latLng.F; $scope.$apply(function() { $scope.marker.coords = { latitude: lat, longitude: lon }; $scope.outlet.contact.location.coords = { latitude: lat, longitude: lon }; $scope.outlet.contact.location.map_url = 'https://maps.google.com/maps/?q=' + lat + ',' + lon + '&z=' + $scope.map.zoom; $scope.marker.options = { draggable: true, labelAnchor: "100 0", labelClass: "marker-labels" }; });  } }
+            $scope.options = {scrollwheel: false};
+            $scope.drawingManagerOptions = {
+                drawingMode: google.maps.drawing.OverlayType.MARKER,
+                drawingControl: true,
+                drawingControlOptions: {
+                    position: google.maps.ControlPosition.TOP_CENTER,
+                    drawingModes: [
+                      google.maps.drawing.OverlayType.POLYGON
+                    ]
+                },
+                circleOptions: {
+                    fillColor: '#ffff00',
+                    fillOpacity: 1,
+                    strokeWeight: 5,
+                    clickable: false,
+                    editable: true,
+                    zIndex: 1
+                }
+            };
+            $scope.markersAndCircleFlag = true;
+            $scope.drawingManagerControl = {};
+            $scope.$watch('markersAndCircleFlag', function() {
+                if (!$scope.drawingManagerControl.getDrawingManager) {
+                return;
+                }
+                var controlOptions = angular.copy($scope.drawingManagerOptions);
+                if (!$scope.markersAndCircleFlag) {
+                  controlOptions.drawingControlOptions.drawingModes.shift();
+                  controlOptions.drawingControlOptions.drawingModes.shift();
+                }
+                $scope.drawingManagerControl.getDrawingManager().setOptions(controlOptions);
+                $scope.drawingManagerControl.getDrawingManager().setOptions(controlOptions);
+
+            });
 
             $http.get('/api/v4/locations')
                 .then(function(res) {
