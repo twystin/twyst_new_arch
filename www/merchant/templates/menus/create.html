@@ -24,28 +24,75 @@
         <h3>Menu Categories</h3>
         <div class='form-group'>
             <accordion close-others='true'>
-                <accordion-group ng-repeat='description in menu.menu_description' heading='{{description.menu_category}}'>
+                <accordion-group ng-repeat='category in menu.menu_categories'>
                     <accordion-heading>
-                        {{description.menu_category}}
-                        <button class='btn btn-sm btn-link pull-right' ng-click='removeDesc($index)' ng-if='menu.menu_description.length > 1'>Delete</button>
+                        {{category.category_name}}
+                        <button class='btn btn-sm btn-link pull-right' ng-click='removeCategory($index)' ng-if='menu.menu_categories.length > 1'>Delete</button>
+                        <button class='btn btn-sm btn-link pull-right' ng-click='manageCategory($index)'>Edit</button>
+                    </accordion-heading>
+                    <accordion close-others='true'>
+                        <accordion-group ng-repeat='sub_category in category.sub_categories'>
+                            <accordion-heading>
+                                {{sub_category.sub_category_name}}
+                                <button class='btn btn-sm btn-link pull-right' ng-click='removeSubCategory(category, $index)' ng-if='category.sub_categories.length > 1'>Delete</button>
+                                <button class='btn btn-sm btn-link pull-right' ng-click='manageSubCategory(category, $index)'>Edit</button>
+                            </accordion-heading>
+                            <p class='alsert alert-info text-justify' ng-if='sub_category.sub_category_description'>{{sub_category.sub_category_description}}</p>
+                            <accordion close-others='true'>
+                                <accordion-group ng-repeat='item in sub_category.items'>
+                                    <accordion-heading>
+                                        # {{($index + 1)}} {{item.item_name}} {{item.item_cost?' Rs. ' + item.item_cost:''}}
+                                        <button class='btn btn-sm btl-link pull-right' ng-click='deleteItem(sub_category, $index)' ng-if='sub_category.items.length > 1'>Delete</button>
+                                        <button class='btn btn-sm btn-link pull-right' ng-click='editItem(sub_category, $index)'>Edit</button>
+                                    </accordion-heading>
+                                    <div class='col-md-4' ng-repeat='option_set in item.option_sets'>
+                                        <div class='panel panel-primary'>
+                                            <div class='panel-heading'>{{option_set.option_set_name}}:{{option_set.option_set_value}} Rs. {{option_set.option_set_cost}}</div>
+                                            <div class='panel-body'>
+                                                <label>Options</label>
+                                                <p ng-repeat='option in option_set.options'>{{option.option_name}} Rs. {{option.option_cost}}</p>
+                                                <label>Addons</label>
+                                                <p ng-repeat='addon in option_set.addons'>{{addon.addon_name}} Rs. {{addon.addon_cost}}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </accordion-group>
+                                <div>&nbsp;</div>
+                                <button class='btn btn-sm btn-primary' ng-click='addItem(sub_category)'><i class='fa fa-plus'></i> Add Item</button>
+                            </accoridion>
+                        </accordion-group>
+                        <div>&nbsp;</div>
+                        <button class='btn btn-primary' ng-click='addSubCategory($index)'><i class='fa fa-plus'></i> Add Section</button>
+                    </accordion>
+                </accordion-group>
+                <div>&nbsp;</div>
+                <button class='btn btn-lg btn-primary' ng-click='addMenuCategory()'><i class='fa fa-plus'></i> Add Category</button>
+            </accordion>
+        </div>
+        <!-- <div class='form-group'>
+            <accordion close-others='true'>
+                <accordion-group ng-repeat='category in menu.menu_categories' heading='{{category.menu_category}}'>
+                    <accordion-heading>
+                        {{category.menu_category}}
+                        <button class='btn btn-sm btn-link pull-right' ng-click='removeDesc($index)' ng-if='menu.menu_categories.length > 1'>Delete</button>
                         <button class='btn btn-sm btn-link pull-right' ng-click='manageDesc($index)'>Edit</button>
                         <button class='btn btn-sm btn-link pull-right' ng-click='addSection($index)'>Add</button>
                     </accordion-heading>
                     <accordion close-others='true'>
-                        <accordion-group ng-repeat='section in description.sections' heading='{{section.section_name}}'>
+                        <accordion-group ng-repeat='sub_category in category.sub_categories' heading='{{sub_category.section_name}}'>
                             <accordion-heading>
-                                {{section.section_name}}
-                                <button class='btn btn-sm btn-link pull-right' ng-click='removeSection(description, $index)' ng-if='description.sections.length > 1'>Delete</button>
-                                <button class='btn btn-sm btn-link pull-right' ng-click='manageSection(description, $index)'>Edit</button>
-                                <button class='btn btn-sm btn-link pull-right' ng-click='addItem(section)'>Add</button>
+                                {{sub_category.section_name}}
+                                <button class='btn btn-sm btn-link pull-right' ng-click='removeSection(category, $index)' ng-if='category.sub_categories.length > 1'>Delete</button>
+                                <button class='btn btn-sm btn-link pull-right' ng-click='manageSection(category, $index)'>Edit</button>
+                                <button class='btn btn-sm btn-link pull-right' ng-click='addItem(sub_category)'>Add</button>
                             </accordion-heading>
-                            <p class='alert alert-info text-justify' ng-if='section.section_description'>{{section.section_description}}</p>
+                            <p class='alert alert-info text-justify' ng-if='sub_category.section_description'>{{sub_category.section_description}}</p>
                             <accordion close-others='true'>
-                                <accordion-group ng-repeat='item in section.items' heading='{{"Item #" + $index + " " + item.item_name}}'>
+                                <accordion-group ng-repeat='item in sub_category.items' heading='{{"Item #" + $index + " " + item.item_name}}'>
                                     <accordion-heading>
                                         # {{($index + 1) + " " + item.item_name + (item.item_cost?' Rs. ' + item.item_cost: '')}}
-                                        <button class='btn btn-sm btn-link pull-right' ng-click='deleteItem(section, $index)' ng-if='section.items.length > 1'>Delete</button>
-                                        <button class='btn btn-sm btn-link pull-right' ng-click='editItem(section, $index)'>Edit</button>
+                                        <button class='btn btn-sm btn-link pull-right' ng-click='deleteItem(sub_category, $index)' ng-if='sub_category.items.length > 1'>Delete</button>
+                                        <button class='btn btn-sm btn-link pull-right' ng-click='editItem(sub_category, $index)'>Edit</button>
                                     </accordion-heading>
                                     <div class='col-md-4' ng-repeat='option in item.item_options'>
                                         <div class='panel panel-primary'>
@@ -57,7 +104,7 @@
                                     </div>
                                 </accordion-group>
                                 <div>&nbsp;</div>
-                                <button class='btn btn-sm btn-primary' ng-click='addItem(section)'><i class='fa fa-plus'></i> Add Item</button>
+                                <button class='btn btn-sm btn-primary' ng-click='addItem(sub_category)'><i class='fa fa-plus'></i> Add Item</button>
                             </accordion>
                         </accordion-group>
                         <div>&nbsp;</div>
@@ -67,11 +114,11 @@
                 <div>&nbsp;</div>
                 <button class='btn btn-lg btn-primary' ng-click='addDesc()'><i class='fa fa-plus'></i> Add Category</button>
             </accordion>
-        </div>
+        </div> -->
     </div>
     <div class='well well-lg'>
         <span class='button-group'>
-            <button type='button' class='btn btn-primary' ng-click='createMenu()'><i class='fa fa-plus'></i> Create Menu</button>
+            <button type='button' class='btn btn-primary' ng-click='createMenu()'> Create Menu</button>
         </span>
     </div>
 
@@ -85,7 +132,7 @@
             <div class='form-group'>
                 <div class='col-xs-3 control-label'>Category Name</div>
                 <div class='col-xs-6'>
-                    <input type='text' ng-model='current_category.menu_category' typeahead='mCategory for mCategory in menu_categories | filter:$viewValue | limitTo: 8' class='form-control'>
+                    <input type='text' ng-model='current_category.category_name' typeahead='mCategory for mCategory in menu_categories | filter:$viewValue | limitTo: 8' class='form-control'>
                 </div>
             </div>
             <div class='clearfix'></div>
@@ -96,7 +143,7 @@
             </div>
         </div>
     </script>
-    <script type='text/ng-template' id='menuSectionTemplate.html'>
+    <script type='text/ng-template' id='subCategoryTemplate.html'>
         <div class='model-header'>
             <legend ng-if='is_new'>Add New Section</legend>
             <legend ng-if='!is_new'>Update Section</legend>
@@ -105,7 +152,14 @@
             <div class='form-group'>
                 <div class='col-xs-3 control-label'>Section Name</div>
                 <div class='col-xs-6'>
-                    <input type='text' ng-model='current_section.section_name' typeahead='mSection for mSection in section_names | filter:$viewValue | limitTo: 8' class='form-control'>
+                    <input type='text' ng-model='current_sub_category.sub_category_name' typeahead='mSection for mSection in section_names | filter:$viewValue | limitTo: 8' class='form-control'>
+                </div>
+            </div>
+            <div class='clearfix'></div>
+            <div class='form-group'>
+                <div class='col-xs-3 control-label'>Section Description</div>
+                <div class='col-xs-6'>
+                    <textarea type='text' ng-model='current_sub_category.sub_category_description' class='form-control'></textarea>
                 </div>
             </div>
         </div>
@@ -154,49 +208,92 @@
             </div>
             <p>&nbsp;</p>
             <div class='form-group'>
-                <label class='col-xs-4 control-label'>Item Options</label>
+                <label class='col-xs-4 control-label'>Is Vegetarian</label>
+                <div class='col-xs-6'>
+                    <input bs-switch ng-model='current_item.is_vegetarian' type='checkbox' switch-on-text="YES" switch-off-text="NO">
+                </div>
+            </div>
+            <p>&nbsp;</p>
+            <div class='form-group'>
+                <label class='col-xs-4 control-label'>Option Sets</label>
                 <div class='col-xs-12'>
-                    <div class='row' ng-repeat='option in current_item.item_options'>
+                    <div class='row' ng-repeat='option_set in current_item.option_sets'>
                         <div class='col-xs-2 control-label'># {{$index + 1}}
-                            <button type='button' class='btn btn-warning btn-link' ng-click='removeItemOption($index)'><i class='fa fa-times'></i></button>
+                            <button type='button' class='btn btn-warning btn-link' ng-click='removeOptionSet($index)'><i class='fa fa-times'></i></button>
                         </div>
                         <div class='col-xs-8'>
                             <div class='row'>
-                                <label class='col-xs-4 control-label'>Option Name</label>
+                                <label class='col-xs-4 control-label'>Option Set Name</label>
                                 <div class='col-xs-8'>
-                                    <input type='text' class='form-control' ng-model='option.option'>
+                                    <input type='text' class='form-control' ng-model='option_set.option_set_name'>
                                 </div>
                             </div>
                             <div class='row'>
-                                <label class='col-xs-4 control-label'>Option Cost</label>
+                                <label class='col-xs-4 control-label'>Option Set Value</label>
                                 <div class='col-xs-8'>
-                                    <div class='input-group'>
-                                        <span class='input-group-addon'>Rs. </span>
-                                        <input type='number' class='form-control' ng-model='option.option_cost'>
-                                    </div>
+                                    <input type='text' class='form-control' ng-model='option_set.option_set_value'>
                                 </div>
                             </div>
                             <div class='row'>
-                                <label class='col-xs-4 control-label'>Addons</label>
-                                <div class='col-xs-12' ng-repeat='addon in option.add_on'>
-                                    <div class='row text-justify'>Addon # {{$index + 1}}
-                                        <button type='button' class='btn btn-warning btn-link' ng-click='removeAddon(option, $index)'><i class='fa fa-times'></i></button>
-                                    </div>
+                                <label class='col-xs-4 control-label'>Option Set Cost</label>
+                                <div class='col-xs-8'>
+                                    <input type='number' class='form-control' ng-model='option_set.option_set_cost'>
+                                </div>
+                            </div>
+                            <div class='row'>
+                                <label class='col-xs-4 control-label'>Options</label>
+                                <div class='col-xs-12' ng-repeat='option in option_set.options'>
                                     <div class='row'>
-                                        <label class='col-xs-2 control-label'>Addon Name</label>
-                                        <div class='col-xs-8'>
-                                            <input type='text' ng-model='addon.add_on_item' class='form-control'>
+                                        <div class='col-xs-2 control-label'># {{$index + 1}}
+                                            <button type='button' class='btn btn-warning btn-link' ng-click='removeOption(option_set, $index)'><i class='fa fa-times'></i></button>
                                         </div>
-                                    </div>
-                                    <div class='row'>
-                                        <label class='col-xs-2 control-label'>Addon Cost</label>
                                         <div class='col-xs-8'>
-                                            <input type='number'  ng-model='addon.add_on_item_cost' class='form-control'>
+                                            <div class='row'>
+                                                <label class='col-xs-4 control-label'>Option Name</label>
+                                                <div class='col-xs-8'>
+                                                    <input type='text' class='form-control' ng-model='option.option_name'>
+                                                </div>
+                                            </div>
+                                            <div class='row'>
+                                                <label class='col-xs-4 control-label'>Option Cost</label>
+                                                <div class='col-xs-8'>
+                                                    <input type='text' class='form-control' ng-model='option.option_cost'>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class='col-xs-12'>
-                                    <button type='button' class='btn btn-primary' ng-click='addAddon($index)'><i class='fa fa-plus'></i> Add Addon</button>
+                                    <button type='button' class='btn btn-primary' ng-click='addOption(option_set)'><i class='fa fa-plus'></i> Add Option Set</button>
+                                </div>
+                                <div class='col-xs-12'>&nbsp;</div>
+                            </div>
+                            <div class='row'>
+                                <label class='col-xs-4 control-label'>Addons</label>
+                                <div class='col-xs-12' ng-repeat='addon in option_set.addons'>
+                                    <div class='row'>
+                                        <div class='col-xs-2 control-label'># {{$index + 1}}
+                                            <button type='button' class='btn btn-warning btn-link' ng-click='removeAddon(option_set, $index)'>
+                                            <i class='fa fa-times'></i></button>
+                                        </div>
+                                        <div class='col-xs-8'>
+                                            <div class='row'>
+                                                <label class='col-xs-4 control-label'>Addon Name</label>
+                                                <div class='col-xs-8'>
+                                                    <input type='text' class='form-control' ng-model='addon.addon_name'>
+                                                </div>
+                                            </div>
+                                            <div class='row'>
+                                                <label class='col-xs-4 control-label'>Addon Cost</label>
+                                                <div class='col-xs-8'>
+                                                    <input type='text' class='form-control' ng-model='addon.addon_cost'>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class='col-xs-12'>
+                                    <button type='button' class='btn btn-primary' ng-click='addAddon(option_set)'><i class='fa fa-plus'></i> Add Option Set</button>
                                 </div>
                                 <div class='col-xs-12'>&nbsp;</div>
                             </div>
@@ -204,10 +301,11 @@
                     </div>
                 </div>
                 <div class='col-xs-12'>
-                    <button type='button' class='btn btn-primary' ng-click='addItemOption()'><i class='fa fa-plus'></i> Add Option</button>
+                    <button type='button' class='btn btn-primary' ng-click='addOptionSet()'><i class='fa fa-plus'></i> Add Option Set</button>
                 </div>
                 <div class='col-xs-12'>&nbsp;</div>
             </div>
+            <p>&nbsp;</p>
         </div>
         <div class='clearfix'></div>
         <div class='form-group'>
