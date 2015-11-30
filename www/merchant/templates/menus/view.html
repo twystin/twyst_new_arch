@@ -22,31 +22,34 @@
         <h3>Menu Categories</h3>
         <div class='form-group'>
             <accordion close-others='true'>
-                <accordion-group ng-repeat='description in menu.menu_description' heading='{{description.menu_category}}'>
+                <accordion-group ng-repeat='category in menu.menu_categories' heading='{{category.category_name}}'>
                     <accordion-heading>
-                        {{description.menu_category}}
+                        {{category.category_name}}
                        
                     </accordion-heading>
                     <accordion close-others='true'>
-                        <accordion-group ng-repeat='section in description.sections' heading='{{section.section_name}}'>
+                        <accordion-group ng-repeat='sub_category in category.sub_categories' heading='{{sub_category.sub_category_name}}'>
                             <accordion-heading>
-                                {{section.section_name}}
+                                {{sub_category.sub_category_name}}
                                 
                             </accordion-heading>
-                            <p class='alert alert-info text-justify' ng-if='section.section_description'>{{section.section_description}}</p>
+                            <p class='alert alert-info text-justify' ng-if='sub_category.sub_category_description'>{{sub_category.sub_category_description}}</p>
                             <accordion close-others='true'>
-                                <accordion-group ng-repeat='item in section.items' heading='{{"Item #" + $index + " " + item.item_name}}'>
+                                <accordion-group ng-repeat='item in sub_category.items' heading='{{"Item #" + $index + " " + item.item_name}}'>
                                     <accordion-heading>
                                         # {{($index + 1) + " " + item.item_name + (item.item_cost?' Rs. ' + item.item_cost: '')}}
                                     </accordion-heading>
-                                    <div class='alert alert-warning' ng-if='item.item_options.length === 0'>
+                                    <div class='alert alert-warning' ng-if='item.option_sets.length === 0'>
                                         No options defined.
                                     </div>
-                                    <div class='col-md-4' ng-repeat='option in item.item_options'>
+                                    <div class='col-md-4' ng-repeat='option_set in item.option_sets'>
                                         <div class='panel panel-primary'>
-                                            <div class='panel-heading'>{{option.option + ": Rs." + option.option_cost}}</div>
+                                            <div class='panel-heading'>{{option_set.option_set_name + ": " + option_set.option_set_value + " Rs." + option_set.option_set_cost}}</div>
                                             <div class='panel-body'>
-                                                <p ng-repeat='add_on in option.add_on'>{{add_on.add_on_item + ": Rs." + add_on.add_on_item_cost}}</p>
+                                                <label class='control-label'>Options</label>
+                                                <p ng-repeat='option in option_set.options'>{{option.option_name + ": Rs." + option.option_cost}}</p>
+                                                <label class='control-label'>Addons</label>
+                                                <p ng-repeat='addon in option_set.addons'>{{addon.addon_name + ": Rs." + addon.addon_cost}}</p>
                                             </div>
                                         </div>
                                     </div>

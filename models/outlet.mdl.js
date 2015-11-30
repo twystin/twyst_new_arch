@@ -557,7 +557,7 @@ var OutletSchema = new Schema({
               type: String
             },
             option_set_cost: {
-              type: String
+              type: Number
             },
             is_an_addon: {
               type: Boolean,
