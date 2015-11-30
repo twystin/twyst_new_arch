@@ -1,11 +1,12 @@
-angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merchantRESTSvc', 'toastr', 'WizardHandler', '$stateParams', '$state', '$timeout', '$q', '$modal',
+angular.module('merchantApp').controller('MenuViewController', ['$scope', 'merchantRESTSvc', 'toastr', 'WizardHandler', '$stateParams', '$state', '$timeout', '$q', '$modal',
 	function($scope, merchantRESTSvc, toastr, WizardHandler, $stateParams, $state, $timeout, $q, $modal) {
 		$scope.menu = {
 			status: 'draft',
 			menu_description: []
 		};
-
+		console.log('hee')
 		merchantRESTSvc.getMenu($stateParams.menu_id).then(function(res) {
+			console.log(res.data)
 			$scope.menu = res.data;
 		}, function(err) {
 			$scope.menu = {};
@@ -25,14 +26,10 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 				controller: 'MenuCategoryController',
 				size: 'lg',
 				resolve: {
-					menu_category: function() {
-						return {
-							sections: [{section_name: 'Default', items: []}]
-						};
+					menu_category: {
+						sections: []
 					},
-					is_new: function() {
-						return true;
-					}
+					is_new: true,
 				}
 			});
 
@@ -61,12 +58,8 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 					controller: 'MenuCategoryController',
 					size: 'lg',
 					resolve: {
-						menu_category: function() {
-							return _.clone($scope.menu.menu_description[index] || {});
-						},
-						is_new: function() {
-							return false
-						}
+						menu_category: _.clone($scope.menu.menu_description[index] || {}),
+						is_new: false,
 					}
 				});
 
@@ -87,18 +80,14 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 		$scope.addSection = function(index) {
 			var modalInstance = $modal.open({
 				animation: true,
-				templateUrl: 'subCategoryTemplate.html',
+				templateUrl: 'menuSectionTemplate.html',
 				controller: 'MenuSectionController',
 				size: 'lg',
 				resolve: {
-					section: function() {
-						return {
-							items: []
-						}
+					section: {
+						items: []
 					},
-					is_new: function() {
-						return false;
-					}
+					is_new: true
 				}
 			});
 
@@ -115,16 +104,12 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 			} else {
 				var modalInstance = $modal.open({
 					animation: true,
-					templateUrl: 'subCategoryTemplate.html',
+					templateUrl: 'menuSectionTemplate.html',
 					controller: 'MenuSectionController',
 					size: 'lg',
 					resolve: {
-						section: function() {
-							return _.clone(category.sections[index] || {});
-						},
-						is_new: function() {
-							return false;
-						}
+						section: _.clone(category.sections[index] || {}),
+						is_new: false
 					}
 				});
 
@@ -136,13 +121,9 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 			}
 		}
 
-		$scope.removeSection = function(desc, index) {
+		$scope.removeSection = function(index) {
 			if(confirm('Are you sure?')) {
-				if(desc && desc.sections && desc.sections[index]) {
-					desc.sections.splice(index, 1);
-				} else {
-					toastr.error('Section out of bounds');
-				}
+				$scope.menu.menu_description[$scope.descIndex].sections.splice(index, 1);
 			}
 		}
 
@@ -153,12 +134,8 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 				controller: 'MenuItemController',
 				size: 'lg',
 				resolve: {
-					item: function() {
-						return {item_options: []}
-					},
-					is_new: function() {
-						return true
-					}
+					item: {item_options: []},
+					is_new: true
 				}
 			});
 
@@ -169,8 +146,8 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 			});
 		}
 
-		$scope.editItem = function(sub_category, index) {
-			if(!sub_category || !sub_category.items || !sub_category.items[index]) {
+		$scope.editItem = function(section, index) {
+			if(!section || !section.items || !section.items[index]) {
 				toastr.error("Item out of bounds");
 			} else {
 				var modalInstance = $modal.open({
@@ -179,30 +156,22 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 					controller: 'MenuItemController',
 					size: 'lg',
 					resolve: {
-						item: function() {
-							return _.clone(sub_category.items[index] || {option_sets: []});
-						},
-						is_new: function() {
-							return false;
-						}
+						item: _.clone(section.items[index] || {item_options: []}),
+						is_new: false
 					}
 				});
 
 				modalInstance.result.then(function(item) {
-					sub_category.items[index] = item;
+					section.items[index] = item;
 				}, function() {
 					console.log('Modal dismissed at: ', new Date());
 				});
 			}
 		}
 
-		$scope.deleteItem = function(section, index) {
+		$scope.deleteItem = function(index) {
 			if(confirm("Are you sure?")) {
-				if(section && section.items && section.items[index]) {
-					section.items.splice(index, 1);
-				} else {
-					toastr.error("Iten out of bounds");
-				}
+				$scope.menu.menu_description[$scope.descIndex].sections[$scope.sectionIndex].items.splice(index, 1);
 			}
 		}
 
@@ -268,7 +237,7 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 				} else if (!description.sections || !description.sections.length) {
 					callback('All menu categories must have atleast one section');
 				} else {
-					async.each(description.sections, function(section, callback) {
+					async.each(description.sections, function(section) {
 						if (!section.section_name) {
 							callback('All sections must have a section name');
 						} else if (!section.items || !section.items.length) {
@@ -411,14 +380,14 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 		$modalInstance.dismiss('cancel');
 	}
 	console.log(menu_category, is_new);
-}).controller('MenuSectionController', function($scope, $modalInstance, sub_category, is_new) {
+}).controller('MenuSectionController', function($scope, $modalInstance, section, is_new) {
 	$scope.section_names = ['Veg Starters', 'Non Veg Starters', 'Veg Main Course', 'Non Veg Main Course'];
 
 	$scope.is_new = is_new;
-	$scope.current_sub_category = sub_category;
+	$scope.current_section = section;
 
 	$scope.resolveSection = function() {
-		$modalInstance.close($scope.current_sub_category);
+		$modalInstance.close($scope.current_section);
 	}
 
 	$scope.discardSection = function() {
@@ -427,34 +396,6 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 }).controller('MenuItemController', function($scope, $modalInstance, toastr, item, is_new, $q) {
 	$scope.is_new = is_new;
 	$scope.current_item = item;
-
-	$scope.addOptionSet = function() {
-		$scope.current_item.option_sets.push({options: [], addons: []});
-	}
-
-	$scope.removeOptionSet = function(index) {
-		if (!$scope.current_item || !$scope.current_item.option_sets || !$scope.current_item.option_sets[index]) {
-			toastr.error("Option set out of bounds");
-		} else {
-			$scope.current_item.option_sets.splice(index, 1);
-		}
-	}
-
-	$scope.addOption = function(option_set) {
-		option_set.options.push({});
-	}
-
-	$scope.removeOption = function(option_set, index) {
-		if(!option_set || !option_set.options || !option_set.options[index]) {
-			toastr.error("Option out of bounds");
-		} else {
-			option_set.options.splice(index, 1);
-		}
-	}
-
-	$scope.addAddon = function(option_set) {
-		option_set.addons.push({});
-	}
 
 	$scope.addItemOption = function() {
 		$scope.current_item.item_options.push({add_on: []});
@@ -469,19 +410,19 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 		}
 	}
 
-	// $scope.addAddon = function(index) {
-	// 	$scope.validateItem().then(function() {
-	// 		$scope.current_item.item_options[index].add_on.push({});
-	// 	}, function(err) {
-	// 		toastr.error(err);
-	// 	});
-	// }
+	$scope.addAddon = function(index) {
+		$scope.validateItem().then(function() {
+			$scope.current_item.item_options[index].add_on.push({});
+		}, function(err) {
+			toastr.error(err);
+		});
+	}
 
-	$scope.removeAddon = function(option_set, index) {
-		if(!option_set || !option_set.addons || !option_set.addons[index]) {
+	$scope.removeAddon = function(option, index) {
+		if(!option || !option.add_on || !option.add_on[index]) {
 			toastr.error('Addon out of bounds');
 		} else {
-			option_set.addons.splice(index, 1);
+			option.add_on.splice(index, 1);
 		}
 	}
 
@@ -506,33 +447,21 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 		} else if (!$scope.current_item.item_cost && $scope.current_item.item_options.length === 0) {
 			deferred.reject('Either item cost or atleast one item option mandatory');
 		} else {
-			async.each($scope.current_item.option_sets, function(option_set, callback) {
-				if(!option_set.option_set_name) {
-					callback("All item option sets must have a valid name");
-				} else if (!option_set.option_set_value) {
-					callback("All item option sets must have a valid value")
-				} else if (!option_set.option_set_cost) {
-					callback("All item option sets must have a valid cost");
+			async.each($scope.current_item.item_options, function(item_option, callback) {
+				if(!item_option.option) {
+					callback('All item options must have a valid name');
+				} else if (!item_option.option_cost) {
+					callback('All item options must have a valid cost');
+				} else if (!item_option.addon || !item_option.addon.length) {
+					callback();
 				} else {
-					async.each(option_set.options, function(item_option, callback) {
-						if(!item_option.option_name) {
-							callback('All item options must have a valid name');
-						} else if (!item_option.option_cost) {
-							callback('All item options must have a valid cost');
-						} else if (!item_option.addon || !item_option.addon.length) {
-							callback();
+					async.each(item_option.addon, function(add_on, callback) {
+						if (!add_on.add_on_item) {
+							callback('All addons must have valid name');
+						} else if (!add_on.add_on_item_cost) {
+							callback('All addons must have valid cost');
 						} else {
-							async.each(item_option.addon, function(add_on, callback) {
-								if (!add_on.add_on_item) {
-									callback('All addons must have valid name');
-								} else if (!add_on.add_on_item_cost) {
-									callback('All addons must have valid cost');
-								} else {
-									callback();
-								}
-							}, function(err) {
-								callback(err);
-							});
+							callback();
 						}
 					}, function(err) {
 						callback(err);

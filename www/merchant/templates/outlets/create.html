@@ -52,6 +52,13 @@
                   <ui-gmap-marker coords="marker.coords" options="marker.options" events="marker.events" idkey="marker.id">
                   </ui-gmap-marker>
                 </ui-gmap-google-map>
+                <br/>
+                <br/>
+                <div id="map_canvas">
+    <ui-gmap-google-map center="map.center" zoom="map.zoom" draggable="true" options="options" bounds="map.bounds">
+        <ui-gmap-drawing-manager options="drawingManagerOptions" control="drawingManagerControl"></ui-gmap-drawing-manager>
+    </ui-gmap-google-map>
+</div>
                 <div class='form-group'>
                   <br />
                   <div class='col-md-12'>
@@ -124,7 +131,7 @@
                 <div class='col-xs-12'>
                   <p />
                 </div>
-                <button class='btn btn-default' ng-click='addNumber("mobile")'>Add number</button>
+                <button class='btn btn-default' ng-click='getPolygonCoords()'>Add number</button>
               </div>
             </div>
             <div class='form-group'>

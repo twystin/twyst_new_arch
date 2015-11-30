@@ -20,7 +20,19 @@ var User = new Schema({
   middle_name: {type: String, default: ''},
   last_name: {type: String, default: ''},
   email: {type: String, default: ''},
-  address: {type: String, default: ''},
+  address: [{ 
+    line1: {type: String},
+    line2: {type: String},
+    landmark: {type: String},
+    pin: {type: Number}, 
+    city: {type: String},
+    state: {type: String},
+    coords:{
+      lat: {type: String},
+      long: {type: String}
+    },
+    tag: {type: String}
+  }],
   twyst_bucks: Number, //default 500
   image: {type: String, default: ''},
   push_ids: [{

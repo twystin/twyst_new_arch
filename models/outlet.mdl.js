@@ -202,8 +202,11 @@ var OutletSchema = new Schema({
       delivery_coords: [],
       min_amt_for_delivery: Number,
       free_delivery_amt: Number,
-      delivery_charge: Number
-
+      delivery_charge: Number,
+      order_accepts_till: {
+        hr: {type: Number},
+        min: {type: Number}
+      }
     },
     home_delivery: {
       type: Boolean
@@ -448,7 +451,7 @@ var OutletSchema = new Schema({
       reward: {
         _id: {
           type: Schema.Types.ObjectId
-        },
+        }, 
         reward_meta: {}, // the structured rewards
         reward_hours: hours.hours,
         applicability: {},
@@ -487,7 +490,16 @@ var OutletSchema = new Schema({
     offer_outlets: [{
       type: Schema.Types.ObjectId,
       ref: 'Outlet'
-    }]
+    }],
+    offer_items: {
+      all: {type: Boolean},
+      category_id: Schema.Types.ObjectId,
+      sub_category_id: Schema.Types.ObjectId,
+      item_id: Schema.Types.ObjectId,
+      option_set_id: Schema.Types.ObjectId,
+      option_id: Schema.Types.ObjectId,
+      addon_id: Schema.Types.ObjectId
+    }
   }],
   orders: [{
     type: Schema.ObjectId,
@@ -506,15 +518,15 @@ var OutletSchema = new Schema({
     last_updated: {
       type: Date
     },
-    menu_description: [{
-      menu_catagery: {
+    menu_categories: [{
+      category_name: {
         type: String//Indian / Desserts / Cakes / Chinese / Soup
       },
-      sections: [{
-        section_name: { //veg starters/no veg starters /veg_main course /non veg main course
+      sub_categories: [{
+        sub_category_name: { //veg starters/no veg starters /veg_main course /non veg main course
           type: String
         },
-        section_description: {
+        sub_category_description: {
           type: String
         },
         items: [{
@@ -530,25 +542,44 @@ var OutletSchema = new Schema({
           item_tags: [{
             type: String
           }],
-          item_cost: {     //base price
-            type: String
+          is_vegetarian: {
+            type: Boolean,
+            default: true
           },
-          item_options:[{
-            option: {
-              type: String 
+          item_cost: {     //base price or lowest option price
+            type: Number
+          },
+          option_sets: [{
+            option_set_name: {
+              type: String
             },
-            option_cost: {
+            option_set_value: {
+              type: String
+            },
+            option_set_cost: {
               type: Number
             },
-            add_on: [{
-              add_on_item: {
+            is_an_addon: {
+              type: Boolean,
+              default: false
+            },
+            options: [{
+              option_name: {
                 type: String
               },
-              add_on_item_cost:{
+              option_cost: {
                 type: Number
-              }   
-            }]            
-          }] 
+              }
+            }],
+            addons: [{
+              addon_name: {
+                type: String,
+              },
+              addon_cost: {
+                type: Number,
+              }
+            }]
+          }]
         }]
       }]  
     }]

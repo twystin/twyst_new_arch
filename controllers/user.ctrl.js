@@ -33,7 +33,7 @@ module.exports.get_coupons = function(req, res) {
         .then(function(data) {
           return load_outlet_info_from_cache(data)
         }).then(function(data) {
-          var twyst_bucks
+          var twyst_bucks;
           if(data.coupons && data.coupons.length){ 
               twyst_bucks = data.twyst_bucks;
           }
@@ -175,7 +175,8 @@ function filter_out_expired_and_used_coupons(data) {
   data.coupons = _.filter(data.coupons, function(coupon) {
     if(_.has(coupon, 'status') && (coupon.status === 'active' && coupon.lapse_date && new Date(coupon.lapse_date) > new Date()) 
         && ( coupon.coupon_source === 'QR' || coupon.coupon_source === 'PANEL' || coupon.coupon_source === 'POS' 
-            || coupon.coupon_source === 'BATCH') && new Date(coupon.issued_at) < new Date(Date.now() - 10800000)) {
+            || coupon.coupon_source === 'BATCH' || coupon.coupon_source === 'qr_checkin' || coupon.coupon_source === 'panel_checkin'
+            || coupon.coupon_source === 'bulk_checkin' || coupon.coupon_source === 'mrl_checkin') && new Date(coupon.issued_at) < new Date(Date.now() - 10800000)) {
       return true;
     } else {
       return false;

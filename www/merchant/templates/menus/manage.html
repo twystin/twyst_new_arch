@@ -12,12 +12,45 @@
 			<div class='col-md-4' ng-repeat='menu in menus'>
 				<div class='panel panel-primary'>
 					<div class='panel-heading'>{{menu.menu_type}}</div>
+					<div class="panel-body" style='min-height:100px;'>
+			          <p>{{menu.outlet.name}}</p>
+			          <p>{{menu.outlet.loc1 + (menu.outlet.loc1?', ':'') + menu.outlet.loc2}}</p>
+			        </div>
 					<div class='panel-footer'>
-						<a class='btn btn-link' ui-sref='merchant.edit_menu({menu_id: menu._id})'>Update</a>
-						<a class='btn btn-link' >Delete</a>
+						<div class='row'>
+							<div class='col-xs-6'>
+									<a class='btn btn-block btn-default' ui-sref='merchant.view_menu({menu_id: menu._id})'>View</a>
+							</div>
+							<div class='col-xs-6'>
+									<a class='btn btn-block btn-primary' ui-sref='merchant.edit_menu({menu_id: menu._id})'>Update</a>
+							</div>
+							<div class='col-xs-12'><div>&nbsp;</div></div>
+							<div class='col-xs-6'>
+									<a class='btn btn-block btn-warning' ng-click='deleteMenu(menu._id)'>Delete</a>
+							</div>
+							<div class='col-xs-6'>
+									<a class='btn btn-block btn-success' ng-click='cloneMenu($index)'>Clone</a>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
+	<script type='text/ng-template' id='cloneMenuTemplate.html'>
+		<div class='modal-header'>
+			<h3 class='modal-header'>Choose the outlet</h3>
+		</div>
+		<div class='model-body'>
+			<div class='col-xs-8'>
+				<select ng-model='req_obj.outlet' class='form-control'>
+					<option value=''>Choose an outlet</option>
+					<option ng-repeat='outlet in outlets' value='{{outlet._id}}'>{{outlet.basics.name}}, {{outlet.contact.location.locality_1[0]}} {{outlet.contact.location.locality_1[0]?', ':''}} {{outlet.contact.location.locality_2[0]}}</option>
+				</select>
+			</div>
+			<div class='col-xs-4'>
+				<button type='button' class='btn btn-block btn-primary' ng-click='cloneMenu()'>Clone</button>
+			</div>
+		</div>
+	</script>
 </div>
