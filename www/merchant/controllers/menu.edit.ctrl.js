@@ -169,8 +169,8 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 			});
 		}
 
-		$scope.editItem = function(section, index) {
-			if(!section || !section.items || !section.items[index]) {
+		$scope.editItem = function(sub_category, index) {
+			if(!sub_category || !sub_category.items || !sub_category.items[index]) {
 				toastr.error("Item out of bounds");
 			} else {
 				var modalInstance = $modal.open({
@@ -180,7 +180,7 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 					size: 'lg',
 					resolve: {
 						item: function() {
-							return _.clone(section.items[index] || {item_options: []});
+							return _.clone(sub_category.items[index] || {option_sets: []});
 						},
 						is_new: function() {
 							return false;
@@ -189,7 +189,7 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 				});
 
 				modalInstance.result.then(function(item) {
-					section.items[index] = item;
+					sub_category.items[index] = item;
 				}, function() {
 					console.log('Modal dismissed at: ', new Date());
 				});
@@ -432,8 +432,24 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 		$scope.current_item.option_sets.push({options: [], addons: []});
 	}
 
+	$scope.removeOptionSet = function(index) {
+		if (!$scope.current_item || !$scope.current_item.option_sets || !$scope.current_item.option_sets[index]) {
+			toastr.error("Option set out of bounds");
+		} else {
+			$scope.current_item.option_sets.splice(index, 1);
+		}
+	}
+
 	$scope.addOption = function(option_set) {
 		option_set.options.push({});
+	}
+
+	$scope.removeOption = function(option_set, index) {
+		if(!option_set || !option_set.options || !option_set.options[index]) {
+			toastr.error("Option out of bounds");
+		} else {
+			option_set.options.splice(index, 1);
+		}
 	}
 
 	$scope.addAddon = function(option_set) {
@@ -461,11 +477,11 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 	// 	});
 	// }
 
-	$scope.removeAddon = function(option, index) {
-		if(!option || !option.add_on || !option.add_on[index]) {
+	$scope.removeAddon = function(option_set, index) {
+		if(!option_set || !option_set.addons || !option_set.addons[index]) {
 			toastr.error('Addon out of bounds');
 		} else {
-			option.add_on.splice(index, 1);
+			option_set.addons.splice(index, 1);
 		}
 	}
 
