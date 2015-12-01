@@ -50,8 +50,8 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 			console.log(err);
 		})
 
-		$scope.manageDesc = function(index) {
-			if(!$scope.menu.menu_description || !$scope.menu.menu_description[index]) {
+		$scope.manageCategory = function(index) {
+			if(!$scope.menu.menu_categories || !$scope.menu.menu_categories[index]) {
 				toastr.error("Menu category out of bounds");
 			} else {
 				$scope.descIndex = index;
@@ -62,7 +62,7 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 					size: 'lg',
 					resolve: {
 						menu_category: function() {
-							return _.clone($scope.menu.menu_description[index] || {});
+							return _.clone($scope.menu.menu_categories[index] || {sub_categories: []});
 						},
 						is_new: function() {
 							return false
@@ -71,16 +71,16 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 				});
 
 				modalInstance.result.then(function(category) {
-					$scope.menu.menu_description[$scope.descIndex] = category;
+					$scope.menu.menu_categories[$scope.descIndex] = category;
 				}, function() {
 					console.log('Modal dismissed at: ', new Date());
 				});
 			}
 		}
 
-		$scope.removeDesc = function(index) {
+		$scope.removeCategory = function(index) {
 			if(confirm('Are you sure?')) {
-				$scope.menu.menu_description.splice(index, 1);
+				$scope.menu.menu_categories.splice(index, 1);
 			}
 		}
 
@@ -109,8 +109,8 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 			})
 		}
 
-		$scope.manageSection = function(category, index) {
-			if(!category || !category.sections || !category.sections[index]) {
+		$scope.manageSubCategory = function(category, index) {
+			if(!category || !category.sub_categories || !category.sub_categories[index]) {
 				toastr.error("Section out of bounds");
 			} else {
 				var modalInstance = $modal.open({
@@ -119,8 +119,8 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 					controller: 'MenuSectionController',
 					size: 'lg',
 					resolve: {
-						section: function() {
-							return _.clone(category.sections[index] || {});
+						sub_category: function() {
+							return _.clone(category.sub_categories[index] || {items: []});
 						},
 						is_new: function() {
 							return false;
@@ -128,18 +128,18 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 					}
 				});
 
-				modalInstance.result.then(function(section) {
-					category.sections[index] = section;
+				modalInstance.result.then(function(sub_category) {
+					category.sub_categories[index] = sub_category;
 				}, function() {
 					console.log('Modal dismissed at: ', new Date());
 				});
 			}
 		}
 
-		$scope.removeSection = function(desc, index) {
+		$scope.removeSubCategory = function(menu_category, index) {
 			if(confirm('Are you sure?')) {
-				if(desc && desc.sections && desc.sections[index]) {
-					desc.sections.splice(index, 1);
+				if(menu_category && menu_category.sub_categories && menu_category.sub_categories[index]) {
+					menu_category.sub_categories.splice(index, 1);
 				} else {
 					toastr.error('Section out of bounds');
 				}
@@ -304,16 +304,16 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 			} else if (!$scope.menu.outlet) {
 				deferred.reject('Outlet id required');
 			} else {
-				async.each($scope.menu.menu_description, function(description, callback) {
-					if(!description.menu_category) {
+				async.each($scope.menu.menu_categories, function(category, callback) {
+					if(!category.category_name) {
 						callback('Menu category name required');
-					} else if (!description.sections || !description.sections.length) {
+					} else if (!category.sub_categories || !category.sub_categories.length) {
 						callback('All menu categories must have atleast one section');
 					} else {
-						async.each(description.sections, function(section) {
-							if (!section.section_name) {
+						async.each(category.sub_categories, function(sub_category, callback) {
+							if (!sub_category.sub_category_name) {
 								callback('All sections must have a section name');
-							} else if (!section.items || !section.items.length) {
+							} else if (!sub_category.items || !sub_category.items.length) {
 								callback('All sections must have atleast one item');
 							} else {
 								callback();
