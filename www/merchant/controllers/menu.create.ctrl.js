@@ -304,7 +304,7 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 					} else if (!category.sub_categories || !category.sub_categories.length) {
 						callback('All menu categories must have atleast one section');
 					} else {
-						async.each(category.sub_categories, function(sub_category) {
+						async.each(category.sub_categories, function(sub_category, callback) {
 							if (!sub_category.sub_category_name) {
 								callback('All sections must have a section name');
 							} else if (!sub_category.items || !sub_category.items.length) {

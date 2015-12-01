@@ -18,7 +18,7 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 		$scope.menu_categories = ['Indian', 'Desserts', 'Cakes', 'Chinese', 'Soup'];
 		$scope.section_names = ['Veg Starters', 'Non Veg Starters', 'Veg Main Course', 'Non Veg Main Course'];
 
-		$scope.addDesc = function() {
+		$scope.addMenuCategory = function() {
 			var modalInstance = $modal.open({
 				animation: true,
 				templateUrl: 'menuCategoryTemplate.html',
@@ -27,17 +27,17 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 				resolve: {
 					menu_category: function() {
 						return {
-							sections: [{section_name: 'Default', items: []}]
+							sub_categories: [{sub_category_name: 'Default', items: []}]
 						};
 					},
 					is_new: function() {
-						return true;
+						return true
 					}
 				}
 			});
 
 			modalInstance.result.then(function(category) {
-				$scope.menu.menu_description.push(category);
+				$scope.menu.menu_categories.push(category);
 			}, function() {
 				console.log('Modal dismissed at: ', new Date());
 			});
@@ -84,26 +84,26 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 			}
 		}
 
-		$scope.addSection = function(index) {
+		$scope.addSubCategory = function(index) {
 			var modalInstance = $modal.open({
 				animation: true,
 				templateUrl: 'subCategoryTemplate.html',
 				controller: 'MenuSectionController',
 				size: 'lg',
 				resolve: {
-					section: function() {
+					sub_category: function() {
 						return {
 							items: []
-						}
+						};
 					},
 					is_new: function() {
-						return false;
+						return true
 					}
 				}
 			});
 
 			modalInstance.result.then(function(section) {
-				$scope.menu.menu_description[index].sections.push(section);
+				$scope.menu.menu_categories[index].sub_categories.push(section);
 			}, function() {
 				console.log('Modal dismissed at: ', new Date());
 			})
@@ -154,10 +154,10 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 				size: 'lg',
 				resolve: {
 					item: function() {
-						return {item_options: []}
+						return {option_sets: []};
 					},
 					is_new: function() {
-						return true
+						return true;
 					}
 				}
 			});
