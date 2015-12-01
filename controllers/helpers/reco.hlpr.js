@@ -66,7 +66,9 @@ module.exports.cache_user_coupons = function(user) {
             memo[outlet] = memo[outlet] || {};
             memo[outlet].coupons = memo[outlet].coupons || [];
             if (item.status === "active" && ( item.coupon_source === 'QR' || item.coupon_source === 'PANEL' || item.coupon_source === 'POS' 
-            || item.coupon_source === 'BATCH' || item.coupon_source === 'MRL')) {
+            || item.coupon_source === 'BATCH' || item.coupon_source === 'MRL'
+            || item.coupon_source === 'qr_checkin' || item.coupon_source === 'panel_checkin'
+            || item.coupon_source === 'bulk_checkin' || item.coupon_source === 'mrl_checkin')) {
               memo[outlet].coupons.push(item);
             }  
           })
