@@ -27,16 +27,16 @@
                 <accordion-group ng-repeat='menu_category in menu.menu_categories' heading='{{menu_category.category_name}}'>
                     <accordion-heading>
                         {{menu_category.category_name}}
-                        <button class='btn btn-sm btn-link pull-right' ng-click='removeDesc($index)' ng-if='menu.menu_description.length > 1'>Delete</button>
-                        <button class='btn btn-sm btn-link pull-right' ng-click='manageDesc($index)'>Edit</button>
+                        <button class='btn btn-sm btn-link pull-right' ng-click='removeCategory($index)' ng-if='menu.menu_categories.length > 1'>Delete</button>
+                        <button class='btn btn-sm btn-link pull-right' ng-click='manageCategory($index)'>Edit</button>
                         
                     </accordion-heading>
                     <accordion close-others='true'>
                         <accordion-group ng-repeat='sub_category in menu_category.sub_categories' heading='{{sub_category.sub_category_name}}'>
                             <accordion-heading>
                                 {{sub_category.sub_category_name}}
-                                <button class='btn btn-sm btn-link pull-right' ng-click='removeSection(menu_category, $index)' ng-if='menu_category.sub_categories.length > 1'>Delete</button>
-                                <button class='btn btn-sm btn-link pull-right' ng-click='manageSection(menu_category, $index)'>Edit</button>
+                                <button class='btn btn-sm btn-link pull-right' ng-click='removeSubCategory(menu_category, $index)' ng-if='menu_category.sub_categories.length > 1'>Delete</button>
+                                <button class='btn btn-sm btn-link pull-right' ng-click='manageSubCategory(menu_category, $index)'>Edit</button>
                                 
                             </accordion-heading>
                             <p class='alert alert-info text-justify' ng-if='sub_category.sub_category_description'>{{sub_category.sub_category_description}}</p>
@@ -68,7 +68,7 @@
                     </accordion>
                 </accordion-group>
                 <div>&nbsp;</div>
-                <button class='btn btn-lg btn-primary' ng-click='addCategory()'><i class='fa fa-plus'></i> Add Category</button>
+                <button class='btn btn-lg btn-primary' ng-click='addMenuCategory()'><i class='fa fa-plus'></i> Add Category</button>
             </accordion>
         </div>
     </div>
@@ -88,7 +88,7 @@
             <div class='form-group'>
                 <div class='col-xs-3 control-label'>Category Name</div>
                 <div class='col-xs-6'>
-                    <input type='text' ng-model='current_category.menu_category' typeahead='mCategory for mCategory in menu_categories | filter:$viewValue | limitTo: 8' class='form-control'>
+                    <input type='text' ng-model='current_category.category_name' typeahead='mCategory for mCategory in menu_categories | filter:$viewValue | limitTo: 8' class='form-control'>
                 </div>
             </div>
             <div class='clearfix'></div>
@@ -100,7 +100,7 @@
         </div>
     </script>
     <script type='text/ng-template' id='subCategoryTemplate.html'>
-        <div class='modal-header'>
+        <div class='model-header'>
             <legend ng-if='is_new'>Add New Section</legend>
             <legend ng-if='!is_new'>Update Section</legend>
         </div>
@@ -108,14 +108,14 @@
             <div class='form-group'>
                 <div class='col-xs-3 control-label'>Section Name</div>
                 <div class='col-xs-6'>
-                    <input type='text' ng-model='current_section.section_name' typeahead='mSection for mSection in section_names | filter:$viewValue | limitTo: 8' class='form-control'>
+                    <input type='text' ng-model='current_sub_category.sub_category_name' typeahead='mSection for mSection in section_names | filter:$viewValue | limitTo: 8' class='form-control'>
                 </div>
             </div>
             <div class='clearfix'></div>
             <div class='form-group'>
                 <div class='col-xs-3 control-label'>Section Description</div>
                 <div class='col-xs-6'>
-                    <textarea ng-model='current_section.section_description' class='form-control'></textarea>
+                    <textarea type='text' ng-model='current_sub_category.sub_category_description' class='form-control'></textarea>
                 </div>
             </div>
         </div>
