@@ -16,9 +16,7 @@ angular.module('merchantApp').controller('MenuViewController', ['$scope', 'merch
 		// $scope.menu = {"status":"draft","menu_description":[{"sections":[{"items":[{"item_options":[{"add_on":[{"add_on_item":"sfvss","add_on_item_cost":"342"}],"option":"fvr","option_cost":546}],"item_name":"wd","item_description":"df","item_tags":["sdf","fre","yt"],"item_cost":345}],"section_name":"asd","section_description":"ads"}],"menu_category":"asd"}],"menu_type":"asd", "outlet": "556568e81ade70eb1974b956"};
 
 		$scope.menu_types = ['Dine-In', 'Takeaway', 'Delivery', 'Weekend', 'Dinner', 'All'];
-		$scope.menu_categories = ['Indian', 'Desserts', 'Cakes', 'Chinese', 'Soup'];
-		$scope.section_names = ['Veg Starters', 'Non Veg Starters', 'Veg Main Course', 'Non Veg Main Course'];
-
+		
 		$scope.addDesc = function() {
 			var modalInstance = $modal.open({
 				animation: true,
@@ -38,6 +36,19 @@ angular.module('merchantApp').controller('MenuViewController', ['$scope', 'merch
 			}, function() {
 				console.log('Modal dismissed at: ', new Date());
 			});
+		}
+
+		$scope.showCategory = function(index) {
+			if(!$scope.menu.menu_categories[index]) {
+				toastr.error("Menu category out of bounds");
+			} else {
+				$scope.current_category = index;
+				delete $scope.visible_item;
+			}
+		}
+
+		$scope.showItem = function(item) {
+			$scope.visible_item = item;
 		}
 
 		merchantRESTSvc.getOutlets().then(function(res) {

@@ -28,8 +28,12 @@
             <div class='col-sm-3'>
                 <div class='row'>
                     <div class='col-sm-12'>
+                        <button type='button' class='btn btn-sm btn-success pull-right' ng-click='addMenuCategory()'><i class='fa fa-sm fa-plus'></i> Add Category</button>
+                    </div>
+                    <div class='clearfix'></div>
+                    <div>&nbsp</div>
+                    <div class='col-sm-12'>
                         <ul class='list-group'>
-                            <a type='button' class='list-group-item btn btn-success' ng-click='addMenuCategory()' style='color:#fff;background-color:#38b44a;'><i class='fa fa-plus'></i> Add New Category</a>
                             <a type='button' class='list-group-item' ng-class='{active: $index===current_category}'} ng-repeat='menu_category in menu.menu_categories' ng-click='showCategory($index)'>{{menu_category.category_name}}
                                 <i class='fa fa-chevron-right pull-right'></i></a>
                         </ul>
@@ -47,8 +51,8 @@
                         <div class='panel panel-default' ng-repeat='sub_category in menu_category.sub_categories'>
                             <div class='panel-heading'>
                                 <h3>{{sub_category.sub_category_name}}
-                                    <button type='button' class='btn btn-sm btn-primary pull-right' ng-click='addItem(sub_category)'><i class='fa fa-plus'></i> Add Item</button>
-                                    <button type='button' class='btn btn-sm btn-warning pull-right' ng-click='editSubCategory(menu_category, $index)'><i class='fa fa-pencil'></i> Edit Sub Category</button>
+                                    <button type='button' class='btn btn-sm btn-success pull-right' ng-click='addItem(sub_category)'><i class='fa fa-plus'></i> Add Item</button>
+                                    <button type='button' class='btn btn-sm btn-primary pull-right' ng-click='editSubCategory(menu_category, $index)'><i class='fa fa-pencil'></i> Edit Sub Category</button>
                                 </h3>
                             </div>
                             <div class='panel-body'>
@@ -56,7 +60,7 @@
                                     <div class='row'>
                                         <div class='alert alert-warning' ng-if='sub_category.items.length===0'>No items added yet</div>
                                         <ul class='list-group'>
-                                            <li class='list-group-item' ng-repeat='item in sub_category.items'>
+                                            <li class='list-group-item' ng-repeat='item in sub_category.items' ng-click='showItem(item)' style='cursor:pointer;'>
                                                 <h4 class='list-group-item-heading'>{{item.item_name}}
                                                     <button type='button' class='btn btn-xs btn-warning' ng-click='editItem(sub_category, $index)'><i class='fa fa-sm fa-pencil'></i> </button>
                                                 </h4>
@@ -68,7 +72,7 @@
                             </div>
                         </div>
                         <div class='col-xs-12'>
-                            <button class='btn btn-sm btn-primary' ng-click='addSubCategory($index)'><i class='fa fa-plus'></i> Add Sub-category</button>
+                            <button class='btn btn-sm btn-success' ng-click='addSubCategory($index)'><i class='fa fa-plus'></i> Add Sub-category</button>
                         </div>
                     </div>
                 </div>
@@ -77,100 +81,27 @@
                 </div>
             </div>
             <div class='col-sm-3'>
-
+                <div class='row'>
+                    <div class='panel panel-primary' ng-if='visible_item.item_name'>
+                        <div class='panel-heading'>
+                            {{visible_item.item_name}} <i class='fa fa-inr'></i>{{visible_item.item_cost}}
+                        </div>
+                        <div class='panel-body'>
+                            <label>{{visible_item.option_set_title}}</label>
+                            <div ng-repeat='option in visible_item.option_set'>#{{$index + 1}}. {{option.option_set_value}} <i class='fa fa-inr'></i>{{option.option_set_cost}}
+                                <div class='col-xs-12'>
+                                    <div ng-repeat='sub_option in option.sub_options'>Sub Variance Group: {{sub_option.sub_option_title}}
+                                        <div ng-repeat='sub_option_obj in sub_option.sub_option_set'>
+                                            <p>{{sub_option_obj.sub_option_value}} <i class='fa fa-inr'></i>{{sub_option_obj.sub_option_cost}}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <!-- <accordion close-others='true'>
-                <accordion-group ng-repeat='category in menu.menu_categories'>
-                    <accordion-heading>
-                        {{category.category_name}}
-                        <button class='btn btn-sm btn-link pull-right' ng-click='removeCategory($index)' ng-if='menu.menu_categories.length > 1'>Delete</button>
-                        <button class='btn btn-sm btn-link pull-right' ng-click='manageCategory($index)'>Edit</button>
-                    </accordion-heading>
-                    <accordion close-others='true'>
-                        <accordion-group ng-repeat='sub_category in category.sub_categories'>
-                            <accordion-heading>
-                                {{sub_category.sub_category_name}}
-                                <button class='btn btn-sm btn-link pull-right' ng-click='removeSubCategory(category, $index)' ng-if='category.sub_categories.length > 1'>Delete</button>
-                                <button class='btn btn-sm btn-link pull-right' ng-click='manageSubCategory(category, $index)'>Edit</button>
-                            </accordion-heading>
-                            <p class='alsert alert-info text-justify' ng-if='sub_category.sub_category_description'>{{sub_category.sub_category_description}}</p>
-                            <accordion close-others='true'>
-                                <accordion-group ng-repeat='item in sub_category.items'>
-                                    <accordion-heading>
-                                        # {{($index + 1)}} {{item.item_name}} {{item.item_cost?' Rs. ' + item.item_cost:''}}
-                                        <button class='btn btn-sm btl-link pull-right' ng-click='deleteItem(sub_category, $index)' ng-if='sub_category.items.length > 1'>Delete</button>
-                                        <button class='btn btn-sm btn-link pull-right' ng-click='editItem(sub_category, $index)'>Edit</button>
-                                    </accordion-heading>
-                                    <div class='col-md-4' ng-repeat='option_set in item.option_sets'>
-                                        <div class='panel panel-primary'>
-                                            <div class='panel-heading'>{{option_set.option_set_name}}:{{option_set.option_set_value}} Rs. {{option_set.option_set_cost}}</div>
-                                            <div class='panel-body'>
-                                                <label>Options</label>
-                                                <p ng-repeat='option in option_set.options'>{{option.option_name}} Rs. {{option.option_cost}}</p>
-                                                <label>Addons</label>
-                                                <p ng-repeat='addon in option_set.addons'>{{addon.addon_name}} Rs. {{addon.addon_cost}}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </accordion-group>
-                                <div>&nbsp;</div>
-                                <button class='btn btn-sm btn-primary' ng-click='addItem(sub_category)'><i class='fa fa-plus'></i> Add Item</button>
-                            </accoridion>
-                        </accordion-group>
-                        <div>&nbsp;</div>
-                        <button class='btn btn-primary' ng-click='addSubCategory($index)'><i class='fa fa-plus'></i> Add Section</button>
-                    </accordion>
-                </accordion-group>
-                <div>&nbsp;</div>
-                <button class='btn btn-lg btn-primary' ng-click='addMenuCategory()'><i class='fa fa-plus'></i> Add Category</button>
-            </accordion> -->
         </div>
-        <!-- <div class='form-group'>
-            <accordion close-others='true'>
-                <accordion-group ng-repeat='category in menu.menu_categories' heading='{{category.menu_category}}'>
-                    <accordion-heading>
-                        {{category.menu_category}}
-                        <button class='btn btn-sm btn-link pull-right' ng-click='removeDesc($index)' ng-if='menu.menu_categories.length > 1'>Delete</button>
-                        <button class='btn btn-sm btn-link pull-right' ng-click='manageDesc($index)'>Edit</button>
-                        <button class='btn btn-sm btn-link pull-right' ng-click='addSection($index)'>Add</button>
-                    </accordion-heading>
-                    <accordion close-others='true'>
-                        <accordion-group ng-repeat='sub_category in category.sub_categories' heading='{{sub_category.section_name}}'>
-                            <accordion-heading>
-                                {{sub_category.section_name}}
-                                <button class='btn btn-sm btn-link pull-right' ng-click='removeSection(category, $index)' ng-if='category.sub_categories.length > 1'>Delete</button>
-                                <button class='btn btn-sm btn-link pull-right' ng-click='manageSection(category, $index)'>Edit</button>
-                                <button class='btn btn-sm btn-link pull-right' ng-click='addItem(sub_category)'>Add</button>
-                            </accordion-heading>
-                            <p class='alert alert-info text-justify' ng-if='sub_category.section_description'>{{sub_category.section_description}}</p>
-                            <accordion close-others='true'>
-                                <accordion-group ng-repeat='item in sub_category.items' heading='{{"Item #" + $index + " " + item.item_name}}'>
-                                    <accordion-heading>
-                                        # {{($index + 1) + " " + item.item_name + (item.item_cost?' Rs. ' + item.item_cost: '')}}
-                                        <button class='btn btn-sm btn-link pull-right' ng-click='deleteItem(sub_category, $index)' ng-if='sub_category.items.length > 1'>Delete</button>
-                                        <button class='btn btn-sm btn-link pull-right' ng-click='editItem(sub_category, $index)'>Edit</button>
-                                    </accordion-heading>
-                                    <div class='col-md-4' ng-repeat='option in item.item_options'>
-                                        <div class='panel panel-primary'>
-                                            <div class='panel-heading'>{{option.option + ": Rs." + option.option_cost}}</div>
-                                            <div class='panel-body'>
-                                                <p ng-repeat='add_on in option.add_on'>{{add_on.add_on_item + ": Rs." + add_on.add_on_item_cost}}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </accordion-group>
-                                <div>&nbsp;</div>
-                                <button class='btn btn-sm btn-primary' ng-click='addItem(sub_category)'><i class='fa fa-plus'></i> Add Item</button>
-                            </accordion>
-                        </accordion-group>
-                        <div>&nbsp;</div>
-                        <button class='btn btn-primary' ng-click='addSection($index)'><i class='fa fa-plus'></i> Add Section</button>
-                    </accordion>
-                </accordion-group>
-                <div>&nbsp;</div>
-                <button class='btn btn-lg btn-primary' ng-click='addDesc()'><i class='fa fa-plus'></i> Add Category</button>
-            </accordion>
-        </div> -->
     </div>
     <div class='well well-lg'>
         <span class='button-group'>
