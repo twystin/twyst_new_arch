@@ -84,6 +84,27 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 			}
 		}
 
+		$scope.editCategory = function(index) {
+			var modalInstance = $modal.open({
+				animation: true,
+				templateUrl: 'menuCategoryTemplate.html',
+				controller: 'MenuCategoryController',
+				size: 'lg',
+				resolve: {
+					menu_category: function() {
+						return _.clone($scope.menu.menu_categories[index] || {sub_categories: []});
+					},
+					is_new: function() {
+						return false;
+					}
+				}
+			});
+
+			modalInstance.result.then(function(category) {
+				$scope.menu.menu_categories[index] = category;
+			});
+		}
+
 		$scope.addSubCategory = function(index) {
 			var modalInstance = $modal.open({
 				animation: true,
@@ -106,6 +127,13 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 				$scope.menu.menu_categories[index].sub_categories.push(section);
 			}, function() {
 				console.log('Modal dismissed at: ', new Date());
+			})
+		}
+
+		$scope.editSubCategory = function(category, index) {
+			var modalInstance = $modal.open({
+				animation: true,
+				templateUrl: ''
 			})
 		}
 
@@ -429,7 +457,7 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 	$scope.current_item = item;
 
 	$scope.addOptionSet = function() {
-		$scope.current_item.option_sets.push({options: [], addons: []});
+		$scope.current_item.option_set.push({sub_options: [], addons: []});
 	}
 
 	$scope.removeOptionSet = function(index) {
@@ -440,16 +468,28 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 		}
 	}
 
+	$scope.addSubVariant = function(option) {
+		option.sub_options.push({sub_option_set: []})
+	}
+
+	$scope.addSubOptionPair = function(sub_option) {
+		sub_option.sub_option_set.push({});
+	}
+
+	$scope.removeSubOption = function(option, index) {
+		option.sub_options.splice(index, 1);
+	}
+
+	$scope.removeSubOptionObj = function(sub_option, $index) {
+		sub_option.sub_option_set.splice($index, 1);
+	}
+
 	$scope.addOption = function(option_set) {
 		option_set.options.push({});
 	}
 
-	$scope.removeOption = function(option_set, index) {
-		if(!option_set || !option_set.options || !option_set.options[index]) {
-			toastr.error("Option out of bounds");
-		} else {
-			option_set.options.splice(index, 1);
-		}
+	$scope.removeOption = function(index) {
+		$scope.current_item.option_set.splice(index, 1);
 	}
 
 	$scope.addAddon = function(option_set) {
@@ -458,6 +498,49 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 
 	$scope.addItemOption = function() {
 		$scope.current_item.item_options.push({add_on: []});
+	}
+
+	$scope.addAddonSet = function(option) {
+		option.addons.push({addon_set: []});
+	}
+
+	$scope.removeAddon = function(option, index) {
+		option.addons.splice(index, 1);
+	}
+
+	$scope.addAddonObj = function(addon) {
+		addon.addon_set.push({});
+	}
+
+	$scope.removeAddonObj = function(addon, index) {
+		addon.addon_set.splice(index, 1);
+	}
+
+	$scope.editItem = function(sub_category, index) {
+		if(!sub_category || !sub_category.items || !sub_category.items[index]) {
+			toastr.error("Item out of bounds");
+		} else {
+			var modalInstance = $modal.open({
+				animation: true,
+				templateUrl: 'menuItemTemplate.html',
+				controller: 'MenuItemController',
+				size: 'lg',
+				resolve: {
+					item: function() {
+						return _.clone(sub_category.items[index] || {option_sets: []});
+					},
+					is_new: function() {
+						return false;
+					}
+				}
+			});
+
+			modalInstance.result.then(function(item) {
+				sub_category.items[index] = item;
+			}, function() {
+				console.log('Modal dismissed at: ', new Date());
+			});
+		}
 	}
 
 	$scope.removeItemOption = function(index) {
@@ -503,36 +586,57 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 			deferred.reject('Item name is mandatory');
 		} else if (!$scope.current_item.item_tags || !$scope.current_item.item_tags.length) {
 			deferred.reject('Atleast one item tag is required');
-		} else if (!$scope.current_item.item_cost && $scope.current_item.item_options.length === 0) {
-			deferred.reject('Either item cost or atleast one item option mandatory');
+		} else if (!$scope.current_item.item_cost) {
+			deferred.reject("Base cost is mandatory");
+		} else if (!$scope.current_item.option_set_title) {
+			deferred.reject("Variant header required");
+		} else if ($scope.current_item.option_set.length === 0) {
+			deferred.reject('Atleast one option mandatory');
 		} else {
-			async.each($scope.current_item.option_sets, function(option_set, callback) {
-				if(!option_set.option_set_name) {
-					callback("All item option sets must have a valid name");
-				} else if (!option_set.option_set_value) {
+			async.each($scope.current_item.option_set, function(option_set, callback) {
+				if (!option_set.option_set_value) {
 					callback("All item option sets must have a valid value")
 				} else if (!option_set.option_set_cost) {
 					callback("All item option sets must have a valid cost");
 				} else {
-					async.each(option_set.options, function(item_option, callback) {
-						if(!item_option.option_name) {
-							callback('All item options must have a valid name');
-						} else if (!item_option.option_cost) {
-							callback('All item options must have a valid cost');
-						} else if (!item_option.addon || !item_option.addon.length) {
-							callback();
+					async.each(option_set.sub_options, function(sub_option, callback) {
+						if(!sub_option.sub_option_title) {
+							callback("All sub variant sets must have valid headers");
+						} else if ((!sub_option.sub_option_set || sub_option.sub_option_set.length === 0)) {
+							callback("Atleast one key-value pair required for all sub variant sets");
 						} else {
-							async.each(item_option.addon, function(add_on, callback) {
-								if (!add_on.add_on_item) {
-									callback('All addons must have valid name');
-								} else if (!add_on.add_on_item_cost) {
-									callback('All addons must have valid cost');
+							async.each(sub_option.sub_option_set, function(sub_option_obj, callback) {
+								console.log(sub_option_obj);
+								if (!sub_option_obj.sub_option_value) {
+									callback("All sub variant sets must have valid value");
+								} else if (!sub_option_obj.sub_option_cost) {
+									callback("All sub variant sets must have valid cost");
 								} else {
-									callback();
+									async.each(option_set.addons, function(addon, callback) {
+										if (!addon.addon_title) {
+											callback("All addon sets must have valid title");
+										} else if (!addon.addon_set || addon.addon_set.length === 0) {
+											callback('All addons must have atleast one key-value pair');
+										} else {
+											async.each(addon.addon_set, function(addon_obj, callback) {
+												if (!addon_obj.addon_value) {
+													callback("All addons must have valid value");
+												} else if (!addon_obj.addon_cost) {
+													callback("Add addons must have valid cost");
+												} else {
+													callback();
+												}
+											}, function(err) {
+												callback(err);
+											});
+										}
+									}, function(err) {
+										callback(err);
+									})
 								}
 							}, function(err) {
 								callback(err);
-							});
+							})
 						}
 					}, function(err) {
 						callback(err);
