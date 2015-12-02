@@ -274,14 +274,6 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 		$scope.current_item.option_set.push({sub_options: [], addons: []});
 	}
 
-	$scope.removeOptionSet = function(index) {
-		if (!$scope.current_item || !$scope.current_item.option_sets || !$scope.current_item.option_sets[index]) {
-			toastr.error("Option set out of bounds");
-		} else {
-			$scope.current_item.option_sets.splice(index, 1);
-		}
-	}
-
 	$scope.addSubVariant = function(option) {
 		option.sub_options.push({sub_option_set: []})
 	}
@@ -298,20 +290,8 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 		sub_option.sub_option_set.splice($index, 1);
 	}
 
-	$scope.addOption = function(option_set) {
-		option_set.options.push({});
-	}
-
 	$scope.removeOption = function(index) {
 		$scope.current_item.option_set.splice(index, 1);
-	}
-
-	$scope.addAddon = function(option_set) {
-		option_set.addons.push({});
-	}
-
-	$scope.addItemOption = function() {
-		$scope.current_item.item_options.push({add_on: []});
 	}
 
 	$scope.addAddonSet = function(option) {
@@ -329,50 +309,6 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 	$scope.removeAddonObj = function(addon, index) {
 		addon.addon_set.splice(index, 1);
 	}
-
-	$scope.editItem = function(sub_category, index) {
-		if(!sub_category || !sub_category.items || !sub_category.items[index]) {
-			toastr.error("Item out of bounds");
-		} else {
-			var modalInstance = $modal.open({
-				animation: true,
-				templateUrl: 'menuItemTemplate.html',
-				controller: 'MenuItemController',
-				size: 'lg',
-				resolve: {
-					item: function() {
-						return _.clone(sub_category.items[index] || {option_sets: []});
-					},
-					is_new: function() {
-						return false;
-					}
-				}
-			});
-
-			modalInstance.result.then(function(item) {
-				sub_category.items[index] = item;
-			}, function() {
-				console.log('Modal dismissed at: ', new Date());
-			});
-		}
-	}
-
-	$scope.removeItemOption = function(index) {
-		console.log(index, $scope.current_item, $scope.current_item.item_options, $scope.current_item.item_options[index])
-		if(!$scope.current_item || !$scope.current_item.item_options || !$scope.current_item.item_options[index]) {
-			toastr.error('Item option out of bounds');
-		} else {
-			$scope.current_item.item_options.splice(index, 1);
-		}
-	}
-
-	// $scope.addAddon = function(index) {
-	// 	$scope.validateItem().then(function() {
-	// 		$scope.current_item.item_options[index].add_on.push({});
-	// 	}, function(err) {
-	// 		toastr.error(err);
-	// 	});
-	// }
 
 	$scope.removeAddon = function(option_set, index) {
 		if(!option_set || !option_set.addons || !option_set.addons[index]) {
