@@ -549,18 +549,18 @@ var OutletSchema = new Schema({
           item_cost: {     //base price or lowest option price
             type: Number
           },
-          option_set_title: {
+          option_title: {
             type: String
           },
-          option_set_is_addon: {
+          option_is_addon: {
             type: Boolean,
             default: false,
           },
-          option_set: [{
-            option_set_value: {
+          options: [{
+            option_value: {
               type: String
             },
-            option_set_cost: {
+            option_cost: {
               type: Number
             },
             sub_options: [{
