@@ -5,7 +5,9 @@ var logger = require('tracer').colorConsole();
   'use strict';
   var express = require('express');
   var app = express();
+  var compression = require('compression');
 
+  app.use(compression());
   // CONFIGURE THE APP & THE DATA MODELS
   require('./config/app.cfg')(app);
   require('./config/models.cfg')();
