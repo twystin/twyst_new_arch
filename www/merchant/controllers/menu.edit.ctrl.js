@@ -1,8 +1,8 @@
 angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merchantRESTSvc', 'toastr', 'WizardHandler', '$stateParams', '$state', '$timeout', '$q', '$modal',
 	function($scope, merchantRESTSvc, toastr, WizardHandler, $stateParams, $state, $timeout, $q, $modal) {
 		$scope.menu = {
-			status: 'draft',
-			menu_description: []
+			status: 'active',
+			menu_categories: []
 		};
 
 		merchantRESTSvc.getMenu($stateParams.menu_id).then(function(res) {
@@ -12,11 +12,16 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 			console.log(err);
 		})
 
-		// $scope.menu = {"status":"draft","menu_description":[{"sections":[{"items":[{"item_options":[{"add_on":[{"add_on_item":"sfvss","add_on_item_cost":"342"}],"option":"fvr","option_cost":546}],"item_name":"wd","item_description":"df","item_tags":["sdf","fre","yt"],"item_cost":345}],"section_name":"asd","section_description":"ads"}],"menu_category":"asd"}],"menu_type":"asd", "outlet": "556568e81ade70eb1974b956"};
+		$scope.showCategory = function(index) {
+			if(!$scope.menu.menu_categories[index]) {
+				toastr.error("Menu category out of bounds");
+			} else {
+				$scope.current_category = index;
+				delete $scope.visible_item;
+			}
+		}
 
 		$scope.menu_types = ['Dine-In', 'Takeaway', 'Delivery', 'Weekend', 'Dinner', 'All'];
-		$scope.menu_categories = ['Indian', 'Desserts', 'Cakes', 'Chinese', 'Soup'];
-		$scope.section_names = ['Veg Starters', 'Non Veg Starters', 'Veg Main Course', 'Non Veg Main Course'];
 
 		$scope.addMenuCategory = function() {
 			var modalInstance = $modal.open({
@@ -27,19 +32,20 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 				resolve: {
 					menu_category: function() {
 						return {
-							sub_categories: [{sub_category_name: 'Default', items: []}]
+							sub_categories: [{
+								sub_category_name: 'Default',
+								items: []
+							}]
 						};
 					},
 					is_new: function() {
-						return true
+						return true;
 					}
 				}
 			});
 
 			modalInstance.result.then(function(category) {
 				$scope.menu.menu_categories.push(category);
-			}, function() {
-				console.log('Modal dismissed at: ', new Date());
 			});
 		}
 
@@ -50,38 +56,25 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 			console.log(err);
 		})
 
-		$scope.manageCategory = function(index) {
-			if(!$scope.menu.menu_categories || !$scope.menu.menu_categories[index]) {
-				toastr.error("Menu category out of bounds");
-			} else {
-				$scope.descIndex = index;
-				var modalInstance = $modal.open({
-					animation: true,
-					templateUrl: 'menuCategoryTemplate.html',
-					controller: 'MenuCategoryController',
-					size: 'lg',
-					resolve: {
-						menu_category: function() {
-							return _.clone($scope.menu.menu_categories[index] || {sub_categories: []});
-						},
-						is_new: function() {
-							return false
-						}
+		$scope.editCategory = function(index) {
+			var modalInstance = $modal.open({
+				animation: true,
+				templateUrl: 'menuCategoryTemplate.html',
+				controller: 'MenuCategoryController',
+				size: 'lg',
+				resolve: {
+					menu_category: function() {
+						return _.clone($scope.menu.menu_categories[index] || {sub_categories: []});
+					},
+					is_new: function() {
+						return false;
 					}
-				});
+				}
+			});
 
-				modalInstance.result.then(function(category) {
-					$scope.menu.menu_categories[$scope.descIndex] = category;
-				}, function() {
-					console.log('Modal dismissed at: ', new Date());
-				});
-			}
-		}
-
-		$scope.removeCategory = function(index) {
-			if(confirm('Are you sure?')) {
-				$scope.menu.menu_categories.splice(index, 1);
-			}
+			modalInstance.result.then(function(category) {
+				$scope.menu.menu_categories[index] = category;
+			});
 		}
 
 		$scope.addSubCategory = function(index) {
@@ -109,44 +102,28 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 			})
 		}
 
-		$scope.manageSubCategory = function(category, index) {
-			if(!category || !category.sub_categories || !category.sub_categories[index]) {
-				toastr.error("Section out of bounds");
-			} else {
-				var modalInstance = $modal.open({
-					animation: true,
-					templateUrl: 'subCategoryTemplate.html',
-					controller: 'MenuSectionController',
-					size: 'lg',
-					resolve: {
-						sub_category: function() {
-							return _.clone(category.sub_categories[index] || {items: []});
-						},
-						is_new: function() {
-							return false;
-						}
+		$scope.editSubCategory = function(category, index) {
+			var modalInstance = $modal.open({
+				animation: true,
+				templateUrl: 'subCategoryTemplate.html',
+				controller: 'MenuSectionController',
+				size: 'lg',
+				resolve: {
+					sub_category: function() {
+						return _.clone(category.sub_categories[index] || {items: []});
+					},
+					is_new: function() {
+						return false
 					}
-				});
-
-				modalInstance.result.then(function(sub_category) {
-					category.sub_categories[index] = sub_category;
-				}, function() {
-					console.log('Modal dismissed at: ', new Date());
-				});
-			}
-		}
-
-		$scope.removeSubCategory = function(menu_category, index) {
-			if(confirm('Are you sure?')) {
-				if(menu_category && menu_category.sub_categories && menu_category.sub_categories[index]) {
-					menu_category.sub_categories.splice(index, 1);
-				} else {
-					toastr.error('Section out of bounds');
 				}
-			}
+			});
+
+			modalInstance.result.then(function(sub_category) {
+				category.sub_categories[index] = sub_category;
+			});
 		}
 
-		$scope.addItem = function(section) {
+		$scope.addItem = function(sub_category) {
 			var modalInstance = $modal.open({
 				animation: true,
 				templateUrl: 'menuItemTemplate.html',
@@ -154,7 +131,11 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 				size: 'lg',
 				resolve: {
 					item: function() {
-						return {option_sets: []};
+						return {
+							option_set: [],
+							is_vegetarian: false,
+							option_set_is_addon: false
+						};
 					},
 					is_new: function() {
 						return true;
@@ -163,9 +144,7 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 			});
 
 			modalInstance.result.then(function(item) {
-				section.items.push(item);
-			}, function() {
-				console.log('Modal dismissed at: ', new Date());
+				sub_category.items.push(item);
 			});
 		}
 
@@ -193,107 +172,6 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 				}, function() {
 					console.log('Modal dismissed at: ', new Date());
 				});
-			}
-		}
-
-		$scope.deleteItem = function(section, index) {
-			if(confirm("Are you sure?")) {
-				if(section && section.items && section.items[index]) {
-					section.items.splice(index, 1);
-				} else {
-					toastr.error("Iten out of bounds");
-				}
-			}
-		}
-
-		$scope.addItemOption = function(index) {
-			$scope.current_item.item_options.push({add_on: []});
-		}
-
-		$scope.removeItemOption = function(index) {
-			if(confirm('Are you sure?')) {
-				$scope.current_item.item_options.splice(index, 1);
-			}
-		}
-
-		$scope.addAddon = function(index) {
-			$scope.current_item.item_options[index].add_on.push({});
-		}
-
-		$scope.removeAddon = function(list, index) {
-			if(confirm('Are you sure?')) {
-				list.splice(index, 1);
-			}
-		}
-
-		$scope.addNewItem = function() {
-			$scope.validateItem().then(function() {
-				var item_obj = angular.copy($scope.current_item);
-				delete $scope.current_item;
-				$scope.menu.menu_description[$scope.descIndex].sections[$scope.sectionIndex].items.push(item_obj);
-				WizardHandler.wizard().goTo('Manage Section');
-			}, function(err) {
-				toastr.error(err, 'ERROR');
-			});
-		}
-
-		$scope.updateItem = function() {
-			$scope.validateItem().then(function() {
-				var item_obj = angular.copy($scope.current_item);
-				delete $scope.current_item;
-				$scope.menu.menu_description[$scope.descIndex].sections[$scope.sectionIndex].items[$scope.itemIndex] = item_obj;
-				WizardHandler.wizard().goTo('Manage Section');
-			}, function(err) {
-				toastr.error(err, 'ERROR');
-			});
-		}
-
-		$scope.addAnotherItem = function() {
-			var item_obj = angular.copy($scope.current_item);
-			$scope.current_item = {
-				item_options: []
-			};
-			$scope.menu.menu_description[$scope.descIndex].sections[$scope.sectionIndex].items.push(item_obj);
-		}
-
-		$scope.cancelItem = function() {
-			delete $scope.current_item;
-			WizardHandler.wizard().goTo('Manage Section');
-		}
-
-		$scope.backToDesc = function() {
-			async.each($scope.menu.menu_description, function(description, callback) {
-				if(!description.menu_category) {
-					callback('Menu category name required');
-				} else if (!description.sections || !description.sections.length) {
-					callback('All menu categories must have atleast one section');
-				} else {
-					async.each(description.sections, function(section, callback) {
-						if (!section.section_name) {
-							callback('All sections must have a section name');
-						} else if (!section.items || !section.items.length) {
-							callback('All sections must have atleast one item');
-						} else {
-							callback();
-						}
-					}, function(err) {
-						callback(err);
-					});
-				}
-			}, function(err) {
-				if(err) {
-					toastr.error(err, 'ERROR')
-				} else {
-					WizardHandler.wizard().goTo('Menu Basics');
-				}
-			});
-		}
-
-		$scope.backToSection = function() {
-			if ($scope.menu.menu_description[$scope.descIndex].sections[$scope.sectionIndex].items.length === 0) {
-				toastr.error('Atleast one item required in every section');
-			} else {
-				WizardHandler.wizard().goTo('Manage Desc');	
 			}
 		}
 
@@ -356,44 +234,8 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 			})
 		}
 
-		$scope.validateItem = function() {
-			var deferred = $q.defer();
-			if (!$scope.current_item.item_name) {
-				deferred.reject('Item name is mandatory');
-			} else if (!$scope.current_item.item_tags || !$scope.current_item.item_tags.length) {
-				deferred.reject('Atleast one item tag is required');
-			} else if (!$scope.current_item.item_cost && $scope.current_item.item_options.length === 0) {
-				deferred.reject('Either item cost or atleast one item option mandatory');
-			} else {
-				async.each($scope.current_item.item_options, function(item_option, callback) {
-					if(!item_option.option) {
-						callback('All item options must have a valid name');
-					} else if (!item_option.option_cost) {
-						callback('All item options must have a valid cost');
-					} else if (!item_option.addon || !item_option.addon.length) {
-						callback();
-					} else {
-						async.each(item_option.addon, function(add_on, callback) {
-							if (!add_on.add_on_item) {
-								callback('All addons must have valid name');
-							} else if (!add_on.add_on_item_cost) {
-								callback('All addons must have valid cost');
-							} else {
-								callback();
-							}
-						}, function(err) {
-							callback(err);
-						});
-					}
-				}, function(err) {
-					if(err) {
-						deferred.reject(err);
-					} else {
-						deferred.resolve();
-					}
-				});
-			}
-			return deferred.promise;
+		$scope.showItem = function(item) {
+			$scope.visible_item = item;
 		}
 
 	}
@@ -429,53 +271,44 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 	$scope.current_item = item;
 
 	$scope.addOptionSet = function() {
-		$scope.current_item.option_sets.push({options: [], addons: []});
+		$scope.current_item.option_set.push({sub_options: [], addons: []});
 	}
 
-	$scope.removeOptionSet = function(index) {
-		if (!$scope.current_item || !$scope.current_item.option_sets || !$scope.current_item.option_sets[index]) {
-			toastr.error("Option set out of bounds");
-		} else {
-			$scope.current_item.option_sets.splice(index, 1);
-		}
+	$scope.addSubVariant = function(option) {
+		option.sub_options.push({sub_option_set: []})
 	}
 
-	$scope.addOption = function(option_set) {
-		option_set.options.push({});
+	$scope.addSubOptionPair = function(sub_option) {
+		sub_option.sub_option_set.push({});
 	}
 
-	$scope.removeOption = function(option_set, index) {
-		if(!option_set || !option_set.options || !option_set.options[index]) {
-			toastr.error("Option out of bounds");
-		} else {
-			option_set.options.splice(index, 1);
-		}
+	$scope.removeSubOption = function(option, index) {
+		option.sub_options.splice(index, 1);
 	}
 
-	$scope.addAddon = function(option_set) {
-		option_set.addons.push({});
+	$scope.removeSubOptionObj = function(sub_option, $index) {
+		sub_option.sub_option_set.splice($index, 1);
 	}
 
-	$scope.addItemOption = function() {
-		$scope.current_item.item_options.push({add_on: []});
+	$scope.removeOption = function(index) {
+		$scope.current_item.option_set.splice(index, 1);
 	}
 
-	$scope.removeItemOption = function(index) {
-		console.log(index, $scope.current_item, $scope.current_item.item_options, $scope.current_item.item_options[index])
-		if(!$scope.current_item || !$scope.current_item.item_options || !$scope.current_item.item_options[index]) {
-			toastr.error('Item option out of bounds');
-		} else {
-			$scope.current_item.item_options.splice(index, 1);
-		}
+	$scope.addAddonSet = function(option) {
+		option.addons.push({addon_set: []});
 	}
 
-	// $scope.addAddon = function(index) {
-	// 	$scope.validateItem().then(function() {
-	// 		$scope.current_item.item_options[index].add_on.push({});
-	// 	}, function(err) {
-	// 		toastr.error(err);
-	// 	});
-	// }
+	$scope.removeAddon = function(option, index) {
+		option.addons.splice(index, 1);
+	}
+
+	$scope.addAddonObj = function(addon) {
+		addon.addon_set.push({});
+	}
+
+	$scope.removeAddonObj = function(addon, index) {
+		addon.addon_set.splice(index, 1);
+	}
 
 	$scope.removeAddon = function(option_set, index) {
 		if(!option_set || !option_set.addons || !option_set.addons[index]) {
@@ -503,36 +336,57 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 			deferred.reject('Item name is mandatory');
 		} else if (!$scope.current_item.item_tags || !$scope.current_item.item_tags.length) {
 			deferred.reject('Atleast one item tag is required');
-		} else if (!$scope.current_item.item_cost && $scope.current_item.item_options.length === 0) {
-			deferred.reject('Either item cost or atleast one item option mandatory');
+		} else if (!$scope.current_item.item_cost) {
+			deferred.reject("Base cost is mandatory");
+		} else if (!$scope.current_item.option_set_title) {
+			deferred.reject("Variant header required");
+		} else if ($scope.current_item.option_set.length === 0) {
+			deferred.reject('Atleast one option mandatory');
 		} else {
-			async.each($scope.current_item.option_sets, function(option_set, callback) {
-				if(!option_set.option_set_name) {
-					callback("All item option sets must have a valid name");
-				} else if (!option_set.option_set_value) {
+			async.each($scope.current_item.option_set, function(option_set, callback) {
+				if (!option_set.option_set_value) {
 					callback("All item option sets must have a valid value")
 				} else if (!option_set.option_set_cost) {
 					callback("All item option sets must have a valid cost");
 				} else {
-					async.each(option_set.options, function(item_option, callback) {
-						if(!item_option.option_name) {
-							callback('All item options must have a valid name');
-						} else if (!item_option.option_cost) {
-							callback('All item options must have a valid cost');
-						} else if (!item_option.addon || !item_option.addon.length) {
-							callback();
+					async.each(option_set.sub_options, function(sub_option, callback) {
+						if(!sub_option.sub_option_title) {
+							callback("All sub variant sets must have valid headers");
+						} else if ((!sub_option.sub_option_set || sub_option.sub_option_set.length === 0)) {
+							callback("Atleast one key-value pair required for all sub variant sets");
 						} else {
-							async.each(item_option.addon, function(add_on, callback) {
-								if (!add_on.add_on_item) {
-									callback('All addons must have valid name');
-								} else if (!add_on.add_on_item_cost) {
-									callback('All addons must have valid cost');
+							async.each(sub_option.sub_option_set, function(sub_option_obj, callback) {
+								console.log(sub_option_obj);
+								if (!sub_option_obj.sub_option_value) {
+									callback("All sub variant sets must have valid value");
+								} else if (!sub_option_obj.sub_option_cost) {
+									callback("All sub variant sets must have valid cost");
 								} else {
-									callback();
+									async.each(option_set.addons, function(addon, callback) {
+										if (!addon.addon_title) {
+											callback("All addon sets must have valid title");
+										} else if (!addon.addon_set || addon.addon_set.length === 0) {
+											callback('All addons must have atleast one key-value pair');
+										} else {
+											async.each(addon.addon_set, function(addon_obj, callback) {
+												if (!addon_obj.addon_value) {
+													callback("All addons must have valid value");
+												} else if (!addon_obj.addon_cost) {
+													callback("Add addons must have valid cost");
+												} else {
+													callback();
+												}
+											}, function(err) {
+												callback(err);
+											});
+										}
+									}, function(err) {
+										callback(err);
+									})
 								}
 							}, function(err) {
 								callback(err);
-							});
+							})
 						}
 					}, function(err) {
 						callback(err);
