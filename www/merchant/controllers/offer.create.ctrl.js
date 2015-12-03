@@ -1,6 +1,6 @@
 angular.module('merchantApp')
-  .controller('OfferCreateController', ['$scope', '$http', '$q', 'toastr', 'merchantRESTSvc', '$rootScope', '$log', '$timeout', '$state', 'WizardHandler',
-    function($scope, $http, Q, toastr, merchantRESTSvc, $rootScope, $log, $timeout, $state, WizardHandler) {
+  .controller('OfferCreateController', ['$scope', '$http', '$q', 'toastr', 'merchantRESTSvc', '$rootScope', '$log', '$timeout', '$state', 'WizardHandler', '$modal',
+    function($scope, $http, Q, toastr, merchantRESTSvc, $rootScope, $log, $timeout, $state, WizardHandler, $modal) {
 
       $scope.isPaying = $rootScope.isPaying;
       merchantRESTSvc.getOutlets().then(function(data) {
@@ -9,6 +9,20 @@ angular.module('merchantApp')
         $log.log('Could not get outlets - ' + err.message);
         $scope.outlets = [];
       });
+      $scope.menus = [];
+      merchantRESTSvc.getAllMenus().then(function(res) {
+        _.each(res.data, function(menu) {
+          if (!$scope.outlet_id) {
+            $scope.outlet_id = menu.outlet;
+            $scope.menus.push(menu);
+            console.log('menu', menu);
+          } else if($scope.outlet_id === menu.outlet) {
+            $scope.menus.push(menu);
+          }
+        })
+      }, function(error) {
+        console.log(err);
+      });
 
       $scope.today = new Date();
       $scope.max_date = new Date($scope.today.getTime() + (2 * 365 * 24 * 60 * 60 * 1000));
@@ -16,6 +30,42 @@ angular.module('merchantApp')
       $scope.today.setHours(0);
       $scope.today.setSeconds(0);
       $scope.today.setMilliseconds(0);
+
+      $scope.chooseItem = function(text, item_only) {
+        var modalInstance = $modal.open({
+          animation: true,
+          templateUrl: 'chooseItemTemplate.html',
+          controller: 'ChooseItemController',
+          size: 'lg',
+          resolve: {
+            item_only: function() {
+              return item_only;
+            }
+          }
+        });
+
+        modalInstance.result.then(function(choice) {
+
+          if (text === 'buyxgety_1') {
+            $scope.offer.actions.reward.reward_meta.item_x = choice;
+            $scope.offer.offer_items = _.extend($scope.offer.offer_items, choice);
+          } else if (text === 'buyxgety_2') {
+            $scope.offer.actions.reward.reward_meta.item_y = choice;
+          } else if (text === 'free') {
+            $scope.offer.actions.reward.reward_meta.item_free = choice;
+            $scope.offer.offer_items = _.extend($scope.offer.offer_items, choice);
+          } else if (text === '') {
+            $scope.offer.offer_items = _.extend($scope.offer.offer_items, choice);
+          } else {
+            $scope.offer.offer_items = _.extend($scope.offer.offer_items, choice);
+          }
+        }, function(err) {
+          console.log('Modal dismissed at: ', new Date());
+          if(err) {
+            toastr.error(err, "ERROR");
+          }
+        });
+      }
 
       $scope.offer = {
         offer_status: 'active',
@@ -35,12 +85,15 @@ angular.module('merchantApp')
               delivery: true
             }
           }
+        },
+        offer_items: {
+          all: false,
         }
       }
 
       $scope.days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
       $scope.offer_types = { 'checkin': 'Checkin Offer', 'offer': 'Offer', 'deal': 'Deal', 'bank_deal': 'Bank Deal' }
-      $scope.reward_types = {'buyonegetone': 'Buy One Get One', 'discount': 'Discount', 'flatoff': 'Flat Off', 'free': 'Free', 'happyhours': 'Happy Hours', 'reduced': 'Reduced Price', 'custom': 'Custom', 'unlimited': 'Unlimited', 'onlyhappyhours': 'Only Happy Hours', 'combo': 'Combo', 'buffet': 'Buffet'};
+      $scope.reward_types = {'discount': 'Discount', 'flatoff': 'Flat Off', 'free': 'Free'};
       $scope.offer_sources = { 'HDFC': 'HDFC Bank', 'SBI': 'State Bank Of India', 'HSBC': 'HSBC Bank', 'Citi Bank': 'Citi Bank', 'Axis Bank': 'Axis Bank', 'ICICI': 'ICICI Bank', 'American Express': 'American Express' };
       $scope.event_matches = [{name: 'On every', value: 'on every'}, {name: 'After', value: 'after'}, {name: 'On only', value: 'on only'}]
       
@@ -125,13 +178,6 @@ angular.module('merchantApp')
           if(!_.has(obj1, 'timings')) { return obj1 >= obj2.timings.length? obj1: obj2.timings.length; }
           else { return obj1.timings.length>obj2.timings.length? obj1.timings.length:obj2.timings.length; }
         }));
-      }
-
-      $scope.filterOutlets = function(val) {
-        var regex = new RegExp(val, 'i');
-        return _.filter($scope.outlets, function(obj) {
-          return regex.test(obj.basics.name) || regex.test(obj.contact.location.address) || regex.test(obj.contact.location.locality_1[0]) || regex.test(obj.contact.location.locality_2[0]);
-        });
       }
 
       $scope.removeOutlet = function(index) {
@@ -222,18 +268,20 @@ angular.module('merchantApp')
           $scope.offer.actions.reward.reward_meta = {
             reward_type: newVal.reward_type
           };
-          if (newVal.reward_type == 'custom') {
-            $scope.offer.actions.reward.header = '';
-            $scope.offer.actions.reward.line1 = '';
-            $scope.offer.actions.reward.line2 = '';
-          }
         }
 
-        if (newVal.reward_type == "buyonegetone") {
-          if (newVal.bogo) {
-            $scope.offer.actions.reward.header = '1+1',
-              $scope.offer.actions.reward.line1 = 'on ' + newVal.bogo;
-            $scope.offer.actions.reward.line2 = '';
+        if (newVal.reward_type == "buyxgety") {
+          if (newVal.item_x && newVal.item_y) {
+            $scope.getBuyXGetYRewards().then(function(rewards) {
+              console.log('rewards', rewards);
+              $scope.offer.actions.reward.header = 'FREE';
+              $scope.offer.actions.reward.line1 = rewards.item_x;
+              $scope.offer.actions.reward.line2 = 'WITH ' + rewards.item_y;
+            }, function() {
+              $scope.offer.actions.reward.header = '';
+              $scope.offer.actions.reward.line1 = '';
+              $scope.offer.actions.reward.line2 = '';
+            });
           } else {
             $scope.offer.actions.reward.header = '';
             $scope.offer.actions.reward.line1 = '';
@@ -260,77 +308,17 @@ angular.module('merchantApp')
             $scope.offer.actions.reward.line2 = '';
           }
         } else if (newVal.reward_type == 'free') {
-          if (newVal.title && newVal._with) {
-            $scope.offer.actions.reward.header = 'Free';
-            $scope.offer.actions.reward.line1 = newVal.title;
-            $scope.offer.actions.reward.line2 = 'with ' + newVal._with;
-          } else {
-            $scope.offer.actions.reward.header = '';
-            $scope.offer.actions.reward.line1 = '';
-            $scope.offer.actions.reward.line2 = '';
-          }
-        } else if (newVal.reward_type == 'happyhours') {
-          if (newVal.extension) {
-            $scope.offer.actions.reward.header = newVal.extension;
-            $scope.offer.actions.reward.line1 = 'extra happy hours';
-            $scope.offer.actions.reward.line2 = '';
-          } else {
-            $scope.offer.actions.reward.header = '';
-            $scope.offer.actions.reward.line1 = '';
-            $scope.offer.actions.reward.line2 = '';
-          }
-        } else if (newVal.reward_type == 'reduced') {
-          if (newVal.what && newVal.worth && newVal.for_what) {
-            $scope.offer.actions.reward.header = 'Only Rs. ' + newVal.for_what;
-            $scope.offer.actions.reward.line1 = 'for ' + newVal.what + ' worth';
-            $scope.offer.actions.reward.line2 = 'Rs. ' + newVal.worth;
-          } else {
-            $scope.offer.actions.reward.header = '';
-            $scope.offer.actions.reward.line1 = '';
-            $scope.offer.actions.reward.line2 = '';
-          }
-        } else if (newVal.reward_type == 'custom') {
-          if (!$scope.offer.actions.reward.header)
-            $scope.offer.actions.reward.header = '';
-          if (!$scope.offer.actions.reward.line1)
-            $scope.offer.actions.reward.line1 = '';
-          if (!$scope.offer.actions.reward.line2)
-            $scope.offer.actions.reward.line2 = '';
-        } else if (newVal.reward_type == 'unlimited') {
-          if (newVal.item && newVal.conditions) {
-            $scope.offer.actions.reward.header = 'Unlimited';
-            $scope.offer.actions.reward.line1 = newVal.item;
-            $scope.offer.actions.reward.line2 = 'at Rs. ' + newVal.conditions;
-          } else {
-            $scope.offer.actions.reward.header = '';
-            $scope.offer.actions.reward.line1 = '';
-            $scope.offer.actions.reward.line2 = '';
-          }
-        } else if (newVal.reward_type == 'onlyhappyhours') {
-          if (newVal.title && newVal.conditions) {
-            $scope.offer.actions.reward.header = 'Happy Hours';
-            $scope.offer.actions.reward.line1 = 'get ' + newVal.title;
-            $scope.offer.actions.reward.line2 = 'on ' + newVal.conditions;
-          } else {
-            $scope.offer.actions.reward.header = '';
-            $scope.offer.actions.reward.line1 = '';
-            $scope.offer.actions.reward.line2 = '';
-          }
-        } else if (newVal.reward_type == 'combo') {
-          if (newVal.items && newVal._for) {
-            $scope.offer.actions.reward.header = 'Combo';
-            $scope.offer.actions.reward.line1 = newVal.items;
-            $scope.offer.actions.reward.line2 = 'for Rs. ' + newVal._for;
-          } else {
-            $scope.offer.actions.reward.header = '';
-            $scope.offer.actions.reward.line1 = '';
-            $scope.offer.actions.reward.line2 = '';
-          }
-        } else if (newVal.reward_type == 'buffet') {
-          if (newVal.title && newVal.cost) {
-            $scope.offer.actions.reward.header = 'Buffet';
-            $scope.offer.actions.reward.line1 = newVal.title;
-            $scope.offer.actions.reward.line2 = 'at Rs. ' + newVal.cost;
+          if (newVal.item_free) {
+            $scope.getFreeItemReward().then(function(text_obj) {
+              $scope.offer.actions.reward.reward_meta.free_item_name = text_obj.item_free;
+              $scope.offer.actions.reward.header = 'Free';
+              $scope.offer.actions.reward.line1 = text_obj.item_free;
+              $scope.offer.actions.reward.line2 = '';
+            }, function(err) {
+              $scope.offer.actions.reward.header = 'test';
+              $scope.offer.actions.reward.line1 = 'test';
+              $scope.offer.actions.reward.line2 = 'test';
+            });
           } else {
             $scope.offer.actions.reward.header = '';
             $scope.offer.actions.reward.line1 = '';
@@ -450,9 +438,11 @@ angular.module('merchantApp')
         var def = Q.defer();
         if (!$scope.offer.actions.reward.reward_meta.reward_type) {
           def.reject("Choose a reward type");
-        } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'buyonegetone') {
-          if (!$scope.offer.actions.reward.reward_meta.bogo) {
-            def.reject("'Buy One Get One' requires item names");
+        } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'buyxgety') {
+          if (!$scope.offer.actions.reward.reward_meta.item_x) {
+            def.reject("Buy X Get y requires 'FREE ITEM'");
+          } else if (!$scope.offer.actions.reward.reward_meta.item_y) {
+            def.reject("Buy X Get y requires 'PAID ITEM'");
           } else {
             def.resolve(true);
           }
@@ -473,64 +463,8 @@ angular.module('merchantApp')
             def.resolve(true);
           }
         } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'free') {
-          if (!$scope.offer.actions.reward.reward_meta.title) {
-            def.reject("Free offer requires item name");
-          } else if (!$scope.offer.actions.reward.reward_meta._with) {
-            def.reject("Free offer requires conditions");
-          } else {
-            def.resolve(true);
-          }
-        } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'happyhours') {
-          if (!$scope.offer.actions.reward.reward_meta.extension) {
-            def.reject("'Happy hours' offer requires extension duration (in hrs.)")
-          } else {
-            def.resolve(true);
-          }
-        } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'reduced') {
-          if (!$scope.offer.actions.reward.reward_meta.what) {
-            def.reject("Reduced offer requires item info");;
-          } else if (!$scope.offer.actions.reward.reward_meta.worth) {
-            def.reject("Reduced offer requires actual worth");
-          } else if (!$scope.offer.actions.reward.reward_meta.for_what) {
-            def.reject("Reduced offer requires deal price");
-          } else {
-            def.resolve(true);
-          }
-        } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'custom') {
-          if (!$scope.offer.actions.reward.reward_meta.title) {
-            def.reject("Custom offer requires offer details");
-          } else {
-            def.resolve(true);
-          }
-        } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'unlimited') {
-          if (!$scope.offer.actions.reward.reward_meta.item) {
-            def.reject("Unlimited offer requires item name");
-          } else if (!$scope.offer.actions.reward.reward_meta.conditions) {
-            def.reject("Unlimited offer requires offer criteria");
-          } else {
-            def.resolve(true);
-          }
-        } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'onlyhappyhours') {
-          if (!$scope.offer.actions.reward.reward_meta.title) {
-            def.reject("'Only happy hours' offer requires deal info");
-          } else if (!$scope.offer.actions.reward.reward_meta.conditions) {
-            def.reject("'Only happy hours' offer requires deal items");
-          } else {
-            def.resolve(true);
-          }
-        } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'combo') {
-          if (!$scope.offer.actions.reward.reward_meta.items) {
-            def.reject("Combo offer requires deal items");
-          } else if (!$scope.offer.actions.reward.reward_meta._for) {
-            def.reject("Combo offer requires deal price");
-          } else {
-            def.resolve(true);
-          }
-        } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'buffet') {
-          if (!$scope.offer.actions.reward.reward_meta.title) {
-            def.reject("Buffet offer requires deal info");
-          } else if (!$scope.offer.actions.reward.reward_meta.cost) {
-            def.reject("Buffet offer requires deal price");
+          if (!$scope.offer.actions.reward.reward_meta.item_free) {
+            def.reject("Free offer requires 'FREE ITEM' to be selected");
           } else {
             def.resolve(true);
           }
@@ -721,5 +655,482 @@ angular.module('merchantApp')
         WizardHandler.wizard().goTo(0);
       }
 
+      $scope.getBuyXGetYRewards = function() {
+        var deferred = Q.defer();
+        $scope.getRewardName($scope.offer.actions.reward.reward_meta.item_x).then(function(item_x) {
+          $scope.getRewardName($scope.offer.actions.reward.reward_meta.item_y).then(function(item_y) {
+            deferred.resolve({
+              item_x: item_x,
+              item_y: item_y
+            });
+          })
+        })
+        return deferred.promise;
+      }
+
+      $scope.getFreeItemReward = function() {
+        var deferred = Q.defer();
+        $scope.getRewardName($scope.offer.actions.reward.reward_meta.item_free).then(function(reward) {
+          deferred.resolve({
+            item_free: reward
+          });
+        }, function(err) {
+          deferred.reject();
+          console.log('error', err);
+        })
+        return deferred.promise;
+      }
+
+      $scope.getItemName = function(item) {
+        $scope.getRewardName(item).then(function(name) {
+          console.log(name);
+          return '123';
+        }, function(err) {
+          return 'asd';
+        })
+      }
+
+      $scope.getRewardName = function(item_obj) {
+        var deferred = Q.defer();
+        async.each($scope.menus, function(menu, callback) {
+          console.log(menu._id, item_obj.menu_id, menu._id !== item_obj.menu_id, 'menu');
+          if(menu._id !== item_obj.menu_id) {
+            callback();
+          } else {
+            async.each(menu.menu_categories, function(category, callback) {
+              console.log(category._id, item_obj.category_id, category._id !== item_obj.category_id, 'category');
+              if(category._id !== item_obj.category_id) {
+                callback();
+              } else if(!item_obj.sub_category_id) {
+                  callback(category.category_name + " (Category)");
+              } else {
+                async.each(category.sub_categories, function(sub_category, callback) {
+                  console.log(sub_category._id, item_obj.sub_category_id, sub_category._id !== item_obj.sub_category_id, 'sub category');
+                  if(sub_category._id !== item_obj.sub_category_id) {
+                    callback();
+                  } else if (!item_obj.item_id) {
+                    callback(sub_category.sub_category_name + " (Sub Category)");
+                  } else {
+                    async.each(sub_category.items, function(item, callback) {
+                      console.log(item._id, item_obj.item_id, item._id !== item_obj.item_id, 'item');
+                      if(item._id !== item_obj.item_id) {
+                        callback();
+                      } else if (!item_obj.option_id) {
+                        callback(item.item_name);
+                      } else {
+                        async.each(item.options, function(option, callback) {
+                          console.log(option._id, item_obj.option_id, option._id !== item_obj.option_id, 'option');
+                          if(option._id !== item_obj.option_id) {
+                            callback();
+                          } else if (!item_obj.sub_option_id && !item_obj.addon_id) {
+                            callback(option.option_value + ' ' + item.item_name + '(Option)')
+                          } else if (item_obj.sub_option_id) {
+                            async.each(option.sub_options, function(sub_option, callback) {
+                              console.log(sub_option._id, item_obj.sub_option_id, sub_option._id !== item_obj.sub_option_id, 'sub option');
+                              if(sub_option._id !== item_obj.sub_option_id) {
+                                callback();
+                              } else if (!item_obj.sub_option_set_id) {
+                                callback(sub_option.sub_option_title + ' ' + item.item_name + ' (Sub option)');
+                              } else {
+                                async.each(sub_option.sub_option_set, function(sub_option_obj, callback) {
+                                  console.log(sub_option_obj._id, item_obj.sub_option_set_id, sub_option_obj._id !== item_obj.sub_option_set_id, 'sub option obj');
+                                  if (sub_option_obj._id !== item_obj.sub_option_set_id) {
+                                    callback();
+                                  } else {
+                                    callback(sub_option_obj.sub_option_value + ' ' + item.item_name + ' (sub option obj)');
+                                  }
+                                }, function(item_name) {
+                                  callback(item_name);
+                                });
+                              }
+                            }, function(item_name) {
+                              callback(item_name);
+                            })
+                          } else if (item_obj.addon_id) {
+                            async.each(option.addons, function(addon, callback) {
+                              console.log(addon._id, item_obj.addon_id, addon._id !== item_obj.addon_id, 'addon');
+                              if (addon._id !== item_obj.addon_id) {
+                                callback();
+                              } else if (!item_obj.addon_set_id) {
+                                callback(addon.addon_title + ' ' + item.item_name + '(addon)');
+                              } else {
+                                async.each(addon.addon_set, function(addon_obj, callback) {
+                                  console.log(addon_obj._id, item_obj.addon_set_id, addon_obj._id !== item_obj.addon_set_id, 'addon obj');
+                                  if (addon_obj._id !== item_obj.addon_set_id) {
+                                    callback();
+                                  } else {
+                                    callback(addon_obj.addon_value + ' ' + item.item_name + '(addon obj)');
+                                  }
+                                }, function(item_name) {
+                                  callback(item_name);
+                                });
+                              }
+                            }, function(item_name) {
+                              callback(item_name);
+                            });
+                          }
+                        }, function(item_name) {
+                          callback(item_name);
+                        });
+                        // async.each(item.options, function(option, callback) {
+                        //   if (option._id !== item_obj.option_id) {
+                        //     callback();
+                        //   } else if (!item_obj.sub_option_id && !item_obj.addon_id) {
+                        //     callback(option.option_value + " " + item.item_name);
+                        //   } else if (item_obj.sub_option_id) {
+                        //     async.each(option.sub_options, function(sub_option, callback) {
+                        //       if(sub_option._id !== item_obj.sub_option_id) {
+                        //         callback();
+                        //       } else if (!item_obj.sub_option_set_id) {
+                        //         callback(option_set.option_name + ' ' + sub_option.sub_option_title + ' ' + item.item_name);
+                        //       } else  {
+                        //         async.each(sub_option.sub_option_set, function(sub_option_obj, callback) {
+                        //           if (sub_option_obj.)
+                        //         })
+                        //       }
+                        //     }, function(item_name) {
+                        //       callback(item_name);
+                        //     });
+                        //   } else {
+                        //     async.each(option_set.addons, function(addon, callback) {
+                        //       if(addon._id !== item_obj.addon) {
+                        //         callback();
+                        //       } else {
+                        //         callback(option_set.option_set_name + ' ' + item.item_name + ' with ' + addon.addon_name);
+                        //       }
+                        //     }, function(item_name) {
+                        //       callback(item_name);
+                        //     });
+                        //   }
+                        // }, function(item_name) {
+                        //   callback(item_name);
+                        // });
+                      }
+                    }, function(item_name) {
+                      callback(item_name);
+                    })
+                  }
+                }, function(item_name) {
+                  callback(item_name);
+                })
+              }
+            }, function(item_name) {
+              callback(item_name);
+            })
+          }
+        }, function(item_name) {
+          if(item_name) {
+            deferred.resolve(item_name);
+          } else {
+            deferred.reject("error");
+          }
+        })
+        return deferred.promise;
+      }
     }
-  ])
+  ]).controller('ChooseItemController', function($scope, $modalInstance, toastr, merchantRESTSvc, item_only) {
+    $scope.item_only = item_only || false;
+    $scope.menus = [];
+    $scope.categories = [];
+    $scope.sub_categories = [];
+    $scope.items = [];
+    $scope.options = [];
+    $scope.choice = {};
+
+    merchantRESTSvc.getAllMenus().then(function(res) {
+      _.each(res.data, function(menu) {
+        if (!$scope.outlet_id) {
+          $scope.outlet_id = menu.outlet;
+          $scope.menus.push(menu);
+        } else if($scope.outlet_id === menu.outlet) {
+          $scope.menus.push(menu);
+        }
+      })
+    }, function(error) {
+      console.log(err);
+    });
+
+    $scope.menuSelected = function() {
+      if (!$scope.choice.menu_id) {
+        return;
+      }
+      _.each($scope.menus, function(menu) {
+        if (menu._id === $scope.choice.menu_id) {
+          $scope.categories = _.clone(menu.menu_categories);
+        }
+      });
+      $scope.choice.category_id = '';
+      $scope.choice.sub_category_id = '';
+      $scope.choice.item_id = '';
+      $scope.sub_categories = [];
+      $scope.items = [];
+      $scope.options = [];
+    }
+
+    $scope.categorySelected = function() {
+      if (!$scope.choice.category_id) {
+        return;
+      }
+      _.each($scope.categories, function(category) {
+        if (category._id === $scope.choice.category_id) {
+          $scope.sub_categories = _.clone(category.sub_categories);
+        }
+      });
+      $scope.choice.sub_category_id = '';
+      $scope.choice.item_id = '';
+      $scope.items = [];
+      $scope.options = [];
+    }
+
+    $scope.subCategorySelected = function() {
+      if (!$scope.choice.sub_category_id) {
+        return;
+      }
+      _.each($scope.sub_categories, function(sub_category) {
+        if (sub_category._id === $scope.choice.sub_category_id) {
+          $scope.items = _.clone(sub_category.items);
+        }
+      })
+      $scope.choice.item_id = '';
+      $scope.options = [];
+    }
+
+    $scope.itemSelected = function() {
+      if (!$scope.choice.item_id) {
+        return;
+      }
+      _.each($scope.items, function(item) {
+        if(item._id === $scope.choice.item_id) {
+          $scope.option_title = item.option_title;
+          $scope.options = _.clone(item.options);
+        }
+      })
+    }
+
+    $scope.pickMenu = function() {
+      if (!$scope.choice.menu_id) {
+        $modalInstance.dismiss("Error looking up selected menu")
+      } else {
+        $modalInstance.close({
+          menu_id: $scope.choice.menu_id,
+          category_id: undefined,
+          sub_category_id: undefined,
+          item_id: undefined,
+          option_id: undefined,
+          sub_option_id: undefined,
+          sub_option_set_id: undefined,
+          addon_id: undefined,
+          addon_set_id: undefined
+        });
+      }
+    }
+
+    $scope.pickCategory = function() {
+      if (!$scope.choice.menu_id) {
+        $modalInstance.dismiss("Error looking up selected menu");
+      } else if (!$scope.choice.category_id) {
+        $modalInstance.dismiss("Error looking up selected category");
+      } else {
+        $modalInstance.close({
+          menu_id: $scope.choice.menu_id,
+          category_id: $scope.choice.category_id,
+          sub_category_id: undefined,
+          item_id: undefined,
+          option_id: undefined,
+          sub_option_id: undefined,
+          sub_option_set_id: undefined,
+          addon_id: undefined,
+          addon_set_id: undefined
+        });
+      }
+    }
+
+    $scope.pickSubCategory = function() {
+      if (!$scope.choice.menu_id) {
+        $modalInstance.dismiss("Error looking up selected menu");
+      } else if (!$scope.choice.category_id) {
+        $modalInstance.dismiss("Error looking up selected category");
+      } else if (!$scope.choice.sub_category_id) {
+        $modalInstance.dismiss("Error looking up selected sub category");
+      } else {
+        $modalInstance.close({
+          menu_id: $scope.choice.menu_id,
+          category_id: $scope.choice.category_id,
+          sub_category_id: $scope.choice.sub_category_id,
+          item_id: undefined,
+          option_id: undefined,
+          sub_option_id: undefined,
+          sub_option_set_id: undefined,
+          addon_id: undefined,
+          addon_set_id: undefined
+        });
+      }
+    }
+
+    $scope.pickItem = function() {
+      if (!$scope.choice.menu_id) {
+        $modalInstance.dismiss("Error looking up selected menu");
+      } else if (!$scope.choice.category_id) {
+        $modalInstance.dismiss("Error looking up selected category");
+      } else if (!$scope.choice.sub_category_id) {
+        $modalInstance.dismiss("Error looking up selected sub category");
+      } else if (!$scope.choice.item_id) {
+        $modalInstance.dismiss("Error looking up selected item");
+      } else {
+        $modalInstance.close({
+          menu_id: $scope.choice.menu_id,
+          category_id: $scope.choice.category_id,
+          sub_category_id: $scope.choice.sub_category_id,
+          item_id: $scope.choice.item_id,
+          option_id: undefined,
+          sub_option_id: undefined,
+          sub_option_set_id: undefined,
+          addon_id: undefined,
+          addon_set_id: undefined
+        });
+      }
+    }
+
+    $scope.pickOptionSet = function(index) {
+      if (!$scope.choice.menu_id) {
+        $modalInstance.dismiss("Error looking up selected menu");
+      } else if (!$scope.choice.category_id) {
+        $modalInstance.dismiss("Error looking up selected category");
+      } else if (!$scope.choice.sub_category_id) {
+        $modalInstance.dismiss("Error looking up selected sub category");
+      } else if (!$scope.choice.item_id) {
+        $modalInstance.dismiss("Error looking up selected item");
+      } else if (!$scope.options || !$scope.options[index]) {
+        $modalInstance.dismiss("Option set out of bounds");
+      } else {
+        $modalInstance.close({
+          menu_id: $scope.choice.menu_id,
+          category_id: $scope.choice.category_id,
+          sub_category_id: $scope.choice.sub_category_id,
+          item_id: $scope.choice.item_id,
+          option_id: $scope.options[index]._id,
+          sub_option_id: undefined,
+          sub_option_set_id: undefined,
+          addon_id: undefined,
+          addon_set_id: undefined
+        });
+      }
+    }
+
+    $scope.pickSubOption = function(option_id, sub_option_id) {
+      if (!$scope.choice.menu_id) {
+        $modalInstance.dismiss("Error looking up selected menu");
+      } else if (!$scope.choice.category_id) {
+        $modalInstance.dismiss("Error looking up selected category");
+      } else if (!$scope.choice.sub_category_id) {
+        $modalInstance.dismiss("Error looking up selected sub category");
+      } else if (!$scope.choice.item_id) {
+        $modalInstance.dismiss("Error looking up selected item");
+      } else if (!option_id) {
+        $modalInstance.dismiss("error looking up selected option");
+      } else if (!sub_option_id) {
+        $modalInstance.dismiss("Sub option out of bounds");
+      } else {
+        $modalInstance.close({
+          menu_id: $scope.choice.menu_id,
+          category_id: $scope.choice.category_id,
+          sub_category_id: $scope.choice.sub_category_id,
+          item_id: $scope.choice.item_id,
+          option_id: option_id,
+          sub_option_id: sub_option_id,
+          sub_option_set_id: undefined,
+          addon_id: undefined,
+          addon_set_id: undefined
+        });
+      }
+    }
+
+    $scope.pickSubOptionObj = function(option_id, sub_option_id, sub_option_obj_id) {
+      if (!$scope.choice.menu_id) {
+        $modalInstance.dismiss("Error looking up selected menu");
+      } else if (!$scope.choice.category_id) {
+        $modalInstance.dismiss("Error looking up selected category");
+      } else if (!$scope.choice.sub_category_id) {
+        $modalInstance.dismiss("Error looking up selected sub category");
+      } else if (!$scope.choice.item_id) {
+        $modalInstance.dismiss("Error looking up selected item");
+      } else if (!option_id) {
+        $modalInstance.dismiss("error looking up selected option");
+      } else if (!sub_option_id) {
+        $modalInstance.dismiss("Sub option out of bounds");
+      } else if (!sub_option_obj_id) {
+        $modalInstance.dismiss("Sub option value out of bounds");
+      } else {
+        $modalInstance.close({
+          menu_id: $scope.choice.menu_id,
+          category_id: $scope.choice.category_id,
+          sub_category_id: $scope.choice.sub_category_id,
+          item_id: $scope.choice.item_id,
+          option_id: option_id,
+          sub_option_id: sub_option_id,
+          sub_option_set_id: sub_option_obj_id,
+          addon_id: undefined,
+          addon_set_id: undefined
+        });
+      }
+    }
+
+    $scope.pickAddon = function(option_id, addon_id) {
+      if (!$scope.choice.menu_id) {
+        $modalInstance.dismiss("Error looking up selected menu");
+      } else if (!$scope.choice.category_id) {
+        $modalInstance.dismiss("Error looking up selected category");
+      } else if (!$scope.choice.sub_category_id) {
+        $modalInstance.dismiss("Error looking up selected sub category");
+      } else if (!$scope.choice.item_id) {
+        $modalInstance.dismiss("Error looking up selected item");
+      } else if (!option_id) {
+        $modalInstance.dismiss("error looking up selected option set");
+      } else if (!addon_id) {
+        $modalInstance.dismiss("Addon out of bounds");
+      } else {
+        $modalInstance.close({
+          menu_id: $scope.choice.menu_id,
+          category_id: $scope.choice.category_id,
+          sub_category_id: $scope.choice.sub_category_id,
+          item_id: $scope.choice.item_id,
+          option_id: option_id,
+          sub_option_id: undefined,
+          sub_option_set_id: undefined,
+          addon_id: addon_id,
+          addon_set_id: undefined
+        });
+      }
+    }
+
+    $scope.pickAddonObj = function(option_id, addon_id, addon_obj_id) {
+      if (!$scope.choice.menu_id) {
+        $modalInstance.dismiss("Error looking up selected menu");
+      } else if (!$scope.choice.category_id) {
+        $modalInstance.dismiss("Error looking up selected category");
+      } else if (!$scope.choice.sub_category_id) {
+        $modalInstance.dismiss("Error looking up selected sub category");
+      } else if (!$scope.choice.item_id) {
+        $modalInstance.dismiss("Error looking up selected item");
+      } else if (!option_id) {
+        $modalInstance.dismiss("error looking up selected option");
+      } else if (!addon_id) {
+        $modalInstance.dismiss("Addon out of bounds");
+      } else if (!addon_obj_id) {
+        $modalInstance.dismiss("Addon value out of bounds");
+      } else {
+        $modalInstance.close({
+          menu_id: $scope.choice.menu_id,
+          category_id: $scope.choice.category_id,
+          sub_category_id: $scope.choice.sub_category_id,
+          item_id: $scope.choice.item_id,
+          option_id: option_id,
+          sub_option_id: undefined,
+          sub_option_set_id: undefined,
+          addon_id: addon_id,
+          addon_set_id: addon_obj_id
+        });
+      }
+    }
+
+  });
