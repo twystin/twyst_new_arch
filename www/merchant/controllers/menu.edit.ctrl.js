@@ -132,9 +132,9 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 				resolve: {
 					item: function() {
 						return {
-							option_set: [],
+							options: [],
 							is_vegetarian: false,
-							option_set_is_addon: false
+							option_is_addon: false
 						};
 					},
 					is_new: function() {
@@ -159,7 +159,7 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 					size: 'lg',
 					resolve: {
 						item: function() {
-							return _.clone(sub_category.items[index] || {option_sets: []});
+							return _.clone(sub_category.items[index] || {options: []});
 						},
 						is_new: function() {
 							return false;
@@ -271,7 +271,7 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 	$scope.current_item = item;
 
 	$scope.addOptionSet = function() {
-		$scope.current_item.option_set.push({sub_options: [], addons: []});
+		$scope.current_item.options.push({sub_options: [], addons: []});
 	}
 
 	$scope.addSubVariant = function(option) {
@@ -291,7 +291,7 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 	}
 
 	$scope.removeOption = function(index) {
-		$scope.current_item.option_set.splice(index, 1);
+		$scope.current_item.options.splice(index, 1);
 	}
 
 	$scope.addAddonSet = function(option) {
@@ -310,11 +310,11 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 		addon.addon_set.splice(index, 1);
 	}
 
-	$scope.removeAddon = function(option_set, index) {
-		if(!option_set || !option_set.addons || !option_set.addons[index]) {
+	$scope.removeAddon = function(option, index) {
+		if(!option || !option.addons || !option.addons[index]) {
 			toastr.error('Addon out of bounds');
 		} else {
-			option_set.addons.splice(index, 1);
+			option.addons.splice(index, 1);
 		}
 	}
 
@@ -336,20 +336,21 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 			deferred.reject('Item name is mandatory');
 		} else if (!$scope.current_item.item_tags || !$scope.current_item.item_tags.length) {
 			deferred.reject('Atleast one item tag is required');
-		} else if (!$scope.current_item.item_cost) {
+		} else if (!$scope.current_item.item_cost && $scope.current_item.item_cost !== 0) {
 			deferred.reject("Base cost is mandatory");
-		} else if (!$scope.current_item.option_set_title) {
-			deferred.reject("Variant header required");
-		} else if ($scope.current_item.option_set.length === 0) {
+		} else if (!$scope.current_item.option_title) {
+			deferred.reject("Option header required");
+		} else if ($scope.current_item.options.length === 0) {
 			deferred.reject('Atleast one option mandatory');
 		} else {
-			async.each($scope.current_item.option_set, function(option_set, callback) {
-				if (!option_set.option_set_value) {
+			async.each($scope.current_item.options, function(option, callback) {
+				console.log(option);
+				if (!option.option_value) {
 					callback("All item option sets must have a valid value")
-				} else if (!option_set.option_set_cost) {
+				} else if (!option.option_cost && option.option_cost !== 0) {
 					callback("All item option sets must have a valid cost");
 				} else {
-					async.each(option_set.sub_options, function(sub_option, callback) {
+					async.each(option.sub_options, function(sub_option, callback) {
 						if(!sub_option.sub_option_title) {
 							callback("All sub variant sets must have valid headers");
 						} else if ((!sub_option.sub_option_set || sub_option.sub_option_set.length === 0)) {
@@ -359,10 +360,10 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 								console.log(sub_option_obj);
 								if (!sub_option_obj.sub_option_value) {
 									callback("All sub variant sets must have valid value");
-								} else if (!sub_option_obj.sub_option_cost) {
+								} else if (!sub_option_obj.sub_option_cost && !sub_option_obj.sub_option_cost) {
 									callback("All sub variant sets must have valid cost");
 								} else {
-									async.each(option_set.addons, function(addon, callback) {
+									async.each(option.addons, function(addon, callback) {
 										if (!addon.addon_title) {
 											callback("All addon sets must have valid title");
 										} else if (!addon.addon_set || addon.addon_set.length === 0) {
@@ -371,7 +372,7 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 											async.each(addon.addon_set, function(addon_obj, callback) {
 												if (!addon_obj.addon_value) {
 													callback("All addons must have valid value");
-												} else if (!addon_obj.addon_cost) {
+												} else if (!addon_obj.addon_cost && addon_obj.addon_cost !== 0) {
 													callback("Add addons must have valid cost");
 												} else {
 													callback();

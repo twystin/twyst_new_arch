@@ -69,8 +69,8 @@
                             {{visible_item.item_name}} <i class='fa fa-inr'></i>{{visible_item.item_cost}}
                         </div>
                         <div class='panel-body'>
-                            <label>{{visible_item.option_set_title}}</label>
-                            <div ng-repeat='option in visible_item.option_set'>#{{$index + 1}}. {{option.option_set_value}} <i class='fa fa-inr'></i>{{option.option_set_cost}}
+                            <label>{{visible_item.option_title}}</label>
+                            <div ng-repeat='option in visible_item.options'>#{{$index + 1}}. {{option.option_value}} <i class='fa fa-inr'></i>{{option.option_cost}}
                                 <div class='col-xs-12'>
                                     <div ng-repeat='sub_option in option.sub_options'>Sub Variance Group: {{sub_option.sub_option_title}}
                                         <div ng-repeat='sub_option_obj in sub_option.sub_option_set'>

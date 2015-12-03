@@ -4,7 +4,7 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 			status: 'active',
 			menu_categories: []
 		};
-		$scope.menu = {"status":"active","menu_categories":[{"sub_categories":[{"sub_category_name":"Default","items":[{"option_set":[{"sub_options":[],"addons":[],"option_set_value":"zxc","option_set_cost":123}],"is_vegetarian":false,"option_set_is_addon":false,"item_name":"asd","item_cost":123,"item_description":"aasd","item_tags":["asd"],"option_set_title":"qwe"}]}],"category_name":"Indian"}],"menu_type":"Dine-In","outlet":"556568e81ade70eb1974b956"}
+		
 		$scope.current_category = '';
 
 		$scope.menu_types = ['Dine-In', 'Takeaway', 'Delivery', 'Weekend', 'Dinner', 'All'];
@@ -53,9 +53,9 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 				resolve: {
 					item: function() {
 						return {
-							option_set: [],
+							options: [],
 							is_vegetarian: false,
-							option_set_is_addon: false
+							option_is_addon: false
 						};
 					},
 					is_new: function() {
@@ -80,7 +80,7 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 					size: 'lg',
 					resolve: {
 						item: function() {
-							return _.clone(sub_category.items[index] || {option_sets: []});
+							return _.clone(sub_category.items[index] || {options: []});
 						},
 						is_new: function() {
 							return false;

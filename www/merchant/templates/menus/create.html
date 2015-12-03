@@ -87,8 +87,8 @@
                             {{visible_item.item_name}} <i class='fa fa-inr'></i>{{visible_item.item_cost}}
                         </div>
                         <div class='panel-body'>
-                            <label>{{visible_item.option_set_title}}</label>
-                            <div ng-repeat='option in visible_item.option_set'>#{{$index + 1}}. {{option.option_set_value}} <i class='fa fa-inr'></i>{{option.option_set_cost}}
+                            <label>{{visible_item.option_title}}</label>
+                            <div ng-repeat='option in visible_item.options'>#{{$index + 1}}. {{option.option_value}} <i class='fa fa-inr'></i>{{option.option_cost}}
                                 <div class='col-xs-12'>
                                     <div ng-repeat='sub_option in option.sub_options'>Sub Variance Group: {{sub_option.sub_option_title}}
                                         <div ng-repeat='sub_option_obj in sub_option.sub_option_set'>
@@ -202,21 +202,21 @@
                         <label class='col-md-2 control-label'>Variant Header</label>
                         <div class='col-md-6'>
                             <div class='input-group'>
-                                <input type='text' ng-model='current_item.option_set_title' class='form-control'>
+                                <input type='text' ng-model='current_item.option_title' class='form-control'>
                                 <span class='input-group-btn'>
-                                    <button class='btn btn-primary' ng-disabled='!current_item.option_set_title' ng-click='addOptionSet($index)'><i class='fa fa-plus'></i> Add Option</button>
+                                    <button class='btn btn-primary' ng-disabled='!current_item.option_title' ng-click='addOptionSet($index)'><i class='fa fa-plus'></i> Add Option</button>
                                 </span>
                             </div>
                         </div>
                         <label class='col-md-2 control-label'>Variants are Addon?</label>
                         <div class='col-md-2'>
-                            <input bs-switch ng-model='current_item.option_set_is_addon' type='checkbox' switch-off-text="NO" switch-on-text="YES">
+                            <input bs-switch ng-model='current_item.option_is_addon' type='checkbox' switch-off-text="NO" switch-on-text="YES">
                         </div>
                     </div>
                     <div class='form-group'>
                         <label class='col-md-12'><strong>Variants</strong></label>
                         <div class='col-md-12'>
-                            <div class='jumbotron' ng-repeat='option in current_item.option_set'>
+                            <div class='jumbotron' ng-repeat='option in current_item.options'>
                                 <div class='col-xs-12'>
                                     <h4>Variant #{{$index + 1}}
                                         <button type='button' class='btn btn-warning' ng-click='removeOption($index)'><i class='fa fa-times'></i> </button>
@@ -225,13 +225,13 @@
                                 <div class='form-group'>
                                     <label class='col-md-2 control-label'>Value</label>
                                     <div class='col-md-4'>
-                                        <input type='text' ng-model='option.option_set_value' class='form-control'>
+                                        <input type='text' ng-model='option.option_value' class='form-control'>
                                     </div>
                                     <label class='col-md-2 control-label'>Cost</label>
                                     <div class='col-md-4'>
                                         <div class='input-group'>
                                             <span class='input-group-addon'><i class='fa fa-inr'></i></span>
-                                            <input type='number' ng-model='option.option_set_cost' class='form-control'>
+                                            <input type='number' ng-model='option.option_cost' class='form-control'>
                                         </div>
                                     </div>
                                 </div>

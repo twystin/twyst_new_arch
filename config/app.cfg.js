@@ -7,7 +7,6 @@ var express = require('express'),
   methodOverride = require('method-override'),
   morgan = require('morgan'),
   cookieParser = require('cookie-parser'),
-  compression = require('compression'),
   session = require('express-session'),
   favicon = require('serve-favicon'),
   errorhandler = require('errorhandler'),
@@ -34,7 +33,6 @@ var mustBeConfig = require('./mustbe.cfg');
 mustBe.configure(mustBeConfig);
 
 module.exports = function(app) {
-  app.use(compression());
   app.use(morgan('dev'));
   app.use(bodyParser.urlencoded({
     extended: true
