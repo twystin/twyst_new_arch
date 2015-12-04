@@ -493,12 +493,13 @@ var OutletSchema = new Schema({
     }],
     offer_items: {
       all: {type: Boolean},
+      menu_id: Schema.Types.ObjectId,
       category_id: Schema.Types.ObjectId,
       sub_category_id: Schema.Types.ObjectId,
       item_id: Schema.Types.ObjectId,
-      option_set_id: Schema.Types.ObjectId,
       option_id: Schema.Types.ObjectId,
-      addon_id: Schema.Types.ObjectId
+      sub_options: [Schema.Types.ObjectId],
+      addons: [Schema.Types.ObjectId]
     }
   }],
   orders: [{
@@ -536,6 +537,10 @@ var OutletSchema = new Schema({
           item_description: {
             type: String
           },
+          item_is_available: {
+            type: Boolean,
+            default: true
+          },
           item_photo: {
             type: String
           },
@@ -557,6 +562,14 @@ var OutletSchema = new Schema({
             default: false,
           },
           options: [{
+            _id: {
+              type: Schema.Types.ObjectId,
+              default: new mongoose.Types.ObjectId()
+            },
+            option_is_available: {
+              type: Boolean,
+              default: true
+            },
             option_value: {
               type: String
             },
@@ -564,6 +577,10 @@ var OutletSchema = new Schema({
               type: Number
             },
             sub_options: [{
+              _id: {
+                type: Schema.Types.ObjectId,
+                default: new mongoose.Types.ObjectId()
+              },
               sub_option_title: {
                 type: String,
               },
@@ -571,18 +588,30 @@ var OutletSchema = new Schema({
                 sub_option_value: {
                   type: String,
                 },
+                sub_option_is_available: {
+                  type: Boolean,
+                  default: true
+                },
                 sub_option_cost: {
                   type: Number
                 }
               }]
             }],
             addons: [{
+              _id: {
+                type: Schema.Types.ObjectId,
+                default: new mongoose.Types.ObjectId()
+              },
               addon_title: {
                 type: String,
               },
               addon_set: [{
                 addon_value: {
                   type: String,
+                },
+                addon_is_available: {
+                  type: Boolean,
+                  default: true
                 },
                 addon_cost: {
                   type: Number
