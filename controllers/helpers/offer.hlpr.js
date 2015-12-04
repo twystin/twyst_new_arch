@@ -248,3 +248,27 @@ module.exports.get_all_offers = function(token) {
     });
     return deferred.promise;
 }
+
+module.exports.apply_offer = function(token, order, offer) {
+    logger.log();
+    var deferred = Q.defer();
+
+    Cache.get('outlets', function(err, reply) {
+        if(err || !reply) {
+            deferred.reject({
+                err: false,
+                message: 'Unable to load offers right now'
+            });
+        } else {
+            var offer_ids = [];
+            var offers = [];
+            var outlets = JSON.parse(reply);
+            
+            deferred.resolve({
+                data: offers,
+                message: 'All offers loaded from server'
+            });
+        }
+    });
+    return deferred.promise;
+}

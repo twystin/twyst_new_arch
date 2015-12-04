@@ -27,6 +27,7 @@ var Order = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Outlet'
   },
+  offer_used: {type: Schema.Types.ObjectId},
   order_date: {type: Date, default: new Date()},
   order_cost: {type: Number},
   payment_info: {}, //COD/Payu/payment object
