@@ -133,9 +133,9 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 					item: function() {
 						return {
 							options: [],
-							is_vegetarian: false,
+							is_vegetarian: true,
 							option_is_addon: false,
-							item_is_available: true
+							is_available: true
 						};
 					},
 					is_new: function() {
@@ -272,7 +272,7 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 	$scope.current_item = item;
 
 	$scope.addOptionSet = function() {
-		$scope.current_item.options.push({option_is_available: true, sub_options: [], addons: []});
+		$scope.current_item.options.push({is_available: true, is_vegetarian: true, sub_options: [], addons: []});
 	}
 
 	$scope.addSubVariant = function(option) {
@@ -280,7 +280,7 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 	}
 
 	$scope.addSubOptionPair = function(sub_option) {
-		sub_option.sub_option_set.push({sub_option_is_available: true});
+		sub_option.sub_option_set.push({is_available: true, is_vegetarian: true});
 	}
 
 	$scope.removeSubOption = function(option, index) {
@@ -304,7 +304,7 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 	}
 
 	$scope.addAddonObj = function(addon) {
-		addon.addon_set.push({addon_is_available: true});
+		addon.addon_set.push({is_available: true, is_vegetarian: true});
 	}
 
 	$scope.removeAddonObj = function(addon, index) {
