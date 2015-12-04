@@ -334,11 +334,11 @@ var OutletSchema = new Schema({
       value: {
         type: Number
       },
-      commission_slab: {[
+      commission_slab: [{
         start: {type: Number},
         end: {type: Number},
         value: {type: Number}
-      ]}
+      }]
     },
     rating: {
       count: {
