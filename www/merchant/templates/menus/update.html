@@ -195,11 +195,11 @@
                     <div class='form-group'>
                         <label class='col-md-2 control-label'>Is Vegetarian?</label>
                         <div class='col-md-4'>
-                            <input bs-switch ng-model='current_item.is_vegetarian' type='checkbox' switch-on-text="YES" switch-off-text="NO">
+                            <input bs-switch ng-model='current_item.is_vegetarian' type='checkbox' switch-off-color='danger' switch-on-color='success' switch-on-text="YES" switch-off-text="NO">
                         </div>
                         <label class='col-md-2 control-label'>Is Available</label>
                         <div class='col-md-4'>
-                            <input bs-switch ng-model='current_item.item_is_available' type='checkbox' switch-off-text='YES' switch-on-text='NO'>
+                            <input bs-switch ng-model='current_item.is_available' type='checkbox' switch-off-text='NO' switch-on-text='YES'>
                         </div>
                     </div>
                     <div class='form-group'>
@@ -228,19 +228,25 @@
                                 </div>
                                 <div class='form-group'>
                                     <label class='col-sm-2 control-label'>Value<i class='fa fa-asterisk'></i></label>
-                                    <div class='col-sm-3'>
+                                    <div class='col-sm-4'>
                                         <input type='text' ng-model='option.option_value' class='form-control'>
                                     </div>
-                                    <label class='col-sm-1 control-label'>Cost<i class='fa fa-asterisk'></i></label>
-                                    <div class='col-sm-3'>
+                                    <label class='col-sm-2 control-label'>Cost<i class='fa fa-asterisk'></i></label>
+                                    <div class='col-sm-4'>
                                         <div class='input-group'>
                                             <span class='input-group-addon'><i class='fa fa-inr'></i></span>
                                             <input type='number' ng-model='option.option_cost' class='form-control'>
                                         </div>
                                     </div>
-                                    <label class='col-sm-1 control-label'>Available</label>
+                                </div>
+                                <div class='form-group'>
+                                    <label class='col-sm-2 control-label'>Available</label>
                                     <div class='col-sm-2'>
-                                        <input bs-switch ng-model='option.option_is_available' type='checkbox' switch-off-text='NO' switch-on-text='YES'>
+                                        <input bs-switch ng-model='option.is_available' type='checkbox' switch-off-text='NO' switch-on-text='YES'>
+                                    </div>
+                                    <label class='col-sm-2 control-label'>Is Vegetarian?</label>
+                                    <div class='col-sm-2'>
+                                        <input bs-switch ng-model='option.is_vegetarian' type='checkbox' switch-off-color='danger' switch-on-color='success' switch-off-text='NO' switch-on-text='YES'>
                                     </div>
                                 </div>
                                 <div class='form-group'>
@@ -270,6 +276,7 @@
                                                     <th>Value<i class='fa fa-asterisk'></i></th>
                                                     <th>Cost<i class='fa fa-asterisk'></i> (<i class='fa fa-inr'></i>)</th>
                                                     <th>Available?</th>
+                                                    <th>Is Veg?</th>
                                                     <th>Action</th>
                                                 </tr>
                                             </thead>
@@ -281,7 +288,10 @@
                                                         <input type='number' ng-model='sub_option_obj.sub_option_cost'>
                                                     </td>
                                                     <td>
-                                                        <input bs-switch ng-model='sub_option_obj.sub_option_is_available' type='checkbox' switch-off-text='NO' switch-on-text='YES'>
+                                                        <input bs-switch ng-model='sub_option_obj.is_available' type='checkbox' switch-off-text='NO' switch-on-text='YES'>
+                                                    </td>
+                                                    <td>
+                                                        <input bs-switch ng-model='sub_option_obj.is_vegetarian' type='checkbox' switch-off-color='danger' switch-on-color='success' switch-on-text='YES' switch-off-text='NO'>
                                                     </td>
                                                     <td>
                                                         <button type='button' class='btn btn-sm btn-warning' ng-click='removeSubOptionObj(sub_option, $index)'><i class='fa fa-times'></i> </button>
@@ -318,6 +328,7 @@
                                                     <th>Value<i class='fa fa-asterisk'></i></th>
                                                     <th>Cost<i class='fa fa-asterisk'></i> (<i class='fa fa-inr'></i>)</th>
                                                     <th>Available?</th>
+                                                    <th>Is Veg?</th>
                                                     <th>Action</th>
                                                 </tr>
                                             </thead>
@@ -327,7 +338,10 @@
                                                     <td><input type='text' ng-model='addon_obj.addon_value' ></td>
                                                     <td><input type='number' ng-model='addon_obj.addon_cost'></td>
                                                     <td>
-                                                        <input bs-switch ng-model='addon_obj.addon_is_available' type='checkbox' switch-on-text='YES' switch-off-text='NO'>
+                                                        <input bs-switch ng-model='addon_obj.is_available' type='checkbox' switch-on-text='YES' switch-off-text='NO'>
+                                                    </td>
+                                                    <td>
+                                                        <input bs-switch ng-model='addon_obj.is_vegetarian' type='checkbox' switch-off-color='danger' switch-on-color='success' switch-off-text='NO' switch-on-text='YES'>
                                                     </td>
                                                     <td>
                                                         <button type='button' class='btn btn-sm btn-warning' ng-click='removeAddonObj(addon, $index)'><i class='fa fa-times'></i> </button>
