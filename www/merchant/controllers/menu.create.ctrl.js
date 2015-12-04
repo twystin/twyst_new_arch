@@ -54,9 +54,9 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 					item: function() {
 						return {
 							options: [],
-							is_vegetarian: false,
+							is_vegetarian: true,
 							option_is_addon: false,
-							item_is_available: true
+							is_available: true
 						};
 					},
 					is_new: function() {
