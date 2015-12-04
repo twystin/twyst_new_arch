@@ -134,7 +134,8 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 						return {
 							options: [],
 							is_vegetarian: false,
-							option_is_addon: false
+							option_is_addon: false,
+							item_is_available: true
 						};
 					},
 					is_new: function() {
@@ -271,7 +272,7 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 	$scope.current_item = item;
 
 	$scope.addOptionSet = function() {
-		$scope.current_item.options.push({sub_options: [], addons: []});
+		$scope.current_item.options.push({option_is_available: true, sub_options: [], addons: []});
 	}
 
 	$scope.addSubVariant = function(option) {
@@ -279,7 +280,7 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 	}
 
 	$scope.addSubOptionPair = function(sub_option) {
-		sub_option.sub_option_set.push({});
+		sub_option.sub_option_set.push({sub_option_is_available: true});
 	}
 
 	$scope.removeSubOption = function(option, index) {
@@ -303,7 +304,7 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 	}
 
 	$scope.addAddonObj = function(addon) {
-		addon.addon_set.push({});
+		addon.addon_set.push({addon_is_available: true});
 	}
 
 	$scope.removeAddonObj = function(addon, index) {
@@ -338,10 +339,6 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 			deferred.reject('Atleast one item tag is required');
 		} else if (!$scope.current_item.item_cost && $scope.current_item.item_cost !== 0) {
 			deferred.reject("Base cost is mandatory");
-		} else if (!$scope.current_item.option_title) {
-			deferred.reject("Option header required");
-		} else if ($scope.current_item.options.length === 0) {
-			deferred.reject('Atleast one option mandatory');
 		} else {
 			async.each($scope.current_item.options, function(option, callback) {
 				console.log(option);

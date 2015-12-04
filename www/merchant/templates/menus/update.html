@@ -50,9 +50,9 @@
                         </div>
                         <div class='panel panel-default' ng-repeat='sub_category in menu_category.sub_categories'>
                             <div class='panel-heading'>
-                                <h3>{{sub_category.sub_category_name}}
+                                <h3><span ng-if='menu_category.sub_categories.length!==1'>{{sub_category.sub_category_name}}</span>
                                     <button type='button' class='btn btn-sm btn-success pull-right' ng-click='addItem(sub_category)'><i class='fa fa-plus'></i> Add Item</button>
-                                    <button type='button' class='btn btn-sm btn-primary pull-right' ng-click='editSubCategory(menu_category, $index)'><i class='fa fa-pencil'></i> Edit Sub Category</button>
+                                    <button type='button' class='btn btn-sm btn-primary pull-right' ng-click='editSubCategory(menu_category, $index)' ng-if='menu_category.sub_categories.length!==1'><i class='fa fa-pencil'></i> Edit Sub Category</button>
                                 </h3>
                             </div>
                             <div class='panel-body'>
@@ -179,7 +179,7 @@
                         </div>
                     </div>
                     <div class='form-group'>
-                        <label class='col-md-2 control-label'>Item Description<i class='fa fa-asterisk'></i></label>
+                        <label class='col-md-2 control-label'>Item Description</label>
                         <div class='col-md-10'>
                             <textarea class='form-control' ng-model='current_item.item_description' rows='4' placeholder='Item description here...'></textarea>
                         </div>
@@ -187,19 +187,23 @@
                     <div class='form-group'>
                         <label class='col-md-2 control-label'>Item Photo</label>
                         <div class='col-md-4'>Photo Placeholder</div>
-                        <label class='col-md-2 control-label'>Item Tags</label>
+                        <label class='col-md-2 control-label'>Item Tags<i class='fa fa-asterisk'></i></label>
                         <div class='col-md-4'>
                             <input type='text' ng-list ng-model='current_item.item_tags' class='form-control'>
                         </div>
                     </div>
                     <div class='form-group'>
                         <label class='col-md-2 control-label'>Is Vegetarian?</label>
-                        <div class='col-md-10'>
+                        <div class='col-md-4'>
                             <input bs-switch ng-model='current_item.is_vegetarian' type='checkbox' switch-on-text="YES" switch-off-text="NO">
+                        </div>
+                        <label class='col-md-2 control-label'>Is Available</label>
+                        <div class='col-md-4'>
+                            <input bs-switch ng-model='current_item.item_is_available' type='checkbox' switch-off-text='YES' switch-on-text='NO'>
                         </div>
                     </div>
                     <div class='form-group'>
-                        <label class='col-md-2 control-label'>Option Header</label>
+                        <label class='col-md-2 control-label'>Option Header<i class='fa fa-asterisk'></i></label>
                         <div class='col-md-6'>
                             <div class='input-group'>
                                 <input type='text' ng-model='current_item.option_title' class='form-control'>
@@ -223,16 +227,20 @@
                                     </h4>
                                 </div>
                                 <div class='form-group'>
-                                    <label class='col-md-2 control-label'>Value</label>
-                                    <div class='col-md-4'>
+                                    <label class='col-sm-2 control-label'>Value<i class='fa fa-asterisk'></i></label>
+                                    <div class='col-sm-3'>
                                         <input type='text' ng-model='option.option_value' class='form-control'>
                                     </div>
-                                    <label class='col-md-2 control-label'>Cost</label>
-                                    <div class='col-md-4'>
+                                    <label class='col-sm-1 control-label'>Cost<i class='fa fa-asterisk'></i></label>
+                                    <div class='col-sm-3'>
                                         <div class='input-group'>
                                             <span class='input-group-addon'><i class='fa fa-inr'></i></span>
                                             <input type='number' ng-model='option.option_cost' class='form-control'>
                                         </div>
+                                    </div>
+                                    <label class='col-sm-1 control-label'>Available</label>
+                                    <div class='col-sm-2'>
+                                        <input bs-switch ng-model='option.option_is_available' type='checkbox' switch-off-text='NO' switch-on-text='YES'>
                                     </div>
                                 </div>
                                 <div class='form-group'>
@@ -241,24 +249,27 @@
                                     </label>
                                     <div class='col-md-12 table-responsive' ng-repeat='sub_option in option.sub_options'>
                                         <legend>Sub-option set #{{$index + 1}}
-                                            <button type='button' class='btn btn-warning' ng-click='removeSubOption(option, $index)'><i class='fa fa-times'></i> </button>
+                                            <button type='button' class='btn btn-sm btn-warning' ng-click='removeSubOption(option, $index)'><i class='fa fa-times'></i> </button>
                                         </legend>
-                                        <label class='col-md-2'>Sub Option Header</label>
-                                        <div class='col-md-6'>
-                                            <div class='input-group'>
-                                                <input type='text' ng-model='sub_option.sub_option_title' class='form-control'>
-                                                <span class='input-group-btn'>
-                                                    <button class='btn btn-primary' ng-disabled='!sub_option.sub_option_title' ng-click='addSubOptionPair(sub_option)'><i class='fa fa-plus'></i> Add Option</button>
-                                                </span>
+                                        <div class='col-xs-12'>
+                                            <label class='col-md-2'>Sub-option Name<i class='fa fa-asterisk'></i></label>
+                                            <div class='col-md-6'>
+                                                <div class='input-group'>
+                                                    <input type='text' ng-model='sub_option.sub_option_title' class='form-control'>
+                                                    <span class='input-group-btn'>
+                                                        <button class='btn btn-primary' ng-disabled='!sub_option.sub_option_title' ng-click='addSubOptionPair(sub_option)'><i class='fa fa-plus'></i> Add</button>
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class='clearfix'></div>
-                                        <table class='table'>
+                                        <table class='table' ng-if='sub_option.sub_option_set.length'>
                                             <thead>
                                                 <tr>
                                                     <th>S. No. </th>
-                                                    <th>Value</th>
-                                                    <th>Cost <i class='fa fa-inr'></i></th>
+                                                    <th>Value<i class='fa fa-asterisk'></i></th>
+                                                    <th>Cost<i class='fa fa-asterisk'></i> (<i class='fa fa-inr'></i>)</th>
+                                                    <th>Available?</th>
                                                     <th>Action</th>
                                                 </tr>
                                             </thead>
@@ -270,7 +281,10 @@
                                                         <input type='number' ng-model='sub_option_obj.sub_option_cost'>
                                                     </td>
                                                     <td>
-                                                        <button type='button' class='btn btn-warning' ng-click='removeSubOptionObj(sub_option, $index)'><i class='fa fa-times'></i> </button>
+                                                        <input bs-switch ng-model='sub_option_obj.sub_option_is_available' type='checkbox' switch-off-text='NO' switch-on-text='YES'>
+                                                    </td>
+                                                    <td>
+                                                        <button type='button' class='btn btn-sm btn-warning' ng-click='removeSubOptionObj(sub_option, $index)'><i class='fa fa-times'></i> </button>
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -283,24 +297,27 @@
                                     </label>
                                     <div class='col-md-12' ng-repeat='addon in option.addons'>
                                         <legend>Addon set {{$index + 1}}
-                                            <button type='button' class='btn btn-warning' ng-click='removeAddon(option, $index)'><i class='fa fa-times'></i> </button>
+                                            <button type='button' class='btn btn-sm btn-warning' ng-click='removeAddon(option, $index)'><i class='fa fa-times'></i> </button>
                                         </legend>
-                                        <label class='col-md-2'>Addon Set Header</label>
-                                        <div class='col-md-6'>
-                                            <div class='input-group'>
-                                                <input type='text' ng-model='addon.addon_title' class='form-control'>
-                                                <span class='input-group-btn'>
-                                                    <button class='btn btn-primary' ng-disabled='!addon.addon_title' ng-click='addAddonObj(addon)'><i class='fa fa-plus'></i> Add Addon</button>
-                                                </span>
+                                        <div class='col-xs-12'>
+                                            <label class='col-md-2'>Addon Set Title<i class='fa fa-asterisk'></i></label>
+                                            <div class='col-md-6'>
+                                                <div class='input-group'>
+                                                    <input type='text' ng-model='addon.addon_title' class='form-control'>
+                                                    <span class='input-group-btn'>
+                                                        <button class='btn btn-primary' ng-disabled='!addon.addon_title' ng-click='addAddonObj(addon)'><i class='fa fa-plus'></i> Add</button>
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class='clearfix'></div>
-                                        <table class='table'>
+                                        <table class='table' ng-if='addon.addon_set.length'>
                                             <thead>
                                                 <tr>
                                                     <th>S No</th>
-                                                    <th>Value</th>
-                                                    <th>Cost <i class='fa fa-inr'></i></th>
+                                                    <th>Value<i class='fa fa-asterisk'></i></th>
+                                                    <th>Cost<i class='fa fa-asterisk'></i> (<i class='fa fa-inr'></i>)</th>
+                                                    <th>Available?</th>
                                                     <th>Action</th>
                                                 </tr>
                                             </thead>
@@ -310,7 +327,10 @@
                                                     <td><input type='text' ng-model='addon_obj.addon_value' ></td>
                                                     <td><input type='number' ng-model='addon_obj.addon_cost'></td>
                                                     <td>
-                                                        <button type='button' class='btn btn-warning' ng-click='removeAddonObj(addon, $index)'><i class='fa fa-times'></i> </button>
+                                                        <input bs-switch ng-model='addon_obj.addon_is_available' type='checkbox' switch-on-text='YES' switch-off-text='NO'>
+                                                    </td>
+                                                    <td>
+                                                        <button type='button' class='btn btn-sm btn-warning' ng-click='removeAddonObj(addon, $index)'><i class='fa fa-times'></i> </button>
                                                     </td>
                                                 </tr>
                                             </tbody>

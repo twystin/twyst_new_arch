@@ -43,7 +43,7 @@
                         </div>
                         <div class='panel panel-default' ng-repeat='sub_category in menu_category.sub_categories'>
                             <div class='panel-heading'>
-                                <h3>{{sub_category.sub_category_name}}</h3>
+                                <h3><span ng-if='menu_category.sub_categories.length!==1'>{{sub_category.sub_category_name}}</span></h3>
                             </div>
                             <div class='panel-body'>
                                 <div class='col-xs-12'>

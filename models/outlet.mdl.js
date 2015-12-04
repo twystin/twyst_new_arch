@@ -498,10 +498,8 @@ var OutletSchema = new Schema({
       sub_category_id: Schema.Types.ObjectId,
       item_id: Schema.Types.ObjectId,
       option_id: Schema.Types.ObjectId,
-      sub_option_id: Schema.Types.ObjectId,
-      sub_option_set_id: Schema.Types.ObjectId,
-      addon_id: Schema.Types.ObjectId,
-      addon_set_id: Schema.Types.ObjectId
+      sub_options: [Schema.Types.ObjectId],
+      addons: [Schema.Types.ObjectId]
     }
   }],
   orders: [{
@@ -539,6 +537,10 @@ var OutletSchema = new Schema({
           item_description: {
             type: String
           },
+          item_is_available: {
+            type: Boolean,
+            default: true
+          },
           item_photo: {
             type: String
           },
@@ -564,6 +566,10 @@ var OutletSchema = new Schema({
               type: Schema.Types.ObjectId,
               default: new mongoose.Types.ObjectId()
             },
+            option_is_available: {
+              type: Boolean,
+              default: true
+            },
             option_value: {
               type: String
             },
@@ -582,6 +588,10 @@ var OutletSchema = new Schema({
                 sub_option_value: {
                   type: String,
                 },
+                sub_option_is_available: {
+                  type: Boolean,
+                  default: true
+                },
                 sub_option_cost: {
                   type: Number
                 }
@@ -598,6 +608,10 @@ var OutletSchema = new Schema({
               addon_set: [{
                 addon_value: {
                   type: String,
+                },
+                addon_is_available: {
+                  type: Boolean,
+                  default: true
                 },
                 addon_cost: {
                   type: Number
