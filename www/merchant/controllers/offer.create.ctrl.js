@@ -87,7 +87,7 @@ angular.module('merchantApp')
           }
         },
         offer_items: {
-          all: false,
+          all: true,
         }
       }
 
@@ -834,8 +834,28 @@ angular.module('merchantApp')
     $scope.categories = [];
     $scope.sub_categories = [];
     $scope.items = [];
+    $scope.option_sets = [];
+    $scope.sub_option_sets = {};
+    $scope.addon_sets = {};
+    $scope.choice_option_id = '';
     $scope.options = [];
     $scope.choice = {};
+
+    $scope.$watchCollection('sub_option_sets', function(newVal, oldVal) {
+      if(newVal===undefined) {
+        return;
+      }
+      $scope.choice.sub_options = [];
+      $scope.choice.sub_options = _.compact(_.map(newVal, function(val, key) { return val?key:false; }));
+    });
+
+    $scope.$watchCollection('addon_sets', function(newVal, oldVal) {
+      if(newVal===undefined) {
+        return;
+      }
+      $scope.choice.addons = [];
+      $scope.choice.addons = _.compact(_.map(newVal, function(val, key) { return val?key:false; }));
+    });
 
     merchantRESTSvc.getAllMenus().then(function(res) {
       _.each(res.data, function(menu) {
@@ -902,9 +922,20 @@ angular.module('merchantApp')
       _.each($scope.items, function(item) {
         if(item._id === $scope.choice.item_id) {
           $scope.option_title = item.option_title;
-          $scope.options = _.clone(item.options);
+          $scope.option_sets = [{option_title: item.option_title, options: item.options}];
+          console.log($scope.option_sets);
         }
       })
+    }
+
+    $scope.optionChoosen = function(option) {
+      console.log('option', option);
+      if (!option) {
+        return;
+      }
+      $scope.choice.option_id = option._id;
+      $scope.option_sets = $scope.option_sets.slice(0, 1);
+      $scope.option_sets = $scope.option_sets.concat(option.sub_options).concat(option.addons);
     }
 
     $scope.pickMenu = function() {
@@ -917,10 +948,8 @@ angular.module('merchantApp')
           sub_category_id: undefined,
           item_id: undefined,
           option_id: undefined,
-          sub_option_id: undefined,
-          sub_option_set_id: undefined,
-          addon_id: undefined,
-          addon_set_id: undefined
+          sub_options: [],
+          addons: []
         });
       }
     }
@@ -937,10 +966,8 @@ angular.module('merchantApp')
           sub_category_id: undefined,
           item_id: undefined,
           option_id: undefined,
-          sub_option_id: undefined,
-          sub_option_set_id: undefined,
-          addon_id: undefined,
-          addon_set_id: undefined
+          sub_options: [],
+          addons: []
         });
       }
     }
@@ -959,10 +986,8 @@ angular.module('merchantApp')
           sub_category_id: $scope.choice.sub_category_id,
           item_id: undefined,
           option_id: undefined,
-          sub_option_id: undefined,
-          sub_option_set_id: undefined,
-          addon_id: undefined,
-          addon_set_id: undefined
+          sub_options: [],
+          addons: []
         });
       }
     }
@@ -983,10 +1008,8 @@ angular.module('merchantApp')
           sub_category_id: $scope.choice.sub_category_id,
           item_id: $scope.choice.item_id,
           option_id: undefined,
-          sub_option_id: undefined,
-          sub_option_set_id: undefined,
-          addon_id: undefined,
-          addon_set_id: undefined
+          sub_options: [],
+          addons: []
         });
       }
     }
@@ -1009,10 +1032,8 @@ angular.module('merchantApp')
           sub_category_id: $scope.choice.sub_category_id,
           item_id: $scope.choice.item_id,
           option_id: $scope.options[index]._id,
-          sub_option_id: undefined,
-          sub_option_set_id: undefined,
-          addon_id: undefined,
-          addon_set_id: undefined
+          sub_options: [],
+          addons: []
         });
       }
     }
@@ -1037,10 +1058,8 @@ angular.module('merchantApp')
           sub_category_id: $scope.choice.sub_category_id,
           item_id: $scope.choice.item_id,
           option_id: option_id,
-          sub_option_id: sub_option_id,
-          sub_option_set_id: undefined,
-          addon_id: undefined,
-          addon_set_id: undefined
+          sub_options: [],
+          addons: []
         });
       }
     }
@@ -1067,10 +1086,8 @@ angular.module('merchantApp')
           sub_category_id: $scope.choice.sub_category_id,
           item_id: $scope.choice.item_id,
           option_id: option_id,
-          sub_option_id: sub_option_id,
-          sub_option_set_id: sub_option_obj_id,
-          addon_id: undefined,
-          addon_set_id: undefined
+          sub_options: [],
+          addons: []
         });
       }
     }
@@ -1095,10 +1112,8 @@ angular.module('merchantApp')
           sub_category_id: $scope.choice.sub_category_id,
           item_id: $scope.choice.item_id,
           option_id: option_id,
-          sub_option_id: undefined,
-          sub_option_set_id: undefined,
-          addon_id: addon_id,
-          addon_set_id: undefined
+          sub_options: [],
+          addons: []
         });
       }
     }
@@ -1125,11 +1140,25 @@ angular.module('merchantApp')
           sub_category_id: $scope.choice.sub_category_id,
           item_id: $scope.choice.item_id,
           option_id: option_id,
-          sub_option_id: undefined,
-          sub_option_set_id: undefined,
-          addon_id: addon_id,
-          addon_set_id: addon_obj_id
+          sub_options: [],
+          addons: []
         });
+      }
+    }
+
+    $scope.finaliseItem = function() {
+      if(!$scope.choice.menu_id) {
+        $modalInstance.dismiss("Error looking up selected menu");
+      } else if (!$scope.choice.category_id) {
+        $modalInstance.dismiss("Error looking up selected cateory");
+      } else if (!$scope.choice.sub_category_id) {
+        $modalInstance.dismiss("Error looking up selected sub category");
+      } else if (!$scope.choice.item_id) {
+        $modalInstance.dismiss("Error looking up selected item");
+      } else if (!$scope.choice.option_id && $scope.option_sets.length && $scope.option_sets[0].options.length) {
+        $modalInstance.dismiss("Error looking up selected option");
+      } else {
+        $modalInstance.close($scope.choice);
       }
     }
 
