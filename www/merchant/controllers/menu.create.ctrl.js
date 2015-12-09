@@ -54,6 +54,10 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 					item: function() {
 						return {
 							options: [],
+							item_availability: {
+								regular_item: true
+							},
+							item_available_on: [],
 							is_vegetarian: true,
 							option_is_addon: false,
 							is_available: true
