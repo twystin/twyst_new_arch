@@ -133,6 +133,10 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 					item: function() {
 						return {
 							options: [],
+							item_availability: {
+								regular_item: true
+							},
+							item_available_on: [],
 							is_vegetarian: true,
 							option_is_addon: false,
 							is_available: true
@@ -270,6 +274,30 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 }).controller('MenuItemController', function($scope, $modalInstance, toastr, item, is_new, $q) {
 	$scope.is_new = is_new;
 	$scope.current_item = item;
+	$scope.checkModel = {};
+	$scope.days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+	$scope.$watchCollection('checkModel', function() {
+		$scope.current_item.item_available_on = [];
+		angular.forEach($scope.checkModel, function (value, key) {
+			console.log(value, key);
+			if (value) {
+				$scope.current_item.item_available_on.push(key);
+			}
+		});
+	});
+
+	if (!is_new) {
+		_.each($scope.days, function(day) {
+			$scope.checkModel[day] = $scope.current_item.item_available_on.indexOf(day)!==-1?true:false;
+		});
+		if ($scope.current_item.item_availability.start_date) {
+			$scope.current_item.item_availability.start_date = new Date($scope.current_item.item_availability.start_date);
+		}
+		if ($scope.current_item.item_availability.end_date) {
+			$scope.current_item.item_availability.end_date = new Date($scope.current_item.item_availability.end_date);
+		}
+	}
 
 	$scope.addOptionSet = function() {
 		$scope.current_item.options.push({is_available: true, is_vegetarian: true, sub_options: [], addons: []});
