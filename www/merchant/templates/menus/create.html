@@ -45,14 +45,14 @@
                     <div class='col-xs-12' ng-repeat='menu_category in menu.menu_categories' ng-if='current_category === $index'>
                         <div class='col-xs-12'>
                             <legend>{{menu_category.category_name}}
-                                <button type='button' class='btn btn-sm btn-primary' ng-click='editCategory($index)'><i class='fa fa-pencil'></i> Edit Category</button>
+                                
                             </legend>
                         </div>
                         <div class='panel panel-default' ng-repeat='sub_category in menu_category.sub_categories'>
                             <div class='panel-heading'>
                                 <h3><span ng-if='menu_category.sub_categories.length!==1'>{{sub_category.sub_category_name}}</span>
                                     <button type='button' class='btn btn-sm btn-success pull-right' ng-click='addItem(sub_category)'><i class='fa fa-plus'></i> Add Item</button>
-                                    <button type='button' class='btn btn-sm btn-primary pull-right' ng-click='editSubCategory(menu_category, $index)' ng-if='menu_category.sub_categories.length!==1'><i class='fa fa-pencil'></i> Edit Sub Category</button>
+                                    
                                 </h3>
                             </div>
                             <div class='panel-body'>
@@ -132,19 +132,19 @@
     </script>
     <script type='text/ng-template' id='subCategoryTemplate.html'>
         <div class='model-header'>
-            <legend ng-if='is_new'>Add New Section</legend>
-            <legend ng-if='!is_new'>Update Section</legend>
+            <legend ng-if='is_new'>Add New Sub-category</legend>
+            <legend ng-if='!is_new'>Update Sub-category</legend>
         </div>
         <div class='modal-body'>
             <div class='form-group'>
-                <div class='col-xs-3 control-label'>Section Name</div>
+                <div class='col-xs-3 control-label'>Sub-category Name</div>
                 <div class='col-xs-6'>
-                    <input type='text' ng-model='current_sub_category.sub_category_name' typeahead='mSection for mSection in section_names | filter:$viewValue | limitTo: 8' class='form-control'>
+                    <input type='text' ng-model='current_sub_category.sub_category_name' typeahead='sub_category for sub_category in sub_category_names | filter:$viewValue | limitTo: 8' class='form-control'>
                 </div>
             </div>
             <div class='clearfix'></div>
             <div class='form-group'>
-                <div class='col-xs-3 control-label'>Section Description</div>
+                <div class='col-xs-3 control-label'>Sub-category Description</div>
                 <div class='col-xs-6'>
                     <textarea type='text' ng-model='current_sub_category.sub_category_description' class='form-control'></textarea>
                 </div>
@@ -152,9 +152,9 @@
         </div>
         <div class='clearfix'></div>
         <div class='form-group'>
-            <button type='button' class='btn btn-primary' ng-click='resolveSection()' ng-if='is_new'><i class='fa fa-plus'></i> Add</button>
-            <button type='button' class='btn btn-primary' ng-click='resolveSection()' ng-if='!is_new'> Update</button>
-            <button type='button' class='btn btn-warning' ng-click='discardSection()'> Discard</button>
+            <button type='button' class='btn btn-primary' ng-click='resolveSubCategory()' ng-if='is_new'><i class='fa fa-plus'></i> Add</button>
+            <button type='button' class='btn btn-primary' ng-click='resolveSubCategory()' ng-if='!is_new'> Update</button>
+            <button type='button' class='btn btn-warning' ng-click='discardSubCategory()'> Discard</button>
         </div>
     </script>
     <script type='text/ng-template' id='menuItemTemplate.html'>

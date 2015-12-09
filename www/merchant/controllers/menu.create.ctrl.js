@@ -185,13 +185,13 @@ angular.module('merchantApp').controller('MenuCreateController', ['$scope', 'mer
 					if(!category.category_name) {
 						callback('Menu category name required');
 					} else if (!category.sub_categories || !category.sub_categories.length) {
-						callback('All menu categories must have atleast one section');
+						callback('All menu categories must have atleast one sub-category');
 					} else {
 						async.each(category.sub_categories, function(sub_category, callback) {
 							if (!sub_category.sub_category_name) {
-								callback('All sections must have a section name');
+								callback('All sub-categories must have a sub-category name');
 							} else if (!sub_category.items || !sub_category.items.length) {
-								callback('All sections must have atleast one item');
+								callback('All sub-categories must have atleast one item');
 							} else {
 								callback();
 							}

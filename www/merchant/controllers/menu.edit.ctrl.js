@@ -81,7 +81,7 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 			var modalInstance = $modal.open({
 				animation: true,
 				templateUrl: 'subCategoryTemplate.html',
-				controller: 'MenuSectionController',
+				controller: 'MenuSubCategoryController',
 				size: 'lg',
 				resolve: {
 					sub_category: function() {
@@ -95,8 +95,8 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 				}
 			});
 
-			modalInstance.result.then(function(section) {
-				$scope.menu.menu_categories[index].sub_categories.push(section);
+			modalInstance.result.then(function(sub_category) {
+				$scope.menu.menu_categories[index].sub_categories.push(sub_category);
 			}, function() {
 				console.log('Modal dismissed at: ', new Date());
 			})
@@ -106,7 +106,7 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 			var modalInstance = $modal.open({
 				animation: true,
 				templateUrl: 'subCategoryTemplate.html',
-				controller: 'MenuSectionController',
+				controller: 'MenuSubCategoryController',
 				size: 'lg',
 				resolve: {
 					sub_category: function() {
@@ -191,13 +191,13 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 					if(!category.category_name) {
 						callback('Menu category name required');
 					} else if (!category.sub_categories || !category.sub_categories.length) {
-						callback('All menu categories must have atleast one section');
+						callback('All menu categories must have atleast one sub-category');
 					} else {
 						async.each(category.sub_categories, function(sub_category, callback) {
 							if (!sub_category.sub_category_name) {
-								callback('All sections must have a section name');
+								callback('All sub_category must have a sub_category name');
 							} else if (!sub_category.items || !sub_category.items.length) {
-								callback('All sections must have atleast one item');
+								callback('All sub_category must have atleast one item');
 							} else {
 								callback();
 							}
@@ -258,17 +258,17 @@ angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merch
 		$modalInstance.dismiss('cancel');
 	}
 	console.log(menu_category, is_new);
-}).controller('MenuSectionController', function($scope, $modalInstance, sub_category, is_new) {
-	$scope.section_names = ['Veg Starters', 'Non Veg Starters', 'Veg Main Course', 'Non Veg Main Course'];
+}).controller('MenuSubCategoryController', function($scope, $modalInstance, sub_category, is_new) {
+	$scope.sub_category_names = ['Veg Starters', 'Non Veg Starters', 'Veg Main Course', 'Non Veg Main Course'];
 
 	$scope.is_new = is_new;
 	$scope.current_sub_category = sub_category;
 
-	$scope.resolveSection = function() {
+	$scope.resolveSubCategory = function() {
 		$modalInstance.close($scope.current_sub_category);
 	}
 
-	$scope.discardSection = function() {
+	$scope.discardSubCategory = function() {
 		$modalInstance.dismiss('cancel');
 	}
 }).controller('MenuItemController', function($scope, $modalInstance, toastr, item, is_new, $q) {

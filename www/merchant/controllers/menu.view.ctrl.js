@@ -246,13 +246,13 @@ angular.module('merchantApp').controller('MenuViewController', ['$scope', 'merch
 				if(!description.menu_category) {
 					callback('Menu category name required');
 				} else if (!description.sections || !description.sections.length) {
-					callback('All menu categories must have atleast one section');
+					callback('All menu categories must have atleast one sub-category');
 				} else {
 					async.each(description.sections, function(section) {
 						if (!section.section_name) {
-							callback('All sections must have a section name');
+							callback('All sub-categories must have a sub-category name');
 						} else if (!section.items || !section.items.length) {
-							callback('All sections must have atleast one item');
+							callback('All sub-categories must have atleast one item');
 						} else {
 							callback();
 						}
@@ -271,7 +271,7 @@ angular.module('merchantApp').controller('MenuViewController', ['$scope', 'merch
 
 		$scope.backToSection = function() {
 			if ($scope.menu.menu_description[$scope.descIndex].sections[$scope.sectionIndex].items.length === 0) {
-				toastr.error('Atleast one item required in every section');
+				toastr.error('Atleast one item required in every sub-category');
 			} else {
 				WizardHandler.wizard().goTo('Manage Desc');	
 			}
@@ -288,13 +288,13 @@ angular.module('merchantApp').controller('MenuViewController', ['$scope', 'merch
 					if(!description.menu_category) {
 						callback('Menu category name required');
 					} else if (!description.sections || !description.sections.length) {
-						callback('All menu categories must have atleast one section');
+						callback('All menu categories must have atleast one sub-category');
 					} else {
 						async.each(description.sections, function(section) {
 							if (!section.section_name) {
-								callback('All sections must have a section name');
+								callback('All sub-categories must have a sub-category name');
 							} else if (!section.items || !section.items.length) {
-								callback('All sections must have atleast one item');
+								callback('All sub-categories must have atleast one item');
 							} else {
 								callback();
 							}
@@ -397,11 +397,11 @@ angular.module('merchantApp').controller('MenuViewController', ['$scope', 'merch
 	$scope.is_new = is_new;
 	$scope.current_section = section;
 
-	$scope.resolveSection = function() {
+	$scope.resolveSubCategory = function() {
 		$modalInstance.close($scope.current_section);
 	}
 
-	$scope.discardSection = function() {
+	$scope.discardSubCategory= function() {
 		$modalInstance.dismiss('cancel');
 	}
 }).controller('MenuItemController', function($scope, $modalInstance, toastr, item, is_new, $q) {
