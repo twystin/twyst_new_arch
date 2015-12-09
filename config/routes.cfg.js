@@ -156,10 +156,6 @@ module.exports = function(app) {
     app.get('/app', function(req, res) {
         res.redirect('https://play.google.com/store/apps/details?id=com.twyst.app.android&hl=en');
     });
-    app.all('/api/v1/*', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
-    app.all('/api/v2/*', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
-    app.all('/api/v3/*', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
-    app.all('/:shortUrl(*)', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
   })();
 };
 
