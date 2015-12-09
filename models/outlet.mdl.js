@@ -195,18 +195,20 @@ var OutletSchema = new Schema({
   business_hours: hours.hours,
   attributes: {
     delivery: {
-      delivery_area: String,
-      delivery_estimated_time: String,
-      delivery_timings: hours.hours,
-      delivery_conditions: String,
-      delivery_coords: [],
-      min_amt_for_delivery: Number,
-      free_delivery_amt: Number,
-      delivery_charge: Number,
-      order_accepts_till: {
-        hr: {type: Number},
-        min: {type: Number}
-      }
+      delivery_zone: [{
+        zone_name: String,
+        coord: [],
+        delivery_estimated_time: String,  
+        delivery_timings: hours.hours,
+        delivery_conditions: String,  
+        min_amt_for_delivery: Number,
+        free_delivery_amt: Number,
+        delivery_charge: Number,
+        order_accepts_till: {
+          hr: {type: Number},
+          min: {type: Number}
+        }
+      }],  
     },
     home_delivery: {
       type: Boolean
@@ -568,6 +570,19 @@ var OutletSchema = new Schema({
           item_cost: {     //base price or lowest option price
             type: Number
           },
+          item_availability: {
+            regular_item: {
+              type: Boolean,
+              default: true
+            },
+            start_date: {
+              type: Date
+            },
+            end_date: {
+              type: Date
+            }
+          },
+          item_available_on: [],//days 
           option_title: {
             type: String
           },
