@@ -76,6 +76,7 @@ module.exports.get_menu = function(token, menuId) {
     })
     .exec(function(err, outlet) {
         if(err || !outlet) {
+            console.log(err)
             deferred.reject({
                 err: err,
                 message: 'Unable to load menu details'

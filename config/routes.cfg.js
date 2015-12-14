@@ -99,6 +99,7 @@ module.exports = function(app) {
     app.put('/api/v4/offers/:offer_id', mustBe.authorized('outlet.update', OfferCtrl.update));
     app.get('/api/v4/offers/:offer_id', mustBe.authorized('outlet.view', OfferCtrl.get));
     app.delete('/api/v4/offers/:offer_id', mustBe.authorized('outlet.update', OfferCtrl.delete));
+
   })();
 
   (function MenuRoutes() {
@@ -109,6 +110,13 @@ module.exports = function(app) {
     app.put('/api/v4/menus/:menu', mustBe.authorized('outlet.update', MenuCtrl.update));
     app.get('/api/v4/menus/:menu', mustBe.authorized('outlet.view', MenuCtrl.get));    
     app.delete('/api/v4/menus/:menu', mustBe.authorized('outlet.update', MenuCtrl.delete));
+  })();
+
+  (function OrderRoutes() {
+    var OrderCtrl = require('../controllers/order.ctrl');    
+    app.post('/api/v4/order/verify', OrderCtrl.verify_order);
+    app.post('/api/v4/order/apply/offer', OrderCtrl.apply_offer);
+    app.post('/api/v4/order/checkout', OrderCtrl.checkout);
   })();
 
   (function ImageRoutes() {
@@ -148,10 +156,6 @@ module.exports = function(app) {
     app.get('/app', function(req, res) {
         res.redirect('https://play.google.com/store/apps/details?id=com.twyst.app.android&hl=en');
     });
-    app.all('/api/v1/*', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
-    app.all('/api/v2/*', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
-    app.all('/api/v3/*', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
-    app.all('/:shortUrl(*)', function(req, res) { res.redirect('http://staging.twyst.in' + req.url) });
   })();
 };
 

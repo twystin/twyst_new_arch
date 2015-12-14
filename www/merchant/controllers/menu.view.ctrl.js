@@ -16,9 +16,7 @@ angular.module('merchantApp').controller('MenuViewController', ['$scope', 'merch
 		// $scope.menu = {"status":"draft","menu_description":[{"sections":[{"items":[{"item_options":[{"add_on":[{"add_on_item":"sfvss","add_on_item_cost":"342"}],"option":"fvr","option_cost":546}],"item_name":"wd","item_description":"df","item_tags":["sdf","fre","yt"],"item_cost":345}],"section_name":"asd","section_description":"ads"}],"menu_category":"asd"}],"menu_type":"asd", "outlet": "556568e81ade70eb1974b956"};
 
 		$scope.menu_types = ['Dine-In', 'Takeaway', 'Delivery', 'Weekend', 'Dinner', 'All'];
-		$scope.menu_categories = ['Indian', 'Desserts', 'Cakes', 'Chinese', 'Soup'];
-		$scope.section_names = ['Veg Starters', 'Non Veg Starters', 'Veg Main Course', 'Non Veg Main Course'];
-
+		
 		$scope.addDesc = function() {
 			var modalInstance = $modal.open({
 				animation: true,
@@ -38,6 +36,19 @@ angular.module('merchantApp').controller('MenuViewController', ['$scope', 'merch
 			}, function() {
 				console.log('Modal dismissed at: ', new Date());
 			});
+		}
+
+		$scope.showCategory = function(index) {
+			if(!$scope.menu.menu_categories[index]) {
+				toastr.error("Menu category out of bounds");
+			} else {
+				$scope.current_category = index;
+				delete $scope.visible_item;
+			}
+		}
+
+		$scope.showItem = function(item) {
+			$scope.visible_item = item;
 		}
 
 		merchantRESTSvc.getOutlets().then(function(res) {
@@ -235,13 +246,13 @@ angular.module('merchantApp').controller('MenuViewController', ['$scope', 'merch
 				if(!description.menu_category) {
 					callback('Menu category name required');
 				} else if (!description.sections || !description.sections.length) {
-					callback('All menu categories must have atleast one section');
+					callback('All menu categories must have atleast one sub-category');
 				} else {
 					async.each(description.sections, function(section) {
 						if (!section.section_name) {
-							callback('All sections must have a section name');
+							callback('All sub-categories must have a sub-category name');
 						} else if (!section.items || !section.items.length) {
-							callback('All sections must have atleast one item');
+							callback('All sub-categories must have atleast one item');
 						} else {
 							callback();
 						}
@@ -260,7 +271,7 @@ angular.module('merchantApp').controller('MenuViewController', ['$scope', 'merch
 
 		$scope.backToSection = function() {
 			if ($scope.menu.menu_description[$scope.descIndex].sections[$scope.sectionIndex].items.length === 0) {
-				toastr.error('Atleast one item required in every section');
+				toastr.error('Atleast one item required in every sub-category');
 			} else {
 				WizardHandler.wizard().goTo('Manage Desc');	
 			}
@@ -277,13 +288,13 @@ angular.module('merchantApp').controller('MenuViewController', ['$scope', 'merch
 					if(!description.menu_category) {
 						callback('Menu category name required');
 					} else if (!description.sections || !description.sections.length) {
-						callback('All menu categories must have atleast one section');
+						callback('All menu categories must have atleast one sub-category');
 					} else {
 						async.each(description.sections, function(section) {
 							if (!section.section_name) {
-								callback('All sections must have a section name');
+								callback('All sub-categories must have a sub-category name');
 							} else if (!section.items || !section.items.length) {
-								callback('All sections must have atleast one item');
+								callback('All sub-categories must have atleast one item');
 							} else {
 								callback();
 							}
@@ -386,11 +397,11 @@ angular.module('merchantApp').controller('MenuViewController', ['$scope', 'merch
 	$scope.is_new = is_new;
 	$scope.current_section = section;
 
-	$scope.resolveSection = function() {
+	$scope.resolveSubCategory = function() {
 		$modalInstance.close($scope.current_section);
 	}
 
-	$scope.discardSection = function() {
+	$scope.discardSubCategory= function() {
 		$modalInstance.dismiss('cancel');
 	}
 }).controller('MenuItemController', function($scope, $modalInstance, toastr, item, is_new, $q) {

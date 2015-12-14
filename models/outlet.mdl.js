@@ -195,18 +195,20 @@ var OutletSchema = new Schema({
   business_hours: hours.hours,
   attributes: {
     delivery: {
-      delivery_area: String,
-      delivery_estimated_time: String,
-      delivery_timings: hours.hours,
-      delivery_conditions: String,
-      delivery_coords: [],
-      min_amt_for_delivery: Number,
-      free_delivery_amt: Number,
-      delivery_charge: Number,
-      order_accepts_till: {
-        hr: {type: Number},
-        min: {type: Number}
-      }
+      delivery_zone: [{
+        zone_name: String,
+        coord: [],
+        delivery_estimated_time: String,  
+        delivery_timings: hours.hours,
+        delivery_conditions: String,  
+        min_amt_for_delivery: Number,
+        free_delivery_amt: Number,
+        delivery_charge: Number,
+        order_accepts_till: {
+          hr: {type: Number},
+          min: {type: Number}
+        }
+      }],  
     },
     home_delivery: {
       type: Boolean
@@ -326,6 +328,20 @@ var OutletSchema = new Schema({
     }
   },
   twyst_meta: {
+    twyst_commission: {
+      is_fixed: {
+        type: Boolean,
+        default: true
+      },
+      value: {
+        type: Number
+      },
+      commission_slab: [{
+        start: {type: Number},
+        end: {type: Number},
+        value: {type: Number}
+      }]
+    },
     rating: {
       count: {
         type: Number
@@ -345,7 +361,7 @@ var OutletSchema = new Schema({
     recommend_list: [{
       type: Schema.ObjectId,
       ref: 'Outlet'
-    }]
+    }],
   },
   sms_off: {
     value: {
@@ -493,12 +509,13 @@ var OutletSchema = new Schema({
     }],
     offer_items: {
       all: {type: Boolean},
+      menu_id: Schema.Types.ObjectId,
       category_id: Schema.Types.ObjectId,
       sub_category_id: Schema.Types.ObjectId,
       item_id: Schema.Types.ObjectId,
-      option_set_id: Schema.Types.ObjectId,
       option_id: Schema.Types.ObjectId,
-      addon_id: Schema.Types.ObjectId
+      sub_options: [Schema.Types.ObjectId],
+      addons: [Schema.Types.ObjectId]
     }
   }],
   orders: [{
@@ -536,6 +553,10 @@ var OutletSchema = new Schema({
           item_description: {
             type: String
           },
+          is_available: {
+            type: Boolean,
+            default: true
+          },
           item_photo: {
             type: String
           },
@@ -549,35 +570,94 @@ var OutletSchema = new Schema({
           item_cost: {     //base price or lowest option price
             type: Number
           },
-          option_sets: [{
-            option_set_name: {
+          item_availability: {
+            regular_item: {
+              type: Boolean,
+              default: true
+            },
+            start_date: {
+              type: Date
+            },
+            end_date: {
+              type: Date
+            }
+          },
+          item_available_on: [],//days 
+          option_title: {
+            type: String
+          },
+          option_is_addon: {
+            type: Boolean,
+            default: false,
+          },
+          options: [{
+            _id: {
+              type: Schema.Types.ObjectId,
+              default: new mongoose.Types.ObjectId()
+            },
+            is_available: {
+              type: Boolean,
+              default: true
+            },
+            is_vegetarian: {
+              type: Boolean,
+              default: true
+            },
+            option_value: {
               type: String
             },
-            option_set_value: {
-              type: String
-            },
-            option_set_cost: {
+            option_cost: {
               type: Number
             },
-            is_an_addon: {
-              type: Boolean,
-              default: false
-            },
-            options: [{
-              option_name: {
-                type: String
+            sub_options: [{
+              _id: {
+                type: Schema.Types.ObjectId,
+                default: new mongoose.Types.ObjectId()
               },
-              option_cost: {
-                type: Number
-              }
-            }],
-            addons: [{
-              addon_name: {
+              sub_option_title: {
                 type: String,
               },
-              addon_cost: {
-                type: Number,
-              }
+              sub_option_set: [{
+                sub_option_value: {
+                  type: String,
+                },
+                is_available: {
+                  type: Boolean,
+                  default: true
+                },
+                is_vegetarian: {
+                  type: Boolean,
+                  default: true
+                },
+                sub_option_cost: {
+                  type: Number
+                }
+              }]
+            }],
+            addons: [{
+              _id: {
+                type: Schema.Types.ObjectId,
+                default: new mongoose.Types.ObjectId()
+              },
+              addon_title: {
+                type: String,
+              },
+              addon_set: [{
+                addon_value: {
+                  type: String,
+                },
+                is_available: {
+                  type: Boolean,
+                  default: true
+                },
+                is_vegetarian: {
+                  type: Boolean,
+                  default: true
+                },
+                addon_cost: {
+                  type: Number
+                }
+              }]
             }]
           }]
         }]

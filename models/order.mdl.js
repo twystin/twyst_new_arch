@@ -16,22 +16,30 @@ var Order = new Schema({
     pin: {type: Number}, 
     city: {type: String},
     state: {type: String},
+    delivery_zone: {
+      type: String
+    },
     coords:{
       lat: {type: String},
       long: {type: String}
     },
-    tag: {type: String,
+    tags: {type: String,
       enum: ['home', 'office', 'other']}
   },
   outlet: {
     type: Schema.Types.ObjectId,
     ref: 'Outlet'
   },
+  offer_used: {type: Schema.Types.ObjectId},
   order_date: {type: Date, default: new Date()},
   order_cost: {type: Number},
   payment_info: {}, //COD/Payu/payment object
   txn_id: {type: String},
   order_status: {type: String},
+  is_favourite: {
+    type: Boolean,
+    default: false
+  },
   items: [{
   	item_id: Schema.ObjectId,
     item_name: {

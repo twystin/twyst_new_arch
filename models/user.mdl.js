@@ -195,7 +195,10 @@ var User = new Schema({
     type: Number,
     default: 6
   },
-  created_at: Date
+  created_at: {
+    type: Date,
+    default: Date.now
+  }
 });
 
 module.exports = mongoose.model('User', User);
