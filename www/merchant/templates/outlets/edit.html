@@ -1,555 +1,540 @@
-<div class='col-xs-12 col-sm-10 col-sm-offset-1 col-lg-8 col-lg-offset-2' style='min-height:100vh;'>
-  <wizard on-finish='updateOutlet()'>
-    <wz-step title='Outlet Basics' canexit='validateStep1'>
-      <div class='well well-lg'>
-        <form class='form-horizontal'>
-          <fieldset>
-            <legend>Outlet Info</legend>
-            <div class='form-group'>
-              <label for='outlet_name' class='col-md-2 control-label'>Outlet name <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
-              <div class='col-md-5' ng-class='{"has-error": formFailure && !outlet.basics.name}'>
-                <input type='text' class='form-control' ng-model='outlet.basics.name' autocomplete='off'>
-              </div>
-            </div>
-            <div class='form-group'>
-              <label for='outet_desc' class='col-md-2 control-label'>Address <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
-              <div class='col-md-5' ng-class='{"has-error": formFailure && !outlet.contact.location.address}'>
-                <textarea class='form-control' rows='4' ng-model='outlet.contact.location.address' style='overflow:auto;resize:none;'></textarea>
-                <span class='help-block'>Provide the complete outlet address</span>
-              </div>
-            </div>
-            <div class='form-group'>
-              <label for='locality_1' class='col-md-2 control-label'>Locality 1</label>
-              <div class='col-md-4'>
-                <input type='text' class='form-control' ng-model='outlet.contact.location.locality_1[0]' typeahead="location.location_1 for location in locations | filter:{location_1:$viewValue, location_2: outlet.contact.location.locality_2[0], city: outlet.contact.location.city}" typeahead-on-select='updateMapMarker($item.lat, $item.long)' autocomplete='off'>
-              </div>
-              <label for='locality_2' class='col-md-2 control-label' ng-class='{"has-error": formFailure && !outlet.contact.location.locality_2[0]}'>Locality 2 <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
-              <div class='col-md-4' ng-class='{"has-error": formFailure && !outlet.contact.location.locality_2[0]}'>
-                <input type='text' class='form-control' ng-model='outlet.contact.location.locality_2[0]' typeahead="location.location_2 for location in locations | filter:{location_2:$viewValue, location_1: outlet.contact.location.locality_1[0], city: outlet.contact.location.city}" typeahead-on-select='updateMapMarker($item.lat, $item.long)' autocomplete='off'>
-              </div>
-            </div>
-            <div class='form-group'>
-              <label for='city' class='col-md-2 control-label'>City <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
-              <div class='col-md-4' ng-class='{"has-error": formFailure && !outlet.contact.location.city}'>
-                <input type='text' class='form-control' ng-model='outlet.contact.location.city' typeahead="location.city for location in locations | filter:{location_1:outlet.contact.location.locality_1[0], location_2: outlet.contact.location.locality_2[0], city: $viewValue}" typeahead-on-select='updateMapMarker($item.lat, $item.long)' autocomplete='off'>
-              </div>
-              <label for='pincode' class='col-md-2 control-label'>Pincode</label>
-              <div class='col-md-4'>
-                <input type='text' class='form-control' ng-model='outlet.contact.location.pin'>
-              </div>
-            </div>
-            <div class='form-group'>
-              <div class='col-md-4 col-md-offset-2'>
-                <span class='fa fa-lg fa-check-square' ng-click='toggleStatus()' ng-if='outlet.outlet_meta.status==="active"'></span>
-                <span class='fa fa-lg fa-square-o' ng-click='toggleStatus()' ng-if='outlet.outlet_meta.status!=="active"'></span>
-                <label for='city'>Is Active?</label>
-              </div>
-            </div>
-          </fieldset>
-        </form>
-      </div>
-      <div class='well well-lg'>
-        <form class="form-horizontal">
-          <fieldset>
-            <legend>Geo Location</legend>
-            <div class="form-group">
-              <label for="map_container" class="col-md-2 control-label">Mark Location <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
-              <div class="col-md-10">
-                <ui-gmap-google-map center="map.center" zoom="map.zoom" draggable="true" options="options" events='mapEvents'>
-                  <ui-gmap-marker coords="marker.coords" options="marker.options" events="marker.events" idkey="marker.id">
-                  </ui-gmap-marker>
-                </ui-gmap-google-map>
-                <div class='form-group'>
-                  <br />
-                  <div class='col-md-12'>
-                    <label class='control-label'>Set location manually below</label>
-                  </div>
-                  <div class='col-md-6'>
-                    <label class='col-md-3 control-label'>Latitude</label>
-                    <div class='col-md-9' ng-class='{"has-error": formFailure && !outlet.contact.location.coords.latitude}'>
-                      <input type='number' ng-model='outlet.contact.location.coords.latitude' class='form-control' ng-change='updateMapMarker(outlet.contact.location.coords.latitude, outlet.contact.location.coords.longitude) '>
-                    </div>
-                  </div>
-                  <div class='col-md-6'>
-                    <label class='col-md-3 control-label'>Longitude</label>
-                    <div class='col-md-9' ng-class='{"has-error": formFailure && !outlet.contact.location.coords.longitude}'>
-                      <input type='number' ng-model='outlet.contact.location.coords.longitude' class='form-control' ng-change='updateMapMarker(outlet.contact.location.coords.latitude, outlet.contact.location.coords.longitude)  '>
-                    </div>
-                  </div>
+<div>&nbsp;</div>
+<div class='container'>
+    <div class='row'>
+        <div class='col-md-12'>
+            <section class='panel panel-default'>
+                <div class='panel-heading'>
+                    <legend><span class='glyphicon glyphicon-th'></span> Update Outlet</legend>
                 </div>
-              </div>
-            </div>
-            <div class='form-group'>
-              <label for='coordinates' class='col-md-2 control-label'>Coordinates</label>
-              <div class='col-md-10' ng-if='outlet.contact.location.coords.longitude && outlet.contact.location.coords.latitude'>
-                <label class='control-label' for='geo_data'>Geographical Coordinates</label>
-                <div class='clearfix'></div>
-                <div class='col-sm-6'>Longitude: {{outlet.contact.location.coords.longitude}}</div>
-                <div class='col-sm-6'>Latitide: {{outlet.contact.location.coords.latitude}}</div>
-                <div class='col-sm-12'><a href='{{outlet.contact.location.map_url}}' target='_blank'> Click here to view map link</a></div>
-              </div>
-              <div class='col-md-10' ng-if='!outlet.contact.location.coords.longitude || !outlet.contact.location.coords.latitude'>
-                <div class='alert alert-warning' ng-if='!outlet.contact.location.coords.longitude || !outlet.contact.location.coords.latitude'>
-                  <p>Drop a pin to the outlet location to get location details</p>
+                <div class='panel-body'>
+                    <wizard on-finish='updateOutlet()'>
+                        <wz-step title='Outlet Basics' canexit='validateStep1'>
+                            <div class='well well-lg'>
+                                <form class='form-horizontal' role='form'>
+                                    <legend>Outlet Info</legend>
+                                    <div class='form-group'>
+                                        <label class='col-md-2 control-label'>
+                                            Outlet Name <i class='fa fa-sm fa-asterisk'></i>
+                                        </label>
+                                        <div class='col-md-6' ng-class='{"has-error": formFailure && !outlet.basics.name}'>
+                                            <input type='text' class='form-control' ng-model='outlet.basics.name' autocomplete='off'>
+                                        </div>
+                                    </div>
+                                    <div class='form-group'>
+                                        <label class='col-md-2 control-label'>
+                                            Address <i class='fa fa-sm fa-asterisk'></i>
+                                        </label>
+                                        <div class='col-md-6' ng-class='{"has-error": formFailure && !outlet.contact.location.address}'>
+                                            <textarea class='form-control' rows='4' ng-model='outlet.contact.location.address'></textarea>
+                                            <span class='help-block'>Provide the complete outlet address</span>
+                                        </div>
+                                    </div>
+                                    <div class='form-group'>
+                                        <label class='col-md-2 control-label'>
+                                            City <i class='fa fa-sm fa-asterisk'></i>
+                                        </label>
+                                        <div class='col-md-4' ng-class='{"has-error": formFailure && !outlet.contact.location.city}'>
+                                            <select ng-model='outlet.contact.location.city' class='form-control'>
+                                                <option value='' ng-if='!outlet.contact.location.city'>Choose the City</option>
+                                                <option value='Gurgaon'>Gurgaon</option>
+                                                <option value='New Delhi'>New Delhi</option>
+                                                <option value='Ghaziabad'>Ghaziabad</option>
+                                                <option value='Faridabad'>Faridabad</option>
+                                            </select>
+                                        </div>
+                                        <label class='col-md-2 control-label'>
+                                            Locality 2 <i class='fa fa-sm fa-asterisk'></i>
+                                        </label>
+                                        <div class='col-md-4' ng-class='{"has-error": formFailure && !outlet.contact.location.locality_2[0]}'>
+                                            <input type='text' class='form-control' ng-model='outlet.contact.location.locality_2[0]' typeahead='location.location_2 for location in locations | filter:{location_2:$viewValue, location_1: outlet.contact.location.locality_1[0], city: outlet.contact.location.city}' typeahead-on-select='updateMapMarker($item.lat, $item.long)' autocomplete='off'>
+                                        </div>
+                                    </div>
+                                    <div class='form-group'>
+                                        <label class='col-md-2 control-label'>Locality 1</label>
+                                        <div class='col-md-4'>
+                                            <input type='text' class='form-control' ng-model='outlet.contact.location.locality_1[0]' typeahead='location.location_1 for location in locations | filter:{location_1:$viewValue, location_2: outlet.contact.location.locality_2[0], city: outlet.contact.location.city}' typeahead-on-select='updateMapMarker($item.lat, $item.long)' autocomplete='off'>
+                                        </div>
+                                        <label class='col-md-2 control-label'>Pincode</label>
+                                        <div class='col-md-4'>
+                                            <input type='text' class='form-control' ng-model='outlet.contact.location.pin'>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class='well well-lg'>
+                                <form class='form-horizontal' role='form'>
+                                    <legend>Geo Location</legend>
+                                    <div class='form-group'>
+                                        <label class='col-md-2 control-label'>
+                                            Mark Location <i class='fa fa-sm fa-asterisk'></i>
+                                        </label>
+                                        <div class='col-md-10'>
+                                            <ui-gmap-google-map center='map.center' zoom='map.zoom' draggable='true' options='mapOptions' events='mapEvents'>
+                                                <ui-gmap-marker coords="marker.coords" options="marker.options" events="marker.events" idkey="marker.id">
+                                                </ui-gmap-marker>
+                                            </ui-gmap-google-map>
+                                            <div class='form-group'>
+                                                <div class='col-xs-12'>
+                                                    <label class='control-label'>Set location manually below</label>
+                                                </div>
+                                                <div class='col-sm-6'>
+                                                    <label class='col-sm-3 control-label'>Latitude</label>
+                                                    <div class='col-sm-9' ng-class='{"has-error": formFailure && !outlet.contact.location.coords.latitude}'>
+                                                        <input type='number' ng-model='outlet.contact.location.coords.latitude' class='form-control' ng-change='updateMapMarker(outlet.contact.location.coords.latitude, outlet.contact.location.coords.longitude)'>
+                                                    </div>
+                                                </div>
+                                                <div class='col-sm-6'>
+                                                    <label class='col-sm-3 control-label'>Longitude</label>
+                                                    <div class='col-sm-9' ng-class='{"has-error": formFailure && !outlet.contact.location.coords.longitude}'>
+                                                        <input type='number' ng-model='outlet.contact.location.coords.longitude' class='form-control' ng-change='updateMapMarker(outlet.contact.location.coords.latitude, outlet.contact.location.coords.longitude)'>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class='well well-lg'>
+                                <form class='form-horizontal' role='form'>
+                                    <legend>Phone Numbers</legend>
+                                    <div class='form-group'>
+                                        <label class='col-md-2 control-label'>
+                                            Outlet Numbers
+                                            <button class='btn btn-primary' ng-click='addNumber("mobile")'><i class='fa fa-plus'></i> Add Number</button>
+                                        </label>
+                                        <div class='col-md-10'>
+                                            <div class='row' ng-repeat='number in outlet.contact.phones.mobile'>
+                                                <div class='col-md-3' ng-class='{"has-error": formFailure && !number.num_type}'>
+                                                    <select class='form-control' ng-model='number.num_type'>
+                                                        <option value='' ng-if='!number.num_type'>Choose the type</option>
+                                                        <option value='mobile'>Mobile</option>
+                                                        <option value='landline'>Landline</option>
+                                                    </select>
+                                                </div>
+                                                <div class='col-md-4' ng-if='number.num_type' ng-class='{"has-error": formFailure && !number.num}'>
+                                                    <div class='input-group'>
+                                                        <input type='text' class='form-control' ng-model='number.num' placeholder='{{number.num_type=="mobile"? "Eg. 9876543210": "Eg. 01120000198"}}'>
+                                                        <div class='input-group-addon' ng-if='$index===0'>
+                                                            <i class='fa fa-sm fa-asterisk'></i>
+                                                        </div>
+                                                        <div class='input-group-btn mob-number-addon' ng-if='outlet.contact.phones.mobile.length > 1' ng-click='removeNumber(outlet.contact.phones.mobile, $index)'>
+                                                            <button class='btn btn-danger'>
+                                                                <span class='fa fa-trash-o'></span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class='form-group'>
+                                        <label class='col-md-2 control-label'>
+                                            Registered Mobiles
+                                            <button class='btn btn-primary' ng-click='addNumber("reg_mobile")'><i class='fa fa-plus'></i> Add Mobile</button>
+                                        </label>
+                                        <div class='col-md-6'>
+                                            <div class='input-group' ng-class='{"has-error": formFailure && !number.num}' ng-repeat='number in outlet.contact.phones.reg_mobile'>
+                                                <div class='input-group-addon'>#{{$index + 1}}</div>
+                                                <input class='form-control' type='text' ng-model='number.num' placeholder='Eg. 9876543210 or 01120000198'>
+                                                <div class='input-group-addon' ng-if='$index===0'><i class='fa fa-sm fa-asterisk'></i></div>
+                                                <div class='input-group-btn mob-num-addon' ng-if='outlet.contact.phones.reg_mobile.length>1' ng-click='removeNumber(outlet.contact.phones.reg_mobile, $index)'>
+                                                    <button class='btn btn-danger'>
+                                                        <i class='fa fa-trash-o'></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class='well well-lg'>
+                                <form class='form-horizontal' role='form'>
+                                    <legend>Contact Person</legend>
+                                    <div class='form-group'>
+                                        <label class='col-md-2 control-label'>
+                                            Contact Name <i class='fa fa-sm fa-asterisk'></i>
+                                        </label>
+                                        <div class='col-md-6' ng-class='{"has-error": formFailure && !outlet.contact.emails.person}'>
+                                            <input type='text' class='form-control' ng-model='outlet.contact.emails.person'>
+                                        </div>
+                                    </div>
+                                    <div class='form-group'>
+                                        <label class='col-md-2 control-label'>Designation</label>
+                                        <div class='col-md-6' ng-class='{"has-error": formFailure && !outlet.contact.emails.designation}'>
+                                            <select class='form-control' ng-model='outlet.contact.emails.designation'>
+                                                <option value=''>Choose a designation</option>
+                                                <option value='Owner'>Owner</option>
+                                                <option value='General Manager'>General Manager</option>
+                                                <option value='Restaurant Manager'>Restaurant Manager</option>
+                                                <option value='Marketing Manager'>Marketing Manager</option>
+                                                <option value='Other'>Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class='form-group'>
+                                        <label class='col-md-2 control-label'>
+                                            Email <i class='fa fa-sm fa-asterisk'></i>
+                                        </label>
+                                        <div class='col-md-6'>
+                                            <input type='email' class='form-control' ng-model='outlet.contact.emails.email'>
+                                        </div>
+                                    </div>
+                                    <div class='form-group'>
+                                        <label class='col-md-2 control-label'>Email Type</label>
+                                        <div class='col-md-6' ng-class='{"has-error": formFailure && !outlet.contact.emails.type}'>
+                                            <select class='form-control' ng-model='outlet.contact.emails.type'>
+                                                <option value='personal'>Personal</option>
+                                                <option value='work'>Work</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class='well well-lg'>
+                                <form class='form-horizontal' role='form'>
+                                    <legend>Account Manager</legend>
+                                    <div class='form-group'>
+                                        <label class='col-md-2 control-label'>
+                                            Email <i class='fa fa-sm fa-asterisk'></i>
+                                        </label>
+                                        <div class='col-md-6' ng-class='{"has-error": formFailure && !outlet.basics.account_mgr_email}'>
+                                            <input type='email' required class='form-control' ng-model='outlet.basics.account_mgr_email'>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class='clearfix'></div>
+                            <button type="button" class="btn btn-w-sm btn-gap-v btn-direction btn-right btn-primary" wz-next>Next</button>
+                        </wz-step>
+                        <wz-step title='Outlet Details' canexit='validateStep2'>
+                            <div class='well well-lg'>
+                                <form class='form-horizontal' role='form'>
+                                    <legend>Attributes</legend>
+                                    <div class='form-group'>
+                                        <label class='col-md-3 control-label'>
+                                            Outlet Type <i class='fa fa-sm fa-asterisk'></i>
+                                        </label>
+                                        <div class='col-md-6' ng-class='{"has-error": formFailure && !outlet.basics.main_type}'>
+                                            <select class='form-control' ng-model='outlet.basics.main_type'>
+                                                <option value='' ng-if='!outlet.basics.main_type'>Choose an outlet Type</option>
+                                                <option value='{{outlet_type.value}}' ng-repeat='outlet_type in outlet_types'>{{outlet_type.name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class='form-group'>
+                                        <label class='col-md-3 control-label'>
+                                            Cost for Two <i class='fa fa-sm fa-asterisk'></i>
+                                        </label>
+                                        <div class='col-md-6'>
+                                            <div class='col-md-5'>
+                                                <div class='form-group'>
+                                                    <label class='control-label'>From</label>
+                                                    <div class='input-group' ng-class='{"has-error": formFailure && !outlet.attributes.cost_for_two.min}'>
+                                                        <div class='input-group-addon'><i class='fa fa-inr'></i></div>
+                                                        <select class='form-control' ng-model='outlet.attributes.cost_for_two.min'>
+                                                            <option value='100'> 100</option>
+                                                            <option value='300'> 300</option>
+                                                            <option value='500'> 500</option>
+                                                            <option value='1000'>1000</option>
+                                                            <option value='1500'>1500</option>
+                                                            <option value='2000'>2000</option>
+                                                            <option value='2000'>2000</option>
+                                                            <option value='2500'>2500</option>
+                                                            <option value='3000'>3000</option>
+                                                            <option value='3500'>3500</option>
+                                                            <option value='4000'>4000</option>
+                                                            <option value='4500'>4500</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class='col-md-5 col-md-offset-1'>
+                                                <div class='form-group'>
+                                                    <label class='control-label'>From</label>
+                                                    <div class='input-group' ng-class='{"has-error": formFailure && !outlet.attributes.cost_for_two.max}'>
+                                                        <div class='input-group-addon'><i class='fa fa-inr'></i></div>
+                                                        <select class='form-control' ng-model='outlet.attributes.cost_for_two.max'>
+                                                            <option value='300'> 300</option>
+                                                            <option value='500'> 500</option>
+                                                            <option value='1000'>1000</option>
+                                                            <option value='1500'>1500</option>
+                                                            <option value='2000'>2000</option>
+                                                            <option value='2000'>2000</option>
+                                                            <option value='2500'>2500</option>
+                                                            <option value='3000'>3000</option>
+                                                            <option value='3500'>3500</option>
+                                                            <option value='4000'>4000</option>
+                                                            <option value='4500'>4500</option>
+                                                            <option value='5000'>5000</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class='form-group'>
+                                        <label class='col-md-3 control-label'>Dine-In</label>
+                                        <div class='col-md-9'>
+                                            <input bs-switch ng-model='outlet.attributes.dine_in' type='checkbox' switch-on-text='Available' switch-off-text='Unavailable' switch-on-color='success' switch-off-color='danger'>
+                                        </div>
+                                    </div>
+                                    <div class='form-group'>
+                                        <label class='col-md-3 control-label'>Alcohol</label>
+                                        <div class='col-md-9'>
+                                            <input bs-switch ng-model='outlet.attributes.alcohol' type='checkbox' switch-on-text='Available' switch-off-text="Unavailable" switch-on-color='success' switch-off-color='danger'>
+                                        </div>
+                                    </div>
+                                    <div class='form-group'>
+                                        <label class='col-md-3 control-label'>Home Delivery</label>
+                                        <div class='col-md-9'>
+                                            <input bs-switch ng-model='outlet.attributes.home_delivery' type='checkbox' switch-on-text='Available' switch-off-text='Unavailable' switch-on-color='success' switch-off-color='danger'>
+                                        </div>
+                                    </div>
+                                    <div class='form-group' ng-if='outlet.attributes.home_delivery'>
+                                        <label class='col-md-3 control-label'>Estimate Time <i class='fa fa-sm fa-asterisk'></i></label>
+                                        <div class='col-md-4' ng-class='{"has-error": formFailure && !outlet.attributes.delivery.delivery_estimated_time}'>
+                                            <div class='input-group'>
+                                                <input type='text' class='form-control text-right' ng-model='outlet.attributes.delivery.delivery_estimated_time' placeholder='Eg. 30, 40, 45, 60...'>
+                                                <div class='input-group-addon'> minutes</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class='form-group'>
+                                        <label class='col-md-3 control-label'>Cuisines <i class='fa fa-sm fa-asterisk'></i></label>
+                                        <div class='col-md-6'>
+                                            <ul class='list-group' ng-if='outlet.attributes.cuisines.length'>
+                                                <li class='list-group-item' ng-repeat='cuisine in outlet.attributes.cuisines track by $index'>
+                                                    {{cuisine}}
+                                                    <button class='btn btn-sm btn-danger pull-right' ng-click='removeCuisine($index)'><i class='fa fa-trash-o'></i></button>
+                                                </li>
+                                            </ul>
+                                            <div class='alert' ng-if='!outlet.attributes.cuisines.length' ng-class='{"alert-warning": !formFailure, "alert-danger": formFailure}'>
+                                                <span ng-if='!formFailure'>Start adding cuisines below.</span>
+                                                <span ng-if='formFailure'>Add atleast one cuisine below.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class='form-group'>
+                                        <label class='col-md-3 control-label'>Add a cuisines</label>
+                                        <div class='col-md-6'>
+                                            <input class='form-control' ng-model='newCuisine' ng-list placeholder='Add cuisine...' typeahead="cuisine for cuisine in cuisines | filter:$viewValue | limitTo:8" typeahead-on-select="addCuisine(newCuisine)" />
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class='well well-lg'>
+                                <form class='form-horizontal' role='form'>
+                                    <legend>SMS OFF TIME</legend>
+                                    <div class='form-group'>
+                                        <div class='col-md-offset-1 col-md-11'>
+                                            <input bs-switch type='checkbox' ng-model='outlet.sms_off.value' switch-off-text='Inactive' switch-on-text='Active' ng-change='updateSMSOff()'>
+                                        </div>
+                                    </div>
+                                    <div class='form-group' ng-if='outlet.sms_off.value'>
+                                        <label class='col-md-2 control-label'>Timings <i class='fa fa-sm fa-asterisk'></i></label>
+                                        <div class='col-md-10'>
+                                            <div class='form-group'>
+                                                <label class='col-md-2 control-label'>Starting</label>
+                                                <div class='col-md-10'>
+                                                    <input type='number' ng-model='outlet.sms_off.time.start.hr' min='0' max='23' steps='1'> :
+                                                    <input type='number' ng-model='outlet.sms_off.time.start.min' min='0' max='59' steps='1'>
+                                                </div>
+                                            </div>
+                                            <div class='form-group'>
+                                                <label class='col-md-2 control-label'>Uptill</label>
+                                                <div class='col-md-10'>
+                                                    <input type='number' ng-model='outlet.sms_off.time.end.hr' min='0' max='23' steps='1'> :
+                                                    <input type='number' ng-model='outlet.sms_off.time.end.min' min='0' max='59' steps='1'>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class='clearfix'></div>
+                            <button type='button' class='btn btn-w-sm btn-gap-v btn-direction btn-left btn-danger' wz-previous>Prev</button>
+                            <button type="button" class="btn btn-w-sm btn-gap-v btn-direction btn-right btn-primary" wz-next>Next</button>
+                        </wz-step>
+                        <wz-step title='Outlet Timings' canexit='validateStep3'>
+                            <div class='well well-lg'>
+                                <form class='form-horizontal' role='form'>
+                                    <legend>Outlet Timings <i class='fa fa-sm fa-asterisk'></i> </legend>
+                                    <div class='form-group table-responsive'>
+                                        <table class='table table-bordered table-condensed'>
+                                            <thead>
+                                                <th>Day</th>
+                                                <th>Is Closed?</th>
+                                                <th ng-repeat='i in getMaxRange() track by $index'>Timing #{{$index+1}}</th>
+                                                <th>Add Timing</th>
+                                                <th>Apply to all days</th>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat='day in days'>
+                                                    <th>{{day | uppercase}}</th>
+                                                    <td>
+                                                        <input bs-switch type='checkbox' ng-model='outlet.business_hours[day].closed' switch-off-text='Open' switch-on-text='Closed' switch-off-color='success' switch-on-color='default' ng-change='updateTiming(day, outlet.business_hours)'>
+                                                    </td>
+                                                    <td ng-repeat='i in getMaxRange() track by $index'>
+                                                        <div class='col-md-12' ng-if='outlet.business_hours[day].timings.length && outlet.business_hours[day].timings[$index]' ng-click='removeTiming(day, $index, outlet.business_hours)' ng-show='outlet.business_hours[day].timings.length>1' ng-init='initalizeTiming(day, $index, outlet.business_hours)'>
+                                                            <button class='btn btn-sm btn-danger pull-right'><i class='fa fa-trash-o'></i></button>
+                                                        </div>
+                                                        <div class='col-md-12' ng-if='outlet.business_hours[day].timings[$index]'>
+                                                            <input type='time' ng-model='outlet.business_hours[day].timings[$index].open.time' placeholder='HH:MM A/P' class='form-control' ng-change='updateTime(day, $index, outlet.business_hours)'>
+                                                        </div>
+                                                        <div class='col-md-12 text-center' ng-if='outlet.business_hours[day].timings[$index]'> to </div>
+                                                        <div class='col-md-12' ng-if='outlet.business_hours[day].timings[$index]'>
+                                                            <input type='time' ng-model='outlet.business_hours[day].timings[$index].close.time' placeholder='HH:MM A/P' class='form-control' ng-change='updateTime(day, $index, outlet.business_hours)'>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <button type='button' class='btn btn-sm btn-default' ng-click='addNewTiming(day, outlet.business_hours)' ng-show='!outlet.business_hours[day].closed'><i class='fa fa-sm fa-plus'></i> Add Timing</button>
+                                                    </td>
+                                                    <td>
+                                                        <button type='button' class='btn btn-sm btn-default' ng-click='cloneToAllDays(day, outlet.business_hours)'>Apply to all days</button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class='form-group'>
+                                        <div class='col-sm-offset-2 col-sm-6'>
+                                            <div ui-tree>
+                                                <ol ui-tree-nodes='' ng-model='days'>
+                                                    <li ng-repeat='day in days' ui-tree-node>
+                                                        <div ui-tree-handle>
+                                                            {{day | uppercase}}
+                                                            <a class='pull-right btn btn-info btn-sm'><i class='fa fa-copy'></i></a>
+                                                            <a class='pull-right btn btn-primary btn-sm' ng-click='addNewTiming(day, outlet.business_hours)'><i class='fa fa-plus'></i></a>
+                                                        </div>
+                                                        <ol ui-tree-nodes='' ng-model='outlet.business_hours[day].timings'>
+                                                            <li ng-repeat='timing in outlet.business_hours[day].timings' ui-tree-node>
+                                                                <div ui-tree-handle>
+                                                                    Timing {{$index + 1}} :: {{timing.open.hr?timing.open.hr:'00'}}:{{timing.open.min?timing.open.min:'00'}} to {{timing.close.hr?timing.close.hr:'00'}}:{{timing.close.min?timing.close.min:'00'}}
+                                                                </div>
+                                                            </li>
+                                                        </ol>
+                                                    </li>
+                                                </ol>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class='clearfix'></div>
+                            <button type='button' class='btn btn-w-sm btn-gap-v btn-direction btn-left btn-danger' wz-previous>Prev</button>
+                            <button type="button" class="btn btn-w-sm btn-gap-v btn-direction btn-right btn-primary" wz-next>Next</button>
+                        </wz-step>
+                        <wz-step title='Photos' canexit='validateStep2'>
+                            <div class='well well-lg'>
+                                <form class='form-horizontal' role='form'>
+                                    <legend>Photos</legend>
+                                    <div class='form-group'>
+                                        <label class='col-md-2 control-label'>Logo <i class='fa fa-sm fa-asterisk'></i></label>
+                                        <div class='col-md-9'>
+                                            <imagereader ng-image-for='outlet' ng-image-type='logo' ng-model='outlet.photos.logo'>
+                                        </div>
+                                    </div>
+                                    <div class='form-group'>
+                                        <label class='col-md-2 control-label'>Background <i class='fa fa-sm fa-asterisk'></i></label>
+                                        <div class='col-md-9'>
+                                            <button type="button" class="btn btn-w-md btn-gap-v btn-dark" ng-click='chooseImage()'>Choose from Defaults</button>
+                                            <imagereader ng-image-for='outlet' ng-image-type='background' ng-model='outlet.photos.background'>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class='clearfix'></div>
+                            <button type='button' class='btn btn-w-sm btn-gap-v btn-direction btn-left btn-danger' wz-previous>Prev</button>
+                            <button type='button' class='btn btn-w-sm btn-gap-v btn-direction btn-right btn-primary' wz-next>Next</button>
+                        </wz-step>
+                        <wz-step title='Review'>
+                            <div class='panel panel-default'>
+                                <div class='panel-heading'>Basic Information</div>
+                                <div class='panel-body'>
+                                    <div class='col-md-6'>
+                                        <h4>{{outlet.basics.name}}</h4>
+                                        <span class='label label-primary'>{{outlet.outlet_type}}</span>
+                                        <p>
+                                            <i class='fa fa-map-marker'></i> {{outlet.contact.location.locality_1[0]}}, {{outlet.contact.location.locality_2[0]}}
+                                        </p>
+                                        <p>
+                                            <i class='fa fa-home'></i> {{outlet.contact.location.address}}
+                                        </p>
+                                        <h4>Outlet Numbers</h4>
+                                        <span class='label label-default' ng-repeat='number in outlet.contact.phones.mobile'>
+                                            <i class='fa fa-phone'></i> {{number.num}}
+                                        </span>
+                                        <h4>Registered Number</h4>
+                                        <span class='label labe-default' ng-repeat='number in outlet.contact.phones.reg_mobile'>
+                                            <i class='fa fa-phone'></i> {{number.num}}
+                                        </span>
+                                    </div>
+                                    <div class='col-md-6'>
+                                        <ui-gmap-google-map center='map.center' zoom='map.zoom' draggable='true' options='mapOptions' events='mapEvents'>
+                                            <ui-gmap-marker coords='marker.coords' options='marker.options' events='marker.events' idkey='marker.id'>
+                                            </ui-gmap-marker>
+                                        </ui-gmap-google-map>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class='panel panel-default'>
+                                <div class='panel-heading'>Attributes</div>
+                                <div class='panel-body'>
+                                    <div class='col-md-6'>
+                                        <h4>Dine-in</h4>
+                                        <span class='label label-warning' ng-if='!outlet.attributes.dine_in'>Not Available</span>
+                                        <span class='label label-primary' ng-if='outlet.attributes.dine_in'>Available</span>
+                                        <h4>Delivery</h4>
+                                        <span class='label label-warning' ng-if='!outlet.attributes.home_delivery'>Not Available</span>
+                                        <span class='label label-primary' ng-if='outlet.attributes.home_delivery'>Available</span>
+                                        <span ng-if='outlet.attributes.home_delivery'>Estimate Time: <span class='label' ng-class='{"label-primary": outlet.attributes.delivery.delivery_estimated_time<30, "label-default": outlet.attributes.delivery.delivery_estimated_time>=30 && outlet.attributes.delivery.delivery_estimated_time<=60, "label-warning": outlet.attributes.delivery.delivery_estimated_time>60}'>{{outlet.attributes.delivery.delivery_estimated_time}} mins.</span></span>
+                                        <h4>Achohol</h4>
+                                        <span class='label label-warning' ng-if='!outlet.attributes.alcohol'>Do Not Serve</span>
+                                        <span class='label label-primary' ng-if='outlet.attributes.alcohol'>Serves</span>
+                                        <h4>Cost for two: 
+                                            From: <span class='label label-primary'>Rs.{{outlet.attributes.cost_for_two.min}}</span> 
+                                            To:   <span class='label label-primary'>Rs.{{outlet.attributes.cost_for_two.max}}</span>
+                                        </h4>
+                                    </div>
+                                    <div class='col-md-6'>
+                                        <h4>Cuisines</h4>
+                                        <ul class='list-group' ng-if='outlet.attributes.cuisines.length'>
+                                            <li class='list-group-item' ng-repeat='cuisine in outlet.attributes.cuisines track by $index'>{{cuisine}}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class='panel panel-default'>
+                                <div class='panel-heading'>Timings & SMS OFF Time</div>
+                                <div class='panel-body'>
+                                    <div class='col-md-8'>
+                                        <div class='row' ng-repeat='day in days'>
+                                            <h4>{{day | uppercase}}</h4>
+                                            <span class='label label-warning' ng-if='outlet.business_hours[day].closed'>Closed</span>
+                                            <span class='label label-success' ng-if='!outlet.business_hours[day].closed'>Open</span>
+                                            <span ng-repeat='timing in outlet.business_hours[day].timings' style='margin-left:10px;margin-right:10px;'><span class='label label-primary'>{{timing.open.time | date: 'hh:mm a'}}</span> to <span class='label label-primary'>{{timing.close.time | date: 'hh:mm a'}}</span></span>
+                                        </div>
+                                    </div>
+                                    <div class='col-md-4'>
+                                        <h2 class='control-label'>SMS OFF Time</h2>
+                                        <div class='row'>
+                                            <span class='label label-success' ng-if='outlet.sms_off.value'> Active</span>
+                                            <span class='label label-default' ng-if='!outlet.sms_off.value'> Inactive</span>
+                                        </div>
+                                        <div class='row' ng-if='outlet.sms_off.value'>
+                                            <h4>From </h4> <span class='label label-primary'>{{(outlet.sms_off.time.start.hr<10?'0': '') + outlet.sms_off.time.start.hr + ':' + (outlet.sms_off.time.start.min<10?'0': '') + outlet.sms_off.time.start.min}}</span>
+                                            <h4>Upto </h4> <span class='label label-primary'>{{(outlet.sms_off.time.end.hr<10?'0': '') + outlet.sms_off.time.end.hr + ':' + (outlet.sms_off.time.end.min<10?'0': '') + outlet.sms_off.time.end.min}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class='clearfix'></div>
+                            <button type='button' class='btn btn-w-sm btn-gap-v btn-direction btn-left btn-danger' wz-previous>Go Back</button>
+                            <button type='button' class='btn btn-w-sm btn-gap-v btn-direction btn-right btn-primary' wz-next>Update Outlet</button>
+                        </wz-step>
+                    </wizard>
                 </div>
-              </div>
-            </div>
-          </fieldset>
-        </form>
-      </div>
-      <div class='well well-lg'>
-        <form class='form-horizontal'>
-          <fieldset>
-            <legend>Phone Numbers</legend>
-            <div class='form-group'>
-              <label for='outlet_numbers' class='col-md-2 control-label'>Outlet Numbers</label>
-              <div class='col-md-10'>
-                <div class='row' ng-repeat='number in outlet.contact.phones.mobile'>
-                  <div class='col-md-4' ng-class='{"has-error": formFailure && !number.num_type}'>
-                    <select class='form-control' ng-model='number.num_type'>
-                      <option value='' ng-if='!number.num_type'>Choose the type</option>
-                      <option value='mobile'>Mobile</option>
-                      <option value='landline'>Landline</option>
-                    </select>
-                  </div>
-                  <div class='col-md-8' ng-if='number.num_type' ng-class='{"has-error": formFailure && !number.num}'>
-                    <div class='input-group'>
-                      <div class='input-group-addon'>#{{$index + 1}}</div>
-                      <input class='form-control' type='text' ng-model='number.num' placeholder='{{number.num_type=="mobile"? "Eg. 9876543210": "Eg. 01120000198"}}'>
-                      <div class='input-group-addon' ng-if='$index===0'><span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></div>
-                      <div class='input-group-addon mob-num-addon' ng-show='outlet.contact.phones.mobile.length>1' ng-click='removeNumber(outlet.contact.phones.mobile, $index)'>
-                        <button class='btn btn-danger'>
-                          <span class='glyphicon glyphicon-trash'></span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  <div class='col-xs-12'>
-                    <p />
-                  </div>
-                </div>
-                <div class='col-xs-12'>
-                  <p />
-                </div>
-                <button class='btn btn-default' ng-click='addNumber("mobile")'>Add number</button>
-              </div>
-            </div>
-            <div class='form-group'>
-              <label for='outlet_numbers' class='col-md-2 control-label'>Registered Mobiles</label>
-              <div class='col-md-10'>
-                <div class='col-md-8' ng-repeat='number in outlet.contact.phones.reg_mobile'>
-                  <div class='input-group' ng-class='{"has-error": formFailure && !(number.num)}'>
-                    <div class='input-group-addon'># {{$index + 1}}</div>
-                    <input class='form-control' type='text' ng-model='number.num' placeholder='Eg. 9876543210 or 01120000198'>
-                    <div class='input-group-addon' ng-if='$index===0'><span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></div>
-                    <div class='input-group-addon mob-num-addon' ng-show='outlet.contact.phones.reg_mobile.length>1' ng-click='removeNumber(outlet.contact.phones.reg_mobile, $index)'>
-                      <button class='btn btn-danger'>
-                        <span class='glyphicon glyphicon-trash'></span>
-                      </button>
-                    </div>
-                  </div>
-                  <div class='col-xs-12'><p /></div>
-                </div>
-                <div class='col-xs-12'><p /></div>
-                <div class='clearfix'></div>
-                <button class='btn btn-default' ng-click='addNumber("reg_mobile")'>Add mobile</button>
-              </div>
-            </div>
-          </fieldset>
-        </form>
-      </div>
-      <div class='well well-lg'>
-        <form class='form-horizontal'>
-          <fieldset>
-            <legend>Contact Person</legend>
-            <div class='form-group'>
-              <label for='contact_name' class='col-md-2 control-label'>Contact Name <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
-              <div class='col-md-10' ng-class='{"has-error": formFailure && !outlet.contact.emails.person}'>
-                <input type='text' class='form-control' ng-model='outlet.contact.emails.person'>
-              </div>
-            </div>
-            <div class='form-group'>
-              <label for='designation' class='col-md-2 control-label'>Designation <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
-              <div class='col-md-10'>
-                <select class='form-control' ng-model='outlet.contact.emails.designation'>
-                  <option value=''>Choose a designation</option>
-                  <option value='Owner'>Owner</option>
-                  <option value='General Manager'>General Manager</option>
-                  <option value='Restaurant Manager'>Restaurant Manager</option>
-                  <option value='Marketing Manager'>Marketing Manager</option>
-                  <option value='Other'>Other</option>
-                </select>
-              </div>
-            </div>
-            <div class='form-group'>
-              <label for='email' class='col-md-2 control-label'>Email <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
-              <div class='col-md-10' ng-class='{"has-error": formFailure && !outlet.contact.emails.email}'>
-                <input type='email' class='form-control' ng-model='outlet.contact.emails.email'>
-              </div>
-            </div>
-            <div class='form-group'>
-              <label for='email_type' class='col-md-2 control-label'>Email Type <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
-              <div class='col-md-10' ng-class='{"has-error": formFailure && !outlet.contact.emails.type}'>
-                <select ng-model='outlet.contact.emails.type' class='form-control'>
-                  <option value='personal'>Personal</option>
-                  <option value='work'>Work</option>
-                </select>
-              </div>
-            </div>
-          </fieldset>
-        </form>
-      </div>
-      <div class='well well-lg'>
-        <form class='form-horizontal'>
-          <fieldset>
-            <legend>Account Manager</legend>
-            
-            <div class='form-group'>
-              <label for='email_type' class='col-md-2 control-label'>Email <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
-              <div class='col-md-10' ng-class='{"has-error": formFailure && outlet.basics.account_mgr_email}'>
-                <div class='col-md-10' ng-class='{"has-error": formFailure && !outlet.basics.account_mgr_email }'>
-                <input type='email' class='form-control' ng-model='outlet.basics.account_mgr_email'>
-              </div>
-              </div>
-            </div>
-          </fieldset>
-        </form>
-      </div>
-      <div class='clearfix'></div>
-      <button class='btn btn-primary' wz-next>Continue</button>
-    </wz-step>
-    <wz-step title='Outlet Details' canexit='validateStep2'>
-      <div class='well well-lg'>
-        <form class='form-horizontal'>
-          <fieldset>
-            <legend>Attributes</legend>
-            <div class='form-group'>
-              <label for='outlet_type' class='col-md-3 control-label'>Outlet Type <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
-              <div class='col-md-6' ng-class='{"has-error": formFailure && !outlet.basics.main_type}'>
-                <select ng-model='outlet.basics.main_type' class='form-control'>
-                  <option value='{{outlet_type.value}}' ng-repeat='outlet_type in outlet_types'>{{outlet_type.name}}</option>
-                </select>
-              </div>
-            </div>
-            <div class='form-group'>
-              <label for='outlet_type' class='col-md-3 control-label'>Cost For Two <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
-              <div class='col-md-6'>
-                <div class='col-md-5'>
-                  <div class='form-group'>
-                    <label class='control-label'>From</label>
-                    <div class='input-group' ng-class='{"has-error": formFailure && !outlet.attributes.cost_for_two.min}'>
-                      <div class='input-group-addon'>Rs.</div>
-                      <select class='form-control' ng-model='outlet.attributes.cost_for_two.min'>
-                        <option value='100'>100</option>
-                        <option value='300'>300</option>
-                        <option value='500'>500</option>
-                        <option value='1000'>1000</option>
-                        <option value='1500'>1500</option>
-                        <option value='2000'>2000</option>
-                        <option value='2000'>2000</option>
-                        <option value='2500'>2500</option>
-                        <option value='3000'>3000</option>
-                        <option value='3500'>3500</option>
-                        <option value='4000'>4000</option>
-                        <option value='4500'>4500</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-                <div class='col-md-5 col-md-offset-1'>
-                  <div class='form-group'>
-                    <label class='control-label'>Upto</label>
-                    <div class='input-group' ng-class='{"has-error": formFailure && !outlet.attributes.cost_for_two.max}'>
-                      <div class='input-group-addon'>Rs.</div>
-                      <select class='form-control' ng-model='outlet.attributes.cost_for_two.max'>
-                        <option value='300'>300</option>
-                        <option value='500'>500</option>
-                        <option value='1000'>1000</option>
-                        <option value='1500'>1500</option>
-                        <option value='2000'>2000</option>
-                        <option value='2000'>2000</option>
-                        <option value='2500'>2500</option>
-                        <option value='3000'>3000</option>
-                        <option value='3500'>3500</option>
-                        <option value='4000'>4000</option>
-                        <option value='4500'>4500</option>
-                        <option value='5000'>5000 or above</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class='form-group'>
-              <label for='dine_in' class='col-md-3 control-label'>Dine-In Available</label>
-              <div class='col-md-9'>
-                <input type='checkbox' ng-model='outlet.attributes.dine_in'>
-              </div>
-            </div>
-            <div class='form-group'>
-              <label for='alcohol' class='col-md-3 control-label'>Serves Alcohol</label>
-              <div class='col-md-9'>
-                <input type='checkbox' ng-model='outlet.attributes.alcohol'>
-              </div>
-            </div>
-            <div class='form-group'>
-              <label for='delivery' class='col-md-3 control-label'>Home Delivery</label>
-              <div class='col-md-9'>
-                <input type='checkbox' ng-model='outlet.attributes.home_delivery'>
-              </div>
-            </div>
-            <div class='form-group' ng-if='outlet.attributes.home_delivery'>
-              <label for='delivery_info' class='col-md-3 control-label'>Delivery Information</label>
-              <div class='col-md-9'>
-                <div class='form-group'>
-                  <label for='delivery_est_time' class='col-md-3 control-label'>Estimate Time <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
-                  <div class='col-md-6' ng-class='{"has-error": formFailure && !outlet.attributes.delivery.delivery_estimated_time}'>
-                    <div class='input-group'>
-                      <input type='text' class='form-control text-right' ng-model='outlet.attributes.delivery.delivery_estimated_time' placeholder='Eg. 30, 40, 45, 60...'>
-                      <div class='input-group-addon'> minutes</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class='form-group'>
-              <label for='cuisines' class='col-md-3 control-label'>Cuisines <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
-              <div class='col-md-9'>
-                <ul class='list-group' ng-if='outlet.attributes.cuisines.length'>
-                  <li class='list-group-item' ng-repeat='cuisine in outlet.attributes.cuisines track by $index'>{{cuisine}}
-                    <button class='btn btn-sm btn-danger pull-right' ng-click='removeCuisine($index)'><span class='glyphicon glyphicon-trash'></span></button>
-                  </li>
-                </ul>
-                <div class='alert' ng-if='!outlet.attributes.cuisines.length' ng-class='{"alert-warning": !formFailure, "alert-danger": formFailure}'>
-                  <span ng-if='!formFailure'>Start adding cuisines below.</span>
-                  <span ng-if='formFailure'>Add atleast one cuisine below</span>
-                </div>
-              </div>
-            </div>
-            <div class='form-group'>
-              <label for='add_cuisine' class='col-md-3 control-label'>Add a Cuisine</label>
-              <div class='col-md-9'>
-                <input class='form-control' ng-model='newCuisine' ng-list placeholder='Add cuisine...' typeahead="cuisine for cuisine in cuisines | filter:$viewValue | limitTo:8" typeahead-on-select="addCuisine(newCuisine)" />
-              </div>
-            </div>
-          </fieldset>
-        </form>
-      </div>
-      <div class='well well-lg'>
-        <form class='form-horizontal'>
-          <fieldset>
-            <legend>SMS OFF TIME</legend>
-            <div class='form-group'>
-              <label for='status' class='col-md-2 control-label'>Active</label>
-              <div class='col-md-10'>
-                <input type='checkbox' ng-model='outlet.sms_off.value' ng-change='updateSMSOff()'>
-              </div>
-            </div>
-            <div class='form-group' ng-if='outlet.sms_off.value'>
-              <label for='timings' class='col-md-2 control-label'>Timings <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
-              <div class='col-md-10'>
-                <div class='form-group'>
-                  <label for='start_time' class='col-md-2 control-label'>Starting</label>
-                  <div class='col-md-10'>
-                    <input type='number' ng-model='outlet.sms_off.time.start.hr'> : <input type='number' ng-model='outlet.sms_off.time.start.min'>
-                  </div>
-                </div>
-                <div class='form-group'>
-                  <label for='end_time' class='col-md-2 control-label'>Uptill</label>
-                  <div class='col-md-10'>
-                    <input type='number' ng-model='outlet.sms_off.time.end.hr'> : <input type='number' ng-model='outlet.sms_off.time.end.min'>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </fieldset>
-        </form>
-      </div>
-      <button class='btn btn-default' wz-previous>Go Back</button>
-      <button class='btn btn-primary' wz-next>Continue</button>
-      <div class='clearfix'></div>
-    </wz-step>
-    <wz-step title='Outlet Timings' canexit='validateStep3'>
-      <div class='well well-lg'>
-        <form class='form-horizontal'>
-          <fieldset>
-            <legend>Outlet Timings <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></legend>
-            <div class='form-group table-responsive'>
-              <table class='table table-bordered table-condensed'>
-                <thead>
-                  <th>Day</th>
-                  <th>Is Closed?</th>
-                  <th ng-repeat='i in getMaxRange() track by $index'>Timing {{$index+1}}</th>
-                  <th>Add Timing</th>
-                  <th>Apply to all days</th>
-                </thead>
-                <tbody>
-                  <tr ng-repeat='day in days'>
-                    <th>{{day | uppercase}}</th>
-                    <td>
-                      <input type='checkbox' ng-model='outlet.business_hours[day].closed' ng-change='updateTiming(day, outlet.business_hours)'>
-                    </td>
-                    <td ng-repeat='i in getMaxRange() track by $index'>
-                      <div class='col-md-12' ng-if='outlet.business_hours[day].timings.length && outlet.business_hours[day].timings[$index]' ng-click='removeTiming(day, $index, outlet.business_hours)' ng-show='outlet.business_hours[day].timings.length>1' ng-init='initalizeTiming(day, $index, outlet.business_hours)'>
-                        <button class='btn btn-sm btn-danger pull-right'><span class='glyphicon glyphicon-trash'></span></button>
-                      </div>
-                      <div class='col-md-12' ng-if='outlet.business_hours[day].timings[$index]'>
-                        <input type='time' ng-model='outlet.business_hours[day].timings[$index].open.time' placeholder="HH:MM A/P" class='form-control' ng-change='updateTime(day, $index, outlet.business_hours)'>
-                      </div>
-                      <div class='col-md-12 text-center' ng-if='outlet.business_hours[day].timings[$index]'> to </div>
-                      <div class='col-md-12' ng-if='outlet.business_hours[day].timings[$index]'>
-                        <input type='time' ng-model='outlet.business_hours[day].timings[$index].close.time' placeholder="HH:MM A/P" class='form-control' ng-change='updateTime(day, $index, outlet.business_hours)'>
-                      </div>
-                    </td>
-                    <td><button class='btn btn-sm btn-default' ng-click='addNewTiming(day, outlet.business_hours)' ng-show='!outlet.business_hours[day].closed'>Add Timing</button></td>
-                    <td><button class='btn btn-sm btn-default' ng-click='cloneToAllDays(day, outlet.business_hours)'>Apply to all days</button></td>
-                  </tr>
-                  <td>
-                </tbody>
-              </table>
-            </div>
-          </fieldset>
-        </form>
-      </div>
-      <div class='clearfix'></div>
-      <button class='btn btn-default' wz-previous>Go Back</button>
-      <button class='btn btn-primary' wz-next>Continue</button>
-      <div class='clearfix'></div>
-    </wz-step>
-    <wz-step title='Photos' canexit='validateStep4'>
-      <div class='well well-lg'>
-        <form class='form-horizontal'>
-          <fieldset>
-            <legend>Photos</legend>
-            <div class='form-group'>
-              <label for='logo' class='col-md-3 control-label'>Logo <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
-              <div class='col-md-9'>
-                <imagereader ng-image-for='outlet' ng-image-type='logo' ng-model='outlet.photos.logo'>
-              </div>
-            </div>
-            <div class='form-group'>
-              <label for='background' class='col-md-3 control-label'>Background <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
-              <div class='col-md-9'>
-                <button class='btn btn-default' ng-click='chooseImage()'>Choose from Defaults</button>
-                <imagereader ng-image-for='outlet' ng-image-type='background' ng-model='outlet.photos.background' class='background'>
-              </div>
-            </div>
-            <div class='form-group'>
-              <label for='other_images' class='col-md-3 control-label'>Other Images</label>
-              <div class='col-md-9'>
-                <div class='alert alert-warning' ng-if='!outlet.photos.others.length'>Add more images below</div>
-              </div>
-            </div>
-            <div class='form-group' ng-repeat='otherImg in outlet.photos.others'>
-              <label for='other_label' class='col-md-3 control-label'>Image # {{$index+1}} <br />
-                <button class='btn btn-sm btn-danger' ng-click='removeImage($index)'><span class='glyphicon glyphicon-trash'></span></button>
-              </label>
-              <div class='col-md-9'>
-                <div class='row'>
-                  <label for='img_title' class='col-md-2 control-label'>Title <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
-                  <div class='col-md-6'>
-                    <input type='text' class='form-control' ng-model='otherImg.title'>
-                  </div>
-                </div>
-                <div class='row'>
-                  <label for='img_image' class='col-md-2 control-label'>Image <span class='glyphicon glyphicon-asterisk glyphicon-sm'></span></label>
-                  <div class='col-md-9'>
-                    <imagereader ng-model='otherImg.image' ng-outlet-id='outlet._id' ng-image-class='others' />
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class='form-group'>
-              <div class='col-md-9 col-md-offset-3'>
-                <button class='btn btn-sm btn-default' ng-click='addImage()'><span class='glyphicon glyphicon-plus'></span> Add Image</button>
-              </div>
-            </div>
-          </fieldset>
-        </form>
-      </div>
-      <div class='clearfix'></div>
-      <button class='btn btn-default' wz-previous>Go Back</button>
-      <button class='btn btn-primary' wz-next>Review</button>
-      <div class='clearfix'></div>
-    </wz-step>
-    <wz-step title='Review'>
-      <div class='panel panel-default'>
-        <div class='panel-heading'>Basic Information</div>
-        <div class='panel-body'>
-          <div class='col-md-6'>
-            <h4>{{outlet.basics.name}}</h4>
-            <span class='label label-primary'>{{outlet.outlet_type}}</span>
-            <p><span class='glyphicon glyphicon-map-marker glyphicon-sm'></span> {{outlet.contact.location.locality_1[0]}}, {{outlet.contact.location.locality_2[0]}}</p>
-            <p><span class='glyphicon glyphicon-home glyphicon-sm'></span> {{outlet.contact.location.address}} </p>
-            <h4>Outlet Numbers</h4>
-            <span class='label label-default' ng-repeat='number in outlet.contact.phones.mobile'><span class='glyphicon glyphicon-earphone glyphicon-sm'></span> {{number.num}}</span>
-            <h4>Outlet Registered Numbers</h4>
-            <span class='label label-default' ng-repeat='number in outlet.contact.phones.reg_mobile'><span class='glyphicon glyphicon-earphone glyphicon-sm'></span> {{number.num}}</span>
-          </div>
-          <div class='col-md-6'>
-            <ui-gmap-google-map center="map.center" zoom="map.zoom" draggable="true" options="options" events='mapEvents'>
-              <ui-gmap-marker coords="marker.coords" options="marker.options" events="marker.events" idkey="marker.id">
-              </ui-gmap-marker>
-            </ui-gmap-google-map>
-          </div>
+            </section>
         </div>
-      </div>
-      <div class='panel panel-default'>
-        <div class='panel-heading'>Attributes</div>
-        <div class='panel-body'>
-          <div class='col-md-6'>
-            <h4>Dine-in</h4>
-            <span class='label label-warning' ng-if='!outlet.attributes.dine_in'>Not Available</span>
-            <span class='label label-primary' ng-if='outlet.attributes.dine_in'>Available</span>
-            <h4>Delivery</h4>
-            <span class='label label-warning' ng-if='!outlet.attributes.home_delivery'>Not Available</span>
-            <span class='label label-primary' ng-if='outlet.attributes.home_delivery'>Available</span>
-            <span ng-if='outlet.attributes.home_delivery'>Estimate Time: <span class='label' ng-class='{"label-primary": outlet.attributes.delivery.delivery_estimated_time<30, "label-default": outlet.attributes.delivery.delivery_estimated_time>=30 && outlet.attributes.delivery.delivery_estimated_time<=60, "label-warning": outlet.attributes.delivery.delivery_estimated_time>60}'>{{outlet.attributes.delivery.delivery_estimated_time}} mins.</span></span>
-            <h4>Achohol</h4>
-            <span class='label label-warning' ng-if='!outlet.attributes.alcohol'>Do Not Serve</span>
-            <span class='label label-primary' ng-if='outlet.attributes.alcohol'>Serves</span>
-            <h4>Cost for two: 
-              From: <span class='label label-primary'>Rs.{{outlet.attributes.cost_for_two.min}}</span> 
-              To:   <span class='label label-primary'>Rs.{{outlet.attributes.cost_for_two.max}}</span>
-            </h4>
-          </div>
-          <div class='col-md-6'>
-            <h4>Cuisines</h4>
-            <ul class='list-group' ng-if='outlet.attributes.cuisines.length'>
-              <li class='list-group-item' ng-repeat='cuisine in outlet.attributes.cuisines track by $index'>{{cuisine}}</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      <div class='panel panel-default'>
-        <div class='panel-heading'>Timings & SMS OFF Time</div>
-        <div class='panel-body'>
-          <div class='col-md-8'>
-            <div class='row' ng-repeat='day in days'>
-              <h4>{{day | uppercase}}</h4>
-              <span class='label label-warning' ng-if='outlet.business_hours[day].closed'>Closed</span>
-              <span class='label label-success' ng-if='!outlet.business_hours[day].closed'>Open</span>
-              <span ng-repeat='timing in outlet.business_hours[day].timings' style='margin-left:10px;margin-right:10px;'><span class='label label-primary'>{{timing.open.time | date: 'hh:mm a'}}</span> to <span class='label label-primary'>{{timing.close.time | date: 'hh:mm a'}}</span></span>
-            </div>
-          </div>
-          <div class='col-md-4'>
-            <h2 class='control-label'>SMS OFF Time</h2>
-            <div class='row'>
-              <span class='label label-success' ng-if='outlet.sms_off.value'> Active</span>
-              <span class='label label-default' ng-if='!outlet.sms_off.value'> Inactive</span>
-            </div>
-            <div class='row' ng-if='outlet.sms_off.value'>
-              <h4>From </h4> <span class='label label-primary'>{{(outlet.sms_off.time.start.hr<10?'0': '') + outlet.sms_off.time.start.hr + ':' + (outlet.sms_off.time.start.min<10?'0': '') + outlet.sms_off.time.start.min}}</span>
-              <h4>Upto </h4> <span class='label label-primary'>{{(outlet.sms_off.time.end.hr<10?'0': '') + outlet.sms_off.time.end.hr + ':' + (outlet.sms_off.time.end.min<10?'0': '') + outlet.sms_off.time.end.min}}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class='clearfix'></div>
-      <button class='btn btn-default' wz-previous>Go Back</button>
-      <button class='btn btn-primary' wz-next>Update Outlet</button>
-      <div class='clearfix'></div>
-    </wz-step>
-  </wizard>
-  {{outlet}}
+    </div>
 </div>

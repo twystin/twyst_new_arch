@@ -1,0 +1,18 @@
+<div class='modal-header'>
+    <legend ng-if='is_new'>Add New Category</legend>
+    <legend ng-if='!is_new'>Update Category</legend>
+</div>
+<div class='modal-body'>
+    <div class='form-group'>
+        <div class='col-xs-3 control-label'>Category Name<i class='fa fa-sm fa-asterisk'></i></div>
+        <div class='col-xs-6'>
+            <input type='text' ng-model='category.category_name' typeahead='mCategory for  mCategory in menu_categories | filter:$viewValue | limitTo: 8' class='form-control' autofocus>
+        </div>
+    </div>
+    <div class='clearfix'></div>
+</div>
+<div class="modal-footer">
+    <button type='button' class='btn btn-w-md btn-gap-v btn-primary' ng-click='resolveCategory()' ng-if='is_new'><i class='fa fa-plus'></i> Add</button>
+    <button type='button' class='btn btn-w-md btn-gap-v btn-primary' ng-click='resolveCategory()' ng-if='!is_new'> Update </button>
+    <button type='button' class='btn btn-w-md btn-gap-v btn-danger' ng-click='discardCategory()'> Discard</button>
+</div>

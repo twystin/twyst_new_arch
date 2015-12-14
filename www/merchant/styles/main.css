@@ -1,0 +1,2413 @@
+/* line 13, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_bootstrap-slider.scss */
+.slider {
+  display: inline-block;
+  vertical-align: middle;
+  position: relative; }
+  /* line 17, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_bootstrap-slider.scss */
+  .slider.slider-horizontal {
+    width: 100% !important;
+    height: 4px; }
+    /* line 20, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_bootstrap-slider.scss */
+    .slider.slider-horizontal .slider-track {
+      height: 2px;
+      width: 100%;
+      margin-top: -1px;
+      top: 50%;
+      left: 0; }
+    /* line 27, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_bootstrap-slider.scss */
+    .slider.slider-horizontal .slider-selection {
+      height: 100%;
+      top: 0;
+      bottom: 0; }
+    /* line 32, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_bootstrap-slider.scss */
+    .slider.slider-horizontal .slider-handle {
+      margin-left: -15px;
+      margin-top: -15px; }
+      /* line 35, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_bootstrap-slider.scss */
+      .slider.slider-horizontal .slider-handle.triangle {
+        border-width: 0 2px 2px 2px;
+        width: 0;
+        height: 0;
+        border-bottom-color: #0480be;
+        margin-top: 0; }
+  /* line 44, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_bootstrap-slider.scss */
+  .slider.slider-vertical {
+    height: 210px;
+    width: 4px; }
+    /* line 47, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_bootstrap-slider.scss */
+    .slider.slider-vertical .slider-track {
+      width: 2px;
+      height: 100%;
+      margin-left: -1px;
+      left: 50%;
+      top: 0; }
+    /* line 54, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_bootstrap-slider.scss */
+    .slider.slider-vertical .slider-selection {
+      width: 100%;
+      left: 0;
+      top: 0;
+      bottom: 0; }
+    /* line 60, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_bootstrap-slider.scss */
+    .slider.slider-vertical .slider-handle {
+      margin-left: -15px;
+      margin-top: -15px; }
+      /* line 63, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_bootstrap-slider.scss */
+      .slider.slider-vertical .slider-handle.triangle {
+        border-width: 2px 0 2px 2px;
+        width: 1px;
+        height: 1px;
+        border-left-color: #0480be;
+        margin-left: 0; }
+  /* line 73, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_bootstrap-slider.scss */
+  .slider.slider-disabled .slider-handle {
+    pointer-events: none;
+    background-color: #f5f5f5; }
+  /* line 77, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_bootstrap-slider.scss */
+  .slider.slider-disabled .slider-track {
+    opacity: 0.65;
+    cursor: not-allowed; }
+  /* line 82, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_bootstrap-slider.scss */
+  .slider input {
+    display: none; }
+  /* line 86, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_bootstrap-slider.scss */
+  .slider .tooltip.top {
+    margin-top: -47px; }
+  /* line 90, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_bootstrap-slider.scss */
+  .slider .tooltip-inner {
+    white-space: nowrap; }
+
+/* line 94, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_bootstrap-slider.scss */
+.slider-track {
+  position: absolute;
+  cursor: pointer;
+  background-color: #eee;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  border-radius: 4px; }
+
+/* line 101, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_bootstrap-slider.scss */
+.slider-selection {
+  position: absolute;
+  background-color: #f6921e;
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  border-radius: 4px; }
+
+/* line 108, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_bootstrap-slider.scss */
+.slider-handle {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background-color: #fff;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.1); }
+  /* line 115, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_bootstrap-slider.scss */
+  .slider-handle.round {
+    border-radius: 50%; }
+  /* line 118, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_bootstrap-slider.scss */
+  .slider-handle.triangle {
+    background: transparent none; }
+
+/* line 2, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_responsive-tables.scss */
+table.responsive {
+  border: 1px solid #ddd; }
+
+@media only screen and (max-width: 767px) {
+  /* line 7, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_responsive-tables.scss */
+  table.responsive {
+    margin-bottom: 0; }
+  /* line 11, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_responsive-tables.scss */
+  .pinned {
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: #fff;
+    width: 35%;
+    overflow: hidden;
+    overflow-x: scroll;
+    border-right: 1px solid #ccc;
+    border-left: 1px solid #ccc; }
+  /* line 12, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_responsive-tables.scss */
+  .pinned table {
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    border-right: none;
+    border-left: none;
+    width: 100%; }
+  /* line 17, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_responsive-tables.scss */
+  .pinned table th, .pinned table td {
+    white-space: nowrap; }
+  /* line 18, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_responsive-tables.scss */
+  .pinned td:last-child {
+    border-bottom: 0; }
+  /* line 20, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_responsive-tables.scss */
+  div.table-wrapper {
+    position: relative;
+    margin-bottom: 20px;
+    overflow: hidden;
+    border-right: 1px solid #ccc; }
+  /* line 21, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_responsive-tables.scss */
+  div.table-wrapper div.scrollable {
+    margin-left: 35%; }
+  /* line 22, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_responsive-tables.scss */
+  div.table-wrapper div.scrollable {
+    overflow: scroll;
+    overflow-y: hidden; }
+  /* line 24, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_responsive-tables.scss */
+  table.responsive td, table.responsive th {
+    position: relative;
+    white-space: nowrap;
+    overflow: hidden; }
+  /* line 25, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_responsive-tables.scss */
+  table.responsive th:first-child, table.responsive td:first-child, table.responsive td:first-child, table.responsive.pinned td {
+    display: none; } }
+
+/* line 4, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_easypiecharts.scss */
+.easypiechart {
+  display: inline-block;
+  position: relative;
+  width: 180px;
+  height: 180px;
+  text-align: center;
+  margin: 5px auto; }
+  /* line 12, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_easypiecharts.scss */
+  .easypiechart canvas {
+    position: absolute;
+    top: 0;
+    left: 0; }
+  /* line 18, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_easypiecharts.scss */
+  .easypiechart .pie-percent {
+    display: inline-block;
+    line-height: 180px;
+    font-size: 40px;
+    font-weight: 300;
+    color: #333; }
+    /* line 24, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_easypiecharts.scss */
+    .easypiechart .pie-percent:after {
+      content: '%';
+      margin-left: 0.1em;
+      font-size: .6em; }
+
+/* line 16, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+.toast-title {
+  font-weight: bold; }
+
+/* line 19, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+.toast-message {
+  -ms-word-wrap: break-word;
+  word-wrap: break-word; }
+
+/* line 23, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+.toast-message a,
+.toast-message label {
+  color: #ffffff; }
+
+/* line 27, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+.toast-message a:hover {
+  color: #cccccc;
+  text-decoration: none; }
+
+/* line 32, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+.toast-close-button {
+  position: relative;
+  right: -0.3em;
+  top: -0.3em;
+  float: right;
+  font-size: 20px;
+  font-weight: bold;
+  color: #ffffff;
+  -webkit-text-shadow: 0 1px 0 #ffffff;
+  text-shadow: 0 1px 0 #ffffff;
+  opacity: 0.8;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
+  filter: alpha(opacity=80); }
+
+/* line 46, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+.toast-close-button:hover,
+.toast-close-button:focus {
+  color: #000000;
+  text-decoration: none;
+  cursor: pointer;
+  opacity: 0.4;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=40);
+  filter: alpha(opacity=40); }
+
+/*Additional properties for button version
+ iOS requires the button element instead of an anchor tag.
+ If you want the anchor version, it requires `href="#"`.*/
+/* line 59, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+button.toast-close-button {
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  -webkit-appearance: none; }
+
+/* line 66, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+.toast-top-full-width {
+  top: 0;
+  right: 0;
+  width: 100%; }
+
+/* line 71, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+.toast-bottom-full-width {
+  bottom: 0;
+  right: 0;
+  width: 100%; }
+
+/* line 76, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+.toast-top-left {
+  top: 12px;
+  left: 12px; }
+
+/* line 80, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+.toast-top-right {
+  top: 12px;
+  right: 12px; }
+
+/* line 84, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+.toast-bottom-right {
+  right: 12px;
+  bottom: 12px; }
+
+/* line 88, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+.toast-bottom-left {
+  bottom: 12px;
+  left: 12px; }
+
+/* line 92, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+#toast-container {
+  position: fixed;
+  z-index: 999999;
+  /*overrides*/ }
+
+/* line 98, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+#toast-container * {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box; }
+
+/* line 103, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+#toast-container > div {
+  margin: 0 0 6px;
+  padding: 15px 15px 15px 50px;
+  width: 300px;
+  border-radius: 4px;
+  background-position: 15px center;
+  background-repeat: no-repeat;
+  -moz-box-shadow: 0 0 12px #999999;
+  -webkit-box-shadow: 0 0 12px #999999;
+  box-shadow: 0 0 12px #999999;
+  color: #ffffff;
+  opacity: 0.8;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
+  filter: alpha(opacity=80); }
+
+/* line 118, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+#toast-container > :hover {
+  -moz-box-shadow: 0 0 12px #000000;
+  -webkit-box-shadow: 0 0 12px #000000;
+  box-shadow: 0 0 12px #000000;
+  opacity: 1;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
+  filter: alpha(opacity=100);
+  cursor: pointer; }
+
+/* line 127, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+#toast-container > .toast-info {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGwSURBVEhLtZa9SgNBEMc9sUxxRcoUKSzSWIhXpFMhhYWFhaBg4yPYiWCXZxBLERsLRS3EQkEfwCKdjWJAwSKCgoKCcudv4O5YLrt7EzgXhiU3/4+b2ckmwVjJSpKkQ6wAi4gwhT+z3wRBcEz0yjSseUTrcRyfsHsXmD0AmbHOC9Ii8VImnuXBPglHpQ5wwSVM7sNnTG7Za4JwDdCjxyAiH3nyA2mtaTJufiDZ5dCaqlItILh1NHatfN5skvjx9Z38m69CgzuXmZgVrPIGE763Jx9qKsRozWYw6xOHdER+nn2KkO+Bb+UV5CBN6WC6QtBgbRVozrahAbmm6HtUsgtPC19tFdxXZYBOfkbmFJ1VaHA1VAHjd0pp70oTZzvR+EVrx2Ygfdsq6eu55BHYR8hlcki+n+kERUFG8BrA0BwjeAv2M8WLQBtcy+SD6fNsmnB3AlBLrgTtVW1c2QN4bVWLATaIS60J2Du5y1TiJgjSBvFVZgTmwCU+dAZFoPxGEEs8nyHC9Bwe2GvEJv2WXZb0vjdyFT4Cxk3e/kIqlOGoVLwwPevpYHT+00T+hWwXDf4AJAOUqWcDhbwAAAAASUVORK5CYII=") !important; }
+
+/* line 130, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+#toast-container > .toast-error {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAHOSURBVEhLrZa/SgNBEMZzh0WKCClSCKaIYOED+AAKeQQLG8HWztLCImBrYadgIdY+gIKNYkBFSwu7CAoqCgkkoGBI/E28PdbLZmeDLgzZzcx83/zZ2SSXC1j9fr+I1Hq93g2yxH4iwM1vkoBWAdxCmpzTxfkN2RcyZNaHFIkSo10+8kgxkXIURV5HGxTmFuc75B2RfQkpxHG8aAgaAFa0tAHqYFfQ7Iwe2yhODk8+J4C7yAoRTWI3w/4klGRgR4lO7Rpn9+gvMyWp+uxFh8+H+ARlgN1nJuJuQAYvNkEnwGFck18Er4q3egEc/oO+mhLdKgRyhdNFiacC0rlOCbhNVz4H9FnAYgDBvU3QIioZlJFLJtsoHYRDfiZoUyIxqCtRpVlANq0EU4dApjrtgezPFad5S19Wgjkc0hNVnuF4HjVA6C7QrSIbylB+oZe3aHgBsqlNqKYH48jXyJKMuAbiyVJ8KzaB3eRc0pg9VwQ4niFryI68qiOi3AbjwdsfnAtk0bCjTLJKr6mrD9g8iq/S/B81hguOMlQTnVyG40wAcjnmgsCNESDrjme7wfftP4P7SP4N3CJZdvzoNyGq2c/HWOXJGsvVg+RA/k2MC/wN6I2YA2Pt8GkAAAAASUVORK5CYII=") !important; }
+
+/* line 133, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+#toast-container > .toast-success {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADsSURBVEhLY2AYBfQMgf///3P8+/evAIgvA/FsIF+BavYDDWMBGroaSMMBiE8VC7AZDrIFaMFnii3AZTjUgsUUWUDA8OdAH6iQbQEhw4HyGsPEcKBXBIC4ARhex4G4BsjmweU1soIFaGg/WtoFZRIZdEvIMhxkCCjXIVsATV6gFGACs4Rsw0EGgIIH3QJYJgHSARQZDrWAB+jawzgs+Q2UO49D7jnRSRGoEFRILcdmEMWGI0cm0JJ2QpYA1RDvcmzJEWhABhD/pqrL0S0CWuABKgnRki9lLseS7g2AlqwHWQSKH4oKLrILpRGhEQCw2LiRUIa4lwAAAABJRU5ErkJggg==") !important; }
+
+/* line 136, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+#toast-container > .toast-warning {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGYSURBVEhL5ZSvTsNQFMbXZGICMYGYmJhAQIJAICYQPAACiSDB8AiICQQJT4CqQEwgJvYASAQCiZiYmJhAIBATCARJy+9rTsldd8sKu1M0+dLb057v6/lbq/2rK0mS/TRNj9cWNAKPYIJII7gIxCcQ51cvqID+GIEX8ASG4B1bK5gIZFeQfoJdEXOfgX4QAQg7kH2A65yQ87lyxb27sggkAzAuFhbbg1K2kgCkB1bVwyIR9m2L7PRPIhDUIXgGtyKw575yz3lTNs6X4JXnjV+LKM/m3MydnTbtOKIjtz6VhCBq4vSm3ncdrD2lk0VgUXSVKjVDJXJzijW1RQdsU7F77He8u68koNZTz8Oz5yGa6J3H3lZ0xYgXBK2QymlWWA+RWnYhskLBv2vmE+hBMCtbA7KX5drWyRT/2JsqZ2IvfB9Y4bWDNMFbJRFmC9E74SoS0CqulwjkC0+5bpcV1CZ8NMej4pjy0U+doDQsGyo1hzVJttIjhQ7GnBtRFN1UarUlH8F3xict+HY07rEzoUGPlWcjRFRr4/gChZgc3ZL2d8oAAAAASUVORK5CYII=") !important; }
+
+/* line 139, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+#toast-container.toast-top-full-width > div,
+#toast-container.toast-bottom-full-width > div {
+  width: 96%;
+  margin: auto; }
+
+/* line 145, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+.toast {
+  background-color: #333; }
+
+/* line 148, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+.toast-success {
+  background-color: #7fa145; }
+
+/* line 151, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+.toast-error {
+  background-color: #f95c30; }
+
+/* line 154, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+.toast-info {
+  background-color: #30aeee; }
+
+/* line 157, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+.toast-warning {
+  background-color: #f1ba0f; }
+
+/*Responsive Design*/
+@media all and (max-width: 240px) {
+  /* line 162, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+  #toast-container > div {
+    padding: 8px 8px 8px 50px;
+    width: 11em; }
+  /* line 166, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+  #toast-container .toast-close-button {
+    right: -0.2em;
+    top: -0.2em; } }
+
+@media all and (min-width: 241px) and (max-width: 480px) {
+  /* line 172, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+  #toast-container > div {
+    padding: 8px 8px 8px 50px;
+    width: 18em; }
+  /* line 176, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+  #toast-container .toast-close-button {
+    right: -0.2em;
+    top: -0.2em; } }
+
+@media all and (min-width: 481px) and (max-width: 768px) {
+  /* line 182, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_toastr.scss */
+  #toast-container > div {
+    padding: 15px 15px 15px 50px;
+    width: 25em; } }
+
+/* line 2, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_sparkline.scss */
+.jqstooltip {
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box; }
+
+/* line 4, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard,
+.tabcontrol {
+  display: block;
+  width: 100%;
+  overflow: hidden; }
+
+/* line 12, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard a,
+.tabcontrol a {
+  outline: 0; }
+
+/* line 18, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard ul,
+.tabcontrol ul {
+  list-style: none !important;
+  padding: 0;
+  margin: 0; }
+
+/* line 26, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard ul > li,
+.tabcontrol ul > li {
+  display: block;
+  padding: 0; }
+
+/* Accessibility */
+/* line 34, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .steps .current-info,
+.tabcontrol > .steps .current-info {
+  position: absolute;
+  left: -999em; }
+
+/* line 41, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .content > .title,
+.tabcontrol > .content > .title {
+  position: absolute;
+  left: -999em; }
+
+/*
+    Wizard
+*/
+/* line 55, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .steps {
+  position: relative;
+  display: block;
+  width: 100%; }
+  /* line 60, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+  .wizard > .steps > ul > li {
+    width: 100%; }
+    @media (min-width: 600px) {
+      /* line 60, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+      .wizard > .steps > ul > li {
+        width: 25%; } }
+
+/* line 70, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard.vertical > .steps {
+  display: block;
+  width: 100%; }
+  @media (min-width: 600px) {
+    /* line 70, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+    .wizard.vertical > .steps {
+      display: inline;
+      float: left;
+      width: 30%; } }
+  /* line 79, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+  .wizard.vertical > .steps > ul > li {
+    float: none;
+    width: 100%; }
+
+/* line 85, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard.vertical > .content {
+  width: 100%; }
+  @media (min-width: 600px) {
+    /* line 85, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+    .wizard.vertical > .content {
+      display: inline;
+      float: left;
+      margin: 0 2.5% 0.5em 2.5%;
+      width: 65%; } }
+
+/* line 96, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .steps .number {
+  font-size: 1.429em; }
+
+/* line 101, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .steps > ul > li,
+.wizard > .actions > ul > li {
+  float: left; }
+
+/* line 108, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .steps a,
+.wizard > .steps a:hover,
+.wizard > .steps a:active {
+  display: block;
+  width: auto;
+  margin: 0 0.5em 0.5em;
+  padding: 1em 1em;
+  text-decoration: none;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px; }
+
+/* line 123, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .steps .disabled a,
+.wizard > .steps .disabled a:hover,
+.wizard > .steps .disabled a:active {
+  background: #eee;
+  color: #aaa;
+  cursor: default; }
+
+/* line 132, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .steps .current a,
+.wizard > .steps .current a:hover,
+.wizard > .steps .current a:active {
+  background: #f6921e;
+  color: #fff;
+  cursor: default; }
+
+/* line 141, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .steps .done a,
+.wizard > .steps .done a:hover,
+.wizard > .steps .done a:active {
+  background: #f6921e;
+  color: #fff;
+  opacity: .6; }
+
+/* line 150, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .steps .error a,
+.wizard > .steps .error a:hover,
+.wizard > .steps .error a:active {
+  background: #FA7B58;
+  color: #fff; }
+
+/* line 158, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .content {
+  background-color: #eee;
+  display: block;
+  margin: 0.5em;
+  min-height: 25em;
+  overflow: hidden;
+  position: relative;
+  width: auto;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px; }
+
+/* line 175, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .content > .body {
+  float: left;
+  position: absolute;
+  width: 95%;
+  height: 95%;
+  padding: 2.5%; }
+
+/* line 184, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .content > .body ul {
+  list-style: disc !important; }
+
+/* line 189, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .content > .body ul > li {
+  display: list-item; }
+
+/* line 194, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .content > .body > iframe {
+  border: 0 none;
+  width: 100%;
+  height: 100%; }
+
+/* line 201, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .content > .body input {
+  display: block;
+  border: 1px solid #ccc; }
+
+/* line 207, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .content > .body input[type="checkbox"] {
+  display: inline-block; }
+
+/* line 212, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .content > .body input.error {
+  background: #fbe3e4;
+  border: 1px solid #fbc2c4;
+  color: #8a1f11; }
+
+/* line 219, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .content > .body label {
+  display: inline-block;
+  margin-bottom: 0.5em; }
+
+/* line 225, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .content > .body label.error {
+  color: #8a1f11;
+  display: inline-block;
+  margin-left: 1.5em; }
+
+/* line 232, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .actions {
+  position: relative;
+  display: block;
+  text-align: right;
+  width: 100%; }
+
+/* line 240, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard.vertical > .actions {
+  display: inline;
+  float: right;
+  margin: 0 2.5%;
+  width: 95%; }
+
+/* line 248, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .actions > ul {
+  display: inline-block;
+  text-align: right; }
+
+/* line 254, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .actions > ul > li {
+  margin: 0 0.5em; }
+
+/* line 259, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard.vertical > .actions > ul > li {
+  margin: 0 0 0 1em; }
+
+/* line 264, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .actions a,
+.wizard > .actions a:hover,
+.wizard > .actions a:active {
+  background: #f6921e;
+  color: #fff;
+  display: block;
+  padding: 0.5em 1em;
+  text-decoration: none;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px; }
+
+/* line 279, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.wizard > .actions .disabled a,
+.wizard > .actions .disabled a:hover,
+.wizard > .actions .disabled a:active {
+  background: #eee;
+  color: #aaa; }
+
+/*
+    Tabcontrol
+*/
+/* line 301, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.tabcontrol > .steps {
+  position: relative;
+  display: block;
+  width: 100%; }
+
+/* line 308, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.tabcontrol > .steps > ul {
+  position: relative;
+  margin: 6px 0 0 0;
+  top: 1px;
+  z-index: 1; }
+
+/* line 316, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.tabcontrol > .steps > ul > li {
+  float: left;
+  margin: 5px 2px 0 0;
+  padding: 1px;
+  -webkit-border-top-left-radius: 4px;
+  -webkit-border-top-right-radius: 4px;
+  -moz-border-radius-topleft: 4px;
+  -moz-border-radius-topright: 4px;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px; }
+
+/* line 330, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.tabcontrol > .steps > ul > li:hover {
+  background: #edecec;
+  border: 1px solid #bbb;
+  padding: 0; }
+
+/* line 337, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.tabcontrol > .steps > ul > li.current {
+  background: #fff;
+  border: 1px solid #bbb;
+  border-bottom: 0 none;
+  padding: 0 0 1px 0;
+  margin-top: 0; }
+
+/* line 346, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.tabcontrol > .steps > ul > li > a {
+  color: #5f5f5f;
+  display: inline-block;
+  border: 0 none;
+  margin: 0;
+  padding: 10px 30px;
+  text-decoration: none; }
+
+/* line 356, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.tabcontrol > .steps > ul > li > a:hover {
+  text-decoration: none; }
+
+/* line 361, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.tabcontrol > .steps > ul > li.current > a {
+  padding: 15px 30px 10px 30px; }
+
+/* line 366, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.tabcontrol > .content {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  height: 35em;
+  overflow: hidden;
+  border-top: 1px solid #bbb;
+  padding-top: 20px; }
+
+/* line 377, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.tabcontrol > .content > .body {
+  float: left;
+  position: absolute;
+  width: 95%;
+  height: 95%;
+  padding: 2.5%; }
+
+/* line 386, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.tabcontrol > .content > .body ul {
+  list-style: disc !important; }
+
+/* line 391, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jquery-steps.scss */
+.tabcontrol > .content > .body ul > li {
+  display: list-item; }
+
+/* line 1, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-ui-tree.scss */
+.angular-ui-tree {
+  position: relative;
+  display: block;
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+  line-height: 20px;
+  list-style: none; }
+
+/* line 12, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-ui-tree.scss */
+.angular-ui-tree-placeholder {
+  margin: 5px 0;
+  padding: 0;
+  min-height: 30px;
+  border: 1px dashed #e9e9e9;
+  background-color: #E6F5FD;
+  border-radius: 4px; }
+
+/* line 21, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-ui-tree.scss */
+.angular-ui-tree-handle {
+  position: relative;
+  display: block;
+  margin: 5px 0;
+  padding: 10px 10px;
+  text-decoration: none;
+  border: 1px solid #e9e9e9;
+  background: #fff;
+  cursor: move;
+  border-radius: 4px; }
+  /* line 33, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-ui-tree.scss */
+  .angular-ui-tree-handle:hover .angular-ui-tree-icon-action {
+    display: inline; }
+
+/* line 41, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-ui-tree.scss */
+.angular-ui-tree-icon:hover {
+  cursor: pointer; }
+
+/* line 45, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-ui-tree.scss */
+.angular-ui-tree-icon-collapse {
+  display: block;
+  position: relative;
+  cursor: pointer;
+  float: left;
+  width: 25px;
+  height: 40px;
+  margin: -10px 0 0 -10px;
+  padding: 0;
+  text-indent: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  font-size: 12px;
+  line-height: 40px;
+  text-align: center;
+  font-weight: bold; }
+  /* line 63, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-ui-tree.scss */
+  .angular-ui-tree-icon-collapse:before {
+    content: '+';
+    display: block;
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    text-indent: 0; }
+  /* line 66, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-ui-tree.scss */
+  .angular-ui-tree-icon-collapse.uncollapsed:before {
+    content: '-'; }
+
+/* line 70, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-ui-tree.scss */
+.angular-ui-tree-icon-action {
+  margin-left: 7px;
+  display: none;
+  color: #777777;
+  -webkit-transform: scale(1);
+  -moz-transform: scale(1);
+  -ms-transform: scale(1);
+  -o-transform: scale(1);
+  transform: scale(1);
+  -webkit-transition: all 0.2s ease-in-out;
+  -moz-transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out; }
+  /* line 76, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-ui-tree.scss */
+  .angular-ui-tree-icon-action:hover {
+    -webkit-transform: scale(1.3);
+    -moz-transform: scale(1.3);
+    -ms-transform: scale(1.3);
+    -o-transform: scale(1.3);
+    transform: scale(1.3);
+    color: #767676; }
+
+/* line 82, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-ui-tree.scss */
+.angular-ui-tree-empty {
+  border: 1px dashed #bbb;
+  min-height: 100px;
+  background-color: #fff;
+  background-size: 60px 60px;
+  background-position: 0 0,30px 30px; }
+
+/* line 90, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-ui-tree.scss */
+.angular-ui-tree-nodes {
+  display: block;
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none; }
+
+/* line 97, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-ui-tree.scss */
+.angular-ui-tree-nodes .angular-ui-tree-nodes {
+  padding-left: 30px; }
+
+/* line 101, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-ui-tree.scss */
+.angular-ui-tree-node, .angular-ui-tree-placeholder {
+  display: block;
+  position: relative;
+  margin: 0;
+  padding: 0;
+  min-height: 20px;
+  line-height: 20px; }
+
+/* line 109, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-ui-tree.scss */
+.angular-ui-tree-hidden {
+  display: none; }
+
+/* line 114, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-ui-tree.scss */
+.angular-ui-tree-drag {
+  position: absolute;
+  pointer-events: none;
+  z-index: 999;
+  opacity: .8; }
+
+/* line 1, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_morris.scss */
+.morris-hover {
+  z-index: 1;
+  position: absolute; }
+
+/* line 6, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_morris.scss */
+.morris-hover.morris-default-style {
+  border-radius: 4px;
+  padding: 6px;
+  color: #666;
+  background: rgba(255, 255, 255, 0.8);
+  border: solid 2px rgba(230, 230, 230, 0.8);
+  font-size: 12px;
+  text-align: center; }
+
+/* line 15, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_morris.scss */
+.morris-hover.morris-default-style .morris-hover-row-label {
+  font-weight: bold;
+  margin: 0.25em 0; }
+
+/* line 19, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_morris.scss */
+.morris-hover.morris-default-style .morris-hover-point {
+  white-space: nowrap;
+  margin: 0.1em 0; }
+
+/* line 2, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jqvmap.scss */
+.jqvmap-label {
+  position: absolute;
+  display: none;
+  border-radius: 2px;
+  background: #242633;
+  color: #fff;
+  font-size: smaller;
+  padding: 3px; }
+
+/* line 11, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jqvmap.scss */
+.jqvmap-zoomin, .jqvmap-zoomout {
+  position: absolute;
+  left: 10px;
+  border-radius: 2px;
+  background: #242633;
+  padding: 3px;
+  color: #fff;
+  cursor: pointer;
+  line-height: 10px;
+  text-align: center; }
+
+/* line 22, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jqvmap.scss */
+.jqvmap-zoomin {
+  top: 10px; }
+
+/* line 25, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jqvmap.scss */
+.jqvmap-zoomout {
+  top: 30px; }
+
+/* line 28, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jqvmap.scss */
+.jqvmap-region {
+  cursor: pointer; }
+
+/* line 31, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_jqvmap.scss */
+.jqvmap-ajax_response {
+  width: 100%;
+  height: 500px; }
+
+/* line 3, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_ng-tags-input.scss */
+.ui-tags-input .host {
+  position: relative;
+  margin: 5px 0; }
+  /* line 6, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_ng-tags-input.scss */
+  .ui-tags-input .host:active {
+    outline: none; }
+
+/* line 11, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_ng-tags-input.scss */
+.ui-tags-input .tags {
+  overflow: hidden;
+  word-wrap: break-word;
+  cursor: text;
+  display: block;
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 12px;
+  font-size: 14px;
+  line-height: 1.42857;
+  color: #555555;
+  background-color: #fff;
+  background-image: none;
+  border: 1px solid #CBD5DD;
+  border-radius: 4px; }
+
+/* line 27, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_ng-tags-input.scss */
+.ui-tags-input .tags.focused {
+  outline: none; }
+
+/* line 30, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_ng-tags-input.scss */
+.ui-tags-input .tags .tag-list {
+  margin: 0;
+  padding: 0;
+  list-style-type: none; }
+
+/* line 35, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_ng-tags-input.scss */
+.ui-tags-input .tags .tag-item {
+  display: inline-block;
+  float: left;
+  margin: 2px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background-color: #f6921e;
+  color: #fff; }
+
+/* line 46, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_ng-tags-input.scss */
+.ui-tags-input .tags .tag-item .remove-button {
+  margin: 0 0 0 5px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  vertical-align: middle;
+  color: #eeeeee;
+  text-decoration: none; }
+
+/* line 56, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_ng-tags-input.scss */
+.ui-tags-input .tags .tag-item .remove-button:active {
+  color: #FA7B58; }
+
+/* line 59, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_ng-tags-input.scss */
+.ui-tags-input .tags .input {
+  border: 0;
+  outline: none;
+  margin: 2px;
+  padding: 5px 0;
+  padding-left: 5px;
+  float: left;
+  height: 30px; }
+
+/* line 69, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_ng-tags-input.scss */
+.ui-tags-input .tags .input.invalid-tag {
+  color: #FA7B58; }
+
+/* line 72, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_ng-tags-input.scss */
+.ui-tags-input .tags .input::-ms-clear {
+  display: none; }
+
+/* line 76, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_ng-tags-input.scss */
+.ui-tags-input .autocomplete {
+  margin-top: 5px;
+  position: absolute;
+  padding: 5px 0;
+  z-index: 999;
+  width: 100%;
+  background-color: white;
+  border: 1px solid rgba(0, 0, 0, 0.2); }
+
+/* line 85, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_ng-tags-input.scss */
+.ui-tags-input .autocomplete .suggestion-list {
+  margin: 0;
+  padding: 0;
+  list-style-type: none; }
+
+/* line 90, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_ng-tags-input.scss */
+.ui-tags-input .autocomplete .suggestion-item {
+  overflow: hidden;
+  padding: 5px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: #242633;
+  background-color: #fff; }
+
+/* line 99, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_ng-tags-input.scss */
+.ui-tags-input .autocomplete .suggestion-item.selected {
+  color: white;
+  background-color: #0097cf; }
+
+/* line 103, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_ng-tags-input.scss */
+.ui-tags-input .autocomplete .suggestion-item.selected em {
+  color: white;
+  background-color: #0097cf; }
+
+/* line 107, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_ng-tags-input.scss */
+.ui-tags-input .autocomplete .suggestion-item em {
+  color: #242633;
+  background-color: white; }
+
+/*! 
+ * angular-loading-bar v0.6.0
+ * https://chieffancypants.github.io/angular-loading-bar
+ * Copyright (c) 2014 Wes Cruver
+ * License: MIT
+ */
+/* Make clicks pass-through */
+/* line 14, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-loading-bar.scss */
+#loading-bar,
+#loading-bar-spinner {
+  pointer-events: none;
+  -webkit-pointer-events: none;
+  -webkit-transition: 350ms linear all;
+  -moz-transition: 350ms linear all;
+  -o-transition: 350ms linear all;
+  transition: 350ms linear all; }
+
+/* line 24, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-loading-bar.scss */
+#loading-bar.ng-enter,
+#loading-bar.ng-leave.ng-leave-active,
+#loading-bar-spinner.ng-enter,
+#loading-bar-spinner.ng-leave.ng-leave-active {
+  opacity: 0; }
+
+/* line 31, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-loading-bar.scss */
+#loading-bar.ng-enter.ng-enter-active,
+#loading-bar.ng-leave,
+#loading-bar-spinner.ng-enter.ng-enter-active,
+#loading-bar-spinner.ng-leave {
+  opacity: 1; }
+
+/* line 38, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-loading-bar.scss */
+#loading-bar .bar {
+  -webkit-transition: width 350ms;
+  -moz-transition: width 350ms;
+  -o-transition: width 350ms;
+  transition: width 350ms;
+  background-color: #f6921e;
+  position: fixed;
+  z-index: 10002;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  border-bottom-right-radius: 1px;
+  border-top-right-radius: 1px; }
+
+/* Fancy blur effect */
+/* line 56, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-loading-bar.scss */
+#loading-bar .peg {
+  position: absolute;
+  width: 70px;
+  right: 0;
+  top: 0;
+  height: 2px;
+  opacity: .45;
+  box-shadow: #f6921e 1px 0 6px 1px;
+  -moz-border-radius: 100%;
+  -webkit-border-radius: 100%;
+  border-radius: 100%; }
+
+/* line 69, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-loading-bar.scss */
+#loading-bar-spinner {
+  display: block;
+  position: fixed;
+  z-index: 10002;
+  top: 10px;
+  left: 10px; }
+
+/* line 77, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-loading-bar.scss */
+#loading-bar-spinner .spinner-icon {
+  width: 14px;
+  height: 14px;
+  border: solid 2px transparent;
+  border-top-color: #f6921e;
+  border-left-color: #f6921e;
+  border-radius: 10px;
+  -webkit-animation: loading-bar-spinner 400ms linear infinite;
+  -moz-animation: loading-bar-spinner 400ms linear infinite;
+  -ms-animation: loading-bar-spinner 400ms linear infinite;
+  -o-animation: loading-bar-spinner 400ms linear infinite;
+  animation: loading-bar-spinner 400ms linear infinite; }
+
+@-webkit-keyframes loading-bar-spinner {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg); }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg); } }
+
+@-moz-keyframes loading-bar-spinner {
+  0% {
+    -moz-transform: rotate(0deg);
+    transform: rotate(0deg); }
+  100% {
+    -moz-transform: rotate(360deg);
+    transform: rotate(360deg); } }
+
+@-o-keyframes loading-bar-spinner {
+  0% {
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg); }
+  100% {
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg); } }
+
+@-ms-keyframes loading-bar-spinner {
+  /* line 107, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-loading-bar.scss */
+  0% {
+    -ms-transform: rotate(0deg);
+    transform: rotate(0deg); }
+  /* line 108, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/plugins/_angular-loading-bar.scss */
+  100% {
+    -ms-transform: rotate(360deg);
+    transform: rotate(360deg); } }
+
+@keyframes loading-bar-spinner {
+  0% {
+    transform: rotate(0deg);
+    transform: rotate(0deg); }
+  100% {
+    transform: rotate(360deg);
+    transform: rotate(360deg); } }
+
+/* line 1, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_pages.scss */
+.non-display {
+  display: none; }
+
+/* line 5, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_pages.scss */
+.page {
+  padding: 15px; }
+
+/* line 10, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_pages.scss */
+.page-form-ele h3 {
+  margin: 0; }
+
+/* line 3, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_err.scss */
+.body-err #content > .view-container {
+  height: 100%;
+  width: 100%; }
+
+/* line 11, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_err.scss */
+.page-err {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #fafafa; }
+  /* line 17, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_err.scss */
+  .page-err.err-500 .err-container,
+  .page-err.err-500 .err-message {
+    background-color: #56BDF1; }
+  /* line 23, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_err.scss */
+  .page-err .err-container {
+    width: 100%;
+    height: 75%;
+    background-color: #f6921e;
+    border-bottom: 1px solid #F9A831;
+    padding: 45px 0 0; }
+    @media (min-width: 768px) {
+      /* line 23, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_err.scss */
+      .page-err .err-container {
+        padding: 100px 0 0; } }
+  /* line 34, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_err.scss */
+  .page-err .err-status h1 {
+    margin: 0 0 -45px;
+    color: #fafafa;
+    font-size: 100px; }
+    @media (min-width: 768px) {
+      /* line 34, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_err.scss */
+      .page-err .err-status h1 {
+        font-size: 180px; } }
+  /* line 43, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_err.scss */
+  .page-err .err-message {
+    background-color: #f6921e;
+    padding: 24px;
+    text-transform: uppercase; }
+    /* line 47, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_err.scss */
+    .page-err .err-message h2 {
+      font-size: 32px;
+      color: #fff;
+      font-weight: 300; }
+      @media (min-width: 768px) {
+        /* line 47, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_err.scss */
+        .page-err .err-message h2 {
+          font-size: 50px; } }
+  /* line 57, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_err.scss */
+  .page-err .err-body {
+    padding: 20px 10px; }
+  /* line 61, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_err.scss */
+  .page-err .btn-goback {
+    color: #fff;
+    background-color: transparent;
+    border-color: #fff; }
+    /* line 66, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_err.scss */
+    .page-err .btn-goback.btn-info:hover, .page-err .btn-goback.btn-info:focus, .page-err .btn-goback.btn-info:active, .page-err .btn-goback.btn-info.active {
+      color: #6ec6f3; }
+    /* line 73, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_err.scss */
+    .open .page-err .btn-goback.btn-info.dropdown-toggle {
+      color: #6ec6f3; }
+    /* line 79, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_err.scss */
+    .page-err .btn-goback:hover, .page-err .btn-goback:focus, .page-err .btn-goback:active, .page-err .btn-goback.active {
+      color: #1ecdb3;
+      background-color: #fff; }
+    /* line 87, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_err.scss */
+    .open .page-err .btn-goback.dropdown-toggle {
+      color: #1ecdb3;
+      background-color: #fff; }
+  /* line 94, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_err.scss */
+  .page-err .footer {
+    position: absolute;
+    bottom: 20px;
+    width: 100%; }
+
+/* line 3, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_lock-screen.scss */
+.body-lock #content {
+  background: url("../images/background/5.jpg") no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover; }
+
+/* line 11, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_lock-screen.scss */
+.body-lock .content-container > .view-container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0; }
+
+/* line 24, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_lock-screen.scss */
+.page-lock .lock-centered {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  margin-top: -65px; }
+  @media screen and (min-width: 768px) {
+    /* line 24, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_lock-screen.scss */
+    .page-lock .lock-centered {
+      margin-top: -75px; } }
+
+/* line 36, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_lock-screen.scss */
+.page-lock .lock-container {
+  position: relative;
+  max-width: 420px;
+  margin: 0 auto; }
+
+/* line 56, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_lock-screen.scss */
+.page-lock .lock-box {
+  position: absolute;
+  left: 0;
+  right: 0; }
+  /* line 61, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_lock-screen.scss */
+  .page-lock .lock-box .lock-user {
+    background: #fff;
+    width: 50%;
+    float: left;
+    height: 50px;
+    line-height: 50px;
+    margin-top: 50px;
+    padding: 0 20px;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    color: #f6921e; }
+  /* line 73, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_lock-screen.scss */
+  .page-lock .lock-box .lock-img img {
+    position: absolute;
+    border-radius: 50%;
+    left: 40%;
+    width: 80px;
+    height: 80px;
+    border: 6px solid #fff;
+    background: #fff; }
+    @media screen and (min-width: 768px) {
+      /* line 73, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_lock-screen.scss */
+      .page-lock .lock-box .lock-img img {
+        left: 33%;
+        width: 150px;
+        height: 150px;
+        border: 10px solid #fff; } }
+  /* line 90, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_lock-screen.scss */
+  .page-lock .lock-box .lock-pwd {
+    background: #fff;
+    width: 50%;
+    float: right;
+    height: 50px;
+    line-height: 50px;
+    padding: 0 0 0 50px;
+    margin-top: 50px;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    color: #f6921e; }
+    @media screen and (min-width: 768px) {
+      /* line 90, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_lock-screen.scss */
+      .page-lock .lock-box .lock-pwd {
+        padding: 0 0 0 80px; } }
+    /* line 104, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_lock-screen.scss */
+    .page-lock .lock-box .lock-pwd input {
+      width: 80%;
+      height: 50px;
+      color: #555555;
+      border: 0; }
+    /* line 111, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_lock-screen.scss */
+    .page-lock .lock-box .lock-pwd .btn-submit {
+      position: absolute;
+      top: 50%;
+      right: 20px; }
+
+/* line 7, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+.page-tasks .task-list .view {
+  display: block; }
+
+/* line 11, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+.page-tasks .task-list .edit {
+  display: none; }
+
+/* line 18, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+.page-tasks .task-list li.editing .view {
+  display: none; }
+
+/* line 22, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+.page-tasks .task-list li.editing .edit {
+  display: block; }
+
+/* line 31, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+.page-tasks .add-task {
+  position: relative; }
+  /* line 34, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+  .page-tasks .add-task input {
+    height: 44px;
+    padding: 6px 12px 6px 40px; }
+  /* line 39, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+  .page-tasks .add-task a.submit-button {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    color: #777777; }
+
+/* line 47, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+.page-tasks label {
+  font-weight: normal; }
+
+/* line 52, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+.page-tasks .filters {
+  margin: 15px 0; }
+
+/* line 55, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+.page-tasks .nav-tabs > li.active > a,
+.page-tasks .nav-tabs > li.active > a:hover,
+.page-tasks .nav-tabs > li.active > a:focus {
+  background-color: #f9f9f9; }
+
+/* line 63, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+.page-tasks .task-list .view {
+  position: relative;
+  margin-bottom: 10px;
+  padding: 0 12px 0 40px;
+  border-radius: 4px;
+  background-color: #fff;
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0.2); }
+  /* line 71, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+  .page-tasks .task-list .view:hover .glyphicon-pencil,
+  .page-tasks .task-list .view:hover .glyphicon-remove {
+    display: block; }
+  /* line 77, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+  .page-tasks .task-list .view input[type="checkbox"] {
+    position: absolute;
+    top: 11px;
+    left: 16px; }
+  /* line 83, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+  .page-tasks .task-list .view label {
+    line-height: 20px;
+    margin: 0;
+    width: 100%;
+    padding: 12px 0 12px; }
+  /* line 90, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+  .page-tasks .task-list .view .glyphicon-pencil,
+  .page-tasks .task-list .view .glyphicon-remove {
+    display: none;
+    position: absolute;
+    top: 14px;
+    color: #777777;
+    -webkit-transition: all 0.2s ease-in-out;
+    -moz-transition: all 0.2s ease-in-out;
+    transition: all 0.2s ease-in-out; }
+    /* line 97, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+    .page-tasks .task-list .view .glyphicon-pencil:hover,
+    .page-tasks .task-list .view .glyphicon-remove:hover {
+      cursor: pointer;
+      color: #333333;
+      -webkit-transform: scale(1.3);
+      -moz-transform: scale(1.3);
+      -ms-transform: scale(1.3);
+      -o-transform: scale(1.3);
+      transform: scale(1.3); }
+  /* line 103, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+  .page-tasks .task-list .view .glyphicon-pencil {
+    right: 40px; }
+  /* line 106, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+  .page-tasks .task-list .view .glyphicon-remove {
+    right: 16px; }
+
+/* line 112, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+.page-tasks .task-list .completed .view label {
+  color: #777777;
+  text-decoration: line-through; }
+
+/* line 119, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+.page-tasks .task-list input.edit {
+  margin-bottom: 10px;
+  height: 44px;
+  padding: 6px 12px 6px 40px; }
+
+/* line 126, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+.page-tasks .task-footer {
+  margin: 15px 0;
+  border-top: 4px double #e2e2e2;
+  padding: 12px; }
+  /* line 131, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+  .page-tasks .task-footer .list-inline > li {
+    float: left;
+    width: 30%; }
+    /* line 134, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+    .page-tasks .task-footer .list-inline > li.first-item {
+      width: 40%; }
+  /* line 139, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+  .page-tasks .task-footer .clear-completed {
+    color: #777777;
+    border-radius: 4px;
+    -webkit-transition: color, 0.2s ease-in-out;
+    -moz-transition: color, 0.2s ease-in-out;
+    transition: color, 0.2s ease-in-out; }
+    /* line 143, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+    .page-tasks .task-footer .clear-completed:hover {
+      cursor: pointer;
+      color: #767676; }
+
+/* line 151, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_tasks.scss */
+.page-tasks .tips h3 {
+  margin-top: 0; }
+
+/* line 5, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_auth.scss */
+.page-signin .signin-header,
+.page-signup .signin-header,
+.page-forgot .signin-header {
+  margin-top: 10px; }
+  @media (min-width: 768px) {
+    /* line 5, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_auth.scss */
+    .page-signin .signin-header,
+    .page-signup .signin-header,
+    .page-forgot .signin-header {
+      margin-top: 100px; } }
+
+/* line 12, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_auth.scss */
+.page-signin .logo,
+.page-signup .logo,
+.page-forgot .logo {
+  font-size: 26px;
+  font-weight: normal;
+  text-transform: uppercase; }
+  /* line 17, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_auth.scss */
+  .page-signin .logo a:hover,
+  .page-signup .logo a:hover,
+  .page-forgot .logo a:hover {
+    text-decoration: none; }
+
+/* line 23, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_auth.scss */
+.page-signin .info,
+.page-signup .info,
+.page-forgot .info {
+  padding: 20px 0 0;
+  max-width: 420px;
+  margin: 0 auto 20px; }
+  /* line 28, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_auth.scss */
+  .page-signin .info h2,
+  .page-signup .info h2,
+  .page-forgot .info h2 {
+    font-size: 18px;
+    color: #242633; }
+
+/* line 35, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_auth.scss */
+.page-signin .signin-body,
+.page-signin .signup-body,
+.page-signup .signin-body,
+.page-signup .signup-body,
+.page-forgot .signin-body,
+.page-forgot .signup-body {
+  border-top: 1px solid #f8f8f8;
+  padding: 20px 10px; }
+
+/* line 41, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_auth.scss */
+.page-signin .form-container,
+.page-signup .form-container,
+.page-forgot .form-container {
+  max-width: 420px;
+  margin: 10px auto; }
+
+/* line 46, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_auth.scss */
+.page-signin .form-group,
+.page-signup .form-group,
+.page-forgot .form-group {
+  position: relative; }
+  /* line 49, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_auth.scss */
+  .page-signin .form-group > .glyphicon,
+  .page-signup .form-group > .glyphicon,
+  .page-forgot .form-group > .glyphicon {
+    position: absolute;
+    top: 16px;
+    left: 12px;
+    color: #777777; }
+  /* line 56, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_auth.scss */
+  .page-signin .form-group .input-lg,
+  .page-signup .form-group .input-lg,
+  .page-forgot .form-group .input-lg {
+    padding: 10px 30px; }
+
+/* line 2, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_profile.scss */
+.page-profile img.media-object {
+  border-radius: 4px; }
+
+/* line 6, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_ui.scss */
+.page-icons .bs-glyphicons {
+  overflow: hidden; }
+  /* line 9, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_ui.scss */
+  .page-icons .bs-glyphicons li {
+    float: left;
+    width: 25%;
+    height: 115px;
+    padding: 10px;
+    font-size: 10px;
+    line-height: 1.4;
+    text-align: center;
+    border: 1px solid #f9f9f9; }
+  /* line 21, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_ui.scss */
+  .page-icons .bs-glyphicons .glyphicon {
+    margin-top: 5px;
+    margin-bottom: 10px;
+    font-size: 24px; }
+  /* line 27, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_ui.scss */
+  .page-icons .bs-glyphicons .glyphicon-class {
+    display: block;
+    text-align: center;
+    word-wrap: break-word; }
+
+/* line 33, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_ui.scss */
+.page-icons .bs-glyphicons-list {
+  padding-left: 0;
+  list-style: none; }
+
+/* line 41, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_ui.scss */
+.weather-icons {
+  width: 100%;
+  text-align: center; }
+  /* line 45, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_ui.scss */
+  .weather-icons .icon-section {
+    overflow: hidden;
+    margin: 0 auto 3.5em;
+    width: 90%; }
+  /* line 51, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_ui.scss */
+  .weather-icons .example {
+    margin: 0 0 10px;
+    display: inline-block;
+    padding: .5em 0;
+    width: 30%; }
+    /* line 57, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_ui.scss */
+    .weather-icons .example .wi {
+      display: block;
+      height: 80px;
+      font-size: 1.5em;
+      line-height: 100px;
+      transition: all .3s ease-in-out; }
+    @media (min-width: 768px) {
+      /* line 51, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_ui.scss */
+      .weather-icons .example {
+        width: 15%; } }
+  /* line 70, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_ui.scss */
+  .weather-icons .class {
+    margin: 5px 0 0;
+    display: block;
+    color: #aaa;
+    font-size: .8em;
+    transition: all .3s ease-in-out; }
+  /* line 79, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_ui.scss */
+  .weather-icons .example:hover .class {
+    color: #242633; }
+  /* line 83, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_ui.scss */
+  .weather-icons .example:hover .wi {
+    font-size: 3em; }
+
+/* line 3, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_invoice.scss */
+.page-invoice .invoice-wrapper {
+  padding: 0 0 30px;
+  background-color: #fff; }
+
+/* line 10, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_invoice.scss */
+.invoice-inner {
+  padding: 15px 15px 30px;
+  background-color: #fff; }
+  /* line 15, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_invoice.scss */
+  .invoice-inner .invoice-sum li {
+    margin-bottom: 5px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 4px; }
+
+/* line 3, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_demo.scss */
+.weather-icon-list {
+  text-align: center; }
+  /* line 5, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_demo.scss */
+  .weather-icon-list .example {
+    text-align: center;
+    margin: 10px 3px; }
+    /* line 9, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_demo.scss */
+    .weather-icon-list .example .icon {
+      font-size: 24px; }
+
+/* line 16, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_demo.scss */
+.bs-glyphicons {
+  padding-left: 0;
+  padding-bottom: 1px;
+  margin-bottom: 20px;
+  list-style: none;
+  overflow: hidden; }
+  /* line 23, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_demo.scss */
+  .bs-glyphicons .glyphicon {
+    margin-top: 5px;
+    margin-bottom: 10px;
+    font-size: 24px; }
+  /* line 29, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_demo.scss */
+  .bs-glyphicons .glyphicon-class {
+    display: block;
+    text-align: center; }
+  /* line 34, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_demo.scss */
+  .bs-glyphicons li {
+    float: left;
+    width: 25%;
+    height: 115px;
+    padding: 10px;
+    margin: 0 -1px -1px 0;
+    font-size: 12px;
+    line-height: 1.4;
+    text-align: center;
+    border: 1px solid #ddd; }
+    @media (min-width: 768px) {
+      /* line 34, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_demo.scss */
+      .bs-glyphicons li {
+        width: 12.5%; } }
+
+/* line 51, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_demo.scss */
+.page-grid .grid-structure .row {
+  margin-top: 10px; }
+  /* line 54, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_demo.scss */
+  .page-grid .grid-structure .row .widget-container {
+    margin-top: 5px;
+    background: #eee;
+    padding: 10px 15px 12px;
+    min-height: 0;
+    border-radius: 4px; }
+
+/* line 67, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_demo.scss */
+.page-form-ele .list-checkbox-radio li:nth-child(even) {
+  margin-bottom: 20px; }
+
+/* line 71, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_demo.scss */
+.page-form-ele .list-checkbox-radio li > div {
+  float: left;
+  margin-right: 10px; }
+
+/* line 79, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/pages/_demo.scss */
+.demoslider-container {
+  max-width: 600px;
+  margin: auto; }
+
+/* line 4, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_layouts.scss */
+.layout-boxed > .header-container .top-header {
+  max-width: 1200px;
+  margin: 0 auto; }
+
+/* line 10, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_layouts.scss */
+.layout-boxed > .main-container {
+  max-width: 1200px;
+  margin: 0 auto; }
+
+/* line 16, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_layouts.scss */
+html {
+  position: relative;
+  min-height: 100%; }
+
+/* line 22, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_layouts.scss */
+.app {
+  position: static;
+  min-height: 100%; }
+  /* line 27, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_layouts.scss */
+  .app > .header-container.header-fixed {
+    position: fixed;
+    right: 0;
+    left: 0;
+    z-index: 10; }
+    /* line 33, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_layouts.scss */
+    .app > .header-container.header-fixed + .main-container {
+      padding-top: 100px; }
+      @media (min-width: 768px) {
+        /* line 33, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_layouts.scss */
+        .app > .header-container.header-fixed + .main-container {
+          padding-top: 50px; } }
+  /* line 44, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_layouts.scss */
+  .app > .main-container {
+    position: static; }
+    /* line 46, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_layouts.scss */
+    .app > .main-container:before {
+      content: " ";
+      line-height: 0;
+      z-index: -2;
+      position: absolute;
+      display: block;
+      width: 100%;
+      max-width: inherit;
+      top: 0;
+      bottom: 0;
+      background-color: #f9f9f9;
+      box-shadow: 0 0 2px rgba(0, 0, 0, 0.2); }
+    /* line 60, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_layouts.scss */
+    .app > .main-container > .nav-container {
+      display: none;
+      z-index: 11;
+      position: static;
+      float: left;
+      width: 220px;
+      background-color: #f1f1f1;
+      border-width: 0 1px 0 0;
+      border-style: solid;
+      border-color: #d8d8d8; }
+      @media (min-width: 768px) {
+        /* line 60, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_layouts.scss */
+        .app > .main-container > .nav-container {
+          display: block; } }
+      /* line 73, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_layouts.scss */
+      .app > .main-container > .nav-container:before {
+        z-index: -1;
+        content: " ";
+        line-height: 0;
+        position: absolute;
+        display: block;
+        top: 0;
+        bottom: 0;
+        width: inherit;
+        background-color: inherit;
+        border-width: inherit;
+        border-style: inherit;
+        border-color: inherit; }
+      /* line 87, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_layouts.scss */
+      .app > .main-container > .nav-container.nav-fixed {
+        position: fixed;
+        top: 100px;
+        bottom: 0;
+        float: none; }
+        @media (min-width: 768px) {
+          /* line 87, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_layouts.scss */
+          .app > .main-container > .nav-container.nav-fixed {
+            top: 50px; } }
+    /* line 100, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_layouts.scss */
+    .app > .main-container > .content-container {
+      overflow: hidden;
+      min-height: 100%;
+      margin-left: 0; }
+      @media (min-width: 768px) {
+        /* line 100, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_layouts.scss */
+        .app > .main-container > .content-container {
+          margin-left: 220px; } }
+
+@media (min-width: 768px) {
+  /* line 120, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_layouts.scss */
+  .app > .main-container > .nav-container.nav-horizontal {
+    z-index: 9;
+    border-width: 0 0 1px;
+    border-style: solid;
+    border-color: #d8d8d8; }
+    /* line 125, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_layouts.scss */
+    .app > .main-container > .nav-container.nav-horizontal:before {
+      border: 0; }
+    /* line 128, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_layouts.scss */
+    .app > .main-container > .nav-container.nav-horizontal.nav-fixed {
+      border-width: 0 1px 1px 0;
+      left: 0;
+      right: 0;
+      bottom: auto; }
+      /* line 134, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_layouts.scss */
+      .app > .main-container > .nav-container.nav-horizontal.nav-fixed #nav {
+        text-align: center; }
+        /* line 136, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_layouts.scss */
+        .app > .main-container > .nav-container.nav-horizontal.nav-fixed #nav > li {
+          display: inline-block;
+          float: none; }
+          /* line 139, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_layouts.scss */
+          .app > .main-container > .nav-container.nav-horizontal.nav-fixed #nav > li > a {
+            padding: 15px 28px; }
+      /* line 145, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_layouts.scss */
+      .app > .main-container > .nav-container.nav-horizontal.nav-fixed + .content-container {
+        margin: 80px 0 0; } }
+
+@media print {
+  /* line 2, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_shared.scss */
+  .no-print {
+    display: none; } }
+
+/* line 6, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+#nav-container ul {
+  padding-left: 0;
+  list-style: none; }
+
+/* line 11, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+#nav-container > .nav-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%; }
+
+/* line 23, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+.nav-vertical .nav > li.open > a {
+  background-color: #e4e4e4;
+  color: #f6921e; }
+
+/* line 27, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+.nav-vertical .nav > li.open > .fa {
+  color: #f6921e; }
+
+/* line 35, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+.nav-container .nav {
+  margin: 0;
+  padding: 0;
+  -webkit-overflow-scrolling: touch;
+  -webkit-overflow-scrolling: -blackberry-touch; }
+  /* line 41, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+  .nav-container .nav > li > a > i,
+  .nav-container .nav > li > a > .nav-icon {
+    display: inline-block;
+    margin-right: 10px;
+    width: 20px;
+    line-height: 1;
+    text-align: center;
+    font-size: 16px;
+    -webkit-transition: all 0.2s ease-in-out;
+    -moz-transition: all 0.2s ease-in-out;
+    transition: all 0.2s ease-in-out; }
+  /* line 52, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+  .nav-container .nav a {
+    font-size: 13px;
+    color: #767676;
+    -webkit-transition: all 0.2s ease-in-out;
+    -moz-transition: all 0.2s ease-in-out;
+    transition: all 0.2s ease-in-out; }
+    /* line 56, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+    .nav-container .nav a:hover, .nav-container .nav a:focus, .nav-container .nav a:active {
+      text-decoration: none; }
+  /* line 64, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+  .nav-container .nav > li {
+    position: relative;
+    margin: 0;
+    text-align: left;
+    font-weight: bold;
+    -webkit-transition: all 0.2s ease-in-out;
+    -moz-transition: all 0.2s ease-in-out;
+    transition: all 0.2s ease-in-out; }
+    /* line 71, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+    .nav-container .nav > li:hover > a {
+      background-color: #e4e4e4;
+      color: #f6921e; }
+    /* line 75, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+    .nav-container .nav > li:hover > .fa {
+      color: #f6921e; }
+    /* line 78, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+    .nav-container .nav > li.active > a {
+      background-color: #f6921e;
+      color: #fafafa; }
+    /* line 82, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+    .nav-container .nav > li.active > .fa {
+      color: #fafafa; }
+    /* line 85, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+    .nav-container .nav > li:first-child > a {
+      border-top: 0; }
+    /* line 88, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+    .nav-container .nav > li > a {
+      position: relative;
+      display: block;
+      padding: 15px 15px;
+      -webkit-transition: all 0.2s ease-in-out;
+      -moz-transition: all 0.2s ease-in-out;
+      transition: all 0.2s ease-in-out; }
+      /* line 94, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+      .nav-container .nav > li > a .badge {
+        position: absolute;
+        top: 16px;
+        right: 5px; }
+    /* line 101, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+    .nav-container .nav > li > .icon-has-ul-h {
+      display: none; }
+    /* line 105, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+    .nav-container .nav > li > .icon-has-ul {
+      position: absolute;
+      top: 18px;
+      right: 15px; }
+  /* line 113, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+  .nav-container .nav ul {
+    background-color: #f1f1f1;
+    display: none; }
+    /* line 117, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+    .nav-container .nav ul a {
+      font-size: 13px; }
+    /* line 121, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+    .nav-container .nav ul li {
+      position: relative;
+      padding: 0; }
+      /* line 126, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+      .nav-container .nav ul li:hover a, .nav-container .nav ul li.active a {
+        color: #f6921e; }
+      /* line 130, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+      .nav-container .nav ul li:last-child > a {
+        border-bottom: 0; }
+      /* line 134, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+      .nav-container .nav ul li > a {
+        position: relative;
+        display: block;
+        padding: 13px 0 13px 25px;
+        -webkit-transition: all 0.2s ease-in-out;
+        -moz-transition: all 0.2s ease-in-out;
+        transition: all 0.2s ease-in-out; }
+        /* line 139, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+        .nav-container .nav ul li > a:first-child {
+          border-top: none; }
+        /* line 143, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+        .nav-container .nav ul li > a i.fa-caret-right {
+          margin-right: 25px; }
+        /* line 147, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav.scss */
+        .nav-container .nav ul li > a > .badge {
+          position: absolute;
+          right: 5px;
+          top: 12px; }
+
+@media (max-width: 767px) {
+  /* line 5, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-off-canvas.scss */
+  .on-canvas #header {
+    position: fixed;
+    right: 0;
+    left: 0;
+    z-index: 12; }
+  /* line 12, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-off-canvas.scss */
+  .on-canvas #nav-container {
+    display: block;
+    position: fixed;
+    top: 100px;
+    bottom: 0;
+    float: none; }
+  /* line 20, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-off-canvas.scss */
+  .on-canvas .main-container {
+    overflow: hidden; }
+    /* line 22, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-off-canvas.scss */
+    .on-canvas .main-container #content {
+      margin-left: 220px;
+      margin-right: -220px; }
+  /* line 30, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-off-canvas.scss */
+  .on-canvas.body-wide .main-container #content {
+    margin-left: 0;
+    margin-right: 0; } }
+
+@media (max-width: 767px) {
+  /* line 7, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-horizontal.scss */
+  .nav-horizontal .nav > li.open > a {
+    background-color: #e4e4e4;
+    color: #f6921e; }
+  /* line 11, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-horizontal.scss */
+  .nav-horizontal .nav > li.open > .fa {
+    color: #f6921e; } }
+
+@media (min-width: 768px) {
+  /* line 25, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-horizontal.scss */
+  .main-container > .nav-container.nav-horizontal {
+    float: none;
+    width: auto; }
+    /* line 30, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-horizontal.scss */
+    .main-container > .nav-container.nav-horizontal + .content-container {
+      margin-left: 0; }
+  /* line 38, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-horizontal.scss */
+  .nav-horizontal .slimScrollDiv {
+    overflow: visible !important;
+    height: auto !important; }
+    /* line 42, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-horizontal.scss */
+    .nav-horizontal .slimScrollDiv .slimScrollBar,
+    .nav-horizontal .slimScrollDiv .slimScrollRail {
+      display: none !important; }
+  /* line 48, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-horizontal.scss */
+  .nav-horizontal .nav {
+    overflow: visible !important; }
+    /* line 51, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-horizontal.scss */
+    .nav-horizontal .nav > li {
+      position: relative;
+      float: left; }
+      /* line 54, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-horizontal.scss */
+      .nav-horizontal .nav > li > a {
+        padding: 15px 30px;
+        text-align: center;
+        font-weight: normal; }
+        /* line 59, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-horizontal.scss */
+        .nav-horizontal .nav > li > a > .fa {
+          margin: 0;
+          font-size: 26px;
+          line-height: 1; }
+        /* line 65, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-horizontal.scss */
+        .nav-horizontal .nav > li > a span {
+          margin: 0;
+          display: block;
+          font-size: 12px; }
+        /* line 71, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-horizontal.scss */
+        .nav-horizontal .nav > li > a .badge {
+          top: 15px; }
+      /* line 76, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-horizontal.scss */
+      .nav-horizontal .nav > li > .icon-has-ul-h {
+        display: block;
+        position: absolute;
+        bottom: 16px;
+        right: 10px; }
+      /* line 83, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-horizontal.scss */
+      .nav-horizontal .nav > li > .icon-has-ul {
+        display: none; }
+      /* line 88, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-horizontal.scss */
+      .nav-horizontal .nav > li:hover > ul {
+        display: block !important; }
+      /* line 96, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-horizontal.scss */
+      .nav-horizontal .nav > li > ul {
+        z-index: 9;
+        position: absolute;
+        left: 0;
+        top: 100%;
+        min-width: 100%;
+        width: auto; }
+        /* line 104, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-horizontal.scss */
+        .nav-horizontal .nav > li > ul li {
+          white-space: nowrap; }
+          /* line 106, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-horizontal.scss */
+          .nav-horizontal .nav > li > ul li > a {
+            padding: 13px 40px 13px 20px; } }
+
+@media (min-width: 768px) {
+  /* line 6, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-min.scss */
+  .app.nav-collapsed-min .slimScrollDiv {
+    overflow: visible !important;
+    height: auto !important; }
+    /* line 10, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-min.scss */
+    .app.nav-collapsed-min .slimScrollDiv .slimScrollBar,
+    .app.nav-collapsed-min .slimScrollDiv .slimScrollRail {
+      display: none !important; }
+  /* line 16, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-min.scss */
+  .app.nav-collapsed-min #nav-container {
+    width: 60px; }
+  /* line 20, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-min.scss */
+  .app.nav-collapsed-min #content {
+    margin-left: 60px; }
+  /* line 24, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-min.scss */
+  .app.nav-collapsed-min #nav-wrapper {
+    overflow: visible !important; }
+  /* line 27, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-min.scss */
+  .app.nav-collapsed-min #nav {
+    overflow: visible !important; }
+    /* line 31, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-min.scss */
+    .app.nav-collapsed-min #nav > li > a {
+      padding: 15px 15px;
+      text-align: center; }
+      /* line 35, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-min.scss */
+      .app.nav-collapsed-min #nav > li > a > i {
+        margin: 0;
+        font-size: 20px; }
+      /* line 39, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-min.scss */
+      .app.nav-collapsed-min #nav > li > a > span {
+        display: none; }
+    /* line 44, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-min.scss */
+    .app.nav-collapsed-min #nav > li .icon-has-ul {
+      display: none; }
+    /* line 48, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-min.scss */
+    .app.nav-collapsed-min #nav > li > ul {
+      z-index: 9;
+      position: absolute;
+      left: 100%;
+      top: 0;
+      width: 220px;
+      border-top-right-radius: 4px;
+      border-bottom-right-radius: 4px;
+      box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); }
+    /* line 60, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-min.scss */
+    .app.nav-collapsed-min #nav > li:hover > ul, .app.nav-collapsed-min #nav > li.open > ul {
+      display: block !important; }
+  /* line 70, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-min.scss */
+  .app.nav-collapsed-min .nav-horizontal#nav-container {
+    width: auto; }
+  /* line 74, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-min.scss */
+  .app.nav-collapsed-min .nav-horizontal + #content {
+    margin: 0; }
+  /* line 78, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-min.scss */
+  .app.nav-collapsed-min .nav-horizontal.nav-fixed + #content {
+    margin: 50px 0 0; }
+  /* line 84, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-min.scss */
+  .app.nav-collapsed-min .nav-horizontal #nav > li > .fa {
+    display: none; }
+  /* line 88, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_nav-min.scss */
+  .app.nav-collapsed-min .nav-horizontal #nav > li > ul {
+    left: 0;
+    top: 100%; } }
+
+/* line 1, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+.header-container {
+  background-color: #242633; }
+  /* line 10, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+  .header-container > .top-header a {
+    color: #fafafa; }
+    /* line 12, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+    .header-container > .top-header a:hover {
+      text-decoration: none; }
+  /* line 18, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+  .header-container > .top-header .dropdown-menu a {
+    color: #767676; }
+  /* line 23, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+  .header-container > .top-header .hidden-mobile {
+    display: none; }
+    @media (min-width: 480px) {
+      /* line 23, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+      .header-container > .top-header .hidden-mobile {
+        display: inline; } }
+  /* line 31, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+  .header-container > .top-header .logo {
+    position: absolute;
+    width: 100%;
+    height: 50px;
+    background-color: #191b24;
+    color: #fafafa;
+    line-height: 50px;
+    text-align: center; }
+    @media (min-width: 768px) {
+      /* line 31, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+      .header-container > .top-header .logo {
+        display: inline-block;
+        width: 220px;
+        background-color: transparent;
+        border-right: 1px solid rgba(255, 255, 255, 0.1); } }
+    /* line 46, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+    .header-container > .top-header .logo > a {
+      font-size: 24px;
+      vertical-align: middle;
+      color: #fafafa; }
+      /* line 51, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+      .header-container > .top-header .logo > a .logo-icon {
+        color: #52e6d0;
+        margin-right: 12px; }
+  /* line 59, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+  .header-container > .top-header .menu-button {
+    display: block;
+    position: absolute;
+    top: 8px;
+    right: 20px;
+    width: 46px;
+    padding: 10px 12px;
+    border-radius: 4px; }
+    /* line 67, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+    .header-container > .top-header .menu-button:hover {
+      cursor: pointer;
+      background-color: #0f1015; }
+    /* line 72, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+    .header-container > .top-header .menu-button .icon-bar {
+      display: block;
+      width: 22px;
+      height: 2px;
+      border-radius: 1px;
+      background-color: #fff; }
+    /* line 79, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+    .header-container > .top-header .menu-button .icon-bar + .icon-bar {
+      margin-top: 4px; }
+    @media (min-width: 768px) {
+      /* line 59, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+      .header-container > .top-header .menu-button {
+        display: none; } }
+  /* line 89, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+  .header-container > .top-header .admin-options {
+    z-index: 20;
+    line-height: 20px; }
+  /* line 95, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+  .header-container > .top-header .dropdown-menu.panel {
+    padding: 0;
+    white-space: nowrap; }
+    /* line 99, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+    .header-container > .top-header .dropdown-menu.panel .panel-heading,
+    .header-container > .top-header .dropdown-menu.panel .panel-footer {
+      padding: 10px 15px; }
+    /* line 104, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+    .header-container > .top-header .dropdown-menu.panel .list-group-item {
+      padding: 10px 15px; }
+      /* line 106, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+      .header-container > .top-header .dropdown-menu.panel .list-group-item > a {
+        display: block; }
+    /* line 112, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+    .header-container > .top-header .dropdown-menu.panel .media .media-body {
+      padding-right: 75px; }
+  /* line 120, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+  .header-container > .top-header .top-nav {
+    width: 100%;
+    padding: 50px 0 0; }
+    @media (min-width: 768px) {
+      /* line 120, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+      .header-container > .top-header .top-nav {
+        padding: 0 0 0 220px; } }
+    /* line 127, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+    .header-container > .top-header .top-nav > ul {
+      margin-bottom: 0; }
+    /* line 132, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+    .header-container > .top-header .top-nav .nav-left,
+    .header-container > .top-header .top-nav .nav-right {
+      font-size: 18px;
+      line-height: 22px; }
+      /* line 137, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+      .header-container > .top-header .top-nav .nav-left > li,
+      .header-container > .top-header .top-nav .nav-right > li {
+        float: left; }
+        /* line 140, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+        .header-container > .top-header .top-nav .nav-left > li.nav-profile > a,
+        .header-container > .top-header .top-nav .nav-right > li.nav-profile > a {
+          padding: 10px 15px; }
+        /* line 143, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+        .header-container > .top-header .top-nav .nav-left > li.nav-profile .hidden-xs,
+        .header-container > .top-header .top-nav .nav-right > li.nav-profile .hidden-xs {
+          padding-right: 8px; }
+        /* line 146, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+        .header-container > .top-header .top-nav .nav-left > li.nav-profile i,
+        .header-container > .top-header .top-nav .nav-right > li.nav-profile i {
+          width: 18px;
+          font-size: 16px;
+          margin-right: 5px; }
+        /* line 153, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+        .header-container > .top-header .top-nav .nav-left > li > .toggle-min,
+        .header-container > .top-header .top-nav .nav-right > li > .toggle-min {
+          display: none; }
+          @media (min-width: 768px) {
+            /* line 153, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+            .header-container > .top-header .top-nav .nav-left > li > .toggle-min,
+            .header-container > .top-header .top-nav .nav-right > li > .toggle-min {
+              display: block; } }
+        /* line 161, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+        .header-container > .top-header .top-nav .nav-left > li a:hover, .header-container > .top-header .top-nav .nav-left > li a:focus,
+        .header-container > .top-header .top-nav .nav-right > li a:hover,
+        .header-container > .top-header .top-nav .nav-right > li a:focus {
+          text-decoration: none; }
+        /* line 167, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+        .header-container > .top-header .top-nav .nav-left > li > .btn-group > a,
+        .header-container > .top-header .top-nav .nav-left > li > a,
+        .header-container > .top-header .top-nav .nav-right > li > .btn-group > a,
+        .header-container > .top-header .top-nav .nav-right > li > a {
+          position: relative;
+          display: block;
+          height: 50px;
+          padding: 14px 10px; }
+          @media (min-width: 768px) {
+            /* line 167, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+            .header-container > .top-header .top-nav .nav-left > li > .btn-group > a,
+            .header-container > .top-header .top-nav .nav-left > li > a,
+            .header-container > .top-header .top-nav .nav-right > li > .btn-group > a,
+            .header-container > .top-header .top-nav .nav-right > li > a {
+              padding: 14px 15px; } }
+          /* line 178, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+          .header-container > .top-header .top-nav .nav-left > li > .btn-group > a .badge,
+          .header-container > .top-header .top-nav .nav-left > li > a .badge,
+          .header-container > .top-header .top-nav .nav-right > li > .btn-group > a .badge,
+          .header-container > .top-header .top-nav .nav-right > li > a .badge {
+            position: absolute;
+            top: 6px;
+            right: 3px; }
+        /* line 186, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+        .header-container > .top-header .top-nav .nav-left > li ul.dropdown-menu a:hover,
+        .header-container > .top-header .top-nav .nav-right > li ul.dropdown-menu a:hover {
+          background-color: #f6921e;
+          color: #fff; }
+        /* line 191, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+        .header-container > .top-header .top-nav .nav-left > li ul.dropdown-menu .glyphicon,
+        .header-container > .top-header .top-nav .nav-right > li ul.dropdown-menu .glyphicon {
+          margin-right: 10px; }
+    /* line 219, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+    .header-container > .top-header .top-nav .nav-left {
+      float: left;
+      padding: 0; }
+      /* line 222, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+      .header-container > .top-header .top-nav .nav-left > li {
+        border-right: 1px solid rgba(255, 255, 255, 0.1); }
+    /* line 228, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+    .header-container > .top-header .top-nav .nav-right {
+      padding: 0; }
+      /* line 231, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+      .header-container > .top-header .top-nav .nav-right > li > a {
+        text-align: center; }
+      /* line 237, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+      .header-container > .top-header .top-nav .nav-right .badge-info {
+        background-color: transparent; }
+  /* line 246, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+  .header-container > .top-header .langs .active-flag .flag {
+    margin-top: 0; }
+  /* line 252, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+  .header-container > .top-header .langs .list-langs a {
+    position: relative;
+    padding: 8px 20px 8px 57px; }
+    /* line 256, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_header.scss */
+    .header-container > .top-header .langs .list-langs a .flag {
+      position: absolute;
+      top: 7px;
+      left: 15px; }
+
+/* line 1, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_body.scss */
+body {
+  background: url("../images/bg-pattern/bg-pattern4.png") repeat #fff; }
+
+/* line 8, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_body.scss */
+.body-wide #header,
+.body-wide #nav-container {
+  display: none; }
+
+/* line 13, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_body.scss */
+.body-wide > .main-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0; }
+
+/* line 20, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_body.scss */
+.body-wide #content {
+  z-index: 2;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0; }
+
+/* line 31, /Users/hemantwadhwa/Downloads/Transform-Admin-Full-Package v2.0/transform/client/styles/sections/_body.scss */
+.body-wide .introjs-overlay,
+.body-wide .introjs-helperLayer {
+  display: none; }
+
+.fa-sm {
+  font-size: 0.75em;
+}
+
+textarea {
+  overflow:auto;
+  resize:none;
+}
+
+.angular-google-map-container {
+  min-height: 300px;
+  min-width: 200px;
+  width: 100%;
+}
+
+imagereader {
+  display: block;
+  min-width: 100px;
+  min-height: 100px;
+  max-width: 300px;
+  max-height: 300px;
+}
+
+
+imagereader img.img-polaroid {
+  min-width: 150px;
+  min-height: 150px;
+  max-width: 100%;
+  max-height: 300px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+
+imagereader.background img.img-polaroid {
+  min-width: 450px;
+  min-height: 150px;
+  max-width: 100%;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibWFpbi5zY3NzIiwic291cmNlcyI6WyJtYWluLnNjc3MiLCJnbG9iYWwvX3Zhci5zY3NzIiwiYm9vdHN0cmFwL2Jvb3RzdHJhcC9fbWl4aW5zLnNjc3MiLCJib290c3RyYXAvYm9vdHN0cmFwL21peGlucy9faGlkZS10ZXh0LnNjc3MiLCJib290c3RyYXAvYm9vdHN0cmFwL21peGlucy9fb3BhY2l0eS5zY3NzIiwiYm9vdHN0cmFwL2Jvb3RzdHJhcC9taXhpbnMvX2ltYWdlLnNjc3MiLCJib290c3RyYXAvYm9vdHN0cmFwL21peGlucy9fbGFiZWxzLnNjc3MiLCJib290c3RyYXAvYm9vdHN0cmFwL21peGlucy9fcmVzZXQtZmlsdGVyLnNjc3MiLCJib290c3RyYXAvYm9vdHN0cmFwL21peGlucy9fcmVzaXplLnNjc3MiLCJib290c3RyYXAvYm9vdHN0cmFwL21peGlucy9fcmVzcG9uc2l2ZS12aXNpYmlsaXR5LnNjc3MiLCJib290c3RyYXAvYm9vdHN0cmFwL21peGlucy9fc2l6ZS5zY3NzIiwiYm9vdHN0cmFwL2Jvb3RzdHJhcC9taXhpbnMvX3RhYi1mb2N1cy5zY3NzIiwiYm9vdHN0cmFwL2Jvb3RzdHJhcC9taXhpbnMvX3RleHQtZW1waGFzaXMuc2NzcyIsImJvb3RzdHJhcC9ib290c3RyYXAvbWl4aW5zL190ZXh0LW92ZXJmbG93LnNjc3MiLCJib290c3RyYXAvYm9vdHN0cmFwL21peGlucy9fdmVuZG9yLXByZWZpeGVzLnNjc3MiLCJib290c3RyYXAvYm9vdHN0cmFwL21peGlucy9fYWxlcnRzLnNjc3MiLCJib290c3RyYXAvYm9vdHN0cmFwL21peGlucy9fYnV0dG9ucy5zY3NzIiwiYm9vdHN0cmFwL2Jvb3RzdHJhcC9taXhpbnMvX3BhbmVscy5zY3NzIiwiYm9vdHN0cmFwL2Jvb3RzdHJhcC9taXhpbnMvX3BhZ2luYXRpb24uc2NzcyIsImJvb3RzdHJhcC9ib290c3RyYXAvbWl4aW5zL19saXN0LWdyb3VwLnNjc3MiLCJib290c3RyYXAvYm9vdHN0cmFwL21peGlucy9fbmF2LWRpdmlkZXIuc2NzcyIsImJvb3RzdHJhcC9ib290c3RyYXAvbWl4aW5zL19mb3Jtcy5zY3NzIiwiYm9vdHN0cmFwL2Jvb3RzdHJhcC9taXhpbnMvX3Byb2dyZXNzLWJhci5zY3NzIiwiYm9vdHN0cmFwL2Jvb3RzdHJhcC9taXhpbnMvX3RhYmxlLXJvdy5zY3NzIiwiYm9vdHN0cmFwL2Jvb3RzdHJhcC9taXhpbnMvX2JhY2tncm91bmQtdmFyaWFudC5zY3NzIiwiYm9vdHN0cmFwL2Jvb3RzdHJhcC9taXhpbnMvX2JvcmRlci1yYWRpdXMuc2NzcyIsImJvb3RzdHJhcC9ib290c3RyYXAvbWl4aW5zL19ncmFkaWVudHMuc2NzcyIsImJvb3RzdHJhcC9ib290c3RyYXAvbWl4aW5zL19jbGVhcmZpeC5zY3NzIiwiYm9vdHN0cmFwL2Jvb3RzdHJhcC9taXhpbnMvX2NlbnRlci1ibG9jay5zY3NzIiwiYm9vdHN0cmFwL2Jvb3RzdHJhcC9taXhpbnMvX25hdi12ZXJ0aWNhbC1hbGlnbi5zY3NzIiwiYm9vdHN0cmFwL2Jvb3RzdHJhcC9taXhpbnMvX2dyaWQtZnJhbWV3b3JrLnNjc3MiLCJib290c3RyYXAvYm9vdHN0cmFwL21peGlucy9fZ3JpZC5zY3NzIiwiYm91cmJvbi9fYm91cmJvbi5zY3NzIiwiYm91cmJvbi9zZXR0aW5ncy9fcHJlZml4ZXIuc2NzcyIsImJvdXJib24vc2V0dGluZ3MvX3B4LXRvLWVtLnNjc3MiLCJib3VyYm9uL3NldHRpbmdzL19hc3NldC1waXBlbGluZS5zY3NzIiwiYm91cmJvbi9oZWxwZXJzL19jb252ZXJ0LXVuaXRzLnNjc3MiLCJib3VyYm9uL2hlbHBlcnMvX2dyYWRpZW50LXBvc2l0aW9ucy1wYXJzZXIuc2NzcyIsImJvdXJib24vaGVscGVycy9faXMtbnVtLnNjc3MiLCJib3VyYm9uL2hlbHBlcnMvX2xpbmVhci1hbmdsZS1wYXJzZXIuc2NzcyIsImJvdXJib24vaGVscGVycy9fbGluZWFyLWdyYWRpZW50LXBhcnNlci5zY3NzIiwiYm91cmJvbi9oZWxwZXJzL19saW5lYXItcG9zaXRpb25zLXBhcnNlci5zY3NzIiwiYm91cmJvbi9oZWxwZXJzL19saW5lYXItc2lkZS1jb3JuZXItcGFyc2VyLnNjc3MiLCJib3VyYm9uL2hlbHBlcnMvX3JhZGlhbC1hcmctcGFyc2VyLnNjc3MiLCJib3VyYm9uL2hlbHBlcnMvX3JhZGlhbC1wb3NpdGlvbnMtcGFyc2VyLnNjc3MiLCJib3VyYm9uL2hlbHBlcnMvX3JhZGlhbC1ncmFkaWVudC1wYXJzZXIuc2NzcyIsImJvdXJib24vaGVscGVycy9fcmVuZGVyLWdyYWRpZW50cy5zY3NzIiwiYm91cmJvbi9oZWxwZXJzL19zaGFwZS1zaXplLXN0cmlwcGVyLnNjc3MiLCJib3VyYm9uL2hlbHBlcnMvX3N0ci10by1udW0uc2NzcyIsImJvdXJib24vZnVuY3Rpb25zL19hc3NpZ24uc2NzcyIsImJvdXJib24vZnVuY3Rpb25zL19jb2xvci1saWdodG5lc3Muc2NzcyIsImJvdXJib24vZnVuY3Rpb25zL19mbGV4LWdyaWQuc2NzcyIsImJvdXJib24vZnVuY3Rpb25zL19nb2xkZW4tcmF0aW8uc2NzcyIsImJvdXJib24vZnVuY3Rpb25zL19ncmlkLXdpZHRoLnNjc3MiLCJib3VyYm9uL2Z1bmN0aW9ucy9fbW9kdWxhci1zY2FsZS5zY3NzIiwiYm91cmJvbi9mdW5jdGlvbnMvX3B4LXRvLWVtLnNjc3MiLCJib3VyYm9uL2Z1bmN0aW9ucy9fcHgtdG8tcmVtLnNjc3MiLCJib3VyYm9uL2Z1bmN0aW9ucy9fc3RyaXAtdW5pdHMuc2NzcyIsImJvdXJib24vZnVuY3Rpb25zL190aW50LXNoYWRlLnNjc3MiLCJib3VyYm9uL2Z1bmN0aW9ucy9fdHJhbnNpdGlvbi1wcm9wZXJ0eS1uYW1lLnNjc3MiLCJib3VyYm9uL2Z1bmN0aW9ucy9fdW5wYWNrLnNjc3MiLCJib3VyYm9uL2NzczMvX2FuaW1hdGlvbi5zY3NzIiwiYm91cmJvbi9jc3MzL19hcHBlYXJhbmNlLnNjc3MiLCJib3VyYm9uL2NzczMvX2JhY2tmYWNlLXZpc2liaWxpdHkuc2NzcyIsImJvdXJib24vY3NzMy9fYmFja2dyb3VuZC5zY3NzIiwiYm91cmJvbi9jc3MzL19iYWNrZ3JvdW5kLWltYWdlLnNjc3MiLCJib3VyYm9uL2NzczMvX2JvcmRlci1pbWFnZS5zY3NzIiwiYm91cmJvbi9jc3MzL19ib3JkZXItcmFkaXVzLnNjc3MiLCJib3VyYm9uL2NzczMvX2JveC1zaXppbmcuc2NzcyIsImJvdXJib24vY3NzMy9fY2FsYy5zY3NzIiwiYm91cmJvbi9jc3MzL19jb2x1bW5zLnNjc3MiLCJib3VyYm9uL2NzczMvX2ZpbHRlci5zY3NzIiwiYm91cmJvbi9jc3MzL19mbGV4LWJveC5zY3NzIiwiYm91cmJvbi9jc3MzL19mb250LWZhY2Uuc2NzcyIsImJvdXJib24vY3NzMy9fZm9udC1mZWF0dXJlLXNldHRpbmdzLnNjc3MiLCJib3VyYm9uL2NzczMvX2h5cGhlbnMuc2NzcyIsImJvdXJib24vY3NzMy9faGlkcGktbWVkaWEtcXVlcnkuc2NzcyIsImJvdXJib24vY3NzMy9faW1hZ2UtcmVuZGVyaW5nLnNjc3MiLCJib3VyYm9uL2NzczMvX2tleWZyYW1lcy5zY3NzIiwiYm91cmJvbi9jc3MzL19saW5lYXItZ3JhZGllbnQuc2NzcyIsImJvdXJib24vY3NzMy9fcGVyc3BlY3RpdmUuc2NzcyIsImJvdXJib24vY3NzMy9fcmFkaWFsLWdyYWRpZW50LnNjc3MiLCJib3VyYm9uL2NzczMvX3RyYW5zZm9ybS5zY3NzIiwiYm91cmJvbi9jc3MzL190cmFuc2l0aW9uLnNjc3MiLCJib3VyYm9uL2NzczMvX3VzZXItc2VsZWN0LnNjc3MiLCJib3VyYm9uL2NzczMvX3BsYWNlaG9sZGVyLnNjc3MiLCJib3VyYm9uL2FkZG9ucy9fYnV0dG9uLnNjc3MiLCJib3VyYm9uL2FkZG9ucy9fY2xlYXJmaXguc2NzcyIsImJvdXJib24vYWRkb25zL19kaXJlY3Rpb25hbC12YWx1ZXMuc2NzcyIsImJvdXJib24vYWRkb25zL19lbGxpcHNpcy5zY3NzIiwiYm91cmJvbi9hZGRvbnMvX2ZvbnQtZmFtaWx5LnNjc3MiLCJib3VyYm9uL2FkZG9ucy9faGlkZS10ZXh0LnNjc3MiLCJib3VyYm9uL2FkZG9ucy9faHRtbDUtaW5wdXQtdHlwZXMuc2NzcyIsImJvdXJib24vYWRkb25zL19wb3NpdGlvbi5zY3NzIiwiYm91cmJvbi9hZGRvbnMvX3ByZWZpeGVyLnNjc3MiLCJib3VyYm9uL2FkZG9ucy9fcmV0aW5hLWltYWdlLnNjc3MiLCJib3VyYm9uL2FkZG9ucy9fc2l6ZS5zY3NzIiwiYm91cmJvbi9hZGRvbnMvX3RpbWluZy1mdW5jdGlvbnMuc2NzcyIsImJvdXJib24vYWRkb25zL190cmlhbmdsZS5zY3NzIiwiYm91cmJvbi9hZGRvbnMvX3dvcmQtd3JhcC5zY3NzIiwiYm91cmJvbi9fYm91cmJvbi1kZXByZWNhdGVkLXVwY29taW5nLnNjc3MiLCJwbHVnaW5zL19ib290c3RyYXAtc2xpZGVyLnNjc3MiLCJwbHVnaW5zL19yZXNwb25zaXZlLXRhYmxlcy5zY3NzIiwicGx1Z2lucy9fZWFzeXBpZWNoYXJ0cy5zY3NzIiwicGx1Z2lucy9fdG9hc3RyLnNjc3MiLCJwbHVnaW5zL19zcGFya2xpbmUuc2NzcyIsInBsdWdpbnMvX2pxdWVyeS1zdGVwcy5zY3NzIiwicGx1Z2lucy9fYW5ndWxhci11aS10cmVlLnNjc3MiLCJwbHVnaW5zL19tb3JyaXMuc2NzcyIsInBsdWdpbnMvX2pxdm1hcC5zY3NzIiwicGx1Z2lucy9fbmctdGFncy1pbnB1dC5zY3NzIiwicGx1Z2lucy9fYW5ndWxhci1sb2FkaW5nLWJhci5zY3NzIiwiZ2xvYmFsL192YXItcGFnZXMuc2NzcyIsInBhZ2VzL19kYXNoYm9hcmQuc2NzcyIsInBhZ2VzL19wYWdlcy5zY3NzIiwicGFnZXMvX2Vyci5zY3NzIiwicGFnZXMvX2xvY2stc2NyZWVuLnNjc3MiLCJwYWdlcy9fdGFza3Muc2NzcyIsInBhZ2VzL19hdXRoLnNjc3MiLCJwYWdlcy9fcHJvZmlsZS5zY3NzIiwicGFnZXMvX3VpLnNjc3MiLCJwYWdlcy9faW52b2ljZS5zY3NzIiwicGFnZXMvX2RlbW8uc2NzcyIsInNlY3Rpb25zL19sYXlvdXRzLnNjc3MiLCJzZWN0aW9ucy9fc2hhcmVkLnNjc3MiLCJzZWN0aW9ucy9fbmF2LnNjc3MiLCJzZWN0aW9ucy9fbmF2LW9mZi1jYW52YXMuc2NzcyIsInNlY3Rpb25zL19uYXYtaG9yaXpvbnRhbC5zY3NzIiwic2VjdGlvbnMvX25hdi1taW4uc2NzcyIsInNlY3Rpb25zL19oZWFkZXIuc2NzcyIsInNlY3Rpb25zL19ib2R5LnNjc3MiXSwibWFwcGluZ3MiOiI7QXFHWUEsT0FBTyxDQUFDO0VBQ0osT0FBTyxFQUFFLFlBQWE7RUFDdEIsY0FBYyxFQUFFLE1BQU87RUFDdkIsUUFBUSxFQUFFLFFBQVMsR0E2RXRCOztFQWhGRCxPQUFPLEFBSUYsa0JBQWtCLENBQUM7SUFDaEIsS0FBSyxFQUFFLGVBQWdCO0lBQ3ZCLE1BQU0sRUFYa0IsR0FBRyxHQW1DOUI7O0lBOUJMLE9BQU8sQUFJRixrQkFBa0IsQ0FHZixhQUFhLENBQUM7TUFDVixNQUFNLEVBQUUsR0FBd0I7TUFDaEMsS0FBSyxFQUFFLElBQUs7TUFDWixVQUFVLEVBQUUsSUFBQztNQUNiLEdBQUcsRUFBRSxHQUFJO01BQ1QsSUFBSSxFQUFFLENBQUUsR0FDWDs7SUFiVCxPQUFPLEFBSUYsa0JBQWtCLENBVWYsaUJBQWlCLENBQUM7TUFDZCxNQUFNLEVBQUUsSUFBSztNQUNiLEdBQUcsRUFBRSxDQUFFO01BQ1AsTUFBTSxFQUFFLENBQUUsR0FDYjs7SUFsQlQsT0FBTyxBQUlGLGtCQUFrQixDQWVmLGNBQWMsQ0FBQztNQUNYLFdBQVcsRUE3QlMsS0FBSTtNQThCeEIsVUFBVSxFQTlCVSxLQUFJLEdBc0MzQjs7TUE3QlQsT0FBTyxBQUlGLGtCQUFrQixDQWVmLGNBQWMsQUFHVCxTQUFTLENBQUM7UUFDUCxZQUFZLEVBQUUsQ0FBQyxDQUFDLEdBQXdCLENBQUcsR0FBd0IsQ0FBRyxHQUF3QjtRQUM5RixLQUFLLEVBQUUsQ0FBRTtRQUNULE1BQU0sRUFBRSxDQUFFO1FBQ1YsbUJBQW1CLEVBQUUsT0FBUTtRQUM3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 */

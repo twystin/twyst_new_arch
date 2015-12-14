@@ -1,3 +1,5 @@
 node_modules/
 .bower-temporary/
 www/bower_components/
+
+npm-debug.log
