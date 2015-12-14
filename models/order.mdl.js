@@ -16,11 +16,14 @@ var Order = new Schema({
     pin: {type: Number}, 
     city: {type: String},
     state: {type: String},
+    delivery_zone: {
+      type: String
+    },
     coords:{
       lat: {type: String},
       long: {type: String}
     },
-    tag: {type: String,
+    tags: {type: String,
       enum: ['home', 'office', 'other']}
   },
   outlet: {
@@ -33,6 +36,10 @@ var Order = new Schema({
   payment_info: {}, //COD/Payu/payment object
   txn_id: {type: String},
   order_status: {type: String},
+  is_favourite: {
+    type: Boolean,
+    default: false
+  },
   items: [{
   	item_id: Schema.ObjectId,
     item_name: {

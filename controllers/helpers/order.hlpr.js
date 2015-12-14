@@ -44,13 +44,26 @@ module.exports.verify_order = function(token, order) {
         return get_applicable_offer(data);
     })
     .then(function(data) {
-      return calculate_order_value(data);
-    })
-    .then(function(data) {
-      return (data);
-    })
-    .then(function(data) {
-      deferred.resolve(data);
+        var updated_data = {};
+        updated_data.items = data.items;
+        updated_data.order_value = data.order_value;
+        updated_data.offers = [];
+        
+        _.each(data.outlet.offers, function(offer){
+            if(offer.order_value)  {
+                var massgaed_offer = {};
+                massgaed_offer._id = offer._id;
+                massgaed_offer.is_applicable = offer.is_applicable;
+                massgaed_offer.order_value = offer.order_value;
+                massgaed_offer.offer_type = offer.actions.reward.reward_meta.reward_type;
+                if(offer.free_item) {
+                    updated_data.free_item = offer.free_item;
+                }
+                updated_data.offers.push(massgaed_offer);    
+            }        
+        })
+        
+        deferred.resolve(updated_data);
     })
     .fail(function(err) {
         console.log(err)
@@ -158,19 +171,34 @@ function validate_outlet(data) {
     var outlet = passed_data.outlet;
 
     if(!isOutletActive(outlet)){
-        deferred.reject('')
+        deferred.reject({
+          err:  true,
+          message: "outlet is not active"
+        });
     }
     else if(isOutletClosed(outlet)){
-        deferred.reject('')
+        deferred.reject({
+          err:  true,
+          message: "outlet is currently closed"
+        });
     }
     else if (!isDeliveryOutlet(outlet)) {
-        deferred.reject('');
+        deferred.reject({
+          err:  true,
+          message: "outlet does not delivers"
+        });
     }
-    else if (isMenuActive(outlet)) {
-        deferred.reject('');
+    else if (!isMenuActive(outlet)) {
+        deferred.reject({
+          err:  true,
+          message: "menu is not active"
+        });
     }
     else if (verify_delivery_location(data.coords, outlet)){
-        deferred.reject('');
+        deferred.reject({
+          err:  true,
+          message: "outlet does not delivers at selected loation"
+        });
     }
     else{
         deferred.resolve(passed_data);
@@ -179,53 +207,49 @@ function validate_outlet(data) {
     return deferred.promise;
 }
 
-function calculate_order_value(order, outlet_id, free_item) {
+function calculate_order_value(data, free_item) {
     logger.log();
-    var deferred = Q.defer();
-    Cache.get('outlets', function(err, reply) {
-        if (err) {
-          deferred.reject('Could not get outlets');
-        } else {
-            var menu = {};
-            var outlets = JSON.parse(reply);
-            var curr_outlet = outlets[outlet_id];
-            menu = curr_outlet.menus;
-            if(menu) {
-                var amount = 0;
-                //console.log(menu[1]);
-                //console.log(order.items)
-                for(var i = 0; i <= order.items.length; i++) {
-                    var category = _.findWhere(menu[1].menu_categories, {_id: order.items[i].category_id});
-                    console.log(category)
-                    
-                    var sub_category = _.findWhere(category.sub_categories, {_id: order.items[i].sub_category_id});
-                    console.log(sub_category);
-                    var item = _.findWhere(sub_category.items, {_id: order.items[i].item_id});
-                    console.log(item);
-                    var options = _.findWhere(item.options, {_id: order.items[i].option_id});
-                    console.log(options);
-                    if(options.option_set) {
-                        var option = _.findWhere(options.sub_options, {_id: order.items[i].sub_option_id});
-                        console.log(option);
-                    }
-                    if(option_set.add_ons) {
-                        var add_on = _.findWhere(options.add_ons, {_id: order.items[i].addon_id});    
-                    }
-                    
-                    
-                    amoaunt = amount+option_set.item_cost+option.option_cost+addon_cost;
-
-                    console.log(menu_category);
-                    deferred.resolve(menu);     
-                }
-                 
-            }
-            else{
-                deferred.reject('could not get menu');   
-            }
+    console.log('free_item ' + free_item);
+    var passed_data = data;
+    var items = data.items
+    var menu = {};
+    menu = data.outlet && data.outlet.menus[0];
+    var items = data.items;
+    var category, sub_category, item, option, sub_option, add_on, amount = 0;
+    
+    for(var i = 0; i < items.length; i++) {
+        category = _.findWhere(menu.menu_categories, {_id: items[i].category_id});
+        
+        var sub_category = _.findWhere(category.sub_categories, {_id: items[i].sub_category_id});
+        item = _.findWhere(sub_category.items, {_id: items[i].item_id});
+        if(item.options && items[i].option_id) {
+            option = _.findWhere(item.options, {_id: items[i].option_id});
+            console.log(option);    
         }
-    });
-    return deferred.promise;
+        
+        if(option && option.sub_options && items[i].sub_options) {
+            sub_option = _.findWhere(option.sub_options, {_id: items[i].sub_option_id});
+        }
+        if(option && option.add_ons && items[i].addon_id) {
+            add_on = _.findWhere(option.add_ons, {_id: items[i].addon_id});    
+        }
+        console.log(items[i].quantity +'quantity')
+        if(item._id === free_item && option) {
+            amount = amount+(option.option_cost*(items[i].quantity-1));           
+        }
+        else if(item._id === free_item && !option) {
+            amount = amount+(item.item_cost*(items[i].quantity-1));           
+            
+        }         
+        else if(option){
+            amount = amount+(option.option_cost*items[i].quantity);            
+        }
+        else {
+            amount = amount+(item.item_cost*items[i].quantity);               
+        }
+    }
+    console.log('order amount '+ amount);
+    return amount;
 }
 
 function verify_delivery_location(coords, outlet) {
@@ -276,7 +300,7 @@ function isMenuActive(outlet) {
     logger.log();
     if(outlet && outlet.menus) {
         for(var i = 0; i < outlet.menus.length; i++) {
-
+            console.log(outlet.menus[i].status)
             if(outlet.menus[i].status === 'active') {
               return true;
             }            
@@ -305,7 +329,7 @@ function check_item_availability(data) {
     for(var i = 0; i <= data.items.length; i++) {
              
     }
-    deferred.resolve(menu);
+    deferred.resolve(data);
     return deferred.promise;
 }
 
@@ -314,99 +338,230 @@ function get_applicable_offer(data) {
     logger.log();
     var deferred = Q.defer();
 
-    var offers = data.outlet.offers;
-    var user = data.user;
+    var passed_data = data;
+    var user = passed_data.user;
     var date = new Date();
     var time = (parseInt(date.getHours())) +':'+(parseInt(date.getMinutes())+30);
     date = parseInt(date.getMonth())+1+ '-'+ date.getDate()+'-'+date.getFullYear();
-    for(var i = 0; i<offers.length; i++) {
-        var offer_cost = offers[i].offer_cost || 0;
-        
-        if(offers[i].offer_status === 'active' && new Date(offers[i].offer_end_date) > new Date()
-        && !(RecoHelper.isClosed(date, time, offers[i].actions.reward.reward_hours))
-        && data.user.twyst_bucks >= offer_cost && offers[i].offer_type === 'offer' || offers[i].offer_type === 'coupon'){
-            console.log('should be here')
-            if(offers[i].actions.reward.reward_meta.reward_type === 'free') {
-                checkOfferTyeFree(data, data.items, offers[i]);
+    var i, offer_cost = 0;
+    _.each(passed_data.outlet.offers, function(offer){
+        offer.is_applied = false;
+    })
+    passed_data.outlet.offers = _.map(data.outlet.offers, function(offer) {
+        offer_cost = offer.offer_cost || 0;
+        //console.log(offers[i].actions.reward.reward_meta.reward_type)
+        if(offer.offer_status === 'active' && new Date(offer.offer_end_date) > new Date()
+        && !(RecoHelper.isClosed(date, time, offer.actions.reward.reward_hours))
+        && data.user.twyst_bucks >= offer_cost && offer.offer_type === 'offer' || offer.offer_type === 'coupon'){
+            //console.log('should be here')
+            if(offer.actions.reward.reward_meta.reward_type === 'free') {
+                var updated_data = checkFreeItem(data, offer);
+                offer.is_applicable = updated_data.is_applicable;
+                offer.order_value = updated_data.order_value;
+                offer.free_item = updated_data.free_item;
+                return offer;
+                
             }
-            else if(offers[i].actions.reward.reward_meta.reward_type === 'bogo') {
-                checkOfferTypeBogo(data, data.items, offers[i]);
-            }
-            else if(offers[i].actions.reward.reward_meta.reward_type === 'discount') {
-                checkOfferTypePercentageOff(data, data.items, offers[i]);
-            }
-            else if(offers[i].actions.reward.reward_meta.reward_type === 'flatoff') {
-                checkOfferTypeFlatOff(data, data.items, offers[i]);
-            }
-        }
-    }
-    deferred.resolve(data);
-    return defer.promise;
-}
+            else if(offer.actions.reward.reward_meta.reward_type === 'bogo') {
+                var updated_data = checkOfferTypeBogo(data, offer);
 
-function checkOfferTyeFree(data, items, offer) {
-    logger.log();
-    var deferred = Q.defer();
-    console.log(items)
-    var passed_data = data;
-    var id = offer._id;
-    for(var i = 0; i < items.length; i++) {
-        if(offer.offer_items.category_id === items[i].category_id
-            && offer.offer_items.sub_category_id === items[i].sub_category_id
-            && offer.offer_items.option_id === items[i].item_id
-            && items[i].option_set_id && offer.offer_items.sub_option_id === items[i].option_set_id
-            && items[i].addon_id && offer.offer_items.sub_option_id.add_ons === items[i].addon_id){
-            _.each(data.outlet.offers, function(offer){
-                if(offer._id === id){
-                    console.log('new_offer')
-                    offer.is_applicable = true;
-                    item[i].is_free = true;
-                    deferred.resolve(data);
-                }
-            })        
+                offer.is_applicable = updated_data.is_applicable;
+                offer.order_value = updated_data.order_value;
+                    
+                return offer;
+                
+            }
+            else if(offer.actions.reward.reward_meta.reward_type === 'discount') {
+                var updated_data = checkOfferTypePercentageOff(data, offer);
+                offer.is_applicable = updated_data.is_applicable;
+                offer.order_value = updated_data.order_value;
+                console.log(offer)    
+                return offer;
+                
+            }
+            else if(offer.actions.reward.reward_meta.reward_type === 'flatoff') {
+                var updated_data = checkOfferTypeFlatOff(data, offer);
+                offer.is_applicable = updated_data.is_applicable;
+                offer.order_value = updated_data.order_value;
+                   
+                return offer;
+                
+            }
+            else {
+                return offer;
+            }
         }
-        else{
-            _.each(data.outlet.offers, function(offer){
-                if(offer._id === id){
-                    console.log('new_offer')
-                    offer.is_applicable = false;
-                    item[i].is_free = true;
-                    deferred.resolve(data);
-                }
-            })    
+        else{            
+            console.log('offer type alag ahai ' + offer.actions.reward.reward_meta.reward_type)
+            return offer;
         }
-    }   
-    console.log(data.outlet.offers);
+        
+    })
+    deferred.resolve(passed_data);
     return deferred.promise;
 }
 
-function checkOfferTypeBogo(token, items, offer) {
+function checkFreeItem(data, offer) {
     logger.log();
-    for(var i = 0; i<offers.length; i++) {
-        if(offers[i].actions.reward.reward_meta.type === 'Bogo') {
+    var deferred = Q.defer();
 
+    console.log('checking offer type free '+offer.actions.reward.reward_meta.reward_type)
+    var passed_data = data;
+    var offer_id = offer._id;
+    var items = passed_data.items;
+    var offers = passed_data.outlet.offers;
+    // if(offer.is_applied){
+
+    // }
+    // else {
+    //     return offer
+    // }
+    for(var i = 0; i < items.length; i++) {
+    
+        if(offer.offer_items && offer.offer_items.category_id === items[i].category_id
+            && offer.offer_items.sub_category_id === items[i].sub_category_id
+            && offer.offer_items.item_id === items[i].item_id
+            || offer.offer_items.option_id === items[i].option_id
+            || (items[i].sub_option_id && offer.offer_items.sub_option_id) === (items[i].sub_option_id)
+            || (items[i].addon_id && offer.offer_items.sub_option_id.add_ons) === items[i].addon_id){
+            
+            var order_value = calculate_order_value(passed_data, offer.offer_items.item_id)
+                
+            console.log('for free');
+            console.log(order_value);
+            console.log(offer.minimum_bill_value);
+            if(order_value >= offer.minimum_bill_value) {
+                console.log('offer applicable');
+                
+                    offer.is_applicable = true;
+                    offer.order_value = order_value;
+                    offer.free_item = items[i];
+                    return offer;
+                
+            }
+            else{
+                offer.is_applicable = false;
+                offer.order_value = order_value;                
+                console.log('offer not applicable');
+                return offer;
+            }        
+        }
+        else{
+            offer.is_applicable = false; 
+            console.log('offer not applicable');
+            return offer;
+        }
+    }   
+    
+}
+
+function checkOfferTypeBogo(data, offer) {
+    logger.log();
+    var deferred = Q.defer();
+    
+    console.log('checking offer type bogo')
+    var passed_data = data;
+    var offer_id = offer._id;
+    var items = passed_data.items;
+
+    for(var i = 0; i < items.length; i++) {
+        if(offer.offer_items.category_id === items[i].category_id
+            && offer.offer_items.sub_category_id === items[i].sub_category_id
+            && offer.offer_items.item_id === items[i].item_id
+            || offer.offer_items.option_id === items[i].option_id
+            || (items[i].sub_option_id && offer.offer_items.sub_option_id) === (items[i].sub_option_id)
+            || (items[i].addon_id && offer.offer_items.sub_option_id.add_ons) === items[i].addon_id){
+            
+            var order_value = calculate_order_value(passed_data, offer.offer_items.item_id)
+            console.log('for free');
+            console.log(order_value);
+            console.log(offer.minimum_bill_value);
+            if(order_value >= offer.minimum_bill_value) {
+                console.log('offer applicable');
+                
+                    offer.is_applicable = true;
+                    offer.order_value = order_value;
+                
+            }
+            else{
+                offer.is_applicable = false;
+                offer.order_value = order_value;
+                
+                console.log('offer not applicable');
+            }
+            
+            return offer;
+                    
+        }
+        else{
+            var order_value = calculate_order_value(passed_data, null)
+            offer.is_applicable = false;
+            offer.order_value = order_value; 
+            console.log('offer not applicable');
+            console.log(offer)
+            return offer;
         }
     }
 }
 
-function checkOfferTypeFlatOff(token, items, offer) {
+function checkOfferTypeFlatOff(data, offer) {
     logger.log();
-    for(var i = 0; i<offers.length; i++) {
-        if(offers[i].actions.reward.reward_meta.type === 'FlatOff') {
+    var deferred = Q.defer();
 
-        }
+    console.log('checking offer type flatoff')
+    var passed_data = data;
+    var id = offer._id;
+
+    var order_value = calculate_order_value(passed_data, null)
+                
+    console.log('for flat off');
+    console.log(order_value);
+    console.log(offer.minimum_bill_value);
+    if(order_value >= offer.minimum_bill_value) {
+        console.log('offer applicable');
+
+        order_value = order_value - offer.actions.reward.reward_meta.off;        
+        offer.is_applicable = true;
+        offer.order_value = order_value;
+    
     }
-
+    else{
+        offer.is_applicable = false;
+        offer.order_value = order_value;
+        
+        console.log('offer not applicable');
+    }
+    return offer;
 }
 
-function checkOfferTypePercentageOff(token, items, offer) {
+function checkOfferTypePercentageOff(data, offer) {
     logger.log();
-    for(var i = 0; i<offers.length; i++) {
-        if(offers[i].actions.reward.reward_meta.type === 'PercentageOff') {
+    var deferred = Q.defer();
 
-        }
+    console.log('checking offer type percentage off')
+    var passed_data = data;
+    var id = offer._id;
+
+    var order_value = calculate_order_value(passed_data, null)
+                
+    console.log('for percentage off');
+    console.log(order_value);
+    console.log(offer.minimum_bill_value);
+    if(order_value >= offer.minimum_bill_value) {
+        console.log('offer applicable');
+        console.log(offer.actions.reward.reward_meta.percent)
+        order_value = order_value - (order_value * offer.actions.reward.reward_meta.percent)/100;
+        offer.is_applicable = true;
+        offer.order_value = order_value;
+        
     }
-
+    else{
+        offer.is_applicable = false;
+        offer.order_value = order_value;
+        
+        console.log('offer not applicable');
+    }
+    return offer;
 }
 
 
