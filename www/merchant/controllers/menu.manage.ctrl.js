@@ -1,84 +1,94 @@
 angular.module('merchantApp')
-	.controller('MenuManageController', ['$scope', 'merchantRESTSvc', '$log', 'toastr', '$modal',
-		function($scope, merchantRESTSvc, $log, toastr, $modal) {
-			$scope.getMenus = function() {
-				merchantRESTSvc.getAllMenus().then(function(res) {
-					$scope.menus = res.data;
-					toastr.success("Menus loaded successfully");
-				}, function(err) {
-					$scope.menus = [];
-					if(err.message) {
-						toastr.error(err.message, "Error");
-					} else {
-						toastr.error("Something went wrong", "Error");
-					}
-				})
-			}
+    .controller('MenuManageController', ['$scope', 'merchantRESTSvc', 'SweetAlert', '$modal',
+        function($scope, merchantRESTSvc, SweetAlert, $modal) {
+            $scope.filters = {
+                title: '',
+                outlet_name: '',
+                locality1: '',
+                locality2: ''
+            };
 
-			$scope.deleteMenu = function(menu_id) {
-				if(confirm("Are you sure you want to delete?")) {
-					merchantRESTSvc.deleteMenu(menu_id).then(function(res) {
-						console.log(res);
-						$scope.getMenus();
-					}, function(err) {
-						console.log(err);
-					});
-				}
-			}
+            $scope.getMenus = function() {
+                merchantRESTSvc.getAllMenus().then(function(res) {
+                    $scope.menus = res.data;
+                }, function(err) {
+                    $scope.menus = [];
+                    var message;
+                    if (err.message) {
+                        message = err.message;
+                    } else {
+                        message = 'Something went wrong';
+                    }
+                    SweetAlert.swal({
+                        title: 'ERROR',
+                        text: message,
+                        type: 'error',
+                        showCancelButton: false,
+                        confirmButtonColor: "#DD6B55",
+                        confirmButtonText: "Continue",
+                        closeOnConfirm: true
+                    });
+                });
+            }
 
-			$scope.cloneMenu = function(index) {
-				var modalInstance = $modal.open({
-					animation: true,
-					templateUrl: 'cloneMenuTemplate.html',
-					controller: 'CloneMenuController',
-					size: 'lg',
-					resolve: {
-						menu: function() {
-							return $scope.menus[index]._id
-						}
-					}
-				});
+            $scope.menuFilter = function(menu) {
+                var titleFilter = new RegExp($scope.filters.title, 'i'),
+                    oNameFilter = new RegExp($scope.filters.outlet_name, 'i'),
+                    loc1Filter = new RegExp($scope.filters.locality1, 'i'),
+                    loc2Filter = new RegExp($scope.filters.locality2, 'i');
 
-				modalInstance.result.then(function() {
-					// console.info('Modal dismissed at: ' + new Date());
-					toastr.success('Menu cloned successfully');
-					$scope.getMenus();
-				}, function(err) {
-					console.info('Modal dismissed at: ' + new Date());
-					console.log(err);
-				})
-			}
+                return (titleFilter.test(menu.menu_type) && oNameFilter.test(menu.outlet.name) && loc1Filter.test(menu.outlet.loc1) && loc2Filter.test(menu.outlet.loc2));
+            };
 
-			
-		}
-	]).controller('CloneMenuController', function($scope, $modalInstance, menu, merchantRESTSvc, toastr) {
-		$scope.req_obj = {
-			menu: menu
-		}
+            $scope.cloneMenu = function(menu_id, outlet_id) {
+                var modalInstance = $modal.open({
+                    animation: true,
+                    templateUrl: 'templates/partials/menu.clone.tmpl.html',
+                    controller: 'MenuCloneController',
+                    size: 'lg',
+                    resolve: {
+                        menu_id: function() {
+                            return menu_id;
+                        },
+                        outlet_id: function() {
+                            return outlet_id;
+                        }
+                    }
+                });
 
-		merchantRESTSvc.getOutlets().then(function(data) {
-			console.log(data);
-			$scope.outlets = data.data.outlets;
-		}, function(err) {
-			console.log(err);
-		});
+                modalInstance.result.then(function() {
+                    $scope.getMenus();
+                });
+            };
 
-		$scope.cloneMenu = function() {
-			if (!$scope.req_obj.outlet) {
-				toastr.error('Please select an outlet first');
-			} else {
-				merchantRESTSvc.cloneMenu(menu, $scope.req_obj.outlet).then(function(data) {
-					$modalInstance.close();
-				}, function(err) {
-					$modalInstance.dismiss(err);
-				});
-			}
-			// console.log(menu, $scope.req_obj.outlet);
-			// merchantRESTSvc.clone(menu, $scope.req_obj.outlet).then(function(data) {
-			// 	modalInstance.close();
-			// }, function(err) {
-			// 	modalInstance.dismiss(err);
-			// })
-		}
-
-	})
+            $scope.removeMenu = function(menu_id) {
+                SweetAlert.swal({
+                    title: 'Are you sure?',
+                    text: 'You will not be able to recover this menu',
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: 'Yes, Delete It!',
+                    closeOnConfirm: false
+                }, function(confirm) {
+                    if (confirm) {
+                        merchantRESTSvc.deleteMenu(menu_id)
+                            .then(function(data) {
+                                SweetAlert.swal("SUCCESS", "Menu deleted successfully", "success");
+                                $scope.getMenus();
+                            }, function(err) {
+                                SweetAlert.swal({
+                                    title: 'ERROR',
+                                    text: 'Unable to delete this menu right now',
+                                    type: 'error',
+                                    showCancelButton: false,
+                                    confirmButtonColor: "#DD6B55",
+                                    confirmButtonText: 'Continue',
+                                    closeOnConfirm: true
+                                });
+                            });
+                    }
+                });
+            };
+        }
+    ])

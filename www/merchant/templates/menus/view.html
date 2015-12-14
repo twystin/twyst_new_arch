@@ -1,17 +1,18 @@
-<div class='col-xs-12 col-sm-10 col-sm-offset-1' style='min-height:100vh;padding-bottom:50px;'>
-    <div class='well well-lg'>
-        <form class='form-horizontal'>
-            <fieldset>
-                <legend>Menu Basics</legend>
-                <div class='form-group' ng-class='{"has-error": formFailure && !menu.menu_type}'>
-                    <label for='menu_type' class='col-md-2 control-label'>Menu Type <span class='glyphicon glyphicon-asterisk glyphicon-sm'>
-                    </span></label>
-                    <div class='col-md-8'>
-                        <input type='text' disabled ng-model='menu.menu_type' typeahead='mType for mType in menu_types | filter:$viewValue | limitTo: 8' class='form-control'>
+<div>&nbsp;</div>
+<div class='container'>
+    <div class='row'>
+        <div class='col-md-offset-2 col-md-8'>
+            <form class='form-horizontal'>
+                <legend>View Menu</legend>
+                <div class='form-group'>
+                    <label class='col-sm-2 control-label'>Menu Type <i class='fa fa-sm fa-asterisk'></i></label>
+                    <div class='col-sm-8'>
+                        <input type='text' ng-model='menu.menu_type' typeahead='mType for mType in menu_types | filter:$viewValue | limitTo: 8' class='form-control' disabled>
                     </div>
                 </div>
+                <div class='clearfix'></div>
                 <div class='form-group' ng-class='{"has-error": formFailure && !menu.outlet}'>
-                    <label for='outlet' class='col-md-2 control-label'>Outlet</label>
+                    <label for='outlet' class='col-md-2 control-label'>Outlet <i class='fa fa-sm fa-asterisk'></i></label>
                     <div class='col-md-8'>
                         <select ui-select ng-model='menu.outlet' data-placeholder='Choose an outlet' class='form-control' disabled>
                             <option value='' ng-if='!menu.outlet'>Choose an outlet</option>
@@ -19,70 +20,84 @@
                         </select>
                     </div>
                 </div>
-            </fieldset>
-        </form>
-    </div>
-    <div class='well well-lg'>
-        <h3>Menu Categories</h3>
-        <div class='container-fluid'>
-            <div class='col-sm-3'>
-                <div class='row'>
-                    <div class='col-sm-12'>
-                        <ul class='list-group'>
-                            <a type='button' class='list-group-item' ng-class='{active: $index===current_category}'} ng-repeat='menu_category in menu.menu_categories' ng-click='showCategory($index)'>{{menu_category.category_name}}
-                                <i class='fa fa-chevron-right pull-right'></i></a>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class='col-sm-6'>
-                <div class='row'>
-                    <div class='col-xs-12' ng-repeat='menu_category in menu.menu_categories' ng-if='current_category === $index'>
-                        <div class='col-xs-12'>
-                            <legend>{{menu_category.category_name}}</legend>
-                        </div>
-                        <div class='panel panel-default' ng-repeat='sub_category in menu_category.sub_categories'>
-                            <div class='panel-heading'>
-                                <h3><span ng-if='menu_category.sub_categories.length!==1'>{{sub_category.sub_category_name}}</span></h3>
+                <div class='clearfix'></div>
+                <div ui-tree>
+                    <ol ui-tree-nodes ng-model='menu.menu_categories'>
+                        <li ng-repeat='category in menu.menu_categories track by $index' ui-tree-node>
+                            <div ui-tree-handle class='tree-node tree-node-content'>
+                                <a class='btn btn-dark btn-xs' ng-if='category.sub_categories.length' data-nodrag ng-click='toggle(this)'>
+                                    <span class='fa' ng-class='{"fa-chevron-right": collapsed, "fa-chevron-down": !collapsed}'></span>
+                                </a>
+                                {{category.category_name}} [Category]
                             </div>
-                            <div class='panel-body'>
-                                <div class='col-xs-12'>
-                                    <div class='row'>
-                                        <div class='alert alert-warning' ng-if='sub_category.items.length===0'>No items added yet</div>
-                                        <ul class='list-group'>
-                                            <li class='list-group-item' ng-repeat='item in sub_category.items' ng-click='showItem(item)' style='cursor:pointer;'>
-                                                <h4 class='list-group-item-heading'>{{item.item_name}}</h4>
-                                                <p class='list-group-item-text'>Base Cost: <i class='fa fa-inr'></i>{{item.item_cost}}.</p>
-                                            </li>
-                                        </ul>
+                            <ol ui-tree-nodes ng-model='category.sub_categories' ng-class="{hidden: collapsed}">
+                                <li ng-repeat='sub_category in category.sub_categories track by $index' ui-tree-node>
+                                    <div ui-tree-handle class='tree-node tree-node-content' ng-if='category.sub_categories.length!==1'>
+                                        <a class='btn btn-dark btn-xs' ng-if='sub_category.items.length' data-nodrag ng-click='toggle(this)'>
+                                            <span class='fa' ng-class='{"fa-chevron-right": collapsed, "fa-chevron-down": !collapsed}'></span>
+                                        </a>
+                                        {{sub_category.sub_category_name}} [Sub Category]
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                                    <ol ui-tree-nodes ng-model='sub_category.items' ng-class="{hidden: collapsed}">
+                                        <li ng-repeat='item in sub_category.items track by $index' ui-tree-node>
+                                            <div ui-tree-handle class='tree-node tree-node-content'>
+                                                <a class='btn btn-dark btn-xs' ng-if='item.options.length' data-nodrag ng-click='toggle(this)'>
+                                                    <span class='fa' ng-class='{"fa-chevron-right": collapsed, "fa-chevron-down": !collapsed}'></span>
+                                                </a>
+                                                {{item.item_name}} <i class='fa fa-inr'></i>{{item.item_cost}} [Item]
+                                            </div>
+                                            <ol ui-tree-nodes ng-model='item.options' ng-class="{hidden: collapsed}">
+                                                <li ng-repeat='option in item.options track by $index' ui-tree-node>
+                                                    <div ui-tree-handle class='tree-node tree-node-content'>
+                                                        <a class='btn btn-dark btn-xs' ng-if='option.sub_options.length || option.addons.length' data-nodrag ng-click='toggle(this)'>
+                                                            <span class='fa' ng-class='{"fa-chevron-right": collapsed, "fa-chevron-down": !collapsed}'></span>
+                                                        </a>
+                                                        {{item.option_title}} - {{option.option_value}} <i class='fa fa-inr'></i>{{option.option_cost}}
+                                                    </div>
+                                                    <ol ui-tree-nodes ng-model='option.sub_options' ng-class="{hidden: collapsed}" style='margin-top:20px;'>
+                                                        <li ng-repeat='sub_option in option.sub_options track by $index' ui-tree-node>
+                                                            <div ui-tree-handle class='tree-node tree-node-content'>
+                                                                <a class='btn btn-dark btn-xs' ng-if='sub_option.sub_option_set.length' data-nodrag ng-click='toggle(this)'>
+                                                                    <span class='fa' ng-class='{"fa-chevron-right": collapsed, "fa-chevron-down": !collapsed}'></span>
+                                                                </a>
+                                                                {{sub_option.sub_option_title}} [Sub Options]
+                                                            </div>
+                                                            <ol ui-tree-nodes ng-model='sub_option.sub_option_set' ng-class='{hidden: collapsed}'>
+                                                                <li ng-repeat='sub_option_obj in sub_option.sub_option_set track by $index' ui-tree-node>
+                                                                    <div ui-tree-handle class='tree-node tree-node-content'>
+                                                                        {{sub_option_obj.sub_option_value}} <i class='fa fa-inr'></i>{{sub_option_obj.sub_option_cost}}
+                                                                    </div>
+                                                                </li>
+                                                            </ol>
+                                                        </li>
+                                                    </ol>
+                                                    <ol ui-tree-nodes ng-model='option.addons' ng-class="{hidden: collapsed}" style='margin-top:20px;'>
+                                                        <li ng-repeat='addon in option.addons track by $index' ui-tree-node>
+                                                            <div ui-tree-handle class='tree-node tree-node-content'>
+                                                                <a class='btn btn-dark btn-xs' ng-if='addon.addon_set.length' data-nodrag ng-click='toggle(this)'>
+                                                                    <span class='fa' ng-class='{"fa-chevron-right": collapsed, "fa-chevron-down": !collapsed}'></span>
+                                                                </a>
+                                                                {{addon.addon_title}} [Addons]
+                                                            </div>
+                                                            <ol ui-tree-nodes ng-model='addon.addon_set' ng-class='{hidden: collapsed}'>
+                                                                <li ng-repeat='addon_obj in addon.addon_set track by $index' ui-tree-node>
+                                                                    <div ui-tree-handle class='tree-node tree-node-content'>
+                                                                        {{addon_obj.addon_value}} <i class='fa fa-inr'></i>{{addon_obj.addon_cost}}
+                                                                    </div>
+                                                                </li>
+                                                            </ol>
+                                                        </li>
+                                                    </ol>
+                                                </li>
+                                            </ol>
+                                        </li>
+                                    </ol>
+                                </li>
+                            </ol>
+                        </li>
+                    </ol>
                 </div>
-            </div>
-            <div class='col-sm-3'>
-                <div class='row'>
-                    <div class='panel panel-primary' ng-if='visible_item.item_name'>
-                        <div class='panel-heading'>
-                            {{visible_item.item_name}} <i class='fa fa-inr'></i>{{visible_item.item_cost}}
-                        </div>
-                        <div class='panel-body'>
-                            <label>{{visible_item.option_title}}</label>
-                            <div ng-repeat='option in visible_item.options'>#{{$index + 1}}. {{option.option_value}} <i class='fa fa-inr'></i>{{option.option_cost}}
-                                <div class='col-xs-12'>
-                                    <div ng-repeat='sub_option in option.sub_options'>Sub Variance Group: {{sub_option.sub_option_title}}
-                                        <div ng-repeat='sub_option_obj in sub_option.sub_option_set'>
-                                            <p>{{sub_option_obj.sub_option_value}} <i class='fa fa-inr'></i>{{sub_option_obj.sub_option_cost}}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 </div>
