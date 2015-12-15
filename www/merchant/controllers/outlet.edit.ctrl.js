@@ -546,6 +546,7 @@ angular.module('merchantApp')
                     $scope.formFailure = false;
                     deferred.resolve(true);
                 }
+                return deferred.promise;
             };
 
         }

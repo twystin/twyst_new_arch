@@ -539,7 +539,7 @@ angular.module('merchantApp')
                 } else if ((!_.get($scope.outlet, 'attributes.cost_for_two.min') || !_.get($scope.outlet, 'attributes.cost_for_two.max')) && $rootScope.isPaying) {
                     $scope.showErrorMessage('Please provide both minimum and maximum "Cost for Two"');
                     deferred.reject();
-                } else if ($scope.outlet.attributes.home_delivery && $rootScope.isPaying && (!_.get($scope.outlet, 'attributes.delivery.delivery_estimate_time') || !/^[0-9]{1,3}$/i.test($scope.outlet.attributes.delivery.delivery_estimated_time))) {
+                } else if ($scope.outlet.attributes.home_delivery && $rootScope.isPaying && (!_.get($scope.outlet, 'attributes.delivery.delivery_estimated_time') || !/^[0-9]{1,3}$/i.test($scope.outlet.attributes.delivery.delivery_estimated_time))) {
                     $scope.showErrorMessage('Valid estimate delivery time required');
                     deferred.reject();
                 } else if (!$scope.outlet.attributes.dine_in && !$scope.outlet.attributes.home_delivery && $rootScope.isPaying) {
@@ -548,7 +548,7 @@ angular.module('merchantApp')
                 } else if (!$scope.outlet.attributes.cuisines.length && $rootScope.isPaying) {
                     $scope.showErrorMessage('Atleast one cuisine must be specified');
                     deferred.reject();
-                } else if (!$scope.outlet.sms_off.value) {
+                } else if ($scope.outlet.sms_off.value) {
                     if ((!$scope.outlet.sms_off.time.start.hr && $scope.outlet.sms_off.time.start.hr !== 0) || (!$scope.outlet.sms_off.time.start.min && $scope.outlet.sms_off.time.start.min !== 0)) {
                         $scope.showErrorMessage("SMS OFF start time invalid");
                         deferred.reject();
@@ -576,7 +576,7 @@ angular.module('merchantApp')
             };
 
             $scope.validateStep3 = function() {
-                var deferred = Q.defer();
+                var deferred = $q.defer();
                 async.each(Object.keys($scope.outlet.business_hours), function(day, callback) {
                     var schedule = $scope.outlet.business_hours[day];
                     if (schedule.closed) {
@@ -626,11 +626,11 @@ angular.module('merchantApp')
             };
 
             $scope.validateStep4 = function() {
-                var deferred = Q.defer();
-                if ((!_.has($scope.outlet, 'photos.logo') || !$scope.outlet.photos.logo) && $scope.isPaying) {
+                var deferred = $q.defer();
+                if (!_.get($scope.outlet, 'photos.logo')) {
                     $scope.showErrorMessage('Logo is mandatory');
                     deferred.reject();
-                } else if ((!_.has($scope.outlet, 'photos.background') || !$scope.outlet.photos.background) && $scope.isPaying) {
+                } else if (!_.get($scope.outlet, 'photos.background')) {
                     $scope.showErrorMessage('Background image is mandatory');
                     deferred.reject();
                 } else {
@@ -638,6 +638,7 @@ angular.module('merchantApp')
                     $scope.formFailure = false;
                     deferred.resolve(true);
                 }
+                return deferred.promise;
             };
 
         }

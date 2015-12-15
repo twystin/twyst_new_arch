@@ -8,8 +8,7 @@ angular.module('merchantApp')
 				link: function(scope, element, attributes, ngModel) {
 					var fileElement = $(angular.element('<input id="fileInput" type="file" />')),
 						imgElement = element.find('img')[0];
-					console.log(fileElement, imgElement.onclick);
-					console.log(element);
+					
 					fileElement.on('change', function(changeEvent) {
 						var file = changeEvent.target.files[0];
 						var regex = /^image\//i;
@@ -46,7 +45,6 @@ angular.module('merchantApp')
 						}
 					});
 					element.bind('click', function() {
-						console.log(1);
 						fileElement.trigger('click');
 					})
 					element.css('cursor', 'pointer');

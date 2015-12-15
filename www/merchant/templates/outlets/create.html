@@ -1,5 +1,5 @@
 <div>&nbsp;</div>
-<div class='container'>
+<div class='container-fluid'>
     <div class='row'>
         <div class='col-md-12'>
             <section class='panel panel-default'>
@@ -24,7 +24,7 @@
                                         <label class='col-md-2 control-label'>
                                             Address <i class='fa fa-sm fa-asterisk'></i>
                                         </label>
-                                        <div class='col-md-6'>
+                                        <div class='col-md-6' ng-class='{"has-error": formFailure && !outlet.contact.location.address}'>
                                             <textarea class='form-control' rows='4' ng-model='outlet.contact.location.address'></textarea>
                                             <span class='help-block'>Provide the complete outlet address</span>
                                         </div>
@@ -69,10 +69,19 @@
                                             Mark Location <i class='fa fa-sm fa-asterisk'></i>
                                         </label>
                                         <div class='col-md-10'>
-                                            <ui-gmap-google-map center='map.center' zoom='map.zoom' draggable='true' options='options' events='mapEvents'>
+                                            <ui-gmap-google-map center='map.center' zoom='map.zoom' draggable='true' options='mapOptions' events='mapEvents'>
                                                 <ui-gmap-marker coords="marker.coords" options="marker.options" events="marker.events" idkey="marker.id">
                                                 </ui-gmap-marker>
+                                                <!-- <ui-gmap-free-draw-polygons polygons='map.polys' draw='map.draw'>
+                                                </ui-gmap-free-draw-polygons> -->
                                             </ui-gmap-google-map>
+                                            <!-- <ui-gmap-google-map center='map2.center' zoom='map2.zoom' draggable='true' options='options' events=''>
+                                                <ui-gmap-free-draw-polygons polygons='map2.polys' draw='map2.draw'>
+                                                </ui-gmap-free-draw-polygons>
+                                            </ui-gmap-google-map>
+                                            <a class='btn btn-w-sm btn-gap-v btn-default' ng-if='!map2.polys.length' ng-click='map_draw()'>Draw</a>
+                                            <a class='btn btn-w-sm btn-gap-v btn-primary' ng-if='map2.polys.length'>Confirm</a>
+                                            <a class='btn btn-w-sm btn-gap-v btn-danger' ng-if='map2.polys.length' ng-click='clear()'>Discard</a> -->
                                             <div class='form-group'>
                                                 <div class='col-xs-12'>
                                                     <label class='control-label'>Set location manually below</label>
@@ -175,7 +184,7 @@
                                         <label class='col-md-2 control-label'>
                                             Email <i class='fa fa-sm fa-asterisk'></i>
                                         </label>
-                                        <div class='col-md-6'>
+                                        <div class='col-md-6' ng-class='{"has-error": formFailure && !outlet.contact.emails.email}'>
                                             <input type='email' class='form-control' ng-model='outlet.contact.emails.email'>
                                         </div>
                                     </div>
@@ -216,7 +225,7 @@
                                         </label>
                                         <div class='col-md-6' ng-class='{"has-error": formFailure && !outlet.basics.main_type}'>
                                             <select class='form-control' ng-model='outlet.basics.main_type'>
-                                            <option value='' ng-if='!outlet.basics.main_type'>Choose an outlet Type</option>
+                                                <option value='' ng-if='!outlet.basics.main_type'>Choose an outlet Type</option>
                                                 <option value='{{outlet_type.value}}' ng-repeat='outlet_type in outlet_types'>{{outlet_type.name}}</option>
                                             </select>
                                         </div>
@@ -297,6 +306,12 @@
                                                 <input type='text' class='form-control text-right' ng-model='outlet.attributes.delivery.delivery_estimated_time' placeholder='Eg. 30, 40, 45, 60...'>
                                                 <div class='input-group-addon'> minutes</div>
                                             </div>
+                                        </div>
+                                    </div>
+                                    <div class='form-group' ng-if='outlet.attributes.home_delivery'>
+                                        <label class='col-md-3 control-label'>Delivery Zone <i class='fa fa-sm fa-asterisk'></i></label>
+                                        <div class='col-md-9'>
+                                            
                                         </div>
                                     </div>
                                     <div class='form-group'>
@@ -424,7 +439,7 @@
                             <button type='button' class='btn btn-w-sm btn-gap-v btn-direction btn-left btn-danger' wz-previous>Prev</button>
                             <button type="button" class="btn btn-w-sm btn-gap-v btn-direction btn-right btn-primary" wz-next>Next</button>
                         </wz-step>
-                        <wz-step title='Photos' canexit='validateStep2'>
+                        <wz-step title='Photos' canexit='validateStep4'>
                             <div class='well well-lg'>
                                 <form class='form-horizontal' role='form'>
                                     <legend>Photos</legend>
@@ -461,12 +476,12 @@
                                         </p>
                                         <h4>Outlet Numbers</h4>
                                         <span class='label label-default' ng-repeat='number in outlet.contact.phones.mobile'>
-											<i class='fa fa-phone'></i> {{number.num}}
-										</span>
+                                            <i class='fa fa-phone'></i> {{number.num}}
+                                        </span>
                                         <h4>Registered Number</h4>
                                         <span class='label labe-default' ng-repeat='number in outlet.contact.phones.reg_mobile'>
-											<i class='fa fa-phone'></i> {{number.num}}
-										</span>
+                                            <i class='fa fa-phone'></i> {{number.num}}
+                                        </span>
                                     </div>
                                     <div class='col-md-6'>
                                         <ui-gmap-google-map center='map.center' zoom='map.zoom' draggable='true' options='options' events='mapEvents'>
@@ -491,9 +506,9 @@
                                         <span class='label label-warning' ng-if='!outlet.attributes.alcohol'>Do Not Serve</span>
                                         <span class='label label-primary' ng-if='outlet.attributes.alcohol'>Serves</span>
                                         <h4>Cost for two: 
-											From: <span class='label label-primary'>Rs.{{outlet.attributes.cost_for_two.min}}</span> 
-											To:   <span class='label label-primary'>Rs.{{outlet.attributes.cost_for_two.max}}</span>
-										</h4>
+                                            From: <span class='label label-primary'>Rs.{{outlet.attributes.cost_for_two.min}}</span> 
+                                            To:   <span class='label label-primary'>Rs.{{outlet.attributes.cost_for_two.max}}</span>
+                                        </h4>
                                     </div>
                                     <div class='col-md-6'>
                                         <h4>Cuisines</h4>

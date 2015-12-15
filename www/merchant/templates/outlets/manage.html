@@ -1,131 +1,130 @@
 <div>&nbsp;</div>
-<div class='container' ng-init='getOutlets()'>
-	<div class='row'>
-		<div class='col-sm-12 table-responsive' style='min-height:100vh;'>
-			<div class='table-label'>
-				<legend>Outlets</legend>
-			</div>
-			<div class='table-container'>
-				<form accept-charset="utf-8">
-					<div class='header-tools'>
-						<div class='pull-left t5'>
-							<a class='btn btn-default' ui-sref='^.outlets_create'>
-								<i class='fa fa-plus'></i> &nbsp; Add Outlet
-							</a>
-						</div>
-						<div class='pull-right t5'>
-
-						</div>
-					</div>
-					<div class='clearfix'>&nbsp;</div>
-					<table class='table table-bordered table-hover' >
-						<thead>
-							<tr>
-								<th colspan="2">
-									Actions
-								</th>
-								<th>Outlet Name</th>
-								<th>Locality 1</th>
-								<th>Locality 2</th>
-								<th>City</th>
-							</tr>
-							<tr>
-								<td style='border-right: none;'>
-									<div class='pull-left t5'>
-										<input type='checkbox'>
-									</div>
-								</td>
-								<td style='border-left: none;'>
-									<div class='pull-right'>
-										<a class='btn btn-default' ng-click='getOutlets()'>
-											<i class='fa fa-refresh'></i>
-										</a>
-									</div>
-									<div class='clear'></div>
-								</td>
-								<td>
-									<input type='text' class='form-control pull-left' ng-model='filters.name' placeholder='Search Name' name='outletName'>
-								</td>
-								<td>
-									<input type='text' class='form-control pull-left' ng-model='filters.locality1' placeholder='Search Locality 1' name='locality1Name'>
-								</td>
-								<td>
-									<input type='text' class='form-control pull-left' ng-model='filters.locality2' placeholder='Search Locality \2' name='locality2Name'>
-								</td>
-								<td>
-									<input type='text' class='form-control pull-left' ng-model='filters.city' placeholder='Search City' name='cityName'>
-								</td>
-							</tr>
-						</thead>
-						<tbody>
-							<tr ng-repeat='outlet in outlets | filter:outletFilter'>
-								<td>
-									<input type='checkbox'>
-								</td>
-								<td>
-									<div class='hidden-xs'>
-										<a class='btn btn-default' ui-sref='^.outlets_edit({outlet_id: outlet._id})'>
-											<i class='fa fa-pencil'></i> Edit 
-										</a>
-										<div class='btn-group dropdown'>
-											<button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown'>
-												More
-												<span class='caret'></span>
-											</button>
-											<ul class='dropdown-menu'>
-												<li>
-													<a ui-sref='^.outlets_view({outlet_id: outlet._id})'>
-														<i class='fa fa-eye'></i> View
-													</a>
-												</li>
-												<li>
-													<a ng-click='removeOutlet(outlet._id)'>
-														<i class='fa fa-trash-o text-danger'></i>
-														<span class="text-danger">Delete</span>
-													</a>
-												</li>
-											</ul>
-										</div>
-									</div>
-									<div class='visible-xs'>
-										<div class='btn-group dropdown'>
-											<button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown'>
-												More
-												<span class='caret'></span>
-											</button>
-											<ul class='dropdown-menu'>
-												<li>
-													<a ui-sref='^.outlets_edit({outlet_id: outlet._id})'>
-														<i class='fa fa-pencil'></i> Edit 
-													</a>
-												</li>
-												<li>
-													<a ui-sref='^.outlets_view({outlet_id: outlet._id})'>
-														<i class='fa fa-eye'></i> View
-													</a>
-												</li>
-												<li>
-													<a ng-click='removeOutlet(outlet._id)'>
-														<i class='fa fa-trash-o text-danger'></i>
-														<span class="text-danger">Delete</span>
-													</a>
-												</li>
-											</ul>
-										</div>
-									</div>
-								</td>
-								<td>{{outlet.basics.name}}</td>
-								<td>{{outlet.contact.location.locality_1[0]}}</td>
-								<td>{{outlet.contact.location.locality_2[0]}}</td>
-								<td>{{outlet.contact.location.city}}</td>
-							</tr>
-						</tbody>
-					</table>
-				</form>
-			</div>
-		</div>
-	</div>
-	<!-- <div ng-show='outlets.length'>
+<div class='container-fluid' ng-init='getOutlets()'>
+    <div class='row'>
+        <div class='col-sm-12 table-responsive' style='min-height:100vh;'>
+            <div class='table-label'>
+                <legend>Outlets</legend>
+            </div>
+            <div class='table-container'>
+                <form accept-charset="utf-8">
+                    <div class='header-tools'>
+                        <div class='pull-left t5'>
+                            <a class='btn btn-default' ui-sref='^.outlets_create'>
+                                <i class='fa fa-plus'></i> &nbsp; Add Outlet
+                            </a>
+                        </div>
+                        <div class='pull-right t5'>
+                        </div>
+                    </div>
+                    <div class='clearfix'>&nbsp;</div>
+                    <table class='table table-bordered table-hover'>
+                        <thead>
+                            <tr>
+                                <th colspan="2">
+                                    Actions
+                                </th>
+                                <th>Outlet Name</th>
+                                <th>Locality 1</th>
+                                <th>Locality 2</th>
+                                <th>City</th>
+                            </tr>
+                            <tr>
+                                <td style='border-right: none;'>
+                                    <div class='pull-left t5'>
+                                        <input type='checkbox'>
+                                    </div>
+                                </td>
+                                <td style='border-left: none;'>
+                                    <div class='pull-right'>
+                                        <a class='btn btn-default' ng-click='getOutlets()'>
+                                            <i class='fa fa-refresh'></i>
+                                        </a>
+                                    </div>
+                                    <div class='clear'></div>
+                                </td>
+                                <td>
+                                    <input type='text' class='form-control pull-left' ng-model='filters.name' placeholder='Search Name' name='outletName'>
+                                </td>
+                                <td>
+                                    <input type='text' class='form-control pull-left' ng-model='filters.locality1' placeholder='Search Locality 1' name='locality1Name'>
+                                </td>
+                                <td>
+                                    <input type='text' class='form-control pull-left' ng-model='filters.locality2' placeholder='Search Locality \2' name='locality2Name'>
+                                </td>
+                                <td>
+                                    <input type='text' class='form-control pull-left' ng-model='filters.city' placeholder='Search City' name='cityName'>
+                                </td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat='outlet in outlets | filter:outletFilter'>
+                                <td>
+                                    <input type='checkbox'>
+                                </td>
+                                <td>
+                                    <div class='hidden-xs'>
+                                        <a class='btn btn-default' ui-sref='^.outlets_edit({outlet_id: outlet._id})'>
+                                            <i class='fa fa-pencil'></i> Edit
+                                        </a>
+                                        <div class='btn-group dropdown'>
+                                            <button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown'>
+                                                More
+                                                <span class='caret'></span>
+                                            </button>
+                                            <ul class='dropdown-menu'>
+                                                <li>
+                                                    <a ui-sref='^.outlets_view({outlet_id: outlet._id})'>
+                                                        <i class='fa fa-eye'></i> View
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a ng-click='removeOutlet(outlet._id)'>
+                                                        <i class='fa fa-trash-o text-danger'></i>
+                                                        <span class="text-danger">Delete</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class='visible-xs'>
+                                        <div class='btn-group dropdown'>
+                                            <button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown'>
+                                                More
+                                                <span class='caret'></span>
+                                            </button>
+                                            <ul class='dropdown-menu'>
+                                                <li>
+                                                    <a ui-sref='^.outlets_edit({outlet_id: outlet._id})'>
+                                                        <i class='fa fa-pencil'></i> Edit
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a ui-sref='^.outlets_view({outlet_id: outlet._id})'>
+                                                        <i class='fa fa-eye'></i> View
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a ng-click='removeOutlet(outlet._id)'>
+                                                        <i class='fa fa-trash-o text-danger'></i>
+                                                        <span class="text-danger">Delete</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{outlet.basics.name}}</td>
+                                <td>{{outlet.contact.location.locality_1[0]}}</td>
+                                <td>{{outlet.contact.location.locality_2[0]}}</td>
+                                <td>{{outlet.contact.location.city}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- <div ng-show='outlets.length'>
 		<div class='well'>
 			<p>You have created {{outlets.length}} outlets.</p>
 			<button class='btn btn-w-md btn-gap-v btn-round btn-primary' ui-sref='merchant.create_outlet'>Create more Outlets!</button>
