@@ -1,0 +1,57 @@
+<div class='modal-header'>
+    <legend ng-if='is_new'>Add New Item</legend>
+    <legend ng-if='!is_new'>Update Item</legend>
+</div>
+<div class='modal-body'>
+    <form class='form-horizontal' role='form'>
+        <div class='form-group'>
+            <label class='col-sm-2 control-label'>Item Name <i class='fa fa-sm fa-asterisk'></i></label>
+            <div class='col-sm-5'>
+                <input type='text' ng-model='item.item_name' class='form-control' placeholer='Item Name' autofocus>
+            </div>
+            <label class='col-sm-2 control-label'>Item Cost <i class='fa fa-sm fa-asterisk'></i></label>
+            <div class='col-sm-3'>
+                <div class='input-group'>
+                    <span class='input-group-addon'><i class='fa fa-inr'></i></span>
+                    <input type='number' ng-model='item.item_cost' class='form-control'>
+                </div>
+            </div>
+        </div>
+        <div class='form-group'>
+            <label class='col-sm-2 control-label'>Item Description</label>
+            <div class='col-sm-5'>
+                <textarea ng-model='item.item_description' rows='4' placeholder='Item description here...' class='form-control'></textarea>
+            </div>
+            <label class='col-sm-2 control-label'>Item Tags <i class='fa fa-sm fa-asterisk'></i></label>
+            <div class='col-sm-3'>
+                <input type='text' ng-list ng-model='item.item_tags' class='form-control'>
+            </div>
+        </div>
+        <div class='form-group'>
+            <label class='col-sm-2 control-label'>Item Photo </label>
+            <div class='col-sm-6'>
+                <imagereader ng-image-class='menu' ng-image-for='item' ng-model='item.item_photo'>
+            </div>
+            <div class='col-sm-4 text-center'>
+                <input bs-switch ng-model='item.is_vegetarian' type='checkbox' switch-off-color='danger' switch-on-color='success' switch-on-text='Veg' switch-off-text='Non-Veg'>
+                <p>&nbsp;</p>
+                <input bs-switch ng-model='item.item_availability.regular_item' type='checkbox' switch-off-text='Seasonal' switch-on-text='Regular'>
+            </div>
+        </div>
+        <div class='form-group'>
+            <label class='col-sm-2 control-label'>Option Title</label>
+            <div class='col-sm-4'>
+                <input type='text' ng-model='item.option_title' class='form-control'>
+            </div>
+            <label class='col-sm-3 control-label'>Prices are Additive?</label>
+            <div class='col-sm-3'>
+                <input bs-switch ng-model='item.option_is_addon' type='checkbox' switch-off-text='NO' , switch-on-text='YES'>
+            </div>
+        </div>
+    </form>
+</div>
+<div class='modal-footer'>
+    <button type='button' class='btn btn-w-md btn-gap-v btn-primary' ng-click='resolveItem()' ng-if='is_new'><i class='fa fa-plus'></i> Add</button>
+    <button type='button' class='btn btn-w-md btn-gap-v btn-primary' ng-click='resolveItem()' ng-if='!is_new'> Update </button>
+    <button type='button' class='btn btn-w-md btn-gap-v btn-warning' ng-click='discardItem()'> Discard</button>
+</div>

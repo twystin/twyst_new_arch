@@ -1,0 +1,75 @@
+<div>&nbsp;</div>
+<div class='container-fluid'>
+    <div class='row'>
+        <div class='col-sm-12'>
+            <section class='panel panel-default'>
+                <div class='panel-heading'>
+                    <legend>Accept/Reject Bill</legend>
+                </div>
+                <div class='panel-body'>
+                    <div class='row'>
+                        <div class='col-sm-6'>
+                            <img ng-src='{{bill.event_meta.photo}}' style='max-width:100%;height:auto;'>
+                        </div>
+                        <div class='col-sm-6'>
+                            <div class='row'>
+                                <div>
+                                    <div class='col-sm-6'>Upload Date: </div>
+                                    <label class='col-sm-6 text-right'>{{bill.event_date | date: 'MMM dd, yyyy'}}</label>
+                                </div>
+                                <div>
+                                    <div class='col-sm-6'>User ID: </div>
+                                    <label class='col-sm-6 text-right'>{{bill.event_user}}</label>
+                                </div>
+                                <div>
+                                    <div class='col-sm-6'>User Phone: </div>
+                                    <label class='col-sm-6 text-right'>{{bill.event_meta.phone}}</label>
+                                </div>
+                                <div>
+                                    <div class='col-sm-6'>User Email: </div>
+                                    <label class='col-sm-6 text-right'>{{bill.event_meta.email}}</label>
+                                </div>
+                                <p>&nbsp;</p>
+                                <div>
+                                    <div class='col-sm-6'>Outlet: </div>
+                                    <label class='col-sm-6 text-right control-label'>{{bill.event_meta.outlet_name}}</label>
+                                </div>
+                                <div>
+                                    <div class='col-sm-6'>Location: </div>
+                                    <label class='col-sm-6 text-right control-label'>{{bill.event_meta.outlet_location}}</label>
+                                </div>
+                                <div>
+                                    <div class='col-sm-6'>Bill No: </div>
+                                    <label class='col-sm-6 text-right control-label'>{{Bill.event_meta.bill_number}}</label>
+                                </div>
+                                <div>
+                                    <div class='col-sm-6'>Bill Date: </div>
+                                    <label class='col-sm-6 text-right control-label'>{{bill.event_meta.timestamp| date: 'MMM dd, yyyy'}}</label>
+                                </div>
+                                <div>
+                                    <div class='col-sm-6'>Bill Time: </div>
+                                    <label class='col-sm-6 text-right control-label'>{{bill.event_meta.timestamp| date: 'hh:mm a'}}</label>
+                                </div>
+                                <div>
+                                    <div class='col-sm-6'>Bill Amount</div>
+                                    <label class='col-sm-6 text-right control-label'>{{bill.event_meta.bill_amount}}</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='row' ng-if='bill.event_meta.status==="outlet_pending"'>
+                        <div class='col-sm-12'>
+                            <br>
+                        </div>
+                        <div class='col-sm-6'>
+                            <button class='btn btn-w-sm btn-gap-v btn-lg btn-block btn-primary' ng-click='approveBill()'>Approve</button>
+                        </div>
+                        <div class='col-sm-6'>
+                            <button class='btn btn-w-sm btn-gap-v btn-lg btn-block btn-primary' ng-click='rejectBill()'>Reject</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
