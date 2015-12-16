@@ -1,138 +1,137 @@
 <div>&nbsp;</div>
-<div class='container' ng-init='getMenus()'>
-	<div class='row'>
-		<div class='col-sm-12 table-responsive' style='min-height:100vh;'>
-			<div class='table-label'>
-				<legend>Menus</legend>
-			</div>
-			<div class='table-container'>
-				<form accept-charset="utf-8">
-					<div class='header-tools'>
-						<div class='pull-left t5'>
-							<a class='btn btn-default' ui-sref='^.menus_create'>
-								<i class='fa fa-plus'></i> &nbsp; Add Menu
-							</a>
-						</div>
-						<div class='pull-right t5'>
-
-						</div>
-					</div>
-					<div class='clearfix'>&nbsp;</div>
-					<table class='table table-bordered table-hover' >
-						<thead>
-							<tr>
-								<th colspan="2">Actions</th>
-								<th>Menu Title</th>
-								<th>Outlet Name</th>
-								<th>Locality 1</th>
-								<th>Locality 2</th>
-							</tr>
-							<tr>
-								<td style='border-right: none;'>
-									<div class='pull-left'>
-										<input type='checkbox'>
-									</div>
-								</td>
-								<td style='border-left: none;'>
-									<div class='pull-right'>
-										<a class='btn btn-default' ng-click='getMenus()'>
-											<i class='fa fa-refresh'></i>
-										</a>
-									</div>
-									<div class='clear'></div>
-								</td>
-								<td>
-									<input type='text' class='form-control pull-left' ng-model='filters.title' placeholder='Search Title' name='searchTitle'>
-								</td>
-								<td>
-									<input type='text' class='form-control pull-left' ng-model='filters.outlet_name' placeholder='Search Outlet Name' name='outletName'>
-								</td>
-								<td>
-									<input type='text' class='form-control pull-left' ng-model='filters.locality1' placeholder='Search locality 1' name='locality1Name'>
-								</td>
-								<td>
-									<input type='text' class='form-control pull-left' ng-model='filters.locality2' placeholder='Search locality 2' name='locality2Name'>
-								</td>
-							</tr>
-						</thead>
-						<tbody>
-							<tr ng-repeat='menu in menus | filter:menuFilter'>
-								<td>
-									<input type='checkbox'>
-								</td>
-								<td>
-									<div class='hidden-xs'>
-										<a class='btn btn-default' ui-sref='^.menus_edit({menu_id: menu._id})'>
-											<i class='fa fa-pencil'></i> Edit 
-										</a>
-										<div class='btn-group dropdown'>
-											<button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown'>
-												More
-												<span class='caret'></span>
-											</button>
-											<ul class='dropdown-menu'>
-												<li>
-													<a ui-sref='^.menus_view({menu_id: menu._id})'>
-														<i class='fa fa-eye'></i> View
-													</a>
-												</li>
-												<li>
-													<a ng-click='cloneMenu(menu._id, menu.outlet._id)'>
-														<i class='fa fa-files-o'></i> Clone
-													</a>
-												</li>
-												<li>
-													<a ng-click='removeMenu(menu._id)'>
-														<i class='fa fa-trash-o text-danger'></i>
-														<span class="text-danger">&nbsp;Delete</span>
-													</a>
-												</li>
-											</ul>
-										</div>
-									</div>
-									<div class='visible-xs'>
-										<div class='btn-group dropdown'>
-											<button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown'>
-												More
-												<span class='caret'></span>
-											</button>
-											<ul class='dropdown-menu'>
-												<li>
-													<a ui-sref='^.menus_edit({menu_id: menu._id})'>
-														<i class='fa fa-pencil'></i> Edit 
-													</a>
-												</li>
-												<li>
-													<a ui-sref='^.menus_view({menu_id: menu._id})'>
-														<i class='fa fa-eye'></i> View
-													</a>
-												</li>
-												<li>
-													<a ng-click='cloneMenu(menu._id, menu.outlet._id)'>
-														<i class='fa fa-files-o'></i> Clone
-													</a>
-												</li>
-												<li>
-													<a ng-click='removeMenu(menu._id)'>
-														<i class='fa fa-trash-o text-danger'></i>
-														<span class="text-danger">Delete</span>
-													</a>
-												</li>
-											</ul>
-										</div>
-									</div>
-								</td>
-								<td>{{menu.menu_type}}</td>
-								<td>{{menu.outlet.name}}</td>
-								<td>{{menu.outlet.loc1}}</td>
-								<td>{{menu.outlet.loc2}}</td>
-							</tr>
-						</tbody>
-					</table>
-				</form>
-			</div>
-		</div>
-	</div>
+<div class='container-fluid' ng-init='getMenus()'>
+    <div class='row'>
+        <div class='col-sm-12 table-responsive' style='min-height:100vh;'>
+            <div class='table-label'>
+                <legend>Menus</legend>
+            </div>
+            <div class='table-container table-responsive'>
+                <form accept-charset="utf-8">
+                    <div class='header-tools'>
+                        <div class='pull-left t5'>
+                            <a class='btn btn-default' ui-sref='^.menus_create'>
+                                <i class='fa fa-plus'></i> &nbsp; Add Menu
+                            </a>
+                        </div>
+                        <div class='pull-right t5'>
+                        </div>
+                    </div>
+                    <div class='clearfix'>&nbsp;</div>
+                    <table class='table table-bordered table-hover'>
+                        <thead>
+                            <tr>
+                                <th colspan="2">Actions</th>
+                                <th>Menu Title</th>
+                                <th>Outlet Name</th>
+                                <th>Locality 1</th>
+                                <th>Locality 2</th>
+                            </tr>
+                            <tr>
+                                <td style='border-right: none;'>
+                                    <div class='pull-left'>
+                                        <input type='checkbox'>
+                                    </div>
+                                </td>
+                                <td style='border-left: none;'>
+                                    <div class='pull-right'>
+                                        <a class='btn btn-default' ng-click='getMenus()'>
+                                            <i class='fa fa-refresh'></i>
+                                        </a>
+                                    </div>
+                                    <div class='clear'></div>
+                                </td>
+                                <td>
+                                    <input type='text' class='form-control pull-left' ng-model='filters.title' placeholder='Search Title' name='searchTitle'>
+                                </td>
+                                <td>
+                                    <input type='text' class='form-control pull-left' ng-model='filters.outlet_name' placeholder='Search Outlet Name' name='outletName'>
+                                </td>
+                                <td>
+                                    <input type='text' class='form-control pull-left' ng-model='filters.locality1' placeholder='Search locality 1' name='locality1Name'>
+                                </td>
+                                <td>
+                                    <input type='text' class='form-control pull-left' ng-model='filters.locality2' placeholder='Search locality 2' name='locality2Name'>
+                                </td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat='menu in menus | filter:menuFilter'>
+                                <td>
+                                    <input type='checkbox'>
+                                </td>
+                                <td>
+                                    <div class='hidden-xs'>
+                                        <a class='btn btn-default' ui-sref='^.menus_edit({menu_id: menu._id})'>
+                                            <i class='fa fa-pencil'></i> Edit
+                                        </a>
+                                        <div class='btn-group dropdown'>
+                                            <button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown'>
+                                                More
+                                                <span class='caret'></span>
+                                            </button>
+                                            <ul class='dropdown-menu'>
+                                                <li>
+                                                    <a ui-sref='^.menus_view({menu_id: menu._id})'>
+                                                        <i class='fa fa-eye'></i> View
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a ng-click='cloneMenu(menu._id, menu.outlet._id)'>
+                                                        <i class='fa fa-files-o'></i> Clone
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a ng-click='removeMenu(menu._id)'>
+                                                        <i class='fa fa-trash-o text-danger'></i>
+                                                        <span class="text-danger">&nbsp;Delete</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class='visible-xs'>
+                                        <div class='btn-group dropdown'>
+                                            <button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown'>
+                                                More
+                                                <span class='caret'></span>
+                                            </button>
+                                            <ul class='dropdown-menu'>
+                                                <li>
+                                                    <a ui-sref='^.menus_edit({menu_id: menu._id})'>
+                                                        <i class='fa fa-pencil'></i> Edit
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a ui-sref='^.menus_view({menu_id: menu._id})'>
+                                                        <i class='fa fa-eye'></i> View
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a ng-click='cloneMenu(menu._id, menu.outlet._id)'>
+                                                        <i class='fa fa-files-o'></i> Clone
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a ng-click='removeMenu(menu._id)'>
+                                                        <i class='fa fa-trash-o text-danger'></i>
+                                                        <span class="text-danger">Delete</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{menu.menu_type}}</td>
+                                <td>{{menu.outlet.name}}</td>
+                                <td>{{menu.outlet.loc1}}</td>
+                                <td>{{menu.outlet.loc2}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 <!-- <div class='col-xs-12' ng-init='getMenus()'>
 	<div class='well well-lg'>
