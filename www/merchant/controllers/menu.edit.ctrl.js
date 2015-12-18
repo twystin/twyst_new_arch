@@ -12,6 +12,7 @@ angular.module('merchantApp')
 
             merchantRESTSvc.getMenu($stateParams.menu_id).then(function(res) {
                 $scope.menu = _.extend($scope.menu, res.data);
+                _id = $scope.menu._id;
             }, function(err) {
                 if (err.message) {
                     SweetAlert.swal('Service Error', err.message, 'error');
