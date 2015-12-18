@@ -362,8 +362,8 @@ module.exports.clone_menu = function(menu_id, outlet_id) {
                         var img_obj = {
                             Bucket: 'retwyst-merchants',
                             ACL: 'public-read',
-                            CopySource: 'retwyst-merchants/retwyst-menus/' + original_menu_id + '/' + item.item_photo,
-                            Key: 'retwyst-menus/' + menu._id + '/' + item.item_photo
+                            CopySource: 'retwyst-merchants/retwyst-menus/' + original_menu_id + '/items/' + item._id,
+                            Key: 'retwyst-menus/' + menu._id + '/items/' + item._id
                         };
                         logger.info(img_obj);
                         AWSHelper.cloneImage(img_obj).then(function(res) {
