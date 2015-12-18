@@ -1,0 +1,105 @@
+<div class='modal-header'>
+    <legend>Choose Item</legend>
+</div>
+<div class='modal-body'>
+    <form class='form-horizontal' role='form'>
+        <div ui-tree>
+            <ol ui-tree-nodes ng-model='menus'>
+                <li ng-repeat='menu in menus track by $index' ui-tree-node>
+                    <div ui-tree-handle class='tree-node tree-node-content'>
+                        <a class='btn btn-dark btn-xs' ng-if='menu.menu_categories.length' data-nodrag ng-click='toggle(this)'>
+                            <span class='fa' ng-class='{"fa-chevron-right": collapsed, "fa-chevron-down": !collapsed}'></span>
+                        </a>
+                        {{menu.menu_type}} [Menu]
+                        <a class='pull-right btn btn-sm btn-primary' data-nodrag ng-click='pickMenu(menu._id)' ng-if='!item_only'><i class='fa fa-plus'></i> Pick</a>
+                    </div>
+                    <ol ui-tree-nodes ng-model='menu.menu_categories'>
+                        <li ng-repeat='category in menu.menu_categories track by $index' ui-tree-node>
+                            <div ui-tree-handle class='tree-node tree-node-content'>
+                                <a class='btn btn-dark btn-xs' ng-if='category.sub_categories.length' data-nodrag ng-click='toggle(this)'>
+                                    <span class='fa' ng-class='{"fa-chevron-right": collapsed, "fa-chevron-down": !collapsed}'></span>
+                                </a>
+                                {{category.category_name}} [Category]
+                                <a class='pull-right btn btn-sm btn-primary' data-nodrag ng-click='pickCategory(menu._id, category._id)' ng-if='!item_only'><i class='fa fa-plus'></i> Pick</a>
+                            </div>
+                            <ol ui-tree-nodes ng-model='category.sub_categories' ng-class="{hidden: collapsed}">
+                                <li ng-repeat='sub_category in category.sub_categories track by $index' ui-tree-node>
+                                    <div ui-tree-handle class='tree-node tree-node-content' ng-if='category.sub_categories.length!==1'>
+                                        <a class='btn btn-dark btn-xs' ng-if='sub_category.items.length' data-nodrag ng-click='toggle(this)'>
+                                            <span class='fa' ng-class='{"fa-chevron-right": collapsed, "fa-chevron-down": !collapsed}'></span>
+                                        </a>
+                                        {{sub_category.sub_category_name}} [Sub Category]
+                                        <a class='pull-right btn btn-sm btn-primary' data-nodrag ng-click='pickSubCategory(menu._id, category._id, sub_category._id)' ng-if='!item_only'><i class='fa fa-plus'></i> Pick</a>
+                                    </div>
+                                    <ol ui-tree-nodes ng-model='sub_category.items' ng-class="{hidden: collapsed}">
+                                        <li ng-repeat='item in sub_category.items track by $index' ui-tree-node>
+                                            <div ui-tree-handle class='tree-node tree-node-content'>
+                                                <a class='btn btn-dark btn-xs' ng-if='item.options.length' data-nodrag ng-click='toggle(this)'>
+                                                    <span class='fa' ng-class='{"fa-chevron-right": collapsed, "fa-chevron-down": !collapsed}'></span>
+                                                </a>
+                                                {{item.item_name}} <i class='fa fa-inr'></i>{{item.item_cost}} [Item]
+                                                <a class='pull-right btn btn-sm btn-primary' data-nodrag ng-click='pickItem(menu._id,category._id, sub_category._id, item._id)' ng-if='item_only && !item.options.length'><i class='fa fa-plus'></i> Pick</a>
+                                            </div>
+                                            <ol ui-tree-nodes ng-model='item.options' ng-class="{hidden: collapsed}">
+                                                <li ng-repeat='option in item.options track by $index' ui-tree-node>
+                                                    <div ui-tree-handle class='tree-node tree-node-content'>
+                                                        <a class='btn btn-dark btn-xs' ng-if='option.sub_options.length || option.addons.length' data-nodrag ng-click='toggle(this)'>
+                                                            <span class='fa' ng-class='{"fa-chevron-right": collapsed, "fa-chevron-down": !collapsed}'></span>
+                                                        </a>
+                                                        <a class='pull-right btn btn-sm btn-primary' ng-if='item_only' data-nodrag ng-click='pickOption(menu._id,category._id, sub_category._id, item._id, option)'><i class='fa fa-plus'></i> Pick</a> {{item.option_title}} - {{option.option_value}} <i class='fa fa-inr'></i>{{option.option_cost}}
+                                                    </div>
+                                                    <ol ui-tree-nodes ng-model='option.sub_options' ng-class="{hidden: collapsed}" style='margin-top:20px;'>
+                                                        <li ng-repeat='sub_option in option.sub_options track by $index' ui-tree-node>
+                                                            <div ui-tree-handle class='tree-node tree-node-content'>
+                                                                <a class='btn btn-dark btn-xs' ng-if='sub_option.sub_option_set.length' data-nodrag ng-click='toggle(this)'>
+                                                                    <span class='fa' ng-class='{"fa-chevron-right": collapsed, "fa-chevron-down": !collapsed}'></span>
+                                                                </a>
+                                                                {{sub_option.sub_option_title}} [Sub Options]
+                                                            </div>
+                                                            <ol ui-tree-nodes ng-model='sub_option.sub_option_set' ng-class='{hidden: collapsed}'>
+                                                                <li ng-repeat='sub_option_obj in sub_option.sub_option_set track by $index' ui-tree-node>
+                                                                    <div ui-tree-handle class='tree-node tree-node-content'>
+                                                                        <label ng-if='item_only' class='btn' ng-class='{"btn-default": !sub_option_sets[sub_option._id], "btn-danger": sub_option_sets[sub_option_obj._id]}' data-nodrag ng-model='sub_option_sets[sub_option_obj._id]' btn-checkbox>
+                                                                            <i class='fa fa-plus' ng-if='!sub_option_sets[sub_option_obj._id]'></i>
+                                                                            <i class='fa fa-times' ng-if='sub_option_sets[sub_option_obj._id]'></i>
+                                                                        </label>
+                                                                        {{sub_option_obj.sub_option_value}} <i class='fa fa-inr'></i>{{sub_option_obj.sub_option_cost}}
+                                                                    </div>
+                                                                </li>
+                                                            </ol>
+                                                        </li>
+                                                    </ol>
+                                                    <ol ui-tree-nodes ng-model='option.addons' ng-class="{hidden: collapsed}" style='margin-top:20px;'>
+                                                        <li ng-repeat='addon in option.addons track by $index' ui-tree-node>
+                                                            <div ui-tree-handle class='tree-node tree-node-content'>
+                                                                <a class='btn btn-dark btn-xs' ng-if='addon.addon_set.length' data-nodrag ng-click='toggle(this)'>
+                                                                    <span class='fa' ng-class='{"fa-chevron-right": collapsed, "fa-chevron-down": !collapsed}'></span>
+                                                                </a>
+                                                                {{addon.addon_title}} [Addons]
+                                                            </div>
+                                                            <ol ui-tree-nodes ng-model='addon.addon_set' ng-class='{hidden: collapsed}'>
+                                                                <li ng-repeat='addon_obj in addon.addon_set track by $index' ui-tree-node>
+                                                                    <div ui-tree-handle class='tree-node tree-node-content'>
+                                                                        <label ng-if='item_only' class='btn' ng-class='{"btn-default": !addon_sets[addon_obj._id], "btn-danger": addon_sets[addon_obj._id]}' data-nodrag ng-model='addon_sets[addon_obj._id]' btn-checkbox>
+                                                                            <i class='fa fa-plus' ng-if='!addon_sets[addon_obj._id]'></i>
+                                                                            <i class='fa fa-times' ng-if='addon_sets[addon_obj._id]'></i>
+                                                                        </label>
+                                                                        {{addon_obj.addon_value}} <i class='fa fa-inr'></i>{{addon_obj.addon_cost}}
+                                                                    </div>
+                                                                </li>
+                                                            </ol>
+                                                        </li>
+                                                    </ol>
+                                                </li>
+                                            </ol>
+                                        </li>
+                                    </ol>
+                                </li>
+                            </ol>
+                        </li>
+                    </ol>
+                </li>
+            </ol>
+        </div>
+    </form>
+</div>

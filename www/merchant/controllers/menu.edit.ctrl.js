@@ -1,431 +1,634 @@
-angular.module('merchantApp').controller('MenuEditController', ['$scope', 'merchantRESTSvc', 'toastr', 'WizardHandler', '$stateParams', '$state', '$timeout', '$q', '$modal',
-	function($scope, merchantRESTSvc, toastr, WizardHandler, $stateParams, $state, $timeout, $q, $modal) {
-		$scope.menu = {
-			status: 'active',
-			menu_categories: []
-		};
+angular.module('merchantApp')
+    .controller('MenuEditController', ['$scope', 'merchantRESTSvc', 'SweetAlert', '$state', '$q', '$modal', '$stateParams',
+        function($scope, merchantRESTSvc, SweetAlert, $state, $q, $modal, $stateParams) {
 
-		merchantRESTSvc.getMenu($stateParams.menu_id).then(function(res) {
-			$scope.menu = res.data;
-		}, function(err) {
-			$scope.menu = {};
-			console.log(err);
-		})
+            $scope.menu_types = ['Dine-In', 'Takeaway', 'Delivery', 'Weekend', 'Dinner', 'All'];
+            merchantRESTSvc.getOutlets().then(function(res) {
+                $scope.outlets = res.data.outlets;
+            }, function(err) {
+                $scope.outlets = [];
+                console.log(err);
+            });
 
-		$scope.showCategory = function(index) {
-			if(!$scope.menu.menu_categories[index]) {
-				toastr.error("Menu category out of bounds");
-			} else {
-				$scope.current_category = index;
-				delete $scope.visible_item;
-			}
-		}
+            merchantRESTSvc.getMenu($stateParams.menu_id).then(function(res) {
+                $scope.menu = _.extend($scope.menu, res.data);
+            }, function(err) {
+                if (err.message) {
+                    SweetAlert.swal('Service Error', err.message, 'error');
+                } else {
+                    SweetAlert.swal('Service Error', 'Something went wrong.', 'error');
+                }
+            });
 
-		$scope.menu_types = ['Dine-In', 'Takeaway', 'Delivery', 'Weekend', 'Dinner', 'All'];
+            $scope.menu = {
+                status: 'active',
+                menu_categories: []
+            };
 
-		$scope.addMenuCategory = function() {
-			var modalInstance = $modal.open({
-				animation: true,
-				templateUrl: 'menuCategoryTemplate.html',
-				controller: 'MenuCategoryController',
-				size: 'lg',
-				resolve: {
-					menu_category: function() {
-						return {
-							sub_categories: [{
-								sub_category_name: 'Default',
-								items: []
-							}]
-						};
-					},
-					is_new: function() {
-						return true;
-					}
-				}
-			});
+            $scope.toggle = function(scope) {
+                scope.toggle();
+            };
 
-			modalInstance.result.then(function(category) {
-				$scope.menu.menu_categories.push(category);
-			});
-		}
+            $scope.addCategory = function() {
+                var modalInstance = $modal.open({
+                    animation: true,
+                    templateUrl: 'templates/partials/menu.category.tmpl.html',
+                    controller: 'MenuCategoryController',
+                    size: 'lg',
+                    resolve: {
+                        category: function() {
+                            return {
+                                sub_categories: [{
+                                    sub_category_name: 'Default',
+                                    items: []
+                                }]
+                            };
+                        },
+                        is_new: function() {
+                            return true;
+                        }
+                    }
+                });
 
-		merchantRESTSvc.getOutlets().then(function(res) {
-			$scope.outlets = res.data.outlets;
-		}, function(err) {
-			$scope.outlets = [];
-			console.log(err);
-		})
+                modalInstance.result.then(function(category) {
+                    $scope.menu.menu_categories.push(category);
+                });
+            };
 
-		$scope.editCategory = function(index) {
-			var modalInstance = $modal.open({
-				animation: true,
-				templateUrl: 'menuCategoryTemplate.html',
-				controller: 'MenuCategoryController',
-				size: 'lg',
-				resolve: {
-					menu_category: function() {
-						return _.clone($scope.menu.menu_categories[index] || {sub_categories: []});
-					},
-					is_new: function() {
-						return false;
-					}
-				}
-			});
+            $scope.cloneCategory = function(index) {
+                SweetAlert.swal({
+                    title: 'Clone category!',
+                    text: 'Are you sure you want to clone this category?',
+                    type: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'Clone It!'
+                }, function(confirm) {
+                    if (confirm) {
+                        var cloned_category = _.cloneDeep($scope.menu.menu_categories[index]);
+                        delete cloned_category._id;
+                        _.each(cloned_category.sub_categories, function(sub_category) {
+                            delete sub_category._id;
+                            _.each(sub_category.items, function(item) {
+                                delete item._id;
+                                _.each(item.options, function(option) {
+                                    delete option._id;
+                                    _.each(option.sub_options, function(sub_option) {
+                                        delete sub_option._id;
+                                        _.each(sub_option.sub_option_set, function(sub_option_obj) {
+                                            delete sub_option_obj._id;
+                                        });
+                                    });
+                                    _.each(option.addons, function(addon) {
+                                        delete addon._id;
+                                        _.each(addon.addon_set, function(addon_obj) {
+                                            delete addon_obj._id;
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                        $scope.menu.menu_categories.push(_.cloneDeep($scope.menu.menu_categories[index]));
+                    }
+                });
+            };
 
-			modalInstance.result.then(function(category) {
-				$scope.menu.menu_categories[index] = category;
-			});
-		}
+            $scope.editCategory = function(index) {
+                var modalInstance = $modal.open({
+                    animation: true,
+                    templateUrl: 'templates/partials/menu.category.tmpl.html',
+                    controller: 'MenuCategoryController',
+                    size: 'lg',
+                    resolve: {
+                        category: function() {
+                            return _.cloneDeep($scope.menu.menu_categories[index]);
+                        },
+                        is_new: function() {
+                            return true;
+                        }
+                    }
+                });
 
-		$scope.addSubCategory = function(index) {
-			var modalInstance = $modal.open({
-				animation: true,
-				templateUrl: 'subCategoryTemplate.html',
-				controller: 'MenuSubCategoryController',
-				size: 'lg',
-				resolve: {
-					sub_category: function() {
-						return {
-							items: []
-						};
-					},
-					is_new: function() {
-						return true
-					}
-				}
-			});
+                modalInstance.result.then(function(category) {
+                    $scope.menu.menu_categories[index] = category;
+                });
+            };
 
-			modalInstance.result.then(function(sub_category) {
-				$scope.menu.menu_categories[index].sub_categories.push(sub_category);
-			}, function() {
-				console.log('Modal dismissed at: ', new Date());
-			})
-		}
+            $scope.removeCategory = function(index) {
+                SweetAlert.swal({
+                    title: 'Delete category!',
+                    text: 'Are you sure you want to delete?',
+                    type: 'warning',
+                    confirmButtonColor: "#DD6B55",
+                    showCancelButton: true,
+                    confirmButtonText: 'Delete It!'
+                }, function(confirm) {
+                    if (confirm) {
+                        $scope.menu.menu_categories.splice(index, 1);
+                    }
+                });
+            };
 
-		$scope.editSubCategory = function(category, index) {
-			var modalInstance = $modal.open({
-				animation: true,
-				templateUrl: 'subCategoryTemplate.html',
-				controller: 'MenuSubCategoryController',
-				size: 'lg',
-				resolve: {
-					sub_category: function() {
-						return _.clone(category.sub_categories[index] || {items: []});
-					},
-					is_new: function() {
-						return false
-					}
-				}
-			});
+            $scope.addSubCategory = function(category) {
+                var modalInstance = $modal.open({
+                    animation: true,
+                    templateUrl: 'templates/partials/menu.sub_category.tmpl.html',
+                    controller: 'MenuSubCategoryController',
+                    size: 'lg',
+                    resolve: {
+                        sub_category: function() {
+                            return {
+                                items: []
+                            };
+                        },
+                        is_new: function() {
+                            return true;
+                        }
+                    }
+                });
 
-			modalInstance.result.then(function(sub_category) {
-				category.sub_categories[index] = sub_category;
-			});
-		}
+                modalInstance.result.then(function(sub_category) {
+                    category.sub_categories.push(sub_category);
+                });
+            };
 
-		$scope.addItem = function(sub_category) {
-			var modalInstance = $modal.open({
-				animation: true,
-				templateUrl: 'menuItemTemplate.html',
-				controller: 'MenuItemController',
-				size: 'lg',
-				resolve: {
-					item: function() {
-						return {
-							options: [],
-							item_availability: {
-								regular_item: true
-							},
-							item_available_on: [],
-							is_vegetarian: true,
-							option_is_addon: false,
-							is_available: true
-						};
-					},
-					is_new: function() {
-						return true;
-					}
-				}
-			});
+            $scope.cloneSubCategory = function(category, index) {
+                SweetAlert.swal({
+                    title: 'Clone sub category!',
+                    text: 'Are you sure you want to clone this sub category?',
+                    type: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'Clone It!'
+                }, function(confirm) {
+                    if (confirm) {
+                        var cloned_subcategory = _.cloneDeep(category.sub_categories[index]);
+                        delete cloned_subcategory._id;
+                        _.each(cloned_subcategory.items, function(item) {
+                            delete item._id;
+                            _.each(item.options, function(option) {
+                                delete option._id;
+                                _.each(option.sub_options, function(sub_option) {
+                                    delete sub_option._id;
+                                    _.each(sub_option.sub_option_set, function(sub_option_obj) {
+                                        delete sub_option_obj._id;
+                                    });
+                                });
+                                _.each(option.addons, function(addon) {
+                                    delete addon._id;
+                                    _.each(addon.addon_set, function(addon_obj) {
+                                        delete addon_obj._id;
+                                    });
+                                });
+                            });
+                        });
+                        category.sub_categories.push(cloned_subcategory);
+                    }
+                });
+            };
 
-			modalInstance.result.then(function(item) {
-				sub_category.items.push(item);
-			});
-		}
+            $scope.editSubCategory = function(category, index) {
+                var modalInstance = $modal.open({
+                    animation: true,
+                    templateUrl: 'templates/partials/menu.sub_category.tmpl.html',
+                    controller: 'MenuSubCategoryController',
+                    size: 'lg',
+                    resolve: {
+                        sub_category: function() {
+                            return _.cloneDeep(category.sub_categories[index]);
+                        },
+                        is_new: function() {
+                            return false
+                        }
+                    }
+                });
 
-		$scope.editItem = function(sub_category, index) {
-			if(!sub_category || !sub_category.items || !sub_category.items[index]) {
-				toastr.error("Item out of bounds");
-			} else {
-				var modalInstance = $modal.open({
-					animation: true,
-					templateUrl: 'menuItemTemplate.html',
-					controller: 'MenuItemController',
-					size: 'lg',
-					resolve: {
-						item: function() {
-							return _.clone(sub_category.items[index] || {options: []});
-						},
-						is_new: function() {
-							return false;
-						}
-					}
-				});
+                modalInstance.result.then(function(sub_category) {
+                    category.sub_categories[index] = sub_category;
+                });
+            };
 
-				modalInstance.result.then(function(item) {
-					sub_category.items[index] = item;
-				}, function() {
-					console.log('Modal dismissed at: ', new Date());
-				});
-			}
-		}
+            $scope.removeSubCategory = function(category, index) {
+                SweetAlert.swal({
+                    title: 'Delete sub category!',
+                    text: 'Are you sure you want to delete?',
+                    type: 'warning',
+                    confirmButtonColor: "#DD6B55",
+                    showCancelButton: true,
+                    confirmButtonText: 'Delete It!'
+                }, function(confirm) {
+                    if (confirm) {
+                        category.sub_categories.splice(index, 1);
+                    }
+                });
+            };
 
-		$scope.reviewMenu = function() {
-			var deferred = $q.defer();
-			if (!$scope.menu.menu_type) {
-				deferred.reject('Menu Type required');
-			} else if (!$scope.menu.outlet) {
-				deferred.reject('Outlet id required');
-			} else {
-				async.each($scope.menu.menu_categories, function(category, callback) {
-					if(!category.category_name) {
-						callback('Menu category name required');
-					} else if (!category.sub_categories || !category.sub_categories.length) {
-						callback('All menu categories must have atleast one sub-category');
-					} else {
-						async.each(category.sub_categories, function(sub_category, callback) {
-							if (!sub_category.sub_category_name) {
-								callback('All sub_category must have a sub_category name');
-							} else if (!sub_category.items || !sub_category.items.length) {
-								callback('All sub_category must have atleast one item');
-							} else {
-								callback();
-							}
-						}, function(err) {
-							callback(err);
-						});
-					}
-				}, function(err) {
-					if(err) {
-						deferred.reject(err)
-					} else {
-						deferred.resolve(true);
-					}
-				});
-			}
-			return deferred.promise;
-		}
+            $scope.addItem = function(sub_category) {
+                var modalInstance = $modal.open({
+                    animation: true,
+                    templateUrl: 'templates/partials/menu.item.tmpl.html',
+                    controller: 'MenuItemController',
+                    size: 'lg',
+                    resolve: {
+                        item: function() {
+                            return {
+                                is_available: true,
+                                option_is_addon: false,
+                                is_vegetarian: true,
+                                item_available_on: [],
+                                item_availability: {
+                                    regular_item: true
+                                },
+                                options: []
+                            }
+                        },
+                        is_new: function() {
+                            return true
+                        }
+                    }
+                });
 
-		$scope.updateMenu = function() {
-			$scope.reviewMenu().then(function() {
-				merchantRESTSvc.updateMenu($scope.menu).then(function(res) {
-					console.log(res);
-					toastr.success("Menu updated successfully");
-					$timeout(function() {
-						$state.go('merchant.menus', {}, {
-							reload: true
-						});
-					}, 800);
-				}, function(error) {
-					console.log(error);
-					if(error.message) {
-						toastr.error(error.message, "Error");
-					} else {
-						toastr.error("Something went wrong", "Error");
-					}	
-				});
-			}, function(err) {
-				toastr.error(err);
-			})
-		}
+                modalInstance.result.then(function(item) {
+                    sub_category.items.push(item);
+                });
+            };
 
-		$scope.showItem = function(item) {
-			$scope.visible_item = item;
-		}
+            $scope.cloneItem = function(sub_category, index) {
+                SweetAlert.swal({
+                    title: 'Clone item!',
+                    text: 'Are you sure you want to clone this item?',
+                    type: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'Clone It!'
+                }, function(confirm) {
+                    if (confirm) {
+                        var cloned_item = _.cloneDeep(sub_category.items[index]);
+                        delete cloned_item._id;
+                        _.each(cloned_item.options, function(option) {
+                            delete option._id;
+                            _.each(option.sub_options, function(sub_option) {
+                                delete sub_option._id;
+                                _.each(sub_option.sub_option_set, function(sub_option_obj) {
+                                    delete sub_option_obj._id;
+                                });
+                            });
+                            _.each(option.addons, function(addon) {
+                                delete addon._id;
+                                _.each(addon.addon_set, function(addon_obj) {
+                                    delete addon_obj._id;
+                                });
+                            });
+                        });
+                        sub_category.items.push(cloned_item);
+                    }
+                });
+            };
 
-	}
-]).controller('MenuCategoryController', function($scope, $modalInstance, menu_category, is_new) {
-	$scope.menu_categories = ['Indian', 'Desserts', 'Cakes', 'Chinese', 'Soup'];
+            $scope.editItem = function(sub_category, index) {
+                var modalInstance = $modal.open({
+                    animation: true,
+                    templateUrl: 'templates/partials/menu.item.tmpl.html',
+                    controller: 'MenuItemController',
+                    size: 'lg',
+                    resolve: {
+                        item: function() {
+                            return _.cloneDeep(sub_category.items[index]);
+                        },
+                        is_new: function() {
+                            return false
+                        }
+                    }
+                });
 
-	$scope.is_new = is_new;
-	$scope.current_category = menu_category;
+                modalInstance.result.then(function(item) {
+                    sub_category.items[index] = item;
+                });
+            };
 
-	$scope.resolveCategory = function() {
-		$modalInstance.close($scope.current_category);
-	}
+            $scope.removeItem = function(sub_category, index) {
+                SweetAlert.swal({
+                    title: 'Delete item!',
+                    text: 'Are you sure you want to delete?',
+                    type: 'warning',
+                    confirmButtonColor: "#DD6B55",
+                    showCancelButton: true,
+                    confirmButtonText: 'Delete It!'
+                }, function(confirm) {
+                    if (confirm) {
+                        sub_category.items.splice(index, 1);
+                    }
+                });
+            };
 
-	$scope.discardCategory = function() {
-		$modalInstance.dismiss('cancel');
-	}
-	console.log(menu_category, is_new);
-}).controller('MenuSubCategoryController', function($scope, $modalInstance, sub_category, is_new) {
-	$scope.sub_category_names = ['Veg Starters', 'Non Veg Starters', 'Veg Main Course', 'Non Veg Main Course'];
+            $scope.addOption = function(item) {
+                var modalInstance = $modal.open({
+                    animation: true,
+                    templateUrl: 'templates/partials/menu.option.tmpl.html',
+                    controller: 'MenuOptionController',
+                    size: 'lg',
+                    resolve: {
+                        option: function() {
+                            return {
+                                is_available: true,
+                                is_vegetarian: true,
+                                sub_options: [],
+                                addons: []
+                            };
+                        },
+                        is_new: function() {
+                            return true;
+                        },
+                        option_title: function() {
+                            return item.option_title;
+                        }
+                    }
+                });
 
-	$scope.is_new = is_new;
-	$scope.current_sub_category = sub_category;
+                modalInstance.result.then(function(option) {
+                    item.options.push(option);
+                });
+            };
 
-	$scope.resolveSubCategory = function() {
-		$modalInstance.close($scope.current_sub_category);
-	}
+            $scope.cloneOption = function(item, index) {
+                SweetAlert.swal({
+                    title: 'Clone option!',
+                    text: 'Are you sure you want to clone this option?',
+                    type: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'Clone It!'
+                }, function(confirm) {
+                    if (confirm) {
+                        var cloned_option = _.cloneDeep(item.options[index]);
+                        delete cloned_option._id;
+                        _.each(cloned_option.sub_options, function(sub_option) {
+                            delete sub_option._id;
+                            _.each(sub_option.sub_option_set, function(sub_option_obj) {
+                                delete sub_option_obj._id;
+                            });
+                        });
+                        _.each(cloned_option.addons, function(addon) {
+                            delete addon._id;
+                            _.each(addon.addon_set, function(addon_obj) {
+                                delete addon_obj._id;
+                            });
+                        });
+                        item.options.push(cloned_option);
+                    }
+                });
+            };
 
-	$scope.discardSubCategory = function() {
-		$modalInstance.dismiss('cancel');
-	}
-}).controller('MenuItemController', function($scope, $modalInstance, toastr, item, is_new, $q) {
-	$scope.is_new = is_new;
-	$scope.current_item = item;
-	$scope.checkModel = {};
-	$scope.days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            $scope.editOption = function(item, index) {
+                var modalInstance = $modal.open({
+                    animation: true,
+                    templateUrl: 'templates/partials/menu.option.tmpl.html',
+                    controller: 'MenuOptionController',
+                    size: 'lg',
+                    resolve: {
+                        option: function() {
+                            return _.cloneDeep(item.options[index]);
+                        },
+                        is_new: function() {
+                            return false
+                        },
+                        option_title: function() {
+                            return item.option_title;
+                        }
+                    }
+                });
 
-	$scope.$watchCollection('checkModel', function() {
-		$scope.current_item.item_available_on = [];
-		angular.forEach($scope.checkModel, function (value, key) {
-			console.log(value, key);
-			if (value) {
-				$scope.current_item.item_available_on.push(key);
-			}
-		});
-	});
+                modalInstance.result.then(function(option) {
+                    item.options[index] = option;
+                });
+            };
 
-	if (!is_new) {
-		_.each($scope.days, function(day) {
-			$scope.checkModel[day] = $scope.current_item.item_available_on.indexOf(day)!==-1?true:false;
-		});
-		if ($scope.current_item.item_availability.start_date) {
-			$scope.current_item.item_availability.start_date = new Date($scope.current_item.item_availability.start_date);
-		}
-		if ($scope.current_item.item_availability.end_date) {
-			$scope.current_item.item_availability.end_date = new Date($scope.current_item.item_availability.end_date);
-		}
-	}
+            $scope.removeOption = function(item, index) {
+                SweetAlert.swal({
+                    title: 'Delete option!',
+                    text: 'Are you sure you want to delete?',
+                    type: 'warning',
+                    confirmButtonColor: "#DD6B55",
+                    showCancelButton: true,
+                    confirmButtonText: 'Delete It!'
+                }, function(confirm) {
+                    if (confirm) {
+                        item.options.splice(index, 1);
+                    }
+                });
+            };
 
-	$scope.addOptionSet = function() {
-		$scope.current_item.options.push({is_available: true, is_vegetarian: true, sub_options: [], addons: []});
-	}
+            $scope.addSubOption = function(option) {
+                var modalInstance = $modal.open({
+                    animation: true,
+                    templateUrl: 'templates/partials/menu.sub_option.tmpl.html',
+                    controller: 'MenuSubOptionController',
+                    size: 'lg',
+                    resolve: {
+                        sub_option: function() {
+                            return {
+                                sub_option_set: []
+                            };
+                        },
+                        is_new: function() {
+                            return true;
+                        }
+                    }
+                });
 
-	$scope.addSubVariant = function(option) {
-		option.sub_options.push({sub_option_set: []})
-	}
+                modalInstance.result.then(function(sub_option) {
+                    option.sub_options.push(sub_option);
+                });
+            };
 
-	$scope.addSubOptionPair = function(sub_option) {
-		sub_option.sub_option_set.push({is_available: true, is_vegetarian: true});
-	}
+            $scope.cloneSubOption = function(option, index) {
+                SweetAlert.swal({
+                    title: 'Clone sub option!',
+                    text: 'Are you sure you want to clone these sub options?',
+                    type: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'Clone It!'
+                }, function(confirm) {
+                    if (confirm) {
+                        var cloned_suboption = _.cloneDeep(option.sub_options[index]);
+                        delete cloned_suboption._id;
+                        _.each(cloned_suboption.sub_option_set, function(sub_option_obj) {
+                            delete sub_option_obj._id;
+                        });
+                        option.sub_options.push(cloned_suboption);
+                    }
+                });
+            };
 
-	$scope.removeSubOption = function(option, index) {
-		option.sub_options.splice(index, 1);
-	}
+            $scope.editSubOption = function(option, index) {
+                var modalInstance = $modal.open({
+                    animation: true,
+                    templateUrl: 'templates/partials/menu.sub_option.tmpl.html',
+                    controller: 'MenuSubOptionController',
+                    size: 'lg',
+                    resolve: {
+                        sub_option: function() {
+                            return _.cloneDeep(option.sub_options[index]);
+                        },
+                        is_new: function() {
+                            return false
+                        }
+                    }
+                });
 
-	$scope.removeSubOptionObj = function(sub_option, $index) {
-		sub_option.sub_option_set.splice($index, 1);
-	}
+                modalInstance.result.then(function(addon) {
+                    option.sub_options[index] = addon;
+                });
+            };
 
-	$scope.removeOption = function(index) {
-		$scope.current_item.options.splice(index, 1);
-	}
+            $scope.removeSubOption = function(option, index) {
+                SweetAlert.swal({
+                    title: 'Delete sub option set!',
+                    text: 'Are you sure you want to delete?',
+                    type: 'warning',
+                    confirmButtonColor: "#DD6B55",
+                    showCancelButton: true,
+                    confirmButtonText: 'Delete It!'
+                }, function(confirm) {
+                    if (confirm) {
+                        option.sub_options.splice(index, 1);
+                    }
+                });
+            };
 
-	$scope.addAddonSet = function(option) {
-		option.addons.push({addon_set: []});
-	}
+            $scope.addAddon = function(option) {
+                var modalInstance = $modal.open({
+                    animation: true,
+                    templateUrl: 'templates/partials/menu.addon.tmpl.html',
+                    controller: 'MenuAddonController',
+                    size: 'lg',
+                    resolve: {
+                        addon: function() {
+                            return {
+                                addon_set: []
+                            };
+                        },
+                        is_new: function() {
+                            return true
+                        }
+                    }
+                });
 
-	$scope.removeAddon = function(option, index) {
-		option.addons.splice(index, 1);
-	}
+                modalInstance.result.then(function(addon) {
+                    option.addons.push(addon);
+                });
+            };
 
-	$scope.addAddonObj = function(addon) {
-		addon.addon_set.push({is_available: true, is_vegetarian: true});
-	}
+            $scope.cloneAddon = function(option, index) {
+                SweetAlert.swal({
+                    title: 'Clone addon!',
+                    text: 'Are you sure you want to clone these addons?',
+                    type: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'Clone It!'
+                }, function(confirm) {
+                    if (confirm) {
+                        var cloned_addon = _.cloneDeep(option.addons[index]);
+                        delete cloned_addon._id;
+                        _.each(cloned_addon.addon_set, function(addon_obj) {
+                            delete addon_obj._id;
+                        });
+                        option.addons.push(cloned_addon);
+                    }
+                });
+            };
 
-	$scope.removeAddonObj = function(addon, index) {
-		addon.addon_set.splice(index, 1);
-	}
+            $scope.editAddon = function(option, index) {
+                var modalInstance = $modal.open({
+                    animation: true,
+                    templateUrl: 'templates/partials/menu.addon.tmpl.html',
+                    controller: 'MenuAddonController',
+                    size: 'lg',
+                    resolve: {
+                        addon: function() {
+                            return _.cloneDeep(option.addons[index]);
+                        },
+                        is_new: function() {
+                            return false
+                        }
+                    }
+                });
 
-	$scope.removeAddon = function(option, index) {
-		if(!option || !option.addons || !option.addons[index]) {
-			toastr.error('Addon out of bounds');
-		} else {
-			option.addons.splice(index, 1);
-		}
-	}
+                modalInstance.result.then(function(addon) {
+                    option.addons[index] = addon;
+                });
+            };
 
-	$scope.resolveItem = function() {
-		$scope.validateItem().then(function() {
-			$modalInstance.close($scope.current_item);	
-		}, function(err) {
-			toastr.error(err);
-		});
-	}
+            $scope.removeAddon = function(option, index) {
+                SweetAlert.swal({
+                    title: 'Delete addon set!',
+                    text: 'Are you sure you want to delete?',
+                    type: 'warning',
+                    confirmButtonColor: "#DD6B55",
+                    showCancelButton: true,
+                    confirmButtonText: 'Delete It!'
+                }, function(confirm) {
+                    if (confirm) {
+                        option.addons.splice(index, 1);
+                    }
+                });
+            };
 
-	$scope.discardItem = function() {
-		$modalInstance.dismiss('cancel');
-	}
+            $scope.updateMenu = function() {
+                $scope.reviewMenu().then(function() {
+                    merchantRESTSvc.updateMenu($scope.menu).then(function(res) {
+                        console.log(res);
+                        SweetAlert.swal({
+                            title: 'Menu updated successfully',
+                            type: 'success',
+                            showCancelButton: false,
+                            confirmButtonText: 'Continue'
+                        }, function() {
+                            $state.go('^.menus_manage', {}, {
+                                reload: true
+                            });
+                        });
+                    }, function(err) {
+                        console.log(err);
+                        if (err.message) {
+                            SweetAlert.swal('Validation Error', err.message, 'error');
+                        } else {
+                            SweetAlert.swal('Service Error', 'Unable to update the menu right now', 'error');
+                        }
+                    });
+                }, function(err) {
+                    SweetAlert.swal('Validation error', err, 'error');
+                });
+            };
 
-	$scope.validateItem = function() {
-		var deferred = $q.defer();
-		if (!$scope.current_item.item_name) {
-			deferred.reject('Item name is mandatory');
-		} else if (!$scope.current_item.item_tags || !$scope.current_item.item_tags.length) {
-			deferred.reject('Atleast one item tag is required');
-		} else if (!$scope.current_item.item_cost && $scope.current_item.item_cost !== 0) {
-			deferred.reject("Base cost is mandatory");
-		} else {
-			async.each($scope.current_item.options, function(option, callback) {
-				console.log(option);
-				if (!option.option_value) {
-					callback("All item option sets must have a valid value")
-				} else if (!option.option_cost && option.option_cost !== 0) {
-					callback("All item option sets must have a valid cost");
-				} else {
-					async.each(option.sub_options, function(sub_option, callback) {
-						if(!sub_option.sub_option_title) {
-							callback("All sub variant sets must have valid headers");
-						} else if ((!sub_option.sub_option_set || sub_option.sub_option_set.length === 0)) {
-							callback("Atleast one key-value pair required for all sub variant sets");
-						} else {
-							async.each(sub_option.sub_option_set, function(sub_option_obj, callback) {
-								console.log(sub_option_obj);
-								if (!sub_option_obj.sub_option_value) {
-									callback("All sub variant sets must have valid value");
-								} else if (!sub_option_obj.sub_option_cost && !sub_option_obj.sub_option_cost) {
-									callback("All sub variant sets must have valid cost");
-								} else {
-									async.each(option.addons, function(addon, callback) {
-										if (!addon.addon_title) {
-											callback("All addon sets must have valid title");
-										} else if (!addon.addon_set || addon.addon_set.length === 0) {
-											callback('All addons must have atleast one key-value pair');
-										} else {
-											async.each(addon.addon_set, function(addon_obj, callback) {
-												if (!addon_obj.addon_value) {
-													callback("All addons must have valid value");
-												} else if (!addon_obj.addon_cost && addon_obj.addon_cost !== 0) {
-													callback("Add addons must have valid cost");
-												} else {
-													callback();
-												}
-											}, function(err) {
-												callback(err);
-											});
-										}
-									}, function(err) {
-										callback(err);
-									})
-								}
-							}, function(err) {
-								callback(err);
-							})
-						}
-					}, function(err) {
-						callback(err);
-					});
-				}
-			}, function(err) {
-				if(err) {
-					deferred.reject(err);
-				} else {
-					deferred.resolve();
-				}
-			});
-		}
-		return deferred.promise;
-	}
-})
+            $scope.reviewMenu = function() {
+                var deferred = $q.defer();
+                if (!$scope.menu.menu_type) {
+                    deferred.reject('Menu type required');
+                } else if (!$scope.menu.outlet) {
+                    deferred.reject('Please choose an outlet');
+                } else if (!$scope.menu.menu_categories.length) {
+                    deferred.reject('Atleast one category must be added');
+                } else {
+                    async.each($scope.menu.menu_categories, function(category, callback) {
+                        if (!category.sub_categories.length) {
+                            callback('Atleast one sub category must be added to all categories');
+                        } else {
+                            async.each(category.sub_categories, function(sub_category, callback) {
+                                if (!sub_category.items.length) {
+                                    callback('Aleast one item must be present in all sub categories');
+                                } else {
+                                    callback();
+                                }
+                            }, function(err) {
+                                callback(err);
+                            });
+                        }
+                    }, function(err) {
+                        if (err) {
+                            deferred.reject(err);
+                        } else {
+                            deferred.resolve();
+                        }
+                    });
+                }
+                return deferred.promise;
+            };
+        }
+    ])
