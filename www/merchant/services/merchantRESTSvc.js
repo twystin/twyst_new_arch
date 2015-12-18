@@ -66,6 +66,22 @@ angular.module('merchantApp')
                 return deferred.promise;
             }
 
+            merchantRESTSvc.createOutlet = function(outlet) {
+                var deferred = $q.defer();
+                var token = $cookies.get('token');
+                $http.post('/api/v4/outlets?token=' + token, outlet)
+                    .then(function(res) {
+                        if (res.data.response) {
+                            deferred.resolve(res.data);
+                        } else {
+                            deferred.reject(res.data);
+                        }
+                    }, function(err) {
+                        deferred.reject(err);
+                    });
+                return deferred.promise;
+            }
+
             merchantRESTSvc.updateOutlet = function(outlet) {
                 var deferred = $q.defer();
                 var token = $cookies.get('token');
@@ -328,7 +344,7 @@ angular.module('merchantApp')
             merchantRESTSvc.updateMenu = function(menu_obj) {
                 var deferred = $q.defer();
                 var token = $cookies.get('token');
-                $http.put('/api/v4/menus/' + menu_obj._id + '?token=' + token)
+                $http.put('/api/v4/menus/' + menu_obj._id + '?token=' + token, menu_obj)
                     .then(function(res) {
                         if (res.data.response) {
                             deferred.resolve(res.data);

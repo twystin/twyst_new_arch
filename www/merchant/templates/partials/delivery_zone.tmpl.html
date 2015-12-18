@@ -1,0 +1,120 @@
+<div class='modal-header'>
+    <legend ng-if='is_new'>New Delivery Zone</legend>
+    <legend ng-if='!is_new'>Update Delivery Zone</legend>
+</div>
+<div class='modal-body'>
+    <form class='form-horizontal' role='form'>
+        <div class='form-group'>
+            <label class='col-sm-2 control-label'>Zone Name <i class='fa fa-sm fa-asterisk'></i></label>
+            <div class='col-sm-6' ng-class='{"has-error": formFailure && !delivery_zone.zone_name}'>
+                <input type='text' ng-model='delivery_zone.zone_name' class='form-control'>
+            </div>
+        </div>
+        <div class='form-group'>
+            <label class='col-sm-2 control-label'>Estimate Time <i class='fa fa-sm fa-asterisk'></i></label>
+            <div class='col-sm-6'>
+                <div class='input-group text-right' ng-class='{"has-error": formFailure && !delivery_zone.delivery_estimated_time}'>
+                    <input type='number' min='10' max='200' steps='5' ng-model='delivery_zone.delivery_estimated_time' class='form-control'>
+                    <span class='input-group-addon'>min(s).</span>
+                </div>
+            </div>
+        </div>
+        <div class='form-group'>
+            <label class='col-sm-2 control-label'>Delivery Conditions</label>
+            <div class='col-sm-6'>
+                <textarea ng-model='delivery_zone.delivery_conditions' class='form-control' rows='3'></textarea>
+            </div>
+        </div>
+        <div class='form-group'>
+            <label class='col-sm-2 control-label'>Min Delivery Amount <i class='fa fa-sm fa-asterisk'></i></label>
+            <div class='col-sm-6' ng-class='{"has-error": formFailure && !delivery_zone.min_amt_for_delivery && delivery_zone.min_amt_for_delivery!==0}'>
+                <div class='input-group'>
+                    <span class='input-group-addon'><i class='fa fa-inr'></i></span>
+                    <input type='number' min='0' step='25' max='5000' ng-model='delivery_zone.min_amt_for_delivery' class='form-control'>
+                </div>
+            </div>
+        </div>
+        <div class='form-group'>
+            <label class='col-sm-2 control-label'>Free Delivery Amount <i class='fa fa-sm fa-asterisk'></i></label>
+            <div class='col-sm-6'>
+                <div class='input-group' ng-class='{"has-error": formFailure && !delivery_zone.free_delivery_amt && delivery_zone.free_delivery_amt!==0}'>
+                    <span class='input-group-addon'><i class='fa fa-inr'></i></span>
+                    <input type='number' min='0' step='25' max='5000' ng-model='delivery_zone.free_delivery_amt' class='form-control'>
+                </div>
+            </div>
+        </div>
+        <div class='form-group'>
+            <label class='col-sm-2 control-label'>Delivery Charge <i class='fa fa-sm fa-asterisk'></i></label>
+            <div class='col-sm-6'>
+                <div class='input-group' ng-class='{"has-error": formFailure && !delivery_zone.delivery_charge && delivery_zone.delivery_charge!==0}'>
+                    <span class='input-group-addon'> <i class='fa fa-inr'></i></span>
+                    <input type='number' min='0' step='10' ng-model='delivery_zone.delivery_charge' class='form-control'>
+                </div>
+            </div>
+        </div>
+        <div class='form-group'>
+            <label class='col-sm-2 control-label'>Last Order <i class='fa fa-sm fa-asterisk'></i></label>
+            <div class='col-sm-4'>
+                <div class='input-group' ng-class='{"has-error": formFailure && !delivery_zone.order_accepts_till.time}'>
+                    <span class='input-group-addon'><i class='fa fa-clock-o'></i></span>
+                    <input type='time' ng-model='delivery_zone.order_accepts_till.time' class='form-control' ng-change='updateLastTime()'>
+                </div>
+            </div>
+        </div>
+        <div class='form-group'>
+            <label class='col-sm-2 control-label'>Delivery Timings <i class='fa fa-sm fa-asterisk'></i></label>
+            <div class='col-sm-8'>
+                <select ng-model='tempOutlet._id' class='form-control' ng-change='cloneTimings(tempOutlet)'>
+                    <option value=''>Choose an Outlet To Clone From</option>
+                    <option ng-repeat='(outletId, _) in outlets' value='{{outletId}}'>
+                        {{outlets[outletId].basics.name}}, {{outlets[outletId].contact.location.locality_1[0]}}, {{outlets[outletId].contact.location.locality_2[0]}}
+                    </option>
+                </select>
+                <div class='clearfix'></div>
+                <p>&nbsp;</p>
+                <table class='table table-bordered table-hover table-condensed table-responsive'>
+                    <thead>
+                        <tr>
+                            <th>Day</th>
+                            <th>Open/Closed</th>
+                            <th ng-repeat='i in getMaxRange() track by $index'>Timing {{$index+1}}</th>
+                            <th>Add Timing</th>
+                            <th>Apply to All Days</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat='day in days'>
+                            <td>{{day | uppercase}}</td>
+                            <td>
+                                <input bs-switch type='checkbox' ng-model='delivery_zone.delivery_timings[day].closed' switch-off-text='Open' switch-on-text='Closed' switch-off-color='success' switch-on-color='danger' ng-change='updateTiming(day, delivery_zone.delivery_timings)'>
+                            </td>
+                            <td ng-repeat='i in getMaxRange() track by $index'>
+                                <div class='col-sm-12' ng-if='delivery_zone.delivery_timings[day].timings.length && delivery_zone.delivery_timings[day].timings[$index]' ng-click='removeTiming(day, $index, delivery_zone.delivery_timings)' ng-init='initalizeTiming(day, $index, delivery_zone.delivery_timings)'>
+                                    <button type='button' class='btn btn-sm btn-danger pull-right'><i class='fa fa-trash-o'></i></button>
+                                </div>
+                                <div class='col-sm-12' ng-if='delivery_zone.delivery_timings[day].timings[$index]'>
+                                    <input type='time' ng-model='delivery_zone.delivery_timings[day].timings[$index].open.time' placeholder='HH:MM a' class='form-control' ng-change='updateTime(day, $index, delivery_zome.delivery_timings)'>
+                                </div>
+                                <div class='col-sm-12 text-center' ng-if='delivery_zone.delivery_timings[day].timings[$index]'>to</div>
+                                <div class='col-sm-12' ng-if='delivery_zone.delivery_timings[day].timings[$index]'>
+                                    <input type='time' ng-model='delivery_zone.delivery_timings[day].timings[$index].close.time' placeholder='HH:MM a' class='form-control' ng-change='updateTime(day, $index, delivery_zone.delivery_timings)'>
+                                </div>
+                            </td>
+                            <td>
+                                <button type='button' class='btn btn-sm btn-default' ng-click='addNewTiming(day, delivery_zone.delivery_timings)' ng-if='!delivery_zone.delivery_timings[day].closed'><i class='fa fa-sm fa-plus'></i> Add Timing</button>
+                            </td>
+                            <td>
+                                <button type='button' class='btn btn-sm btn-default' ng-click='cloneToAllDays(day, delivery_zone.delivery_timings)'>Apply to All Days</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </form>
+</div>
+<div class='modal-footer'>
+    <button type='button' class='btn btn-w-md btn-gap-v btn-primary' ng-click='resolveDeliveryZone()' ng-if='is_new'><i class='fa fa-plus'></i> Add</button>
+    <button type='button' class='btn btn-w-md btn-gap-v btn-primary' ng-click='resolveDeliveryZone()' ng-if='!is_new'> Update </button>
+    <button type='button' class='btn btn-w-md btn-gap-v btn-warning' ng-click='discardDeliveryZone()'> Discard</button>
+</div>

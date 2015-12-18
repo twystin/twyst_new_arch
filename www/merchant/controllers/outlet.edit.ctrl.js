@@ -11,6 +11,108 @@ angular.module('merchantApp')
                 },
                 zoom: 14
             };
+            $scope.map2 = {
+                center: {
+                    latitude: 28.805422897457665,
+                    longitude: 77.16647699812655
+                },
+                zoom: 14,
+                bounds: {}
+            };
+
+            $scope.drawingManagerOptions = {
+                drawingMode: 'polygon',
+                drawingControl: false,
+                drawingControlOptions: {
+                    position: 2,
+                    drawingModes: ["polygon"]
+                }
+            };
+            $scope.drawingManagerControl = {};
+            $scope.drawingManagerEvents = {
+                polygoncomplete: function(drawingManager, eventName, scope, args) {
+                    var polygon = args[0];
+                    var path = polygon.getPath().getArray();
+                    var coords = _.map(path, function(coord) {
+                        return {
+                            latitude: coord.G,
+                            longitude: coord.K
+                        };
+                    });
+                    var index = $scope.outlet.attributes.delivery.delivery_zone.length - 1;
+                    var modalInstance = $modal.open({
+                        animation: true,
+                        templateUrl: 'templates/partials/delivery_zone.tmpl.html',
+                        size: 'lg',
+                        controller: 'DeliveryZoneController',
+                        resolve: {
+                            delivery_zone: function() {
+                                var _zone = { coords: coords};
+                                if(index != -1) {
+                                    _zone = _.extend(_zone, $scope.outlet.attributes.delivery.delivery_zone[index]);
+                                }
+                                return _zone;
+                            },
+                            is_new: function() {
+                                return true
+                            },
+                            is_first: function() {
+                                console.log('index', index);
+                                if (index === -1) {
+                                    return false;
+                                }
+                                return true;
+                            }
+                        }
+                    });
+
+                    modalInstance.result.then(function(delivery_zone) {
+                        $scope.outlet.attributes.delivery.delivery_zone.push(delivery_zone);
+                    }, function() {
+                        polygon.setMap(null);
+                    });
+
+                }
+            };
+
+            $scope.editZone = function(index) {
+                var modalInstance = $modal.open({
+                    animation: true,
+                    templateUrl: 'templates/partials/delivery_zone.tmpl.html',
+                    size: 'lg',
+                    controller: 'DeliveryZoneController',
+                    resolve: {
+                        delivery_zone: function() {
+                            return _.cloneDeep($scope.outlet.attributes.delivery.delivery_zone[index]);
+                        },
+                        is_new: function() {
+                            return true;
+                        },
+                        is_first: function() {
+                            return false;
+                        }
+                    }
+                });
+
+                modalInstance.result.then(function(delivery_zone) {
+                    $scope.outlet.attributes.delivery.delivery_zone[index] = delivery_zone;
+                });
+            };
+
+            $scope.removeZone = function(index) {
+                SweetAlert.swal({
+                    title: 'Are you sure?',
+                    text: 'This change is irreversable',
+                    type: 'error',
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes, delete it!"
+                }, function(confirm) {
+                    if (confirm) {
+                        $scope.outlet.attributes.delivery.delivery_zone.splice(index, 1);
+                    }
+                });
+            };
 
             $scope.isPaying = $rootScope.isPaying;
 
@@ -101,6 +203,11 @@ angular.module('merchantApp')
                     latitude: latitude,
                     longitude: longitude
                 };
+                $scope.map2.center = {
+                    latitude: latitude,
+                    longitude: longitude
+                };
+
                 $scope.marker.coords = {
                     latitude: latitude,
                     longitude: longitude
@@ -122,6 +229,10 @@ angular.module('merchantApp')
                         $scope.outlet.attributes.cost_for_two.min = $scope.outlet.attributes.cost_for_two.min.toString();
                         $scope.outlet.attributes.cost_for_two.max = $scope.outlet.attributes.cost_for_two.max.toString();
                         $scope.map.center = {
+                            latitude: $scope.outlet.contact.location.coords.latitude,
+                            longitude: $scope.outlet.contact.location.coords.longitude
+                        };
+                        $scope.map2.center = {
                             latitude: $scope.outlet.contact.location.coords.latitude,
                             longitude: $scope.outlet.contact.location.coords.longitude
                         };
@@ -446,9 +557,6 @@ angular.module('merchantApp')
                     deferred.reject();
                 } else if ((!_.get($scope.outlet, 'attributes.cost_for_two.min') || !_.get($scope.outlet, 'attributes.cost_for_two.max')) && $rootScope.isPaying) {
                     $scope.showErrorMessage('Please provide both minimum and maximum "Cost for Two"');
-                    deferred.reject();
-                } else if ($scope.outlet.attributes.home_delivery && $rootScope.isPaying && (!_.get($scope.outlet, 'attributes.delivery.delivery_estimated_time') || !/^[0-9]{1,3}$/i.test($scope.outlet.attributes.delivery.delivery_estimated_time))) {
-                    $scope.showErrorMessage('Valid estimate delivery time required');
                     deferred.reject();
                 } else if (!$scope.outlet.attributes.dine_in && !$scope.outlet.attributes.home_delivery && $rootScope.isPaying) {
                     $scope.showErrorMessage('Outlet must have atleast dine-in or delivery available');

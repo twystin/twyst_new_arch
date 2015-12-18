@@ -203,6 +203,37 @@
                                     </div>
                                 </form>
                             </div>
+                            <div class='well well-lg'>
+                                <form class='form-horizontal' role='form'>
+                                    <legend>Delivery Info</legend>
+                                    <div class='form-group'>
+                                        <label class='col-md-2 control-label'>Delivery Map</label>
+                                        <div class='col-md-10'>
+                                            <ui-gmap-google-map center='map2.center' zoom='map2.zoom' draggable='true' options='options' bounds='map2.bounds'>
+                                                <ui-gmap-marker coords="marker.coords" options="marker.options" events="marker.events" idkey="marker.id">
+                                                </ui-gmap-marker>
+                                                <ui-gmap-drawing-manager options='drawingManagerOptions' control='drawingManagerControl' events='drawingManagerEvents'></ui-gmap-drawing-manager>
+                                            </ui-gmap-google-map>
+                                        </div>
+                                    </div>
+                                    <div class='form-group'>
+                                        <label class='col-md-2 control-label'>Delivery Zones <i class='fa fa-sm fa-asterisk'></i></label>
+                                        <div class='col-md-6'>
+                                            <div ui-tree>
+                                                <ol ui-tree-nodes='' ng-model='outlet.attributes.delivery.delivery_zone'>
+                                                    <li ng-repeat='zone in outlet.attributes.delivery.delivery_zone track by $index' ui-tree-node>
+                                                        <div ui-tree-handle>
+                                                            {{$index+1}} {{zone.zone_name}} [Zone]
+                                                            <a class='pull-right btn btn-danger btn-sm' data-nodrag ng-click='removeZone()'><i class='fa fa-trash-o'></i></a>
+                                                            <a class='pull-right btn btn-warning btn-sm' data-nodrag ng-click='editZone($index)'><i class='fa fa-pencil-square-o'></i></a>
+                                                        </div>
+                                                    </li>
+                                                </ol>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
                             <div class='clearfix'></div>
                             <button type="button" class="btn btn-w-sm btn-gap-v btn-direction btn-right btn-primary" wz-next>Next</button>
                         </wz-step>
@@ -288,15 +319,6 @@
                                         <label class='col-md-3 control-label'>Home Delivery</label>
                                         <div class='col-md-9'>
                                             <input bs-switch ng-model='outlet.attributes.home_delivery' type='checkbox' switch-on-text='Available' switch-off-text='Unavailable' switch-on-color='success' switch-off-color='danger'>
-                                        </div>
-                                    </div>
-                                    <div class='form-group' ng-if='outlet.attributes.home_delivery'>
-                                        <label class='col-md-3 control-label'>Estimate Time <i class='fa fa-sm fa-asterisk'></i></label>
-                                        <div class='col-md-4' ng-class='{"has-error": formFailure && !outlet.attributes.delivery.delivery_estimated_time}'>
-                                            <div class='input-group'>
-                                                <input type='text' class='form-control text-right' ng-model='outlet.attributes.delivery.delivery_estimated_time' placeholder='Eg. 30, 40, 45, 60...'>
-                                                <div class='input-group-addon'> minutes</div>
-                                            </div>
                                         </div>
                                     </div>
                                     <div class='form-group'>

@@ -151,6 +151,15 @@ function listEventForConsole(event_type, status) {
         }, function(err, populated) {
           if(err || !populated) {
             deferred.reject({err: err || null, message: 'Unable to retrieve events list' });
+          } else if (event_type === 'upload_bill') {
+            events = _.filter(events, function(event) {
+              console.log(event.event_meta.status);
+              return ['outlet_pending', 'outlet_approved', 'outlet_rejected'].indexOf(event.event_meta.status) !== -1;
+            });
+            deferred.resolve({
+              data: events,
+              message: 'Found the list'
+            });
           } else {
             deferred.resolve({data: populated, message: 'Found the list' });
           }

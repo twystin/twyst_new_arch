@@ -30,7 +30,8 @@
         <div class='form-group'>
             <label class='col-sm-2 control-label'>Item Photo </label>
             <div class='col-sm-6'>
-                <imagereader ng-image-class='menu' ng-image-for='item' ng-model='item.item_photo'>
+                <imagereader ng-image-for='menu' ng-image-type='item' ng-model='item._id'>
+                {{item.item_photo}}
             </div>
             <div class='col-sm-4 text-center'>
                 <input bs-switch ng-model='item.is_vegetarian' type='checkbox' switch-off-color='danger' switch-on-color='success' switch-on-text='Veg' switch-off-text='Non-Veg'>
