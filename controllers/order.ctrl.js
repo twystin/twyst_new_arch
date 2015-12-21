@@ -17,7 +17,7 @@ module.exports.verify_order = function(req, res) {
 	new_order = _.extend(new_order, req.body);
 
 	OrderHelper.verify_order(token, new_order).then(function(data) {
-		HttpHelper.success(res, data.data, data.message);
+		HttpHelper.success(res, data, data.message);
 	}, function(err) {
 		HttpHelper.error(res, err.err, err.message);
 	})
@@ -26,16 +26,15 @@ module.exports.verify_order = function(req, res) {
 module.exports.apply_offer = function(req, res) {
 	logger.log();
 	var token = req.query.token || null;
-	var offer = req.body.offer;
-	var order = req.body.order;
-	var outlet = req.body.outlet;
+	var order = {};
+	order = _.extend(order, req.body);
 
 	if (!token) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
 
-	OfferHelper.apply_offer(order, offer, outlet).then(function(data) {
-		HttpHelper.success(res, data.data, data.message);
+	OrderHelper.apply_offer(token, order).then(function(data) {
+		HttpHelper.success(res, data, data.message);
 	}, function(err) {
 		HttpHelper.error(res, err || null, err.message);
 	});
@@ -45,15 +44,15 @@ module.exports.apply_offer = function(req, res) {
 module.exports.checkout = function(req, res) {
 	logger.log();
 	var token = req.query.token || null;
-	var order = req.body.order;
-	var outlet = req.body.outlet;
+	var order = {};
+	order = _.extend(order, req.body);
 
 	if (!token) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
 
-	OfferHelper.checkout(order, outlet).then(function(data) {
-		HttpHelper.success(res, data.data, data.message);
+	OrderHelper.checkout(token, order).then(function(data) {
+		HttpHelper.success(res, data, data.message);
 	}, function(err) {
 		HttpHelper.error(res, err.err || null, err.message);
 	});

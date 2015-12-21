@@ -30,9 +30,13 @@ var Order = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Outlet'
   },
+  bill_number: {type: String},
   offer_used: {type: Schema.Types.ObjectId},
   order_date: {type: Date, default: new Date()},
-  order_cost: {type: Number},
+  order_actual_cost: {type: Number},
+  amount_paid: {type: Number},
+  tax_paid: {type: Number},  
+  cash_back: {type: Number},
   payment_info: {}, //COD/Payu/payment object
   txn_id: {type: String},
   order_status: {type: String},
@@ -63,15 +67,52 @@ var Order = new Schema({
     option_cost: {
       type: Number
     },
-    add_on: [{
-      add_on_item: {
-        type: String
+    sub_options: [{
+      _id: {
+        type: Schema.Types.ObjectId,
+        default: new mongoose.Types.ObjectId()
       },
-      add_on_item_cost:{
-        type: Number
-      }   
-    }]
-        
+      sub_option_title: {
+        type: String,
+      },
+      sub_option_set: [{
+        sub_option_value: {
+          type: String,
+        },
+        is_vegetarian: {
+          type: Boolean,
+          default: true
+        },
+        sub_option_cost: {
+          type: Number
+        }
+      }]
+    }],
+    addons: [{
+      _id: {
+        type: Schema.Types.ObjectId,
+        default: new mongoose.Types.ObjectId()
+      },
+      addon_title: {
+        type: String,
+      },
+      addon_set: [{
+        addon_value: {
+          type: String,
+        },
+        is_available: {
+          type: Boolean,
+          default: true
+        },
+        is_vegetarian: {
+          type: Boolean,
+          default: true
+        },
+        addon_cost: {
+          type: Number
+        }
+      }]
+    }] 
   }]
 
 })
