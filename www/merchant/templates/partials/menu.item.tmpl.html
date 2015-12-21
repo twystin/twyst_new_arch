@@ -28,6 +28,26 @@
             </div>
         </div>
         <div class='form-group'>
+            <label class='col-sm-2 control-label'>Item Type</label>
+            <div class='col-sm-5'>
+                <select ng-model='item.item_type' class='form-control'>
+                    <option value='type_1'>Type 1</option>
+                    <option value='type_2'>Type 2</option>
+                    <option value='type_3'>Type 3</option>
+                </select>
+            </div>
+            <div class='col-sm-5'>
+                <div class='alert alert-info'>
+                    <b>Item Types:</b>
+                    <ul>
+                        <li><strong>Type 1:</strong> VAT applicable</li>
+                        <li><strong>Type 2:</strong> Item on MRP</li>
+                        <li><strong>Type 3:</strong> Placeholder for future revisions</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class='form-group'>
             <label class='col-sm-2 control-label'>Item Photo </label>
             <div class='col-sm-6'>
                 <imagereader ng-image-for='menu' ng-image-type='item' ng-model='item._id'>

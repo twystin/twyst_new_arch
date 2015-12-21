@@ -49,6 +49,9 @@ var Order = new Schema({
     item_name: {
       type: String
     },
+    item_quantity: {
+      type: Number
+    },
     item_description: {
       type: String
     },

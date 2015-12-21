@@ -501,7 +501,7 @@ angular.module('merchantApp')
                 } else if (!_.get($scope.outlet, 'contact.location.locality_2[0]')) {
                     $scope.showErrorMessage('Locality 2 must be specified');
                     deferred.reject();
-                } else if ((!_.get($scope.outlet, 'contact.location.coords.longitude') && $scope.outlet.contact.location.coords.longitude === 0) || (!_.get($scope.outlet, 'contact.location.coords.latitude') && $scope.outlet.contact.location.coords.latitude === 0)) {
+                } else if ((!_.get($scope.outlet, 'contact.location.coords.longitude') && $scope.outlet.contact.location.coords.longitude !== 0) || (!_.get($scope.outlet, 'contact.location.coords.latitude') && $scope.outlet.contact.location.coords.latitude !== 0)) {
                     $scope.showErrorMessage('Geo-location data is missing');
                     deferred.reject();
                 } else {

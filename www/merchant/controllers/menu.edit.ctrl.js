@@ -130,26 +130,62 @@ angular.module('merchantApp')
             };
 
             $scope.addSubCategory = function(category) {
-                var modalInstance = $modal.open({
-                    animation: true,
-                    templateUrl: 'templates/partials/menu.sub_category.tmpl.html',
-                    controller: 'MenuSubCategoryController',
-                    size: 'lg',
-                    resolve: {
-                        sub_category: function() {
-                            return {
-                                items: []
-                            };
-                        },
-                        is_new: function() {
-                            return true;
-                        }
-                    }
-                });
+                if (category.sub_categories.length === 1 && category.sub_categories[0].sub_category_name === 'Default' && category.sub_categories[0].items.length) {
+                    SweetAlert.swal({
+                        title: 'Are you sure?',
+                        text: 'Existing items will be shifted to the new sub category',
+                        type: 'warning',
+                        confirmButtonColor: '#DD6B55',
+                        showCancelButton: 'true',
+                        confirmButtonText: 'Yes, Continue'
+                    }, function(confirm) {
+                        var modalInstance = $modal.open({
+                            animation: true,
+                            templateUrl: 'templates/partials/menu.sub_category.tmpl.html',
+                            controller: 'MenuSubCategoryController',
+                            size: 'lg',
+                            resolve: {
+                                sub_category: function() {
+                                    return {
+                                        items: []
+                                    };
+                                },
+                                is_new: function() {
+                                    return true;
+                                }
+                            }
+                        });
 
-                modalInstance.result.then(function(sub_category) {
-                    category.sub_categories.push(sub_category);
-                });
+                        modalInstance.result.then(function(sub_category) {
+                            category.sub_categories[0] = _.merge(category.sub_categories[0], sub_category);
+                        });
+                    });
+                } else {
+                    var modalInstance = $modal.open({
+                        animation: true,
+                        templateUrl: 'templates/partials/menu.sub_category.tmpl.html',
+                        controller: 'MenuSubCategoryController',
+                        size: 'lg',
+                        resolve: {
+                            sub_category: function() {
+                                return {
+                                    items: []
+                                };
+                            },
+                            is_new: function() {
+                                return true;
+                            }
+                        }
+                    });
+
+                    modalInstance.result.then(function(sub_category) {
+                        if(category.sub_categories[0].sub_category_name === 'Default') {
+                            category.sub_categories[0] = _.merge(category.sub_categories[0], sub_category);
+                        } else {
+                            category.sub_categories.push(sub_category);
+                        }
+                    });
+                }
             };
 
             $scope.cloneSubCategory = function(category, index) {
@@ -231,6 +267,7 @@ angular.module('merchantApp')
                     resolve: {
                         item: function() {
                             return {
+                                item_type: 'type_1',
                                 is_available: true,
                                 option_is_addon: false,
                                 is_vegetarian: true,

@@ -1,93 +1,96 @@
 <div>&nbsp;</div>
-<div class='col-xs-12 col-md-8'>
-	<div class='row'>
-		<div class='col-xs-12'>
-			<div class='well'>
-				<legend>Outlet
-					<select class='form-control' ng-model='choosen_outlet' ng-change='resetForms()'>
-						<option ng-repeat='outlet in outlets' value='{{outlet._id}}'>{{outlet.basics.name + (outlet.contact.location.locality_1[0]?"," + outlet.contact.location.locality_1[0]: '') + (outlet.contact.location.locality_2[0]?"," + outlet.contact.location.locality_2[0]: '')}}</option>
-					</select>
-				</legend>
-			</div>
-		</div>
-		<div class='col-xs-12 col-sm-4'>
-			<div class='well' style='min-height: 170px;'>
-				<label>Check-in a User</label>
-				<div class='form-group'>
-					<div class='input-group'>
-						<input type='text' ng-model='checkin.number' class='form-control' placeholder='10 digit nobile number'>
-						<div class='input-group-btn'>
-							<a class='btn btn-primary' ng-click='checkinUser()'>Checkin</a>
-						</div>
-					</div>
-					<div>&nbsp;</div>
-					<div class='input-group'>
-						<div class='input-group-addon'>Date</div>
-						<input type='text' datepicker-popup="MM/dd/yyyy" show-button-bar='false' min-date='minDate' max-date='maxDate' is-open="date_open" ng-click="date_open = true" class='form-control' ng-model='checkin.date'>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class='col-xs-12 col-sm-4'>
-			<div class='well' style='min-height: 170px;'>
-				<label>Find vouchers by code</label>
-				<div class='input-group'>
-					<input type='text' class='form-control' ng-model='search.code' placeholder='Voucher code'>
-					<div class='input-group-btn'>
-						<a class='btn btn-primary' ng-click='getVoucherByCode()'>Search</a>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class='col-xs-12 col-sm-4'>
-			<div class='well' style='min-height: 170px;'>
-				<label>Find vouchers by phone</label>
-				<div class='input-group'>
-					<input type='text' class='form-control' ng-model='search.number' placeholder='10 digit mobile number'>
-					<div class='input-group-btn'>
-						<a class='btn btn-primary' ng-click='getVouchersByPhone()'>Search</a>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class='col-xs-12'>
-			<div class='jumbotron'>
-				<div class='col-xs-12'>
-					<div ng-if='show_msg' class='alert alert-warning'>
-						<h4>No matching  coupon found</h4>
-					</div>
-					<div ng-if='show_vouchers'>
-						
-						<div class='col-xs-12 col-sm-6 col-lg-4 well well-lg' ng-repeat='voucher in user_vouchers'>
-							<legend>{{voucher.code}}</legend>
-							<h2>{{voucher.header}}</h2>
-							<h4>{{voucher.line1}}</h4>
-							<h4>{{voucher.line2}}</h4>
-							<h4 class='pull-right'><span class='glyphicon glyphicon-user'></span>{{voucher.phone}}</h4>
-							<div class='clearfix'></div>
-							<hr>
-							<div class='text-center'>
-								<a class='btn btn-block btn-primary' ng-click='redeemUserCoupon(voucher.code)' ng-if='voucher.status==="active" && (voucher.lapse_date > today || voucher.exipry_date > today || (!voucher.expiry_date && voucher.issued_at > THREE_HOURS)) || voucher.status==="user_redeemed" && (voucher.lapse_date > today || voucher.exipry_date > today)'>Redeem</a>
-							</div>							
-							
-							<div class='text-center'>
-								<a class='btn btn-block btn-success' ng-if='voucher.lapse_date > today && voucher.status==="social_pool" && !voucher.used_details.used_time' disabled>Social Pool</a>
-							</div>
-							<div class='text-center'>
-								<a class='btn btn-block btn-danger' ng-if='voucher.status=="merchant_redeemed" ||  voucher.status=="redeemed" ||  voucher.status=="user_redeemed"' disabled> Redeemed</a>
-							</div>
-							<div class='text-center'>
-								<a class='btn btn-block btn-warning' ng-if='(voucher.lapse_date <= today || voucher.expiry_date <= today || (!voucher.expiry_date && voucher.issued_at < THREE_HOURS)) && !voucher.used_details.used_time' disabled>Expired</a>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-<div class='col-xs-12 col-md-4' ng-init='retrieveNotifications()'>
-	<legend>Notifications</legend>
-	<div class='well well-lg' style='min-height:400px;'>
-	</div>
+<div class='container-fluid'>
+    <div class='row'>
+        <div class='col-sm-12 table-responsive'>
+            <div class='table-label'>
+                <legend>Orders</legend>
+            </div>
+            <div class='btn-group btn-group-justified'>
+                <a class='btn' ng-click='updateShowing("pending")' ng-class='{"btn-primary": showing==="pending", "btn-dark": showing!=="pending"}'>Pending</a>
+                <a class='btn' ng-click='updateShowing("accepted")' ng-class='{"btn-primary": showing==="accepted", "btn-dark": showing!=="accepted"}'>Accepted</a>
+                <a class='btn' ng-click='updateShowing("declined")' ng-class='{"btn-primary": showing==="declined", "btn-dark": showing!=="declined"}'>Declined</a>
+                <a class='btn' ng-click='updateShowing("delivered")' ng-class='{"btn-primary": showing==="delivered", "btn-dark": showing!=="delivered"}'>Delivered</a>
+            </div>
+            <div class='clearfix'></div>
+            <div>&nbsp;</div>
+            <div class='alert alert-warning text-center' ng-if='!orders.length'>
+                <b>No {{showing}} orders right now.</b>
+            </div>
+            <div class='col-sm-offset-1 col-sm-10'>
+                <div class='panel panel-primary'>
+                    <div class='panel-heading'>
+                        <div>
+                            <h4 class='pull-left'>{{order.user.email}}</h4>
+                            <span class='pull-right'>Order Id #{{order._id}}</span>
+                        </div>
+                        <div>
+                            <div class='pull-left'>
+                                {{order.order_date | date:longDate}}
+                                <div class='clearfix'></div>
+                                {{order.address.line1}}, {{order.address.line2}}, {{order.address.city}}
+                            </div>
+                            <div class='pull-right'>
+                                <h4 class='text-right'>{{order.user.phone}}</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='panel-body'>
+                        <table class='table table-bordered table-hover'>
+                            <thead>
+                                <tr>
+                                    <th>ITEM</th>
+                                    <th>PRICE</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        {{item.item_name}} <span class='badge'>{{item.item_quantity}}</span> <span class='badge' ng-if='item.option'>{{item.option}}</span> <span ng-repeat='addon in item.add_on' class='badge'>{{addon.add_on_item}}</span>
+                                    </td>
+                                    <td>{{getItemPrice(item)}}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <hr>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Item Total</td>
+                                    <td>{{getOrderTotal(order)}}</td>
+                                </tr>
+                                <tr>
+                                    <td>VAT</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Delivery and Dispatch</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                	<td>Discount</td>
+                                	<td></td>
+                            	</tr>
+                            	<tr>
+                            		<td colspan="2"><hr></td>
+                            	</tr>
+                            	<tr>
+                            		<th>Grand Total</th>
+                            		<th>{{order.order_cost}}</th>
+                            	</tr>
+                            	<tr>
+                            		<td colspan='2' class='text-center'>
+                            			<!-- <timer> -->
+                            			<span class='label label-primary'>Timer</span>
+                            			<span class='label label-primary' ng-if='order.txn_id'>PAID</span>
+                            			<span class='label label-danger' ng-if='!order.txn_id'>C.O.D</span>
+                            			<span class='label label-default pull-right'>{{showing | uppercase}}</span>
+                            		</td>
+                            	</tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

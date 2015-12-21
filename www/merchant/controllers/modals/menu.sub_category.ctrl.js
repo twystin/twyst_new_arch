@@ -3,6 +3,7 @@ angular.module('merchantApp')
 
 		$scope.is_new = is_new;
 		$scope.sub_category = sub_category;
+		$scope.sub_category_name = ['Veg Starter', 'Non-Veg Starter', 'Veg Main Course', 'Non-Veg Main Course'];
 
 		$scope.resolveSubCategory = function() {
 			if (!$scope.sub_category.sub_category_name) {
