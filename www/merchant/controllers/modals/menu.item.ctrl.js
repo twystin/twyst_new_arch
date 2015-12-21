@@ -28,6 +28,7 @@ angular.module('merchantApp')
         });
 
         $scope.resolveItem = function() {
+            console.log($scope.item);
             $scope.validateItem().then(function() {
                 $modalInstance.close($scope.item);
             }, function(err) {

@@ -5,6 +5,7 @@ var Q = require('q');
 var _ = require('underscore');
 var ld = require('lodash');
 var mongoose = require('mongoose');
+var ObjectId = mongoose.Types.ObjectId;
 require('../../models/outlet.mdl');
 var Outlet = mongoose.model('Outlet');
 var User = mongoose.model('User');
@@ -198,7 +199,8 @@ module.exports.create_outlet = function(token, created_outlet) {
               }
             });
           }
-        })
+        });
+        
         User.findOne({
           _id: data.data._id
         }, function(err, user) {
@@ -208,7 +210,7 @@ module.exports.create_outlet = function(token, created_outlet) {
               message: 'Saved the outlet, but couldn\'t set the user.'
             });
           } else {
-            user.outlets.push(o._id);
+            user.outlets.push(outlet._id);
             
             user.save(function(err, u) {
               if (err || !u) {

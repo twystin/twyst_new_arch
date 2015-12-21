@@ -18,7 +18,7 @@ angular.module('merchantApp').controller('MenuCloneController', function($scope,
         if (!$scope.req_obj.outlet) {
             SweetAlert.swal('Error!', 'Please select an outlet first', 'error');
         } else {
-            merchantRESTSvc.cloneMenu(menu, $scope.req_obj.outlet).then(function(data) {
+            merchantRESTSvc.cloneMenu(menu_id, $scope.req_obj.outlet).then(function(data) {
                 $modalInstance.close();
             }, function(err) {
                 var message = err.message?err.message:'Unable to clone the menu right now';

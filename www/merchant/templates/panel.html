@@ -52,32 +52,33 @@
 		</div>
 		<div class='col-xs-12'>
 			<div class='jumbotron'>
-				<div ng-if='show_msg' class='alert alert-warning'>
-					<h4>No matching  coupon found</h4>
-				</div>
-				<div ng-if='show_vouchers'>
-					
-					<div class='col-xs-12 col-sm-6 col-lg-4 well well-lg' ng-repeat='voucher in user_vouchers'>
-						<legend>{{voucher.code}}</legend>
-						<legend>{{voucher.coupon_code}}</legend>
-						<h2>{{voucher.header}}</h2>
-						<h4>{{voucher.line1}}</h4>
-						<h4>{{voucher.line2}}</h4>
-						<h4 class='pull-right'><span class='glyphicon glyphicon-user'></span>{{voucher.phone}}</h4>
-						<div class='clearfix'></div>
-						<hr>
-						<div class='text-center'>
-							<a class='btn btn-block btn-primary' ng-click='redeemUserCoupon(voucher.code)' ng-if='voucher.status==="active" && (voucher.lapse_date > today || voucher.exipry_date > today || (!voucher.expiry_date && voucher.issued_at > THREE_HOURS)) || voucher.status==="user_redeemed" && (voucher.lapse_date > today || voucher.exipry_date > today)'>Redeem</a>
-						</div>							
+				<div class='col-xs-12'>
+					<div ng-if='show_msg' class='alert alert-warning'>
+						<h4>No matching  coupon found</h4>
+					</div>
+					<div ng-if='show_vouchers'>
 						
-						<div class='text-center'>
-							<a class='btn btn-block btn-success' ng-if='voucher.lapse_date > today && voucher.status==="social_pool" && !voucher.used_details.used_time' disabled>Social Pool</a>
-						</div>
-						<div class='text-center'>
-							<a class='btn btn-block btn-danger' ng-if='voucher.status=="merchant_redeemed" ||  voucher.status=="redeemed" ||  voucher.status=="user_redeemed"' disabled> Redeemed</a>
-						</div>
-						<div class='text-center'>
-							<a class='btn btn-block btn-warning' ng-if='(voucher.lapse_date <= today || voucher.expiry_date <= today || (!voucher.expiry_date && voucher.issued_at < THREE_HOURS)) && !voucher.used_details.used_time' disabled>Expired</a>
+						<div class='col-xs-12 col-sm-6 col-lg-4 well well-lg' ng-repeat='voucher in user_vouchers'>
+							<legend>{{voucher.code}}</legend>
+							<h2>{{voucher.header}}</h2>
+							<h4>{{voucher.line1}}</h4>
+							<h4>{{voucher.line2}}</h4>
+							<h4 class='pull-right'><span class='glyphicon glyphicon-user'></span>{{voucher.phone}}</h4>
+							<div class='clearfix'></div>
+							<hr>
+							<div class='text-center'>
+								<a class='btn btn-block btn-primary' ng-click='redeemUserCoupon(voucher.code)' ng-if='voucher.status==="active" && (voucher.lapse_date > today || voucher.exipry_date > today || (!voucher.expiry_date && voucher.issued_at > THREE_HOURS)) || voucher.status==="user_redeemed" && (voucher.lapse_date > today || voucher.exipry_date > today)'>Redeem</a>
+							</div>							
+							
+							<div class='text-center'>
+								<a class='btn btn-block btn-success' ng-if='voucher.lapse_date > today && voucher.status==="social_pool" && !voucher.used_details.used_time' disabled>Social Pool</a>
+							</div>
+							<div class='text-center'>
+								<a class='btn btn-block btn-danger' ng-if='voucher.status=="merchant_redeemed" ||  voucher.status=="redeemed" ||  voucher.status=="user_redeemed"' disabled> Redeemed</a>
+							</div>
+							<div class='text-center'>
+								<a class='btn btn-block btn-warning' ng-if='(voucher.lapse_date <= today || voucher.expiry_date <= today || (!voucher.expiry_date && voucher.issued_at < THREE_HOURS)) && !voucher.used_details.used_time' disabled>Expired</a>
+							</div>
 						</div>
 					</div>
 				</div>

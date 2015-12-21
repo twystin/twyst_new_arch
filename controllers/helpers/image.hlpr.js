@@ -107,6 +107,48 @@ module.exports.uploadOutletImage = function(image_obj) {
 	return deferred.promise;
 };
 
+module.exports.uploadMenuImage = function(image_obj) {
+    logger.log();
+    var deferred = Q.defer();
+    var content_type = getContentType(image_obj.image);
+    var buff = new Buffer(image_obj.image.replace(/^data:image\/\w+;base64,/, ""), 'base64');
+
+    if (!content_type) {
+        deferred.reject({
+            err: new Error("Invalid image type"),
+            message: 'Image upload failed'
+        });
+    } else if (image_obj.image_type === 'item') {
+        var upload_obj = {
+            Bucket: 'retwyst-merchants',
+            ACL: 'public-read',
+            ContentType: content_type,
+            Key: 'retwyst-menus' + '/' + image_obj.id + '/items/' + image_obj.item,
+            Body: buff
+        };
+        AWSHelper.uploadImage(upload_obj)
+            .then(function(res) {
+                deferred.resolve({
+                    data: {
+                        id: image_obj.id,
+                        key: image_obj.item
+                    },
+                    message: "Image uploaded successfully"
+                });
+            }, function(err) {
+                deferred.reject({
+                    err: err,
+                    message: 'Image upload failed'
+                });
+            });
+    } else {
+        deferred.reject({
+            err: new Error("Invalid request object"),
+            message: "Invalid request object"
+        });
+    }
+    return deferred.promise;
+}
 
 var getResizedImages = function(img_buffer) {
 	logger.log();

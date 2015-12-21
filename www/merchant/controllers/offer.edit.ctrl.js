@@ -388,9 +388,9 @@ angular.module('merchantApp')
                 } else if ($scope.offer.rule.event_match === 'on every') {
                     if (!$scope.offer.rule.event_count) {
                         deferred.reject('Valid checkin repeat required');
-                    } else if (!$scope.offer.rule.event_start) {
+                    } else if (!$scope.offer.rule.event_start && $scope.offer.rule.event_start !== 0) {
                         deferred.reject('Valid start checkin required')
-                    } else if ($scope.offer.rule.event_end) {
+                    } else if (!$scope.offer.rule.event_end) {
                         deferred.reject('Valid end checkin required');
                     } else if (($scope.offer.rule.event_count > ($scope.offer.rule.event_end - $scope.offer.rule.event_start)) || ($scope.offer.rule.event_start >= $scope.offer.rule.event_end)) {
                         deferred.reject(($scope.offer.rule.event_count > ($scope.offer.rule.event_end - $scope.offer.rule.event_start)) || ($scope.offer.rule.event_start >= $scope.offer.rule.event_end));
@@ -398,7 +398,7 @@ angular.module('merchantApp')
                         deferred.resolve(true);
                     }
                 } else if ($scope.offer.rule.event_match === 'after') {
-                    if (!$scope.offer.rule.event_start) {
+                    if (!$scope.offer.rule.event_start && $scope.offer.rule.event_start !== 0) {
                         deferred.reject('Valid offer start checkin count required');
                     } else if (!$scope.offer.rule.event_end) {
                         deferred.reject('Valid offer end checkin count required');
@@ -422,9 +422,10 @@ angular.module('merchantApp')
                 if (!$scope.offer.actions.reward.reward_meta.reward_type) {
                     deferred.reject('Choose a reward type');
                 } else if ($scope.offer.actions.reward.reward_meta.reward_type === 'buyxgety') {
+                    console.log($scope.offer.actions.reward.reward_meta);
                     if (!$scope.offer.actions.reward.reward_meta.item_x) {
                         deferred.reject('Buy X Get Y requires "FREE ITEM"');
-                    } else if (!$scope.offer.actions.reward.reward_meta.item_y === 'discount') {
+                    } else if (!$scope.offer.actions.reward.reward_meta.item_y) {
                         deferred.reject('Buy X Get Y requires "PAID ITEM"');
                     } else {
                         deferred.resolve(true);

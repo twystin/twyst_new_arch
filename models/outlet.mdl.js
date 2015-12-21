@@ -105,6 +105,10 @@ var OutletSchema = new Schema({
     },
     phones: {
       mobile: [{
+        num_type: {
+          type: String,
+          default: ''
+        },
         num: {
           type: String,
           default: '',
@@ -198,7 +202,7 @@ var OutletSchema = new Schema({
       delivery_zone: [{
         zone_name: String,
         coord: [],
-        delivery_estimated_time: String,  
+        delivery_estimated_time: Number,  
         delivery_timings: hours.hours,
         delivery_conditions: String,  
         min_amt_for_delivery: Number,

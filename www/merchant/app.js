@@ -7,7 +7,7 @@ angular.module('merchantApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angula
         uiGmapGoogleMapApiProvider.configure({
             key: 'AIzaSyALU-FlIm704rdvaZFVujipV4SVxR4Kt9A',
             v: '3.17',
-            libraries: 'weather,geometry,visualization'
+            libraries: 'weather,geometry,visualization,drawing'
         });
 
         $urlRouterProvider.when('', '/');
