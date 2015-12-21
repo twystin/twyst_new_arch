@@ -15,36 +15,7 @@ angular.module('merchantApp')
                     cuisines: [],
                     payment_options: [],
                     delivery: {
-                        delivery_timings: {
-                            monday: {
-                                closed: false,
-                                timings: [{}]
-                            },
-                            tuesday: {
-                                closed: false,
-                                timings: [{}]
-                            },
-                            wednesday: {
-                                closed: false,
-                                timings: [{}]
-                            },
-                            thursday: {
-                                closed: false,
-                                timings: [{}]
-                            },
-                            friday: {
-                                closed: false,
-                                timings: [{}]
-                            },
-                            saturday: {
-                                closed: false,
-                                timings: [{}]
-                            },
-                            sunday: {
-                                closed: false,
-                                timings: [{}]
-                            }
-                        }
+                        delivery_zone: []
                     }
                 },
                 contact: {
@@ -110,6 +81,112 @@ angular.module('merchantApp')
                 },
                 zoom: 14
             };
+
+            $scope.map2 = {
+                center: {
+                    latitude: 28.805422897457665,
+                    longitude: 77.16647699812655
+                },
+                zoom: 14,
+                bounds: {}
+            };
+            $scope.options = {
+                scrollwheel: true
+            };
+            $scope.drawingManagerOptions = {
+                drawingMode: 'polygon',
+                drawingControl: false,
+                drawingControlOptions: {
+                    position: 2,
+                    drawingModes: ["polygon"]
+                }
+            };
+            $scope.drawingManagerControl = {};
+            $scope.drawingManagerEvents = {
+                polygoncomplete: function(drawingManager, eventName, scope, args) {
+                    var polygon = args[0];
+                    var path = polygon.getPath().getArray();
+                    var coords = _.map(path, function(coord) {
+                        return {
+                            latitude: coord.G,
+                            longitude: coord.K
+                        };
+                    });
+                    var index = $scope.outlet.attributes.delivery.delivery_zone.length - 1;
+                    var modalInstance = $modal.open({
+                        animation: true,
+                        templateUrl: 'templates/partials/delivery_zone.tmpl.html',
+                        size: 'lg',
+                        controller: 'DeliveryZoneController',
+                        resolve: {
+                            delivery_zone: function() {
+                                var _zone = { coords: coords};
+                                if(index != -1) {
+                                    _zone = _.extend(_zone, $scope.outlet.attributes.delivery.delivery_zone[index]);
+                                }
+                                return _zone;
+                            },
+                            is_new: function() {
+                                return true
+                            },
+                            is_first: function() {
+                                console.log('index', index);
+                                if (index === -1) {
+                                    return false;
+                                }
+                                return true;
+                            }
+                        }
+                    });
+
+                    modalInstance.result.then(function(delivery_zone) {
+                        $scope.outlet.attributes.delivery.delivery_zone.push(delivery_zone);
+                    }, function() {
+                        polygon.setMap(null);
+                    });
+
+                }
+            };
+
+            $scope.editZone = function(index) {
+                var modalInstance = $modal.open({
+                    animation: true,
+                    templateUrl: 'templates/partials/delivery_zone.tmpl.html',
+                    size: 'lg',
+                    controller: 'DeliveryZoneController',
+                    resolve: {
+                        delivery_zone: function() {
+                            return _.cloneDeep($scope.outlet.attributes.delivery.delivery_zone[index]);
+                        },
+                        is_new: function() {
+                            return true;
+                        },
+                        is_first: function() {
+                            return false;
+                        }
+                    }
+                });
+
+                modalInstance.result.then(function(delivery_zone) {
+                    $scope.outlet.attributes.delivery.delivery_zone[index] = delivery_zone;
+                });
+            };
+
+            $scope.removeZone = function(index) {
+                SweetAlert.swal({
+                    title: 'Are you sure?',
+                    text: 'This change is irreversable',
+                    type: 'error',
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes, delete it!"
+                }, function(confirm) {
+                    if (confirm) {
+                        $scope.outlet.attributes.delivery.delivery_zone.splice(index, 1);
+                    }
+                });
+            };
+
             $scope.isPaying = $rootScope.isPaying;
 
             $scope.outlet_types = [{
@@ -198,6 +275,10 @@ angular.module('merchantApp')
                 }
 
                 $scope.map.center = {
+                    latitude: latitude,
+                    longitude: longitude
+                };
+                $scope.map2.center = {
                     latitude: latitude,
                     longitude: longitude
                 };
@@ -447,7 +528,31 @@ angular.module('merchantApp')
                 });
             };
 
-            // TODO: createOutlet function
+            $scope.createOutlet = function() {
+                var temp_outlet = _.cloneDeep($scope.outlet);
+                temp_outlet._id = _id;
+                merchantRESTSvc.createOutlet($scope.outlet)
+                    .then(function(res) {
+                        console.log(res);
+                        SweetAlert.swal({
+                            title: 'Outlet created successfully',
+                            type: 'success',
+                            showCancelButton: false,
+                            confirmButtonText: 'Continue'
+                        }, function() {
+                            $state.go('^.outlets_manage');
+                        });
+                    }, function(err) {
+                        console.log(err);
+                        var message = err.message || 'Something went wrong';
+                        SweetAlert.swal({
+                            title: 'Error',
+                            text: message,
+                            showCancelButton: false,
+                            confirmButtonColor: "#DD6B55"
+                        });
+                    });
+            }
 
             $scope.scrollToTop = function() {
                 $('document').ready(function() {

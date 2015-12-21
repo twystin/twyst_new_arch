@@ -60,7 +60,7 @@ module.exports.update = function(req, res) {
 module.exports.delete = function(req, res) {
     logger.log();
     var token = req.query.token || null,
-    offer_id = req.body.offer_id.
+    offer_id = req.body.offer_id,
     order = req.body.order;
 
     if(!token) {
