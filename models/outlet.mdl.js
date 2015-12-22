@@ -574,6 +574,10 @@ var OutletSchema = new Schema({
           item_name: {
             type: String
           },
+          item_type: {
+            type: String,
+            enum: ['type_1', 'type_2', 'type_3']
+          },
           item_description: {
             type: String
           },

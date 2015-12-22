@@ -36,17 +36,17 @@
                                 <a class='pull-right btn btn-sm btn-info' data-nodrag ng-click='cloneCategory($index)'><i class='fa fa-copy'></i></a>
                                 <a class='pull-right btn btn-sm btn-default' data-nodrag ng-click='editCategory($index)'> <i class='fa fa-pencil'></i> </a>
                                 <a class='pull-right btn btn-sm btn-default' data-nodrag ng-click='addSubCategory(category)'> <i class='fa fa-plus'></i> Sub Category</a>
-                                <a class='pull-right btn btn-sm btn-default' data-nodrag ng-click='addItem(category.sub_categories[0])' ng-if='category.sub_categories.length===1'> <i class='fa fa-plus'></i> Item</a>
+                                <a class='pull-right btn btn-sm btn-default' data-nodrag ng-click='addItem(category.sub_categories[0])' ng-if='category.sub_categories.length===1 && category.sub_categories[0].sub_category_name === "Default"'> <i class='fa fa-plus'></i> Item</a>
                             </div>
                             <div ui-tree>
                                 <ol ui-tree-nodes ng-model='category.sub_categories' ng-class="{hidden: collapsed}">
                                     <li ng-repeat='sub_category in category.sub_categories track by $index' ui-tree-node>
-                                        <div ui-tree-handle class='tree-node tree-node-content' ng-if='category.sub_categories.length!==1'>
+                                        <div ui-tree-handle class='tree-node tree-node-content' ng-if='category.sub_categories.length!==1 || category.sub_categories[0].sub_category_name !== "Default"'>
                                             <a class='btn btn-dark btn-xs' ng-if='sub_category.items.length' data-nodrag ng-click='toggle(this)'>
                                                 <span class='fa' ng-class='{"fa-chevron-right": collapsed, "fa-chevron-down": !collapsed}'></span>
                                             </a>
                                             {{sub_category.sub_category_name}} [Sub Category]
-                                            <a class='pull-right btn btn-sm btn-danger' data-nodrag ng-click='removeSubCategory(category, $index)'> <i class='fa fa-trash-o'></i> </a>
+                                            <a class='pull-right btn btn-sm btn-danger' data-nodrag ng-click='removeSubCategory(category, $index)' ng-if='category.sub_categories.length>1'> <i class='fa fa-trash-o'></i> </a>
                                             <a class='pull-right btn btn-sm btn-info' data-nodrag ng-click='cloneSubCategory(category, $index)'><i class='fa fa-copy'></i></a>
                                             <a class='pull-right btn btn-sm btn-default' data-nodrag ng-click='editSubCategory(category, $index)'> <i class='fa fa-pencil'></i> </a>
                                             <a class='pull-right btn btn-sm btn-default' data-nodrag ng-click='addItem(sub_category)'> <i class='fa fa-plus'></i> Item</a>

@@ -21,7 +21,8 @@ angular.module('merchantApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angula
             })
             .state('merchant.default', {
                 url: '/',
-                templateUrl: 'templates/panel.html'
+                templateUrl: 'templates/panel.html',
+                controller: 'OrderManageController'
             })
             .state('merchant.login', {
                 url: '/login',

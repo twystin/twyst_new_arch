@@ -48,6 +48,8 @@ angular.module('merchantApp')
                 deferred.reject('Item cost required.');
             } else if (!$scope.item.item_tags || !$scope.item.item_tags.length) {
                 deferred.reject('Atleast one tag required')
+            } else if (!$scope.item.item_type) {
+                deferred.reject('Item type must be selected');
             } else {
                 deferred.resolve();
             }

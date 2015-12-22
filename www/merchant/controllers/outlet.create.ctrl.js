@@ -587,7 +587,7 @@ angular.module('merchantApp')
                 } else if (!_.get($scope.outlet, 'contact.location.locality_2[0]')) {
                     $scope.showErrorMessage('Locality 2 must be specified');
                     deferred.reject();
-                } else if ((!_.get($scope.outlet, 'contact.location.coords.longitude') && $scope.outlet.contact.location.coords.longitude === 0) || (!_.get($scope.outlet, 'contact.location.coords.latitude') && $scope.outlet.contact.location.coords.latitude === 0)) {
+                } else if ((!_.get($scope.outlet, 'contact.location.coords.longitude') && $scope.outlet.contact.location.coords.longitude !== 0) || (!_.get($scope.outlet, 'contact.location.coords.latitude') && $scope.outlet.contact.location.coords.latitude !== 0)) {
                     $scope.showErrorMessage('Geo-location data is missing');
                     deferred.reject();
                 } else {
@@ -643,9 +643,6 @@ angular.module('merchantApp')
                     deferred.reject();
                 } else if ((!_.get($scope.outlet, 'attributes.cost_for_two.min') || !_.get($scope.outlet, 'attributes.cost_for_two.max')) && $rootScope.isPaying) {
                     $scope.showErrorMessage('Please provide both minimum and maximum "Cost for Two"');
-                    deferred.reject();
-                } else if ($scope.outlet.attributes.home_delivery && $rootScope.isPaying && (!_.get($scope.outlet, 'attributes.delivery.delivery_estimated_time') || !/^[0-9]{1,3}$/i.test($scope.outlet.attributes.delivery.delivery_estimated_time))) {
-                    $scope.showErrorMessage('Valid estimate delivery time required');
                     deferred.reject();
                 } else if (!$scope.outlet.attributes.dine_in && !$scope.outlet.attributes.home_delivery && $rootScope.isPaying) {
                     $scope.showErrorMessage('Outlet must have atleast dine-in or delivery available');
