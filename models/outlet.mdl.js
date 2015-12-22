@@ -603,10 +603,6 @@ var OutletSchema = new Schema({
             default: false,
           },
           options: [{
-            _id: {
-              type: Schema.Types.ObjectId,
-              default: new mongoose.Types.ObjectId()
-            },
             is_available: {
               type: Boolean,
               default: true
@@ -622,10 +618,6 @@ var OutletSchema = new Schema({
               type: Number
             },
             sub_options: [{
-              _id: {
-                type: Schema.Types.ObjectId,
-                default: new mongoose.Types.ObjectId()
-              },
               sub_option_title: {
                 type: String,
               },
@@ -647,10 +639,6 @@ var OutletSchema = new Schema({
               }]
             }],
             addons: [{
-              _id: {
-                type: Schema.Types.ObjectId,
-                default: new mongoose.Types.ObjectId()
-              },
               addon_title: {
                 type: String,
               },
