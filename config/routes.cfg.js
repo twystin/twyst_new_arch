@@ -156,7 +156,16 @@ module.exports = function(app) {
     app.get('/app', function(req, res) {
         res.redirect('https://play.google.com/store/apps/details?id=com.twyst.app.android&hl=en');
     });
+    
   })();
+
+  app.get('/privacy_policy/', function(req, res){
+      res.redirect('../../privacy_policy.pdf');    
+  });
+
+  app.get('/terms_of_use/', function(req, res){
+      res.redirect('../../privacy_policy.pdf');    
+  });
 };
 
 
