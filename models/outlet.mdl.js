@@ -214,25 +214,9 @@ var OutletSchema = new Schema({
         }
       }],  
     },
-    taxes: {
-      vat:{
-        type: Number
-      },
-      surcharge_on_vat: {
-        type: Number
-      },
-      st: {
-        type: Number
-      },
-      sbc: {
-        type: Number
-      },
-      packing_charge: {
-        type: Number
-      },
-      other: {
-        type: Number
-      }
+    packing_charge: {
+      type: Number,
+      default: 0
     },
     home_delivery: {
       type: Boolean

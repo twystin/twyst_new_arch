@@ -19,6 +19,7 @@ var RecoHelper = require('./reco.hlpr');
 var keygen = require('keygenerator');
 var Bayeux = require('../../app_server');
 var PaymentHelper = require('./payment.hlpr');
+var TaxConfig = require('../../config/taxes.cfg');
 
 
 module.exports.verify_order = function(token, order) {
@@ -290,7 +291,8 @@ function calculate_order_value(data, free_item) {
     var menu = {};
     menu = data.outlet && data.outlet.menus[0];
     var items = data.items;
-    var category, sub_category, item, option, sub_option, add_on, amount = 0;
+    var category, sub_category, item, option, sub_options = [], menu_sub_options,
+     order_sub_options, menu_addons,order_addons, addons = [], amount = 0;
     
     for(var i = 0; i < items.length; i++) {
         category = _.findWhere(menu.menu_categories, {_id: items[i].category_id});
@@ -303,24 +305,84 @@ function calculate_order_value(data, free_item) {
         }
         
         if(option && option.sub_options && items[i].sub_options) {
-            sub_option = _.findWhere(option.sub_options, {_id: items[i].sub_option_id});
+            menu_sub_options = option.sub_options;
+            order_sub_options = items[i].sub_options;
         }
-        if(option && option.add_ons && items[i].addon_id) {
-            add_on = _.findWhere(option.add_ons, {_id: items[i].addon_id});    
-        }
+        console.log(menu_sub_options);
+        console.log(order_sub_options);
+        _.each(menu_sub_options, function(sub_option){
+            _.each(order_sub_options, function(order_sub_option){
+                sub_option = _.findWhere(sub_option.sub_option_set, {_id: order_sub_option})
+                console.log(sub_option);
+                if(sub_option){
+                    sub_options.push(sub_option);
+                }
+            })
+        })
+        console.log(sub_options);
+        _.each(menu_addons, function(addon){
+            _.each(order_addons, function(order_addon){
+                addon = _.findWhere(addon.addon_set, {_id: order_addon})
+                console.log(addon);
+                if(addon){
+                    addons.push(addon);
+                }
+            })
+        })
+        console.log(addons);
+        
         console.log(items[i].quantity +'quantity')
         if(item._id === free_item && option) {
-            amount = amount+(option.option_cost*(items[i].quantity-1));           
+            amount = amount+(option.option_cost*(items[i].quantity-1));
+            if(sub_options.length) {
+                for(var i = 0; i < sub_options.length-1; i++) {
+                    amount = amount + sub_option[i].sub_option_cost;
+                }               
+            }
+            if(addons.length) {
+                for(var i = 0; i < addons.length-1; i++) {
+                    amount = amount + addons[i].addon_cost;
+                }
+            }
         }
         else if(item._id === free_item && !option) {
             amount = amount+(item.item_cost*(items[i].quantity-1));           
-            
+            if(sub_options.length) {
+                for(var i = 0; i < sub_options.length-1; i++) {
+                    amount = amount + sub_option[i].sub_option_cost;
+                }               
+            }
+            if(addons.length) {
+                for(var i = 0; i < addons.length-1; i++) {
+                    amount = amount + addons[i].addon_cost;
+                }
+            }
         }         
         else if(option){
-            amount = amount+(option.option_cost*items[i].quantity);            
+            amount = amount+(option.option_cost*items[i].quantity);
+            if(sub_options.length) {
+                _.each(sub_options, function(sub_option){
+                    amount = amount + sub_option.sub_option_cost;
+                })
+            }
+            if(addons.length) {
+                _.each(addons, function(addon){
+                    amount = amount + addon.addon_cost;
+                })
+            }
         }
         else {
-            amount = amount+(item.item_cost*items[i].quantity);               
+            amount = amount+(item.item_cost*items[i].quantity);
+            if(sub_options.length) {
+                _.each(sub_options, function(sub_option){
+                    amount = amount + sub_option.sub_option_cost;
+                })
+            }
+            if(addons.length) {
+                _.each(addons, function(addon){
+                    amount = amount + addon.addon_cost;
+                })
+            }               
         }
     }
     console.log('order amount '+ amount);
@@ -723,32 +785,34 @@ function apply_selected_offer(data) {
 
 function calculate_tax(order_value, outlet) {
     logger.log();
-
+    
     var new_order_value = order_value;
-    console.log('passsed order value '+ order_value*outlet.taxes.vat/100)
+    var tax_grid = {};
+
+    tax_grid = _.find(TaxConfig.tax_grid, function(tax_grid) {        
+        if(tax_grid.city.trim() === outlet.contact.location.city.trim()) {
+            return tax_grid;
+        }
+    })
+    console.log(tax_grid);
     var new_order_value = 0, vat = 0, surcharge_on_vat = 0, st = 0, sbc = 0,packing_charge = 0;
-    if(outlet.taxes && outlet.taxes.vat) {
-        vat = order_value*outlet.taxes.vat/100;
-        console.log('vat ' + vat)
-    }
+   
+    vat = order_value*tax_grid.vat/100;
+    surcharge_on_vat = vat*tax_grid.surcharge_on_vat/100;
 
-    if(outlet.taxes && outlet.taxes.surcharge_on_vat) {
-        surcharge_on_vat = vat*outlet.taxes.surcharge_on_vat/100;
-    }
+    st = ((order_value*tax_grid.st_applied_on_percentage/100)*tax_grid.st)/100;   
+    
 
-    if(outlet.taxes && outlet.taxes.st) {
-        st = ((order_value*40/100)*outlet.taxes.st)/100;   
-    }
+    sbc = ((order_value*tax_grid.st_applied_on_percentage/100)*tax_grid.sbc)/100; 
+    
 
-    if(outlet.taxes && outlet.taxes.sbc) {
-        sbc = ((order_value*40/100)*outlet.taxes.sbc)/100; 
-    }
-
-    if(outlet.taxes && outlet.taxes.packing_charge) {
-        packing_charge = outlet.taxes.packing_charge;
+    if(outlet.attributes.packing_charge) {
+        packing_charge = outlet.attributes.packing_charge;
     }
     console.log(vat + ' ' + surcharge_on_vat + ' ' + st + ' ' + sbc + ' ' + packing_charge)
     new_order_value = order_value+vat+surcharge_on_vat+st+sbc+packing_charge;
+    vat = vat+surcharge_on_vat;
+    st = st+sbc;
 
     return new_order_value;
 }
