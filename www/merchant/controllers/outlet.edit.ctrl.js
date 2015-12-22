@@ -410,9 +410,9 @@ angular.module('merchantApp')
                     if (_id) {
                         img_obj['id'] = _id;
                     }
-                    imageSvc.cloneImage(img_obj).then(function(data) {
+                    imageSvc.cloneImage(img_obj).then(function(res) {
                         $scope.outlet.photos.background = 'asd';
-                        $scope.outlet.photos.background = data.key;
+                        $scope.outlet.photos.background = res.data.key;
                         toastr.success('Image set successfully');
                     }, function(err) {
                         console.log(err);

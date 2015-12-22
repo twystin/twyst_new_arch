@@ -1,6 +1,6 @@
 angular.module('merchantApp')
-    .controller('OutletCreateController', ['$scope', 'merchantRESTSvc', '$stateParams', '$rootScope', 'SweetAlert', '$state', '$q', '$modal', 'toastr',
-        function($scope, merchantRESTSvc, $stateParams, $rootScope, SweetAlert, $state, $q, $modal, toastr) {
+    .controller('OutletCreateController', ['$scope', 'merchantRESTSvc', '$stateParams', '$rootScope', 'SweetAlert', '$state', '$q', '$modal', 'toastr', 'imageSvc',
+        function($scope, merchantRESTSvc, $stateParams, $rootScope, SweetAlert, $state, $q, $modal, toastr, imageSvc) {
 
             $scope.cuisines = ["African", "American", "Andhra", "Arabic", "Armenian", "Asian", "Assamese", "Awadhi", "Bangladeshi", "Belgian", "Bengali", "Biryani", "British", "Burmese", "Chettinad", "Chinese", "Continental", "Costal", "Desserts", "European", "Fast Food", "Finger Food", "French", "German", "Goan", "Greek", "Gujarati", "Healthy Food", "Hyderabadi", "Ice creams", "Indian", "Indonesian", "Italian", "Japanese", "Kashmiri", "Konkan", "Malayali", "Korean", "Lebanese", "Lucknowi", "Maharashtrian", "Malaysian", "Mangalorean", "Mediterranean", "Mexican", "Moroccan", "Mughlai", "Naga", "Nepalese", "North Eastern", "North Indian", "Oriya", "Pakistani", "Parsi", "Pizza", "Portuguese", "Punjabi", "Rajasthani", "Russian", "Sri Lankan", "Sindhi", "Singaporean", "South American", "South Indian", "Spanish", "Street Food", "Sushi", "Tex-Mex", "Thai", "Tibetan", "Turkish", "Vietnamese", "Wraps", "Bakery", "Beverages", "Burgers", "Cafe", "Salads", "Sandwiches", "Seafood", "Middle Eastern", "Steaks", "Sizzlers"];
             $scope.outlet = {
@@ -489,9 +489,11 @@ angular.module('merchantApp')
                         img_obj['id'] = _id
                     }
 
-                    imageSvc.cloneImage(img_obj).then(function(data) {
+                    imageSvc.cloneImage(img_obj).then(function(res) {
+                        console.log('res', res);
+                        _id = res.data.id;
                         $scope.outlet.photos.background = 'asd';
-                        $scope.outlet.photos.background = data.key;
+                        $scope.outlet.photos.background = res.data.key;
                         toastr.success('Image set successfully');
                     }, function(err) {
                         console.log(err);

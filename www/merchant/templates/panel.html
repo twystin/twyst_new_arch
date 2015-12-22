@@ -18,77 +18,72 @@
             </div>
             <div class='col-sm-offset-1 col-sm-10'>
                 <div class='panel panel-primary'>
-                    <div class='panel-heading'>
-                        <div>
-                            <h4 class='pull-left'>{{order.user.email}}</h4>
-                            <span class='pull-right'>Order Id #{{order._id}}</span>
-                        </div>
-                        <div>
-                            <div class='pull-left'>
-                                {{order.order_date | date:longDate}}
-                                <div class='clearfix'></div>
-                                {{order.address.line1}}, {{order.address.line2}}, {{order.address.city}}
-                            </div>
-                            <div class='pull-right'>
-                                <h4 class='text-right'>{{order.user.phone}}</h4>
-                            </div>
-                        </div>
-                    </div>
                     <div class='panel-body'>
-                        <table class='table table-bordered table-hover'>
-                            <thead>
-                                <tr>
-                                    <th>ITEM</th>
-                                    <th>PRICE</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        {{item.item_name}} <span class='badge'>{{item.item_quantity}}</span> <span class='badge' ng-if='item.option'>{{item.option}}</span> <span ng-repeat='addon in item.add_on' class='badge'>{{addon.add_on_item}}</span>
-                                    </td>
-                                    <td>{{getItemPrice(item)}}</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="2">
-                                        <hr>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Item Total</td>
-                                    <td>{{getOrderTotal(order)}}</td>
-                                </tr>
-                                <tr>
-                                    <td>VAT</td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td>Delivery and Dispatch</td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                	<td>Discount</td>
-                                	<td></td>
-                            	</tr>
-                            	<tr>
-                            		<td colspan="2"><hr></td>
-                            	</tr>
-                            	<tr>
-                            		<th>Grand Total</th>
-                            		<th>{{order.order_cost}}</th>
-                            	</tr>
-                            	<tr>
-                            		<td colspan='2' class='text-center'>
-                            			<!-- <timer> -->
-                            			<span class='label label-primary'>Timer</span>
-                            			<span class='label label-primary' ng-if='order.txn_id'>PAID</span>
-                            			<span class='label label-danger' ng-if='!order.txn_id'>C.O.D</span>
-                            			<span class='label label-default pull-right'>{{showing | uppercase}}</span>
-                            		</td>
-                            	</tr>
-                            </tbody>
-                        </table>
+                        <h4 class='pull-left'>email {{order.user.email}}</h4>
+                        <span class='pull-right'>Order Id #{{order._id}}</span>
+                        <div class='clearfix'></div>
+                        <div class='pull-left'>
+                            date {{order.order_date | date:longDate}}
+                            <div class='clearfix'></div>
+                            address {{order.address.line1}}, {{order.address.line2}}, {{order.address.city}}
+                        </div>
+                        <div class='pull-right'>
+                            <h4 class='text-right'>phone {{order.user.phone}}</h4>
+                        </div>
                     </div>
+                    <table class='table table-bordered table-hover'>
+                        <thead>
+                            <tr>
+                                <th>ITEM</th>
+                                <th>PRICE</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    {{item.item_name}} <span class='badge'>{{item.item_quantity}}</span> <span class='badge' ng-if='item.option'>{{item.option}}</span> <span ng-repeat='addon in item.add_on' class='badge'>{{addon.add_on_item}}</span>
+                                </td>
+                                <td>{{getItemPrice(item)}}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <hr>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Item Total</td>
+                                <td>{{getOrderTotal(order)}}</td>
+                            </tr>
+                            <tr>
+                                <td>VAT</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Delivery and Dispatch</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                            	<td>Discount</td>
+                            	<td></td>
+                        	</tr>
+                        	<tr>
+                        		<td colspan="2"><hr></td>
+                        	</tr>
+                        	<tr>
+                        		<th>Grand Total</th>
+                        		<th>{{order.order_cost}}</th>
+                        	</tr>
+                        	<tr>
+                        		<td colspan='2' class='text-center'>
+                        			<!-- <timer> -->
+                        			<span class='label label-primary'>Timer</span>
+                        			<span class='label label-primary' ng-if='order.txn_id'>PAID</span>
+                        			<span class='label label-danger' ng-if='!order.txn_id'>C.O.D</span>
+                        			<span class='label label-default pull-right'>{{showing | uppercase}}</span>
+                        		</td>
+                        	</tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
