@@ -1,6 +1,6 @@
 angular.module('merchantApp')
-    .controller('OfferCreateController', ['$scope', 'merchantRESTSvc', '$q', 'SweetAlert', '$state', '$stateParams', '$filter', '$modal',
-        function($scope, merchantRESTSvc, $q, SweetAlert, $state, $stateParams, $filter, $modal) {
+    .controller('OfferCreateController', ['$scope', 'merchantRESTSvc', '$q', 'SweetAlert', '$state', '$stateParams', '$filter', '$modal', 'WizardHandler',
+        function($scope, merchantRESTSvc, $q, SweetAlert, $state, $stateParams, $filter, $modal, WizardHandler) {
 
             $scope.today = new Date();
             $scope.today.setMilliseconds(0);
@@ -84,10 +84,22 @@ angular.module('merchantApp')
                     all: true
                 }
             };
+
+            $scope.menus = [];
+            merchantRESTSvc.getAllMenus().then(function(res) {
+                _.each(res.data, function(menu) {
+                    if (!$scope.outlet_id) {
+                        $scope.outlet_id = menu.outlet._id;
+                        $scope.menus.push(menu);
+                    } else if ($scope.outlet_id === menu.outlet._id) {
+                        $scope.menus.push(menu);
+                    }
+                });
+            });
+
             merchantRESTSvc.getOutlets()
                 .then(function(res) {
                     $scope.outlets = _.indexBy(res.data.outlets, '_id');
-                    console.log($scope.outlets);
                 }, function(err) {
                     console.log(err);
                     SweetAlert.swal('Error getting outlets', err.message ? err.message : 'Something went wrong', 'error');
@@ -133,26 +145,56 @@ angular.module('merchantApp')
                 }
                 console.log(newVal);
                 if (newVal.reward_type === 'buyxgety') {
+                    delete newVal.item_free;
                     if (newVal.item_x && newVal.item_y) {
-                        $scope.offer.actions.reward.header = 'testing';
-                        $scope.offer.actions.reward.line1 = 'testing';
-                        $scope.offer.actions.reward.line2 = 'testing';
+                        $scope.getRewardName(newVal.item_x).then(function(item_x) {
+                            $scope.getRewardName(newVal.item_y).then(function(item_y) {
+                                newVal.free_item_name = item_x;
+                                newVal.paid_item_name = item_y;
+                                $scope.offer.actions.reward.header = 'Buy ' + item_x;
+                                $scope.offer.actions.reward.line1 = 'Get ' + item_y;
+                                $scope.offer.actions.reward.line2 = '';
+                            }, function(err) {
+                                console.log(err);
+                                $scope.offer.actions.reward.header = 'testing';
+                                $scope.offer.actions.reward.line1 = 'testing';
+                                $scope.offer.actions.reward.line2 = 'testing';
+                            });
+                        }, function(err) {
+                            console.log(err);
+                            $scope.offer.actions.reward.header = 'testing';
+                            $scope.offer.actions.reward.line1 = 'testing';
+                            $scope.offer.actions.reward.line2 = 'testing';
+                        });
                     } else {
                         $scope.offer.actions.reward.header = '';
                         $scope.offer.actions.reward.line1 = '';
                         $scope.offer.actions.reward.line2 = '';
                     }
                 } else if (newVal.reward_type === 'free') {
+                    delete newVal.item_x;
+                    delete newVal.item_y;
                     if (newVal.item_free) {
-                        $scope.offer.actions.reward.header = 'testing';
-                        $scope.offer.actions.reward.line1 = 'testing';
-                        $scope.offer.actions.reward.line2 = 'testing';
+                        $scope.getRewardName(newVal.item_free).then(function(item_free) {
+                            newVal.free_item_name = item_free;
+                            $scope.offer.actions.reward.header = 'FREE';
+                            $scope.offer.actions.reward.line1 = item_free;
+                            $scope.offer.actions.reward.line2 = '';
+                        }, function(err) {
+                            console.log(err);
+                            $scope.offer.actions.reward.header = 'testing';
+                            $scope.offer.actions.reward.line1 = 'testing';
+                            $scope.offer.actions.reward.line2 = 'testing';
+                        });
                     } else {
                         $scope.offer.actions.reward.header = '';
                         $scope.offer.actions.reward.line1 = '';
                         $scope.offer.actions.reward.line2 = '';
                     }
                 } else if (newVal.reward_type === 'flatoff') {
+                    delete newVal.item_x;
+                    delete newVal.item_y;
+                    delete newVal.item_free;
                     if (newVal.off && newVal.spend) {
                         $scope.offer.actions.reward.header = 'Rs. ' + newVal.off + ' off';
                         $scope.offer.actions.reward.line1 = 'on a min spend';
@@ -163,6 +205,9 @@ angular.module('merchantApp')
                         $scope.offer.actions.reward.line2 = '';
                     }
                 } else if (newVal.reward_type === 'discount') {
+                    delete newVal.item_x;
+                    delete newVal.item_y;
+                    delete newVal.item_free;
                     if (newVal.percent && newVal.max) {
                         $scope.offer.actions.reward.header = newVal.percent + '% OFF';
                         $scope.offer.actions.reward.line1 = 'on your bill';
@@ -301,7 +346,6 @@ angular.module('merchantApp')
                 var _showValidationError = function(message) {
                     $scope.formFailure = true;
                     SweetAlert.swal('Validation Error', message, 'error');
-                    console.log(message);
                     deferred.reject();
                 };
 
@@ -325,7 +369,6 @@ angular.module('merchantApp')
                 var _showValidationError = function(message) {
                     $scope.formFailure = true;
                     SweetAlert.swal('Validation Error', message, 'error');
-                    console.log(message);
                     deferred.reject();
                 };
 
@@ -347,7 +390,7 @@ angular.module('merchantApp')
                 var deferred = $q.defer();
                 if (!$scope.offer.offer_type) {
                     deferred.reject('Offer type must be selected');
-                } else if ($scope.offer.user_sourced && (!$scope.offer.offer_user_source || !/.{24}/i.test($scope.offer.offer_user_source))) {
+                } else if ($scope.offer.user_sourced && (!$scope.offer.offer_user_source || !/^[a-zA-Z0-9]{24}$/i.test($scope.offer.offer_user_source))) {
                     deferred.reject('Valid user ID required for user sourced offers');
                 } else {
                     deferred.resolve(true);
@@ -398,7 +441,6 @@ angular.module('merchantApp')
                 if (!$scope.offer.actions.reward.reward_meta.reward_type) {
                     deferred.reject('Choose a reward type');
                 } else if ($scope.offer.actions.reward.reward_meta.reward_type === 'buyxgety') {
-                    console.log($scope.offer.actions.reward.reward_meta);
                     if (!$scope.offer.actions.reward.reward_meta.item_x) {
                         deferred.reject('Buy X Get Y requires "FREE ITEM"');
                     } else if (!$scope.offer.actions.reward.reward_meta.item_y) {
@@ -454,7 +496,7 @@ angular.module('merchantApp')
                 var deferred = $q.defer();
                 if (!$scope.offer.minimum_bill_value && $scope.offer.minimum_bill_value !== 0) {
                     deferred.reject("Minimum bill value required");
-                } else if (!$scope.offer.actions.reward.applicability.din_in && !$scope.offer.actions.reward.applicability.delivery) {
+                } else if (!$scope.offer.actions.reward.applicability.dine_in && !$scope.offer.actions.reward.applicability.delivery) {
                     deferred.reject('Offer cannot be invalid for both dine-in and delivery');
                 } else if (!$scope.offer.offer_lapse_days && $scope.offer.offer_type === 'checkin') {
                     deferred.reject('Offer lapse duration required');
@@ -598,6 +640,84 @@ angular.module('merchantApp')
                 } else {
                     deferred.resolve(true);
                 }
+                return deferred.promise;
+            };
+
+            $scope.getRewardName = function(item_obj) {
+                var deferred = $q.defer();
+                async.each($scope.menus, function(menu, callback) {
+                    if (menu._id !== item_obj.menu_id) {
+                        callback();
+                    } else {
+                        async.each(menu.menu_categories, function(category, callback) {
+                            if (category._id !== item_obj.category_id) {
+                                callback();
+                            } else if (!item_obj.sub_category_id) {
+                                callback('All ' + category.category_name);
+                            } else {
+                                async.each(category.sub_categories, function(sub_category, callback) {
+                                    if (sub_category._id !== item_obj.sub_category_id) {
+                                        callback();
+                                    } else if (!item_obj.item_id) {
+                                        callback('All ' + sub_category.sub_category_name);
+                                    } else {
+                                        async.each(sub_category.items, function(item, callback) {
+                                            if (item._id !== item_obj.item_id) {
+                                                callback();
+                                            } else if (!item_obj.option_id) {
+                                                callback(item.item_name);
+                                            } else {
+                                                async.each(item.options, function(option, callback) {
+                                                    if (option._id !== item_obj.option_id) {
+                                                        callback();
+                                                    } else if ((!item_obj.sub_options || !item_obj.sub_options.length)) {
+                                                        callback(item.item_name + ' - ' + option.option_value);
+                                                    } else {
+                                                        var item_name = '';
+                                                        async.each(option.sub_options, function(sub_option, callback) {
+                                                            async.each(sub_option.sub_option_set, function(sub_opt, callback) {
+                                                                if (item_obj.sub_options.indexOf(sub_opt._id) !== -1) {
+                                                                    item_name += ', ' + sub_opt.sub_option_value;
+                                                                    callback();
+                                                                } else {
+                                                                    callback();
+                                                                }
+                                                            }, function() {
+                                                                callback();
+                                                            });
+                                                        }, function() {
+                                                            item_name = item_name.slice(2);
+                                                            item_name += ' ' + item.item_name + ' - ' + option.option_value;
+                                                            var index = item_name.lastIndexOf(',');
+                                                            if (index !== -1) {
+                                                                item_name = item_name.slice(0, index) + ' or' + item_name.slice(index+1);
+                                                            }
+                                                            callback(item_name);
+                                                        });
+                                                    }
+                                                }, function(item_name) {
+                                                    callback(item_name);
+                                                });
+                                            }
+                                        }, function(item_name) {
+                                            callback(item_name);
+                                        });
+                                    }
+                                }, function(item_name) {
+                                    callback(item_name);
+                                });
+                            }
+                        }, function(item_name) {
+                            callback(item_name);
+                        });
+                    }
+                }, function(item_name) {
+                    if (item_name) {
+                        deferred.resolve(item_name);
+                    } else {
+                        deferred.reject('error');
+                    }
+                });
                 return deferred.promise;
             };
 

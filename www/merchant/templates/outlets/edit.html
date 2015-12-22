@@ -160,7 +160,7 @@
                                     </div>
                                     <div class='form-group'>
                                         <label class='col-md-2 control-label'>Designation</label>
-                                        <div class='col-md-6' ng-class='{"has-error": formFailure && !outlet.contact.emails.designation}'>
+                                        <div class='col-md-6'>
                                             <select class='form-control' ng-model='outlet.contact.emails.designation'>
                                                 <option value=''>Choose a designation</option>
                                                 <option value='Owner'>Owner</option>
@@ -247,7 +247,7 @@
                                         </label>
                                         <div class='col-md-6' ng-class='{"has-error": formFailure && !outlet.basics.main_type}'>
                                             <select class='form-control' ng-model='outlet.basics.main_type'>
-                                                <option value='' ng-if='!outlet.basics.main_type'>Choose an outlet Type</option>
+                                                <option value='' ng-if='!outlet.basics.main_type'>Choose an outlet type</option>
                                                 <option value='{{outlet_type.value}}' ng-repeat='outlet_type in outlet_types'>{{outlet_type.name}}</option>
                                             </select>
                                         </div>

@@ -516,7 +516,6 @@ angular.module('merchantApp')
             $scope.createMenu = function() {
                 $scope.reviewMenu().then(function() {
                     merchantRESTSvc.createMenu($scope.menu).then(function(res) {
-                        console.log(res);
                         SweetAlert.swal({
                             title: 'Menu created successfully',
                             type: 'success',

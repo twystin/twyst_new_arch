@@ -20,8 +20,6 @@ angular.module('merchantApp')
                     return val ? key : false;
                 })
             );
-            console.log($scope.sub_options);
-            console.log($scope.sub_option_set);
         });
 
         $scope.$watchCollection('addon_sets', function(newVal) {
@@ -34,8 +32,6 @@ angular.module('merchantApp')
                     return val ? key : false;
                 })
             );
-            console.log($scope.addons);
-            console.log($scope.addon_set);
         });
 
         $scope.toggle = function(scope) {
@@ -107,11 +103,9 @@ angular.module('merchantApp')
             }));
 
             obj.sub_options = _.filter($scope.sub_options, function(sub_option) {
-                console.log(sub_option_set, sub_option, sub_option_set.indexOf(sub_option));
                 return sub_option_set.indexOf(sub_option) !== -1;
             });
             obj.addons = _.filter($scope.addons, function(addon) {
-                console.log(addon_set, addon, addon_set.indexOf(addon));
                 return addon_set.indexOf(addon) !== -1;
             });
 
