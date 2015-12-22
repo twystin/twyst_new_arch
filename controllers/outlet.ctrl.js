@@ -938,3 +938,18 @@ function create_event(data) {
 
   return deferred.promise;
 }
+
+module.exports.get_orders = function(req, res) {
+  var token = req.query.token || null;
+  var updated_outlet = {};
+
+  if (!token) {
+    HttpHelper.error(res, null, "Not authenticated");
+  }
+
+  OutletHelper.get_orders(token).then(function(data) {
+    HttpHelper.success(res, data.data, data.message);
+  }, function(err) {
+    HttpHelper.error(res, err.data, err.message);
+  });
+};

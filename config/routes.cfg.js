@@ -90,6 +90,8 @@ module.exports = function(app) {
     app.get('/api/v4/outlets/:outlet_id', OutletCtrl.get);
     app.get('/api/v4/outlets', mustBe.authorized('outlet.view', OutletCtrl.all));
     app.delete('/api/v4/outlets/:outlet_id', mustBe.authorized('outlet.remove', OutletCtrl.remove));
+    app.get('/api/v4/outlet/orders', OutletCtrl.get_orders);
+    //app.put('/api/v4/outlet/order/:order', OutletCtrl.update_order);
   })();
 
   (function OfferRoutes() {
@@ -117,6 +119,7 @@ module.exports = function(app) {
     app.post('/api/v4/order/verify', OrderCtrl.verify_order);
     app.post('/api/v4/order/apply/offer', OrderCtrl.apply_offer);
     app.post('/api/v4/order/checkout', OrderCtrl.checkout);
+    //app.put('/api/v4/order/:order', OrderCtrl.update_order);
   })();
 
   (function ImageRoutes() {
@@ -132,6 +135,8 @@ module.exports = function(app) {
     app.put('/api/v4/friends', UserCtrl.update_friends);
     app.get('/api/v4/coupons', UserCtrl.get_coupons);
     app.post('/api/v4/user/location', UserCtrl.update_location);
+    app.get('/api/v4/orders', UserCtrl.get_orders);
+    //app.put('/api/v4/user/order/:order', UserCtrl.update_order);
   })();
 
   (function LocationRoutes() {

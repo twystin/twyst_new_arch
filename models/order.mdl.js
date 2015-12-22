@@ -30,11 +30,11 @@ var Order = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Outlet'
   },
-  bill_number: {type: String},
+  order_number: {type: String},
   offer_used: {type: Schema.Types.ObjectId},
   order_date: {type: Date, default: new Date()},
-  order_actual_cost: {type: Number},
-  amount_paid: {type: Number},
+  order_value_without_offer: {type: Number},
+  order_value_with_offer: {type: Number},
   tax_paid: {type: Number},  
   cash_back: {type: Number},
   payment_info: {}, //COD/Payu/payment object

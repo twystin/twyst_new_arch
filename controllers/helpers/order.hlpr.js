@@ -124,26 +124,44 @@ module.exports.checkout = function(token, order) {
     data.outlet = order.outlet;
     data.user_token = token;
     data.order_number = order.order_number;
-
-    get_user(data).then(function(data) {
+    data.address = order.address
+    
+    get_user(data)
+    .then(function(data) {
+        return massage_order(data);
+    })
+    .then(function(data) {
         Cache.hget(data.user._id, 'order_map', function(err, reply) {
             if(!reply) {
                 deferred.reject('can not process this order')
             }
             else{
-                console.log('here')
-                console.log(data.order_number)
-                if(data.order_number === reply.order_number) {
-                    PaymentHelper.make_payment(order).then(function(data){
-                        var order = {};
-                        order = new Order();
-                        console.log(data.items)
-                        order.save(err, function(){
-                            if(err){
+                console.log('here');
+                var order = JSON.parse(reply);
+                if(data.order_number === order.order_number) {
+                    PaymentHelper.make_payment(data).then(function(data){
+                        var order = {};                        
+                        order.address = data.address;
+                        order.outlet = data.outlet;
+                        order.order_number = data.order_number;
+                        order.offer_used = data.offer_used;
+                        order.order_value_without_offer = 500
+                        order.order_value_with_offer = 400
+                        order.tax_paid = 12;
+                        order.cash_back = 20;
+                        order.order_status = 'pending';
+                        order.items = data.items;
 
+                        order = new Order(order);
+                        console.log(data.items)
+                        order.save(function(err, order){
+                            if(err){
+                                console.log(err);
+                                deferred.reject('unable to checkout ');
                             }
                             else{
-
+                                console.log('saved')
+                                deferred.resolve(data);   
                             }
                         })    
                     })
@@ -170,21 +188,18 @@ function basic_checks(data) {
     var passed_data = data;
 
     if(!passed_data.outlet){
-        deferred.reject({
-            err: err || true,
-            message: 'could not process without outlet'
-        });
+        deferred.reject({message: 'could not process without outlet'});
     }
     
     if(!passed_data.items && passed_data.items.length){
         deferred.reject({
-            err: err || true,
+            
             message: 'no item passed'
         });
     }
     if(!passed_data.coords || !passed_data.coords.lat || !passed_data.coords.long){
         deferred.reject({
-            err: err || true,
+            
             message: 'user location is not passed'
         });
     }
@@ -736,7 +751,7 @@ function apply_selected_offer(data) {
         }
         else{
             var order = JSON.parse(reply);
-            console.log(passed_data.order_number);
+            console.log(order);
             if(passed_data.order_number === order.order_number) {
                 if(passed_data.used_offer) {                
                     
@@ -766,7 +781,7 @@ function apply_selected_offer(data) {
                 }
                 else{
                     console.log('order found and no offer applied')
-                    data.order_value = order.order_value;
+                    data.order_value = order.order_actual_value;
                     data.applied_offer = null;
                     deferred.resolve(data);
                 }
@@ -816,3 +831,92 @@ function calculate_tax(order_value, outlet) {
 
     return new_order_value;
 }
+
+function massage_order(data){
+    logger.log();
+    var deferred = Q.defer();
+
+    calculate_order_value()
+    deferred.resolve();
+    return deferred.promise;
+}
+
+module.exports.update_order = function(token, update_order) {
+    logger.log();
+    var deferred = Q.defer();
+    var id = update_order._id;
+    AuthHelper.get_user(token).then(function(data) {
+      
+        Order.findOneAndUpdate({
+            _id: id
+          }, {
+            $set: update_order
+          }, {
+            upsert: true
+          },
+          function(err, o) {
+            if (err || !o) {
+              deferred.reject({
+                err: err || true,
+                message: 'Couldn\'t update the order'
+              });
+            } else {
+              updated_outlet._id = id;
+
+              deferred.resolve({
+                data: o,
+                message: 'Updated order successfully'
+              });
+            }
+          }
+        );
+    }, function(err) {
+        deferred.reject({
+          err: err || true,
+          message: 'Couldn\'t find the user'
+        });
+    });
+
+  return deferred.promise;
+};
+
+module.exports.cancel_order = function(token, order) {
+    logger.log();
+    var deferred = Q.defer();
+
+    var id = order._id;
+    AuthHelper.get_user(token).then(function(data) {
+      
+        Order.findOneAndUpdate({
+            _id: id
+          }, {
+            $set: order
+          }, {
+            upsert: true
+          },
+          function(err, o) {
+            if (err || !o) {
+              deferred.reject({
+                err: err || true,
+                message: 'Couldn\'t cancel the order'
+              });
+            } else {
+              order._id = id;
+
+              deferred.resolve({
+                data: o,
+                message: 'order cancelled successfully'
+              });
+            }
+          }
+        );
+       
+    }, function(err) {
+        deferred.reject({
+          err: err || true,
+          message: 'Couldn\'t find the user'
+        });
+    });
+
+  return deferred.promise;
+};

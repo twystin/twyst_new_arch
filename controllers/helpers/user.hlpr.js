@@ -282,3 +282,30 @@ function addUserReferral(user_obj, friendObjId) {
         }
     });
 }
+
+module.exports.getorders = function(token) {
+    logger.log();
+    var Q = Q.defer();
+
+    AuthHelper.get_user(token).then(function(data) {
+        var user = data.data;
+
+        User.findOne({_id: user._id }).populate('orders').exec(function(err, user) {
+            if (err || !user) {
+              deferred.reject();
+            } 
+            else {              
+                deferred.resolve({
+                    data: user.orders,
+                    message: 'found user orders'
+                });
+            }
+        });
+    }, function(err) {
+        deferred.reject({
+          err: err || true,
+          message: "Couldn\'t find user"
+        });
+    });
+    return deferred.promise;
+};

@@ -58,5 +58,38 @@ module.exports.checkout = function(req, res) {
 	});
 }
 
+module.exports.update_order = function(req, res) {
+  var token = req.query.token || null;
+  var updated_order = {};
+  updated_order = _.extend(updated_order, req.body);
+
+  if (!token) {
+    HttpHelper.error(res, null, "Not authenticated");
+  }
+
+  OrderHelper.update_order(token, updated_order).then(function(data) {
+    HttpHelper.success(res, data.data, data.message);
+  }, function(err) {
+    HttpHelper.error(res, err.data, err.message);
+  });
+};
+
+module.exports.cancel_order = function(req, res) {
+  var token = req.query.token || null;
+  var order = {};
+  order = _.extend(order, req.body);
+
+  if (!token) {
+    HttpHelper.error(res, null, "Not authenticated");
+  }
+
+  OrderHelper.cancel_order(token, order).then(function(data) {
+    HttpHelper.success(res, data.data, data.message);
+  }, function(err) {
+    HttpHelper.error(res, err.data, err.message);
+  });
+};
+
+
 
 
