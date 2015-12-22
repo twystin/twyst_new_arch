@@ -1,7 +1,6 @@
 angular.module('merchantApp')
     .controller('DeliveryZoneController', function($scope, $modalInstance, delivery_zone, is_new, is_first, merchantRESTSvc, $rootScope, SweetAlert) {
         merchantRESTSvc.getOutlets().then(function(res) {
-            console.log(res);
             $scope.outlets = _.indexBy(res.data.outlets, '_id');
         }, function(err) {
             console.log(err);
@@ -192,7 +191,6 @@ angular.module('merchantApp')
         };
 
         $scope.updateLastTime = function() {
-        	console.log($scope.delivery_zone.order_accepts_till.time);
         	if(!$scope.delivery_zone.order_accepts_till.time) {
         		return;
         	}

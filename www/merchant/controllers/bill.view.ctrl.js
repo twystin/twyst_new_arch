@@ -3,7 +3,6 @@ angular.module('merchantApp')
         function($scope, merchantRESTSvc, SweetAlert, $stateParams) {
             merchantRESTSvc.getBill($stateParams.bill_id)
                 .then(function(res) {
-                    console.log(res);
                     $scope.bill = res.data;
                 }, function(err) {
                     console.log(err);
@@ -14,7 +13,6 @@ angular.module('merchantApp')
                 merchantRESTSvc.updatebill($scope.bill)
                     .then(function(res) {
                         $scope.bill = res.data;
-                        console.log(res);
                     }, function(err) {
                         console.log(err);
                     });
@@ -25,7 +23,6 @@ angular.module('merchantApp')
                 merchantRESTSvc.updatebill($scope.bill)
                     .then(function(res) {
                         $scope.bill = res.data;
-                        console.log(res);
                     }, function(err) {
                         console.log(err);
                     });

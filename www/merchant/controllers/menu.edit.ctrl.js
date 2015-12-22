@@ -611,7 +611,6 @@ angular.module('merchantApp')
             $scope.updateMenu = function() {
                 $scope.reviewMenu().then(function() {
                     merchantRESTSvc.updateMenu($scope.menu).then(function(res) {
-                        console.log(res);
                         SweetAlert.swal({
                             title: 'Menu updated successfully',
                             type: 'success',

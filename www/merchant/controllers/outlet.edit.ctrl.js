@@ -47,8 +47,10 @@ angular.module('merchantApp')
                         controller: 'DeliveryZoneController',
                         resolve: {
                             delivery_zone: function() {
-                                var _zone = { coords: coords};
-                                if(index != -1) {
+                                var _zone = {
+                                    coords: coords
+                                };
+                                if (index != -1) {
                                     _zone = _.extend(_zone, $scope.outlet.attributes.delivery.delivery_zone[index]);
                                 }
                                 return _zone;
@@ -57,7 +59,6 @@ angular.module('merchantApp')
                                 return true
                             },
                             is_first: function() {
-                                console.log('index', index);
                                 if (index === -1) {
                                     return false;
                                 }
@@ -269,7 +270,7 @@ angular.module('merchantApp')
                 }
                 var num = {
                     num: '',
-                    num_type: ''
+                    num_type: 'mobile'
                 };
 
                 $scope.outlet.contact.phones[field_name].push(num);
@@ -463,6 +464,7 @@ angular.module('merchantApp')
                             });
                         });
                     }, function(err) {
+                        console.log(err);
                         var message = err.message ? err.message : 'Something went wrong';
                         SweetAlert.swal('Service error', message, 'error');
                     });
@@ -533,10 +535,10 @@ angular.module('merchantApp')
                                 } else if (!_.get($scope.outlet, 'contact.emails.person') && $rootScope.isPaying) {
                                     $scope.showErrorMessage("Contact person's name required");
                                     deferred.reject();
-                                } else if (!_.has($scope.outlet, 'contact.emails.email') && $rootScope.isPaying) {
+                                } else if (!_.get($scope.outlet, 'contact.emails.email') && $rootScope.isPaying) {
                                     $scope.showErrorMessage("Contact person's Email ID required");
                                     deferred.reject();
-                                } else if (!_.has($scope.outlet, 'basics.account_mgr_email')) {
+                                } else if (!_.get($scope.outlet, 'basics.account_mgr_email')) {
                                     $scope.showErrorMessage("Account manager's email ID required");
                                 } else {
                                     $scope.scrollToTop();
@@ -643,10 +645,10 @@ angular.module('merchantApp')
 
             $scope.validateStep4 = function() {
                 var deferred = $q.defer();
-                if ((!_.has($scope.outlet, 'photos.logo') || !$scope.outlet.photos.logo) && $scope.isPaying) {
+                if (!_.get($scope.outlet, 'photos.logo')) {
                     $scope.showErrorMessage('Logo is mandatory');
                     deferred.reject();
-                } else if ((!_.has($scope.outlet, 'photos.background') || !$scope.outlet.photos.background) && $scope.isPaying) {
+                } else if (!_.get($scope.outlet, 'photos.background')) {
                     $scope.showErrorMessage('Background image is mandatory');
                     deferred.reject();
                 } else {

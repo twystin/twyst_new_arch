@@ -32,7 +32,7 @@
                                     <div class='form-group' ng-if='offer.user_sourced'>
                                         <label class='col-sm-2 control-label'>User ID <i class='fa fa-sm fa-asterisk'></i></label>
                                         <div class='col-sm-6' ng-class='{"has-error": formFailure && !offer.offer_user_source}'>
-                                            <input type='text' ng-model='offer.offer_user_source' class='form-control'>
+                                            <input type='text' ng-model='offer.offer_user_source' ng-pattern='/^[a-zA-Z0-9]{24}$/' class='form-control'>
                                         </div>
                                     </div>
                                 </form>
@@ -182,13 +182,13 @@
                                     <div class='form-group'>
                                         <label class='col-sm-2 control-label'>Reward Info</label>
                                         <div class='col-sm-10' ng-if='!offer.actions.reward.reward_meta.reward_type || (offer.actions.reward.reward_meta.reward_type==="discount" && !(offer.actions.reward.reward_meta.percent && offer.actions.reward.reward_meta.max)) || (offer.actions.reward.reward_meta.reward_type==="free" && !offer.actions.reward.reward_meta.item_free) || (offer.actions.reward.reward_meta.reward_type==="flatoff" && !(offer.actions.reward.reward_meta.off && offer.actions.reward.reward_meta.spend)) || (offer.actions.reward.reward_meta.reward_type==="buyxgety" && !(offer.actions.reward.reward_meta.item_x && offer.actions.reward.reward_meta.item_y))'>
-                                            {{offer.actions.reward.reward_meta}}
                                             <div class='alert' ng-class='{"alert-warning": !formFailure, "alert-danger": formFailure}'>
                                                 <b ng-if='!offer.actions.reward.reward_meta.reward_type'>Choose a valid reward type first</b>
                                                 <b ng-if='offer.actions.reward.reward_meta.reward_type'>Input reward specifics to edit details</b>
                                             </div>
                                         </div>
                                         <div class='col-sm-10' ng-if='(offer.actions.reward.reward_meta.reward_type==="discount" && (offer.actions.reward.reward_meta.percent && offer.actions.reward.reward_meta.max)) || (offer.actions.reward.reward_meta.reward_type==="free" && offer.actions.reward.reward_meta.item_free) || (offer.actions.reward.reward_meta.reward_type==="flatoff" && (offer.actions.reward.reward_meta.off && offer.actions.reward.reward_meta.spend)) || (offer.actions.reward.reward_meta.reward_type==="buyxgety" && (offer.actions.reward.reward_meta.item_x && offer.actions.reward.reward_meta.item_y))'>
+                                            {{offer.actions.reward.reward_meta}}
                                             <div class='form-group'>
                                                 <label class='col-sm-2 control-label'>Header <i class='fa fa-sm fa-asterisk'></i></label>
                                                 <div class='col-sm-5' ng-class='{"has-error": formFailure && !offer.actions.reward.header}'>
@@ -203,7 +203,7 @@
                                             </div>
                                             <div class='form-group'>
                                                 <label class='col-sm-2 control-label'>Line 2</label>
-                                                <div class='col-sm-5' ng-class='{"has-error": formFailure && !offer.actions.reward.line2}'>
+                                                <div class='col-sm-5'>
                                                     <input type='text' ng-model='offer.actions.reward.line2' class='form-control'>
                                                 </div>
                                             </div>
@@ -416,8 +416,12 @@
                                         <h2>{{offer.actions.reward.header}}</h2>
                                         <h4>{{offer.actions.reward.line1}}</h4>
                                         <h4 ng-if='offer.actions.reward.line2'>{{offer.actions.reward.line2}}</h4>
-                                        <textarea class='form-control' ng-if='offer.actions.reward.description' ng-model='offer.actions.reward.description' disabled></textarea>
-                                        <textarea class='form-control' ng-if='offer.actions.reward.terms' ng-model='offer.actions.reward.terms' disabled></textarea>
+                                        <div>&nbsp;</div>
+                                        <div class="help-block" ng-if='offer.actions.reward.description'>Offer Description</div>
+                                        <textarea class='form-control' rows="3" ng-if='offer.actions.reward.description' ng-model='offer.actions.reward.description' disabled></textarea>
+                                        <div>&nbsp;</div>
+                                        <div class="help-block" ng-if='offer.actions.reward.terms'>Extra Terms</div>
+                                        <textarea class='form-control' rows="3" ng-if='offer.actions.reward.terms' ng-model='offer.actions.reward.terms' disabled></textarea>
                                         <div class='clearfix'></div>
                                         <p>&nbsp;</p>
                                         <div class='pull-left'>Lapse Duration <span class='label label-primary'>{{offer.offer_lapse_days}} days</span></div>
@@ -431,7 +435,7 @@
                                         </div>
                                         <div>
                                             <h4>Reward Type</h4>
-                                            <span class='label label-default'>{{reward_types[offer.actions.reward.reward_type]}}</span>
+                                            <span class='label label-default'>{{reward_types[offer.actions.reward.reward_meta.reward_type]}}</span>
                                         </div>
                                         <div>
                                             <h4>Reward Info</h4>
@@ -439,15 +443,15 @@
                                                 Get
                                                 <span class='label label-success'>{{offer.actions.reward.reward_meta.percent + '%'}}</span> for a maximum discount of upto <span class='label label-success'><i class='fa fa-inr'></i> {{offer.actions.reward.reward_meta.max}}</span>
                                             </div>
-                                            <div ng-if='ofer.actions.reward.reward_meta.reward_type==="flatoff"'>
+                                            <div ng-if='offer.actions.reward.reward_meta.reward_type==="flatoff"'>
                                                 Get
-                                                <span class='label label-success'><i class='fa fa-inr'></i> {{offer.actions.reward.reward_meta.off}}</span> on a minimum spend of <span class='laebl label-success'><i class='fa fa-inr'></i> {{offer.actions.reward.reward_meta.spend}}</span>
+                                                <span class='label label-success'><i class='fa fa-inr'></i> {{offer.actions.reward.reward_meta.off}}</span> on a minimum spend of <span class='label label-success'><i class='fa fa-inr'></i> {{offer.actions.reward.reward_meta.spend}}</span>
                                             </div>
                                             <div ng-if='offer.actions.reward.reward_meta.reward_type==="free"'>
-                                                Free reward info here
+                                                <span class='label label-success'>{{offer.actions.reward.reward_meta.free_item_name}}</span> FREE
                                             </div>
-                                            <div nf-ig='offer.actions.reward.reward_meta.reward_type==="buyxgety"'>
-                                                Buy X Get Y info here
+                                            <div ng-if='offer.actions.reward.reward_meta.reward_type==="buyxgety"'>
+                                                <span class='label label-success'>{{offer.actions.reward.reward_meta.free_item_name}}</span> FREE with <span class='label label-success'> {{offer.actions.reward.reward_meta.paid_item_name}}
                                             </div>
                                         </div>
                                         <div ng-if='offer.offer_type==="checkin"'>
@@ -461,11 +465,6 @@
                                             <div ng-if='offer.rule.event_match==="on only"'>
                                                 Application on the <span class='label label-success'>{{offer.rule.event_count + ((offer.rule.event_count==1)? 'st': (offer.rule.event_count==2)? 'nd': (offer.rule.event_count==3)? 'rd': 'th')}}</span> checkin.
                                             </div>
-                                        </div>
-                                        <div>
-                                            <h4>Applicable on: </h4>
-                                            <span ng-if='offer.actions.reward.reward_meta.dine_in' class='label label-success'>Dine In</span>
-                                            <span ng-if='offer.actions.reward.reward_meta.delivery' class='label label-success'>Delivery</span>
                                         </div>
                                         <div>
                                             <h4>Applicable on: </h4>

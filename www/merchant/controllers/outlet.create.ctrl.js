@@ -28,9 +28,11 @@ angular.module('merchantApp')
                     phones: {
                         mobile: [{
                             num: '',
-                            num_type: ''
+                            num_type: 'mobile'
                         }],
-                        reg_mobile: []
+                        reg_mobile: [{
+                            num: ''
+                        }]
                     },
                     emails: {
                         type: 'work'
@@ -120,8 +122,10 @@ angular.module('merchantApp')
                         controller: 'DeliveryZoneController',
                         resolve: {
                             delivery_zone: function() {
-                                var _zone = { coords: coords};
-                                if(index != -1) {
+                                var _zone = {
+                                    coords: coords
+                                };
+                                if (index != -1) {
                                     _zone = _.extend(_zone, $scope.outlet.attributes.delivery.delivery_zone[index]);
                                 }
                                 return _zone;
@@ -130,7 +134,6 @@ angular.module('merchantApp')
                                 return true
                             },
                             is_first: function() {
-                                console.log('index', index);
                                 if (index === -1) {
                                     return false;
                                 }
@@ -345,7 +348,7 @@ angular.module('merchantApp')
 
                 var num = {
                     num: '',
-                    num_type: ''
+                    num_type: 'mobile'
                 };
 
                 $scope.outlet.contact.phones[field_name].push(num);
@@ -490,7 +493,6 @@ angular.module('merchantApp')
                     }
 
                     imageSvc.cloneImage(img_obj).then(function(res) {
-                        console.log('res', res);
                         _id = res.data.id;
                         $scope.outlet.photos.background = 'asd';
                         $scope.outlet.photos.background = res.data.key;
@@ -535,7 +537,6 @@ angular.module('merchantApp')
                 temp_outlet._id = _id;
                 merchantRESTSvc.createOutlet($scope.outlet)
                     .then(function(res) {
-                        console.log(res);
                         SweetAlert.swal({
                             title: 'Outlet created successfully',
                             type: 'success',
@@ -621,10 +622,10 @@ angular.module('merchantApp')
                                 } else if (!_.get($scope.outlet, 'contact.emails.person') && $rootScope.isPaying) {
                                     $scope.showErrorMessage("Contact person's name required");
                                     deferred.reject();
-                                } else if (!_.has($scope.outlet, 'contact.emails.email') && $rootScope.isPaying) {
+                                } else if (!_.get($scope.outlet, 'contact.emails.email') && $rootScope.isPaying) {
                                     $scope.showErrorMessage("Contact person's Email ID required");
                                     deferred.reject();
-                                } else if (!_.has($scope.outlet, 'basics.account_mgr_email')) {
+                                } else if (!_.get($scope.outlet, 'basics.account_mgr_email')) {
                                     $scope.showErrorMessage("Account manager's email ID required");
                                 } else {
                                     $scope.scrollToTop();

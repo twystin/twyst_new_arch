@@ -47,7 +47,6 @@ angular.module('merchantApp')
 			$scope.getBills = function() {
 				merchantRESTSvc.getBills($scope.view_by, $scope.sort)
 					.then(function(res) {
-						console.log(res);
 						$scope.bills = res.data;
 					}, function(err) {
 						var message = err.message? err.message: 'Something went wrong.';
