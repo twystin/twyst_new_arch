@@ -6,6 +6,7 @@ angular.module('merchantApp')
             console.log(err);
             $scope.outlets = {};
         });
+        $scope.checkModel = {};
 
         $scope.is_new = is_new;
         $scope.days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -52,6 +53,24 @@ angular.module('merchantApp')
         $scope.delivery_zone.order_accepts_till.time.setHours($scope.delivery_zone.order_accepts_till.hr);
         $scope.delivery_zone.order_accepts_till.time.setSeconds(0);
         $scope.delivery_zone.order_accepts_till.time.setMilliseconds(0);
+        console.log('$scope.is_new', $scope.is_new);
+        if (!$scope.is_new) {
+            _.each($scope.delivery_zone.payment_options, function(mode) {
+                console.log(mode);
+                $scope.checkModel[mode] = true;
+            });
+        }
+
+        $scope.$watchCollection('checkModel', function(obj) {
+            if (!obj) {
+                return;
+            }
+            var payment_options = _.compact(_.map(obj, function(val, key) {
+                return val?key:'';
+            }));
+            $scope.delivery_zone.payment_options = payment_options;
+        });
+
 
         $scope.getMaxRange = function() {
             return new Array(_.reduce($scope.delivery_zone.delivery_timings, function(obj1, obj2) {
@@ -190,14 +209,6 @@ angular.module('merchantApp')
             });
         };
 
-        $scope.updateLastTime = function() {
-        	if(!$scope.delivery_zone.order_accepts_till.time) {
-        		return;
-        	}
-        	$scope.delivery_zone.order_accepts_till.hr = $scope.delivery_zone.order_accepts_till.time.getHours();
-        	$scope.delivery_zone.order_accepts_till.min = $scope.delivery_zone.order_accepts_till.time.getMinutes();
-        }
-
         $scope.resolveDeliveryZone = function() {
         	$scope.formFailure = false;
         	if (!$scope.delivery_zone.zone_name) {
@@ -215,9 +226,9 @@ angular.module('merchantApp')
         	} else if (!$scope.delivery_zone.delivery_charge && $scope.delivery_zone.delivery_charge!==0) {
         		$scope.formFailure = true;
         		SweetAlert.swal('Validation error', 'Delivery charge cannot be left blank', 'error');
-        	} else if ((!$scope.delivery_zone.order_accepts_till.hr && $scope.delivery_zone.order_accepts_till.hr!==0) || (!$scope.delivery_zone.order_accepts_till.min && $scope.delivery_zone.order_accepts_till.min!==0) || $scope.delivery_zone.order_accepts_till.hr<0 || $scope.delivery_zone.order_accepts_till.min<0 || $scope.delivery_zone.order_accepts_till.hr>23 || $scope.delivery_zone.order_accepts_till.min>59) {
-        		$scope.formFailure = true;
-        		SweetAlert.swal('Validation error', 'Last order time is invalid', 'error');
+            } else if (!$scope.delivery_zone.payment_options || !$scope.delivery_zone.payment_options.length) {
+                $scope.formFailure = true;
+                SweetAlert.swal('Validation error', 'Atleast one payment option must be selected');
         	} else if(is_first) {
         		var updated_params = _.cloneDeep(delivery_zone),
         			original_params = _.cloneDeep($scope.delivery_zone);

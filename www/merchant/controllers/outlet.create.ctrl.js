@@ -7,6 +7,15 @@ angular.module('merchantApp')
                 sms_off: {
                     value: false
                 },
+                twyst_meta: {
+                    twyst_commission: {
+                        is_fixed: true,
+                        value: 0,
+                        commission_slab: []
+                    },
+                    cashback: {
+                    }
+                },
                 attributes: {
                     dine_in: true,
                     alcohol: false,
@@ -43,6 +52,7 @@ angular.module('merchantApp')
                 },
                 menus: [],
                 links: {
+                    short_url: [''],
                     other_links: []
                 },
                 business_hours: {
@@ -162,7 +172,7 @@ angular.module('merchantApp')
                             return _.cloneDeep($scope.outlet.attributes.delivery.delivery_zone[index]);
                         },
                         is_new: function() {
-                            return true;
+                            return false;
                         },
                         is_first: function() {
                             return false;
@@ -373,6 +383,23 @@ angular.module('merchantApp')
 
             $scope.removeCuisine = function(index) {
                 $scope.outlet.attributes.cuisines.splice(index, 1);
+            };
+
+            $scope.updateCommission = function() {
+                if($scope.outlet.twyst_meta.twyst_commission.is_fixed) {
+                    $scope.outlet.twyst_meta.twyst_commission.commission_slab = [];
+                } else {
+                    delete $scope.outlet.twyst_meta.twyst_commission.value;
+                    $scope.outlet.twyst_meta.twyst_commission.commission_slab = [{has_upper_bound: true}];
+                }
+            };
+
+            $scope.addCommissionSlab = function() {
+                $scope.outlet.twyst_meta.twyst_commission.commission_slab.push({has_upper_bound: true});
+            };
+
+            $scope.removeSlab = function(index) {
+                $scope.outlet.twyst_meta.twyst_commission.commission_slab.splice(index, 1);
             };
 
             $scope.updateSMSOff = function() {
@@ -590,6 +617,8 @@ angular.module('merchantApp')
                 } else if (!_.get($scope.outlet, 'contact.location.locality_2[0]')) {
                     $scope.showErrorMessage('Locality 2 must be specified');
                     deferred.reject();
+                } else if (!_.get($scope.outlet, 'links.short_url[0]')) {
+                    $scope.showErrorMessage('Short code cannot be left blank');
                 } else if ((!_.get($scope.outlet, 'contact.location.coords.longitude') && $scope.outlet.contact.location.coords.longitude !== 0) || (!_.get($scope.outlet, 'contact.location.coords.latitude') && $scope.outlet.contact.location.coords.latitude !== 0)) {
                     $scope.showErrorMessage('Geo-location data is missing');
                     deferred.reject();
@@ -653,29 +682,58 @@ angular.module('merchantApp')
                 } else if (!$scope.outlet.attributes.cuisines.length && $rootScope.isPaying) {
                     $scope.showErrorMessage('Atleast one cuisine must be specified');
                     deferred.reject();
-                } else if ($scope.outlet.sms_off.value) {
-                    if ((!$scope.outlet.sms_off.time.start.hr && $scope.outlet.sms_off.time.start.hr !== 0) || (!$scope.outlet.sms_off.time.start.min && $scope.outlet.sms_off.time.start.min !== 0)) {
-                        $scope.showErrorMessage("SMS OFF start time invalid");
-                        deferred.reject();
-                    } else if ((!$scope.outlet.sms_off.time.end.hr && $scope.outlet.sms_off.time.end.hr !== 0) || (!$scope.outlet.sms_off.time.end.min && $scope.outlet.sms_off.time.end.min !== 0)) {
-                        $scope.showErrorMessage("SMS OFF end time invalid");
-                        deferred.reject();
-                    } else {
-                        var startMin = ($scope.outlet.sms_off.time.start.hr * 60) + $scope.outlet.sms_off.time.start.min,
-                            closeMin = ($scope.outlet.sms_off.time.end.hr * 60) + $scope.outlet.sms_off.time.end.min;
-                        if (startMin == closeMin) {
-                            $scope.showErrorMessage("SMS Off start and end time cannot be the same");
+                } else if (!_.get($scope.outlet, 'twyst_meta.cashback.min') && $scope.outlet.twyst_meta.cashback.min!==0) {
+                    $scope.showErrorMessage('Minimum cashback amount required');
+                    deferred.reject();
+                } else if (!_.get($scope.outlet, 'twyst_meta.cashback.max') && $scope.outlet.twyst_meta.cashback.max!==0) { 
+                    $scope.showErrorMessage('Maximum cashback amount required');
+                    deferred.reject();
+                } else if ($scope.outlet.twyst_meta.twyst_commission.is_fixed && !$scope.outlet.twyst_meta.twyst_commission.value) {
+                    $scope.showErrorMessage("Fixed commission value must be specified");
+                    deferred.reject();
+                } else if (!$scope.outlet.twyst_meta.twyst_commission.is_fixed && !($scope.outlet.twyst_meta.twyst_commission.commission_slab && $scope.outlet.twyst_meta.twyst_commission.commission_slab.length)) {
+                    $scope.showErrorMessage("Atleast one commission slab must be provided");
+                    deferred.reject();
+                } else {
+                    async.each($scope.outlet.twyst_meta.twyst_commission.commission_slab, function(slab, callback) {
+                        if (!slab.start && slab.start!==0) {
+                            callback("All slabs require valid start amount");
+                        } else if (slab.has_upper_bound && !slab.end && slab.end!==0) {
+                            callback("End amount missing for slab with upper bound");
+                        } else if (!slab.value && slab.value!==0) {
+                            callback("Commission amount required for all slabs");
+                        } else {
+                            callback();
+                        }
+                    }, function(err) {
+                        if(err) {
+                            $scope.showErrorMessage(err);
                             deferred.reject();
+                        } else if ($scope.outlet.sms_off.value) {
+                            if ((!$scope.outlet.sms_off.time.start.hr && $scope.outlet.sms_off.time.start.hr !== 0) || (!$scope.outlet.sms_off.time.start.min && $scope.outlet.sms_off.time.start.min !== 0)) {
+                                $scope.showErrorMessage("SMS OFF start time invalid");
+                                deferred.reject();
+                            } else if ((!$scope.outlet.sms_off.time.end.hr && $scope.outlet.sms_off.time.end.hr !== 0) || (!$scope.outlet.sms_off.time.end.min && $scope.outlet.sms_off.time.end.min !== 0)) {
+                                $scope.showErrorMessage("SMS OFF end time invalid");
+                                deferred.reject();
+                            } else {
+                                var startMin = ($scope.outlet.sms_off.time.start.hr * 60) + $scope.outlet.sms_off.time.start.min,
+                                    closeMin = ($scope.outlet.sms_off.time.end.hr * 60) + $scope.outlet.sms_off.time.end.min;
+                                if (startMin == closeMin) {
+                                    $scope.showErrorMessage("SMS Off start and end time cannot be the same");
+                                    deferred.reject();
+                                } else {
+                                    $scope.scrollToTop();
+                                    $scope.formFailure = false;
+                                    deferred.resolve(true);
+                                }
+                            }
                         } else {
                             $scope.scrollToTop();
                             $scope.formFailure = false;
                             deferred.resolve(true);
                         }
-                    }
-                } else {
-                    $scope.scrollToTop();
-                    $scope.formFailure = false;
-                    deferred.resolve(true);
+                    });
                 }
                 return deferred.promise;
             };

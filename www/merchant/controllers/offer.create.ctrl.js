@@ -35,7 +35,7 @@ angular.module('merchantApp')
             };
 
             $scope.offer = {
-                offer_status: 'draft',
+                offer_status: 'active',
                 offer_type: '',
                 user_sourced: false,
                 offer_start_date: _.clone($scope.today),
@@ -146,26 +146,24 @@ angular.module('merchantApp')
                 console.log(newVal);
                 if (newVal.reward_type === 'buyxgety') {
                     delete newVal.item_free;
-                    if (newVal.item_x && newVal.item_y) {
+                    if (newVal.item_x) {
                         $scope.getRewardName(newVal.item_x).then(function(item_x) {
-                            $scope.getRewardName(newVal.item_y).then(function(item_y) {
-                                newVal.free_item_name = item_x;
-                                newVal.paid_item_name = item_y;
-                                $scope.offer.actions.reward.header = 'Buy ' + item_x;
-                                $scope.offer.actions.reward.line1 = 'Get ' + item_y;
-                                $scope.offer.actions.reward.line2 = '';
-                            }, function(err) {
-                                console.log(err);
-                                $scope.offer.actions.reward.header = 'testing';
-                                $scope.offer.actions.reward.line1 = 'testing';
-                                $scope.offer.actions.reward.line2 = 'testing';
-                            });
+                            newVal.free_item_name = item_x;
                         }, function(err) {
                             console.log(err);
-                            $scope.offer.actions.reward.header = 'testing';
-                            $scope.offer.actions.reward.line1 = 'testing';
-                            $scope.offer.actions.reward.line2 = 'testing';
-                        });
+                        });    
+                    }
+                    if (newVal.item_y) {
+                        $scope.getRewardName(newVal.item_y).then(function(item_y) {
+                            newVal.paid_item_name = item_y;
+                        }, function(err) {
+                            console.log(err);
+                        }); 
+                    }
+                    if (newVal.item_x && newVal.item_y) {
+                        $scope.offer.actions.reward.header = 'Buy ' + newVal.free_item_name;
+                        $scope.offer.actions.reward.line1 = 'Get ' + newVal.paid_item_name;
+                        $scope.offer.actions.reward.line2 = '';
                     } else {
                         $scope.offer.actions.reward.header = '';
                         $scope.offer.actions.reward.line1 = '';
@@ -195,6 +193,8 @@ angular.module('merchantApp')
                     delete newVal.item_x;
                     delete newVal.item_y;
                     delete newVal.item_free;
+                    delete newVal.free_item_name;
+                    delete newVal.paid_item_name;
                     if (newVal.off && newVal.spend) {
                         $scope.offer.actions.reward.header = 'Rs. ' + newVal.off + ' off';
                         $scope.offer.actions.reward.line1 = 'on a min spend';
@@ -208,6 +208,8 @@ angular.module('merchantApp')
                     delete newVal.item_x;
                     delete newVal.item_y;
                     delete newVal.item_free;
+                    delete newVal.free_item_name;
+                    delete newVal.paid_item_name;
                     if (newVal.percent && newVal.max) {
                         $scope.offer.actions.reward.header = newVal.percent + '% OFF';
                         $scope.offer.actions.reward.line1 = 'on your bill';
@@ -269,7 +271,7 @@ angular.module('merchantApp')
                     $scope.cloneTimings({
                         _id: newOutlet
                     });
-                } else if ($scope.offer.offer_outlets.indexOf(newOutlet) !== -1) {
+                } else if ($scope.offer.offer_outlets.indexOf(newOutlet) === -1) {
                     $scope.offer.offer_outlets.push(newOutlet);
                 }
             };
