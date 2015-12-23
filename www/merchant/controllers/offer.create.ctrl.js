@@ -35,7 +35,7 @@ angular.module('merchantApp')
             };
 
             $scope.offer = {
-                offer_status: 'draft',
+                offer_status: 'active',
                 offer_type: '',
                 user_sourced: false,
                 offer_start_date: _.clone($scope.today),

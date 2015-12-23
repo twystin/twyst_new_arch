@@ -351,6 +351,7 @@ var OutletSchema = new Schema({
       commission_slab: [{
         start: {type: Number},
         end: {type: Number},
+        has_upper_bound: {type: Boolean},
         value: {type: Number}
       }]
     },
