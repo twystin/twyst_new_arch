@@ -110,7 +110,7 @@ module.exports = function(app) {
     app.get('/api/v4/menu', MenuCtrl.all);
     app.post('/api/v4/menus/clone', mustBe.authorized('outlet.update', MenuCtrl.clone));
     app.put('/api/v4/menus/:menu', mustBe.authorized('outlet.update', MenuCtrl.update));
-    app.get('/api/v4/menus/:menu', mustBe.authorized('outlet.view', MenuCtrl.get));    
+    app.get('/api/v4/menus/:menu', MenuCtrl.get);    
     app.delete('/api/v4/menus/:menu', mustBe.authorized('outlet.update', MenuCtrl.delete));
   })();
 
