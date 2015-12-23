@@ -211,7 +211,11 @@ var OutletSchema = new Schema({
         order_accepts_till: {
           hr: {type: Number},
           min: {type: Number}
-        }
+        },
+        payment_options: [{
+          type: String,
+          enum: ['cod', 'inapp']
+        }],
       }],  
     },
     packing_charge: {
@@ -349,6 +353,14 @@ var OutletSchema = new Schema({
         end: {type: Number},
         value: {type: Number}
       }]
+    },
+    cashback:{
+      min: {
+        type: Number
+      },
+      max: {
+        type: Number
+      }
     },
     rating: {
       count: {

@@ -320,3 +320,28 @@ var _removeOutletFromCache = function(outletId) {
     }
   });
 }
+
+module.exports.get_orders = function(token) {
+  var deferred = Q.defer();
+  logger.log();
+
+  AuthHelper.get_user(token).then(function(data) {
+    User.findOne({
+      _id: data.data._id
+    }).populate('outlets').exec(function(err, orders) {
+      if (err) {
+        deferred.reject({
+          err: err || true,
+          message: 'Couldn\'t get the orders'
+        });
+      } else {
+        deferred.resolve({
+          data: orders,
+          message: 'Got your orders'
+        });
+      }
+    });
+  });
+
+  return deferred.promise;
+};

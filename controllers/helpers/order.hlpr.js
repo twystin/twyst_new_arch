@@ -49,13 +49,16 @@ module.exports.verify_order = function(token, order) {
         return get_applicable_offer(data);
     })
     .then(function(data){
+        return massage_offer(data);
+    })
+    .then(function(data){
         return generate_and_cache_order(data);
     })
     .then(function(data) {
         var updated_data = {};
         updated_data.items = data.order.items;
         updated_data.order_number = data.order.order_number;
-        updated_data.order_value = data.order.order_actual_value;
+        updated_data.order_actual_value = data.order.order_actual_value;
         console.log(updated_data);
         updated_data.offers = [];
         _.each(data.order.available_offers, function(offer){
@@ -124,26 +127,44 @@ module.exports.checkout = function(token, order) {
     data.outlet = order.outlet;
     data.user_token = token;
     data.order_number = order.order_number;
-
-    get_user(data).then(function(data) {
+    data.address = order.address
+    
+    get_user(data)
+    .then(function(data) {
+        return massage_order(data);
+    })
+    .then(function(data) {
         Cache.hget(data.user._id, 'order_map', function(err, reply) {
             if(!reply) {
                 deferred.reject('can not process this order')
             }
             else{
-                console.log('here')
-                console.log(data.order_number)
-                if(data.order_number === reply.order_number) {
-                    PaymentHelper.make_payment(order).then(function(data){
-                        var order = {};
-                        order = new Order();
-                        console.log(data.items)
-                        order.save(err, function(){
-                            if(err){
+                console.log('here');
+                var order = JSON.parse(reply);
+                if(data.order_number === order.order_number) {
+                    PaymentHelper.make_payment(data).then(function(data){
+                        var order = {};                        
+                        order.address = data.address;
+                        order.outlet = data.outlet;
+                        order.order_number = data.order_number;
+                        order.offer_used = data.offer_used;
+                        order.order_value_without_offer = 500
+                        order.order_value_with_offer = 400
+                        order.tax_paid = 12;
+                        order.cash_back = 20;
+                        order.order_status = 'pending';
+                        order.items = data.items;
 
+                        order = new Order(order);
+                        console.log(data.items)
+                        order.save(function(err, order){
+                            if(err){
+                                console.log(err);
+                                deferred.reject('unable to checkout ');
                             }
                             else{
-
+                                console.log('saved')
+                                deferred.resolve(data);   
                             }
                         })    
                     })
@@ -170,21 +191,18 @@ function basic_checks(data) {
     var passed_data = data;
 
     if(!passed_data.outlet){
-        deferred.reject({
-            err: err || true,
-            message: 'could not process without outlet'
-        });
+        deferred.reject({message: 'could not process without outlet'});
     }
     
     if(!passed_data.items && passed_data.items.length){
         deferred.reject({
-            err: err || true,
+            
             message: 'no item passed'
         });
     }
     if(!passed_data.coords || !passed_data.coords.lat || !passed_data.coords.long){
         deferred.reject({
-            err: err || true,
+            
             message: 'user location is not passed'
         });
     }
@@ -513,8 +531,7 @@ function get_applicable_offer(data) {
         else{            
             console.log('offer type alag ahai ' + offer.actions.reward.reward_meta.reward_type)
             return offer;
-        }
-        
+        }        
     })
     deferred.resolve(passed_data);
     return deferred.promise;
@@ -736,7 +753,7 @@ function apply_selected_offer(data) {
         }
         else{
             var order = JSON.parse(reply);
-            console.log(passed_data.order_number);
+            console.log(order);
             if(passed_data.order_number === order.order_number) {
                 if(passed_data.used_offer) {                
                     
@@ -766,7 +783,7 @@ function apply_selected_offer(data) {
                 }
                 else{
                     console.log('order found and no offer applied')
-                    data.order_value = order.order_value;
+                    data.order_value = order.order_actual_value;
                     data.applied_offer = null;
                     deferred.resolve(data);
                 }
@@ -816,3 +833,150 @@ function calculate_tax(order_value, outlet) {
 
     return new_order_value;
 }
+
+function massage_offer(data) {
+    logger.log();
+    var deferred = Q.defer();
+
+    data.outlet.offers = _.map(data.outlet.offers, function(offer) {
+      if (offer.type) {
+        return offer;
+      } 
+      else if(offer.offer_status === 'archived' || offer.offer_status === 'draft') {
+        return false;
+      }
+      else {
+        var massaged_offer = {};
+        massaged_offer.order_value = offer.order_value;
+        massaged_offer.is_applicable = offer.is_applicable;
+        massaged_offer._id = offer._id;
+        massaged_offer.header = offer.actions && offer.actions.reward && offer.actions.reward.header || offer.header;
+        massaged_offer.line1 = offer.actions && offer.actions.reward && offer.actions.reward.line1 || offer.line1;
+        massaged_offer.line2 = offer.actions && offer.actions.reward && offer.actions.reward.line2 || offer.line2;
+        massaged_offer.description = offer.actions && offer.actions.reward && offer.actions.reward.description || '';
+        massaged_offer.terms = offer.actions && offer.actions.reward && offer.actions.reward.terms || '';
+
+        massaged_offer.type = offer.offer_type;
+        massaged_offer.meta = offer.actions && offer.actions.reward && offer.actions.reward.reward_meta || offer.meta;
+
+        massaged_offer.expiry = offer.offer_end_date || offer.expiry_date;
+
+        var date = new Date();
+        var time = date.getHours()+':'+date.getMinutes();
+        date = date.getMonth()+'-'+date.getDate()+'-'+date.getFullYear();
+
+        if (offer && offer.actions && offer.actions.reward && offer.actions.reward.reward_hours) {
+          massaged_offer.available_now = !(RecoHelper.isClosed(date, time, offer.actions.reward.reward_hours));
+          if (!massaged_offer.available_now) {
+            massaged_offer.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
+          }
+
+        }
+        if(offer.offer_type === 'offer' || offer.offer_type === 'deal' || offer.offer_type ==='bank_deal') {
+          massaged_offer.offer_cost =  offer.offer_cost;  
+        }
+        if(offer.offer_type === 'bank_deal') {
+          massaged_offer.offer_source = offer.offer_source;
+        }
+
+        if(massaged_offer.expiry && (new Date(massaged_offer.expiry) <= new Date())) {
+          return massaged_offer;
+        }
+        else{
+          return massaged_offer;  
+        }       
+      }
+
+    });
+    deferred.resolve(data);
+    return deferred.promise;
+}
+
+function massage_order(data){
+    logger.log();
+    var deferred = Q.defer();
+
+    calculate_order_value()
+    deferred.resolve();
+    return deferred.promise;
+}
+
+module.exports.update_order = function(token, update_order) {
+    logger.log();
+    var deferred = Q.defer();
+    var id = update_order._id;
+    AuthHelper.get_user(token).then(function(data) {
+      
+        Order.findOneAndUpdate({
+            _id: id
+          }, {
+            $set: update_order
+          }, {
+            upsert: true
+          },
+          function(err, o) {
+            if (err || !o) {
+              deferred.reject({
+                err: err || true,
+                message: 'Couldn\'t update the order'
+              });
+            } else {
+              updated_outlet._id = id;
+
+              deferred.resolve({
+                data: o,
+                message: 'Updated order successfully'
+              });
+            }
+          }
+        );
+    }, function(err) {
+        deferred.reject({
+          err: err || true,
+          message: 'Couldn\'t find the user'
+        });
+    });
+
+  return deferred.promise;
+};
+
+module.exports.cancel_order = function(token, order) {
+    logger.log();
+    var deferred = Q.defer();
+
+    var id = order._id;
+    AuthHelper.get_user(token).then(function(data) {
+      
+        Order.findOneAndUpdate({
+            _id: id
+          }, {
+            $set: order
+          }, {
+            upsert: true
+          },
+          function(err, o) {
+            if (err || !o) {
+              deferred.reject({
+                err: err || true,
+                message: 'Couldn\'t cancel the order'
+              });
+            } else {
+              order._id = id;
+
+              deferred.resolve({
+                data: o,
+                message: 'order cancelled successfully'
+              });
+            }
+          }
+        );
+       
+    }, function(err) {
+        deferred.reject({
+          err: err || true,
+          message: 'Couldn\'t find the user'
+        });
+    });
+
+  return deferred.promise;
+};

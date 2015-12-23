@@ -329,3 +329,17 @@ module.exports.update_location = function(req, res) {
   });
 };
 
+module.exports.get_orders = function(req, res) {
+  var token = req.query.token || null;
+
+  if (!token) {
+    HttpHelper.error(res, null, "Not authenticated");
+  }
+
+  UserHelper.get_orders(req.query.token).then(function(data) {
+    HttpHelper.success(res, data.data, "found user orders");
+  }, function(err) {
+    HttpHelper.error(res, err, "Could not find user");
+  });
+};
+
