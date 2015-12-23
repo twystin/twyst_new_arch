@@ -16,8 +16,8 @@
                         <textarea class='form-control' ng-if='offer.actions.reward.terms' ng-model='offer.actions.reward.terms' disabled></textarea>
                         <div class='clearfix'></div>
                         <p>&nbsp;</p>
-                        <div class='pull-left'>Lapse Duration <span class='label label-primary'>{{offer.offer_lapse_days}} days</span></div>
-                        <div class='pull-right'>Expire Duration <span class='label label-primary'>{{offer.offer_valid_days}} days</span></div>
+                        <div class='pull-left' ng-if='offer.offer_type==="checkin"'>Lapse Duration <span class='label label-primary'>{{offer.offer_lapse_days}} days</span></div>
+                        <div class='pull-right' ng-if='offer.offer_type==="checkin"'>Expire Duration <span class='label label-primary'>{{offer.offer_valid_days}} days</span></div>
                     </div>
                     <div class='col-sm-6'>
                         <h4>Offer Type: <span class='label label-primary'>{{offer_types[offer.offer_type]}}</span></h4>
@@ -40,10 +40,10 @@
                                 <span class='label label-success'><i class='fa fa-inr'></i> {{offer.actions.reward.reward_meta.off}}</span> on a minimum spend of <span class='laebl label-success'><i class='fa fa-inr'></i> {{offer.actions.reward.reward_meta.spend}}</span>
                             </div>
                             <div ng-if='offer.actions.reward.reward_meta.reward_type==="free"'>
-                                Free reward info here
+                                <span class='label label-success'>{{offer.actions.reward.reward_meta.free_item_name}}</span> FREE
                             </div>
-                            <div nf-ig='offer.actions.reward.reward_meta.reward_type==="buyxgety"'>
-                                Buy X Get Y info here
+                            <div ng-if='offer.actions.reward.reward_meta.reward_type==="buyxgety"'>
+                                <span class='label label-success'>{{offer.actions.reward.reward_meta.free_item_name}}</span> FREE with <span class='label label-success'> {{offer.actions.reward.reward_meta.paid_item_name}}
                             </div>
                         </div>
                         <div ng-if='offer.offer_type==="checkin"'>
