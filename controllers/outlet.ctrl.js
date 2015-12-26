@@ -941,13 +941,31 @@ function create_event(data) {
 
 module.exports.get_orders = function(req, res) {
   var token = req.query.token || null;
-  var updated_outlet = {};
+  var outlet_id = req.params.outlet_id || null;
+
+  if (!token) {
+    HttpHelper.error(res, null, "Not authenticated");
+  }
+  if (!outlet_id) {
+    HttpHelper.error(res, null, "No outlet id passed");
+  }
+  OutletHelper.get_orders(token, outlet_id).then(function(data) {
+    HttpHelper.success(res, data.data, data.message);
+  }, function(err) {
+    HttpHelper.error(res, err.data, err.message);
+  });
+};
+
+module.exports.update_order = function(req, res) {
+  var token = req.query.token || null;
+  var order = {};
+  order = _.extend(order, req.body);
 
   if (!token) {
     HttpHelper.error(res, null, "Not authenticated");
   }
 
-  OutletHelper.get_orders(token).then(function(data) {
+  OutletHelper.update_order(token, order).then(function(data) {
     HttpHelper.success(res, data.data, data.message);
   }, function(err) {
     HttpHelper.error(res, err.data, err.message);

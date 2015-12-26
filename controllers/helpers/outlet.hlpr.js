@@ -9,6 +9,7 @@ var ObjectId = mongoose.Types.ObjectId;
 require('../../models/outlet.mdl');
 var Outlet = mongoose.model('Outlet');
 var User = mongoose.model('User');
+var Order = mongoose.model('Order');
 var AuthHelper = require('../../common/auth.hlpr.js');
 var logger = require('tracer').colorConsole();
 
@@ -321,27 +322,61 @@ var _removeOutletFromCache = function(outletId) {
   });
 }
 
-module.exports.get_orders = function(token) {
+module.exports.get_orders = function(token, outlet_id) {
   var deferred = Q.defer();
   logger.log();
 
   AuthHelper.get_user(token).then(function(data) {
-    User.findOne({
-      _id: data.data._id
-    }).populate('outlets').exec(function(err, orders) {
+    Order.find({
+      outlet: outlet_id
+    }).populate('user').exec(function(err, orders) {
       if (err) {
         deferred.reject({
           err: err || true,
           message: 'Couldn\'t get the orders'
         });
-      } else {
+      } 
+      else {  
+        orders = _.map(orders, function(order){
+          
+          var updated_user = {};
+          if(order.user.email) {
+            updated_user.email = order.user.email;
+          }
+          else if(order.user.google && order.user.google.email) {
+            updated_user.email = order.user.google.email;
+          }
+          else {
+            updated_user.email = order.user.profile.email;
+          }
+          updated_user.first_name = order.user.first_name;
+          updated_user.middle_name = order.user.middle_name;
+          updated_user.last_name = order.user.last_name;
+          updated_user.phone = order.user.phone; 
+          order.user = updated_user;
+          return order;
+        });
+
         deferred.resolve({
           data: orders,
           message: 'Got your orders'
         });
       }
     });
+  }, function(err) {
+    deferred.reject({
+      err: err || true,
+      message: 'Couldn\'t find the user'
+    });
   });
 
   return deferred.promise;
+};
+
+module.exports.update_order = function(token, order) {
+    logger.log();
+    var deferred = Q.defer();
+    deferred.resolve(order);
+    return deferred.promise;
+
 };

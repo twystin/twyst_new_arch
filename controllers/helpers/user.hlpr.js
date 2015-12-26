@@ -10,6 +10,7 @@ var Outlet = mongoose.model('Outlet');
 var User = mongoose.model('User');
 var Friend = mongoose.model('Friend');
 var Contact = mongoose.model('Contact');
+var Order = mongoose.model('Order');
 var AuthHelper = require('../../common/auth.hlpr.js');
 var async = require('async');
 var logger = require('tracer').colorConsole();
@@ -283,20 +284,37 @@ function addUserReferral(user_obj, friendObjId) {
     });
 }
 
-module.exports.getorders = function(token) {
+module.exports.get_orders = function(token) {
     logger.log();
-    var Q = Q.defer();
+    var deferred = Q.defer();
 
     AuthHelper.get_user(token).then(function(data) {
         var user = data.data;
 
-        User.findOne({_id: user._id }).populate('orders').exec(function(err, user) {
+        Order.find({user: user._id }).populate('outlet').exec(function(err, orders) {
             if (err || !user) {
               deferred.reject();
             } 
-            else {              
+            else {                
+                orders = _.map(orders, function(order){
+                    var updated_order = {};    
+                    updated_order.outlet_name = order.outlet.basics.name;
+                    updated_order.items = order.items;
+                    updated_order.address = order.address;
+                    updated_order.is_favourite = order.is_favourite;
+                    if(order.offer_used) {
+                        updated_order.order_cost = order.order_value_with_offer + order.tax_paid;
+                    }
+                    else{
+                        updated_order.order_cost = order.order_value_without_offer + order.tax_paid;
+                    }
+                    updated_order.cashback = order.cashback;
+                    updated_order.order_date = order.order_date;
+                    updated_order.order_status = order.order_status;
+                    return updated_order;
+                })
                 deferred.resolve({
-                    data: user.orders,
+                    data: orders,
                     message: 'found user orders'
                 });
             }
@@ -307,5 +325,12 @@ module.exports.getorders = function(token) {
           message: "Couldn\'t find user"
         });
     });
+    return deferred.promise;
+};
+
+module.exports.update_order = function(token, order) {
+    logger.log();
+    var deferred = Q.defer();
+    deferred.resolve(order);
     return deferred.promise;
 };

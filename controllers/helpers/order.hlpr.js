@@ -160,6 +160,7 @@ module.exports.checkout = function(token, order) {
                         order.cash_back = 20;
                         order.order_status = 'pending';
                         order.items = data.items;
+                        order.user = data.user._id;
 
                         order = new Order(order);
                         console.log(data.items)
@@ -519,7 +520,7 @@ function get_applicable_offer(data) {
                 return checkFreeItem(data, offer);
                 
             }
-            else if(offer.actions.reward.reward_meta.reward_type === 'bogo') {
+            else if(offer.actions.reward.reward_meta.reward_type === 'buyxgety') {
                 return checkOfferTypeBogo(data, offer);  
             }
             else if(offer.actions.reward.reward_meta.reward_type === 'discount') {
@@ -610,9 +611,21 @@ function checkOfferTypeBogo(data, offer) {
     var passed_data = data;
     var offer_id = offer._id;
     var items = passed_data.items;
+    var is_contain_free_item = false;
+    var is_contain_paid_item = false;
 
     for(var i = 0; i < items.length; i++) {
-        if(offer.offer_items.category_id === items[i].category_id
+        if(offer.actions.reward.reward_meta.paid_item.category_id === items[i].category_id
+            && offer.actions.reward.reward_meta.paid_item.sub_category_id === items[i].sub_category_id
+            && offer.actions.reward.reward_meta.paid_item.item_id === items[i].item_id
+            && offer.actions.reward.reward_meta.paid_item.option_id === items[i].option_id){            
+            is_contain_paid_item = true;
+            return;
+        }
+    }
+
+    for(var i = 0; i < items.length; i++) {
+        if(is_contain_paid_item && offer.offer_items.category_id === items[i].category_id
             && offer.offer_items.sub_category_id === items[i].sub_category_id
             && offer.offer_items.item_id === items[i].item_id
             || offer.offer_items.option_id === items[i].option_id
@@ -1013,47 +1026,6 @@ module.exports.update_order = function(token, update_order) {
             }
           }
         );
-    }, function(err) {
-        deferred.reject({
-          err: err || true,
-          message: 'Couldn\'t find the user'
-        });
-    });
-
-  return deferred.promise;
-};
-
-module.exports.cancel_order = function(token, order) {
-    logger.log();
-    var deferred = Q.defer();
-
-    var id = order._id;
-    AuthHelper.get_user(token).then(function(data) {
-      
-        Order.findOneAndUpdate({
-            _id: id
-          }, {
-            $set: order
-          }, {
-            upsert: true
-          },
-          function(err, o) {
-            if (err || !o) {
-              deferred.reject({
-                err: err || true,
-                message: 'Couldn\'t cancel the order'
-              });
-            } else {
-              order._id = id;
-
-              deferred.resolve({
-                data: o,
-                message: 'order cancelled successfully'
-              });
-            }
-          }
-        );
-       
     }, function(err) {
         deferred.reject({
           err: err || true,

@@ -35,8 +35,9 @@ var Order = new Schema({
   order_date: {type: Date, default: new Date()},
   order_value_without_offer: {type: Number},
   order_value_with_offer: {type: Number},
-  tax_paid: {type: Number},  
-  cash_back: {type: Number},
+  tax_paid: {type: Number},
+  actual_amount_paid: {type: Number},
+  cashback: {type: Number, default: 0},
   payment_info: {}, //COD/Payu/payment object
   txn_id: {type: String},
   order_status: {type: String},
