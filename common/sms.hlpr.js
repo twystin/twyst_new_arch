@@ -35,6 +35,7 @@ module.exports.send_sms = function(phone, message, type, from, outlet) {
         });
 
         res.on('end', function () {
+          console.log(body);
             deferred.resolve({data: body, message: 'Sent SMS'});
         });
 

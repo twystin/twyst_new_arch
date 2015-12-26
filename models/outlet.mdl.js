@@ -328,7 +328,7 @@ var OutletSchema = new Schema({
     status: {
       type: String,
       //enum: ['active', 'archived', 'draft'],
-      default: 'active'
+      default: 'draft'
     },
     links: [{
       type: Schema.ObjectId,
@@ -351,7 +351,6 @@ var OutletSchema = new Schema({
       commission_slab: [{
         start: {type: Number},
         end: {type: Number},
-        has_upper_bound: {type: Boolean},
         value: {type: Number}
       }]
     },

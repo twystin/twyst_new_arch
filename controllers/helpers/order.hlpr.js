@@ -58,7 +58,10 @@ module.exports.verify_order = function(token, order) {
         var updated_data = {};
         updated_data.items = data.order.items;
         updated_data.order_number = data.order.order_number;
-        updated_data.order_actual_value = data.order.order_actual_value;
+        updated_data.order_actual_value_without_tax = data.order.order_actual_value_without_tax;
+        updated_data.vat = data.order.vat;
+        updated_data.st = data.order.st;
+        updated_data.order_actual_value_with_tax = data.order.order_actual_value_with_tax;
         console.log(updated_data);
         updated_data.offers = [];
         _.each(data.order.available_offers, function(offer){
@@ -89,7 +92,7 @@ module.exports.apply_offer = function(token, order) {
     data.items = order.items;
     data.outlet = order.outlet;
     data.user_token = token;
-    data.used_offer = order.used_offer;
+    data.offer_used = order.offer_used;
     data.order_number = order.order_number;
 
     get_user(data)
@@ -104,8 +107,11 @@ module.exports.apply_offer = function(token, order) {
         var updated_data = {};
         updated_data.order_number = data.order_number;
         updated_data.items = data.items;
-        updated_data.order_value = data.order_value;
-        updated_data.applied_offer = data.applied_offer || null;
+        updated_data.order_value_without_tax = data.order_value_without_tax;
+        updated_data.vat = data.vat;
+        updated_data.st = data.st;
+        updated_data.order_value_with_tax = data.order_value_with_tax;
+        updated_data.offer_used = data.offer_used || null;
        
         deferred.resolve(updated_data);
     })
@@ -154,6 +160,7 @@ module.exports.checkout = function(token, order) {
                         order.cash_back = 20;
                         order.order_status = 'pending';
                         order.items = data.items;
+                        order.user = data.user._id;
 
                         order = new Order(order);
                         console.log(data.items)
@@ -513,7 +520,7 @@ function get_applicable_offer(data) {
                 return checkFreeItem(data, offer);
                 
             }
-            else if(offer.actions.reward.reward_meta.reward_type === 'bogo') {
+            else if(offer.actions.reward.reward_meta.reward_type === 'buyxgety') {
                 return checkOfferTypeBogo(data, offer);  
             }
             else if(offer.actions.reward.reward_meta.reward_type === 'discount') {
@@ -556,31 +563,40 @@ function checkFreeItem(data, offer) {
             || (items[i].sub_option_id && offer.offer_items.sub_option_id) === (items[i].sub_option_id)
             || (items[i].addon_id && offer.offer_items.sub_option_id.add_ons) === items[i].addon_id){
             
-            var order_value = calculate_tax(calculate_order_value(passed_data, offer.offer_items.item_id), passed_data.outlet);
+            var order_value_obj = calculate_tax(calculate_order_value(passed_data, offer.offer_items.item_id), passed_data.outlet);
                 
             console.log('for free');
-            console.log(order_value);
+            console.log(order_value_obj);
             console.log(offer.minimum_bill_value);
-            if(order_value >= offer.minimum_bill_value) {
+            if(order_value_obj.new_order_value >= offer.minimum_bill_value) {
                 console.log('offer applicable');
                     offer.is_already_checked = true;
                     offer.is_applicable = true;
-                    offer.order_value = order_value;
+                    offer.order_value_without_tax = order_value_obj.order_value;
+                    offer.vat = order_value_obj.vat;
+                    offer.st = order_value_obj.st;
+                    offer.order_value_with_tax = order_value_obj.new_order_value;
                     offer.free_item = items[i];
                     return offer;
                 
             }
             else{
                 offer.is_applicable = false;
-                offer.order_value = order_value;                
+                offer.order_value_without_tax = order_value_obj.order_value;
+                offer.vat = order_value_obj.vat;
+                offer.st = order_value_obj.st;
+                offer.order_value_with_tax = order_value_obj.new_order_value;
                 console.log('offer not applicable');
                 return offer;
             }        
         }
         else{
-            var order_value = calculate_tax(calculate_order_value(passed_data, null), passed_data.outlet);
+            var order_value_obj = calculate_tax(calculate_order_value(passed_data, null), passed_data.outlet);
             offer.is_applicable = false;
-            offer.order_value = order_value;    
+            offer.order_value_without_tax = order_value_obj.order_value;
+            offer.vat = order_value_obj.vat;
+            offer.st = order_value_obj.st;
+            offer.order_value_with_tax = order_value_obj.new_order_value;
             console.log('offer not applicable');
             return offer;
         }
@@ -595,29 +611,47 @@ function checkOfferTypeBogo(data, offer) {
     var passed_data = data;
     var offer_id = offer._id;
     var items = passed_data.items;
+    var is_contain_free_item = false;
+    var is_contain_paid_item = false;
 
     for(var i = 0; i < items.length; i++) {
-        if(offer.offer_items.category_id === items[i].category_id
+        if(offer.actions.reward.reward_meta.paid_item.category_id === items[i].category_id
+            && offer.actions.reward.reward_meta.paid_item.sub_category_id === items[i].sub_category_id
+            && offer.actions.reward.reward_meta.paid_item.item_id === items[i].item_id
+            && offer.actions.reward.reward_meta.paid_item.option_id === items[i].option_id){            
+            is_contain_paid_item = true;
+            return;
+        }
+    }
+
+    for(var i = 0; i < items.length; i++) {
+        if(is_contain_paid_item && offer.offer_items.category_id === items[i].category_id
             && offer.offer_items.sub_category_id === items[i].sub_category_id
             && offer.offer_items.item_id === items[i].item_id
             || offer.offer_items.option_id === items[i].option_id
             || (items[i].sub_option_id && offer.offer_items.sub_option_id) === (items[i].sub_option_id)
             || (items[i].addon_id && offer.offer_items.sub_option_id.add_ons) === items[i].addon_id){
             
-            var order_value = calculate_tax(calculate_order_value(passed_data, offer.offer_items.item_id), passed_data.outlet);
+            var order_value_obj = calculate_tax(calculate_order_value(passed_data, offer.offer_items.item_id), passed_data.outlet);
             console.log('for free');
-            console.log(order_value);
+            console.log(order_value_obj);
             console.log(offer.minimum_bill_value);
-            if(order_value >= offer.minimum_bill_value) {
+            if(order_value.new_order_value >= offer.minimum_bill_value) {
                 console.log('offer applicable');
                 
-                    offer.is_applicable = true;
-                    offer.order_value = order_value;
+                offer.is_applicable = true;
+                offer.order_value_without_tax = order_value_obj.order_value;
+                offer.vat = order_value_obj.vat;
+                offer.st = order_value_obj.st;
+                offer.order_value_with_tax = order_value_obj.new_order_value;
                 
             }
             else{
                 offer.is_applicable = false;
-                offer.order_value = order_value;
+                offer.order_value_without_tax = order_value_obj.order_value;
+                offer.vat = order_value_obj.vat;
+                offer.st = order_value_obj.st;
+                offer.order_value_with_tax = order_value_obj.new_order_value;
                 
                 console.log('offer not applicable');
             }
@@ -626,9 +660,12 @@ function checkOfferTypeBogo(data, offer) {
                     
         }
         else{
-            var order_value = calculate_tax(calculate_order_value(passed_data, null), passed_data.outlet);
+            var order_value_obj = calculate_tax(calculate_order_value(passed_data, offer.offer_items.item_id), passed_data.outlet);
             offer.is_applicable = false;
-            offer.order_value = order_value; 
+            offer.order_value_without_tax = order_value_obj.order_value;
+            offer.vat = order_value_obj.vat;
+            offer.st = order_value_obj.st;
+            offer.order_value_with_tax = order_value_obj.new_order_value;
             console.log('offer not applicable');
             console.log(offer)
             return offer;
@@ -644,7 +681,7 @@ function checkOfferTypeFlatOff(data, offer) {
     var passed_data = data;
     var id = offer._id;
 
-    var order_value = calculate_tax(calculate_order_value(passed_data, null), passed_data.outlet);
+    var order_value = calculate_order_value(passed_data, null);
                 
     console.log('for flat off');
     console.log(order_value);
@@ -652,14 +689,24 @@ function checkOfferTypeFlatOff(data, offer) {
     if(order_value >= offer.minimum_bill_value) {
         console.log('offer applicable');
 
-        order_value = order_value - offer.actions.reward.reward_meta.off;        
+        order_value = order_value - offer.actions.reward.reward_meta.off;
+        var order_value_obj = calculate_tax(order_value, passed_data.outlet);
+
         offer.is_applicable = true;
-        offer.order_value = order_value;
+        offer.order_value_without_tax = order_value_obj.order_value;
+        offer.vat = order_value_obj.vat;
+        offer.st = order_value_obj.st;
+        offer.order_value_with_tax = order_value_obj.new_order_value;
     
     }
     else{
         offer.is_applicable = false;
-        offer.order_value = order_value;
+
+        var order_value_obj = calculate_tax(order_value, passed_data.outlet);
+        offer.order_value_without_tax = order_value_obj.order_value;
+        offer.vat = order_value_obj.vat;
+        offer.st = order_value_obj.st;
+        offer.order_value_with_tax = order_value_obj.new_order_value;
         
         console.log('offer not applicable');
     }
@@ -675,7 +722,7 @@ function checkOfferTypePercentageOff(data, offer) {
     var id = offer._id;
     var discount = 0;
 
-    var order_value = calculate_tax(calculate_order_value(passed_data, null), passed_data.outlet);
+    var order_value = calculate_order_value(passed_data, null);
                 
     console.log('for percentage off');
     console.log(order_value);
@@ -685,19 +732,25 @@ function checkOfferTypePercentageOff(data, offer) {
         console.log(offer.actions.reward.reward_meta.percent)
         discount = (order_value * offer.actions.reward.reward_meta.percent)/100;
         if(discount <= offer.actions.reward.reward_meta.max) {
-            order_value = order_value - (order_value * offer.actions.reward.reward_meta.percent)/100;            
+            order_value = order_value - discount;            
         }
         else {
             order_value = order_value - offer.actions.reward.reward_meta.max;               
         }
-        
+        var order_value_obj = calculate_tax(order_value, passed_data.outlet);
         offer.is_applicable = true;
-        offer.order_value = order_value;
-        
+        offer.order_value_without_tax = order_value_obj.order_value;
+        offer.vat = order_value_obj.vat;
+        offer.st = order_value_obj.st;
+        offer.order_value_with_tax = order_value_obj.new_order_value;
     }
     else{
         offer.is_applicable = false;
-        offer.order_value = order_value;
+        var order_value_obj = calculate_tax(order_value, passed_data.outlet);
+        offer.order_value_without_tax = order_value_obj.order_value;
+        offer.vat = order_value_obj.vat;
+        offer.st = order_value_obj.st;
+        offer.order_value_with_tax = order_value_obj.new_order_value;
         
         console.log('offer not applicable');
     }
@@ -709,7 +762,7 @@ function generate_and_cache_order(data) {
     var deferred = Q.defer();
 
     var passed_data = data;
-    var order_number, order_actual_value;
+    var order_number, order_actual_value_obj = {};
     var date = new Date();
     var month = date.getMonth();
     var year = date.getFullYear();
@@ -718,16 +771,19 @@ function generate_and_cache_order(data) {
     var code = keygen._({
         forceUppercase: true,
         length: 4,
-        exclude: ['O', '0', 'L', '1', 'I']
+        exclude: ['O', '0', '1', 'I']
     });
 
     order_number = 'TW'+data.outlet.links.short_url+'-'+month+year+'-'+code;
-    order_actual_value = calculate_tax(calculate_order_value(passed_data, null), passed_data.outlet);
+    order_actual_value_obj = calculate_tax(calculate_order_value(passed_data, null), passed_data.outlet);
 
     var order = {};
     order.order_number = order_number;
     order.items = data.items;
-    order.order_actual_value = order_actual_value;     
+    order.order_actual_value_without_tax = order_actual_value_obj.order_value;     
+    order.vat = order_actual_value_obj.vat;     
+    order.st = order_actual_value_obj.st;     
+    order.order_actual_value_with_tax = order_actual_value_obj.new_order_value;     
     order.available_offers = data.outlet.offers;
     data.order = order;
     
@@ -746,7 +802,7 @@ function apply_selected_offer(data) {
     var deferred = Q.defer();
 
     var passed_data = data;
-    var applied_offer = {};
+    var offer_used = {};
     Cache.hget(passed_data.user._id, 'order_map', function(err, reply) {
         if(!reply) {
             deferred.reject('no offer available for user at this outlet')
@@ -755,44 +811,79 @@ function apply_selected_offer(data) {
             var order = JSON.parse(reply);
             console.log(order);
             if(passed_data.order_number === order.order_number) {
-                if(passed_data.used_offer) {                
+                if(passed_data.offer_used) {                
                     
-                    applied_offer = _.find(order.available_offers, function(offer){
+                    offer_used = _.find(order.available_offers, function(offer){
                         
-                        if(offer && offer.is_applicable && offer._id === passed_data.used_offer) {
-                            order.offer_used = offer;
-                            order.order_value = offer.order_value;
-                            data.order_value = offer.order_value;
+                        if(offer && offer.is_applicable && offer._id === passed_data.offer_used) {
+                            order.order_value_without_tax = offer.order_value_without_tax;
+                            order.vat = offer.vat;
+                            order.st = offer.st;
+                            order.order_value_with_tax = offer.order_value_with_tax;
+                            
+                            data.order_value_without_tax = offer.order_value_without_tax;
+                            data.vat = offer.vat;
+                            data.st = offer.st;
+                            data.order_value_with_tax = offer.order_value_with_tax;
 
-                            return order;                        
+                            return offer;                        
                         }
                     })
-                
-                    delete order.available_offers;
-                    Cache.hset(data.user._id, "order_map", JSON.stringify(order), function(err) {
-                       if(err) {
-                         logger.log(err);
-                       }
-                       else{
-                            console.log('order found and offer applied')
-                            data.applied_offer = applied_offer;
-                            deferred.resolve(data);
-                       }
-                        
-                    });   
+                    
+                    if(offer_used) {
+                        delete order.available_offers;
+                        order.offer_used = offer_used;
+                        Cache.hset(data.user._id, "order_map", JSON.stringify(order), function(err) {
+                           if(err) {
+                             logger.log(err);
+                           }
+                           else{
+                                console.log('order found and offer applied')
+                                data.offer_used = offer_used;
+                                deferred.resolve(data);
+                           }
+                            
+                        });     
+                    }
+                    else{                        
+                        data.order_value_without_tax = order.order_actual_value_without_tax;
+                        data.vat = order.vat;
+                        data.st = order.st;
+                        data.order_value_with_tax = order.order_actual_value_with_tax;
+                        delete order.available_offers;
+                        order.offer_used = null;
+                        Cache.hset(data.user._id, "order_map", JSON.stringify(order), function(err) {
+                           if(err) {
+                             logger.log(err);
+                           }
+                           else{
+                                console.log('order found no offer applied')
+                                data.offer_used = offer_used;
+                                deferred.resolve(data);
+                           }
+                            
+                        }); 
+                    }
+                      
                 }
                 else{
                     console.log('order found and no offer applied')
-                    data.order_value = order.order_actual_value;
-                    data.applied_offer = null;
+                    data.order_value_without_tax = order.order_actual_value_without_tax;
+                    data.vat = order.vat;
+                    data.st = order.st;
+                    data.order_value_with_tax = order.order_actual_value_with_tax;
+                    data.offer_used = null;
                     deferred.resolve(data);
                 }
             }
             else {
                 console.log('order not found');
-                var order_value = calculate_tax(calculate_order_value(passed_data, null), passed_data.outlet);
-                data.order_value = order_value;
-                data.applied_offer = null;
+                var order_value_obj = calculate_tax(calculate_order_value(passed_data, null), passed_data.outlet);
+                data.order_value_without_tax = order_value_obj.order_value_without_tax;
+                data.vat = order_value_obj.vat;
+                data.st = order_value_obj.st;
+                data.order_value_with_tax = order_value_obj.order_value_with_tax;
+                data.offer_used = null;
                 deferred.resolve(data);
             }
         } 
@@ -803,15 +894,17 @@ function apply_selected_offer(data) {
 function calculate_tax(order_value, outlet) {
     logger.log();
     
-    var new_order_value = order_value;
     var tax_grid = {};
-
+    var order_value_obj = {};
+    order_value_obj.new_order_value = 0;
+    order_value_obj.vat = 0;
+    order_value_obj.st = 0;
     tax_grid = _.find(TaxConfig.tax_grid, function(tax_grid) {        
         if(tax_grid.city.trim() === outlet.contact.location.city.trim()) {
             return tax_grid;
         }
     })
-    console.log(tax_grid);
+
     var new_order_value = 0, vat = 0, surcharge_on_vat = 0, st = 0, sbc = 0,packing_charge = 0;
    
     vat = order_value*tax_grid.vat/100;
@@ -819,19 +912,19 @@ function calculate_tax(order_value, outlet) {
 
     st = ((order_value*tax_grid.st_applied_on_percentage/100)*tax_grid.st)/100;   
     
-
     sbc = ((order_value*tax_grid.st_applied_on_percentage/100)*tax_grid.sbc)/100; 
     
-
     if(outlet.attributes.packing_charge) {
         packing_charge = outlet.attributes.packing_charge;
     }
     console.log(vat + ' ' + surcharge_on_vat + ' ' + st + ' ' + sbc + ' ' + packing_charge)
     new_order_value = order_value+vat+surcharge_on_vat+st+sbc+packing_charge;
-    vat = vat+surcharge_on_vat;
-    st = st+sbc;
+    order_value_obj.vat = vat+surcharge_on_vat;
+    order_value_obj.st = st+sbc;
+    order_value_obj.new_order_value = new_order_value;
+    order_value_obj.order_value = order_value;
 
-    return new_order_value;
+    return order_value_obj;
 }
 
 function massage_offer(data) {
@@ -847,7 +940,10 @@ function massage_offer(data) {
       }
       else {
         var massaged_offer = {};
-        massaged_offer.order_value = offer.order_value;
+        massaged_offer.order_value_without_tax = offer.order_value_without_tax;
+        massaged_offer.vat = offer.vat;
+        massaged_offer.st = offer.st;
+        massaged_offer.order_value_with_tax = offer.order_value_with_tax;
         massaged_offer.is_applicable = offer.is_applicable;
         massaged_offer._id = offer._id;
         massaged_offer.header = offer.actions && offer.actions.reward && offer.actions.reward.header || offer.header;
@@ -930,47 +1026,6 @@ module.exports.update_order = function(token, update_order) {
             }
           }
         );
-    }, function(err) {
-        deferred.reject({
-          err: err || true,
-          message: 'Couldn\'t find the user'
-        });
-    });
-
-  return deferred.promise;
-};
-
-module.exports.cancel_order = function(token, order) {
-    logger.log();
-    var deferred = Q.defer();
-
-    var id = order._id;
-    AuthHelper.get_user(token).then(function(data) {
-      
-        Order.findOneAndUpdate({
-            _id: id
-          }, {
-            $set: order
-          }, {
-            upsert: true
-          },
-          function(err, o) {
-            if (err || !o) {
-              deferred.reject({
-                err: err || true,
-                message: 'Couldn\'t cancel the order'
-              });
-            } else {
-              order._id = id;
-
-              deferred.resolve({
-                data: o,
-                message: 'order cancelled successfully'
-              });
-            }
-          }
-        );
-       
     }, function(err) {
         deferred.reject({
           err: err || true,
