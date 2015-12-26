@@ -153,6 +153,9 @@ angular.module('merchantApp')
                     });
 
                     modalInstance.result.then(function(delivery_zone) {
+                        if (index === -1) {
+                            $scope.outlet.business_hours = _.cloneDeep(delivery_zone.delivery_timings);
+                        }
                         $scope.outlet.attributes.delivery.delivery_zone.push(delivery_zone);
                     }, function() {
                         polygon.setMap(null);

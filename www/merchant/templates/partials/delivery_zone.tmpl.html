@@ -35,15 +35,6 @@
             </div>
         </div>
         <div class='form-group'>
-            <label class='col-sm-2 control-label'>Free Delivery Amount <i class='fa fa-sm fa-asterisk'></i></label>
-            <div class='col-sm-6'>
-                <div class='input-group' ng-class='{"has-error": formFailure && !delivery_zone.free_delivery_amt && delivery_zone.free_delivery_amt!==0}'>
-                    <span class='input-group-addon'><i class='fa fa-inr'></i></span>
-                    <input type='number' min='0' step='25' max='5000' ng-model='delivery_zone.free_delivery_amt' class='form-control'>
-                </div>
-            </div>
-        </div>
-        <div class='form-group'>
             <label class='col-sm-2 control-label'>Delivery Charge <i class='fa fa-sm fa-asterisk'></i></label>
             <div class='col-sm-6'>
                 <div class='input-group' ng-class='{"has-error": formFailure && !delivery_zone.delivery_charge && delivery_zone.delivery_charge!==0}'>
@@ -52,6 +43,16 @@
                 </div>
             </div>
         </div>
+        <div class='form-group' ng-if='delivery_zone.delivery_charge'>
+            <label class='col-sm-2 control-label'>Free Delivery Amount <i class='fa fa-sm fa-asterisk'></i></label>
+            <div class='col-sm-6'>
+                <div class='input-group' ng-class='{"has-error": formFailure && !delivery_zone.free_delivery_amt && delivery_zone.free_delivery_amt!==0}'>
+                    <span class='input-group-addon'><i class='fa fa-inr'></i></span>
+                    <input type='number' min='0' step='25' max='5000' ng-model='delivery_zone.free_delivery_amt' class='form-control'>
+                </div>
+            </div>
+        </div>
+        
         <div class='form-group'>
             <label class='col-sm-2 control-label'>Payment Modes</label>
             <div class='col-sm-6'>

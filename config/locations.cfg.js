@@ -153,7 +153,7 @@ module.exports.locations = [{"location_1":"Shiv Mandir","location_2":"Aaya Nagar
 {"location_1":"The Bristol Hotel","location_2":"DLF Phase 1","city":"Gurgaon","lat":28.480343,"long":77.09173},
 {"location_1":"Central Arcade","location_2":"DLF Phase 2","city":"Gurgaon","lat":28.481104,"long":77.086189},
 {"location_1":"","location_2":"DLF Phase 2","city":"Gurgaon","lat":28.483676,"long":77.08873},
-{"location_1":"Nathupur","location_2":"DLF Phase 3","city":"Gurgaon","lat":28.769264,"long":77.177675},
+{"location_1":"Nathupur","location_2":"DLF Phase 3","city":"Gurgaon","lat":28.486349,"long":77.097987},
 {"location_1":"","location_2":"DLF Phase 3","city":"Gurgaon","lat":28.493862,"long":77.104085},
 {"location_1":"Moulsari Arcade","location_2":"DLF Phase 3","city":"Gurgaon","lat":28.4949569,"long":77.1034985},
 {"location_1":"","location_2":"DLF Phase 4","city":"Gurgaon","lat":28.46422,"long":77.083917},

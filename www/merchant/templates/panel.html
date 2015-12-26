@@ -1,10 +1,20 @@
 <div>&nbsp;</div>
 <div class='container-fluid'>
     <div class='row'>
-        <div class='col-sm-12 table-responsive'>
+        <div class='col-sm-8 table-responsive'>
             <div class='table-label'>
-                <legend>Orders</legend>
+                <legend>Order Panel</legend>
             </div>
+            <div class='col-xs-12'>
+                <label class='col-sm-2 control-label'>Pick Outlet</label>
+                <div class='col-sm-6'>
+                    <select ng-model='choosen_outlet' ng-disabled='!choosen_outlet' class='form-control'>
+                        <option value='' ng-if='!choosen_outlet' n>No outlets to pick from</option>
+                        <option value='{{id}}' ng-repeat='(id, _) in outlets'>{{outlets[id].basics.name}}{{outlets[id].contact.location.locality_1[0]?', ' + outlets[id].contact.location.locality_1[0]:''}}{{outlets[id].contact.location.locality_2[0]?', ' + outlets[id].contact.location.locality_2[0]:''}}</option>
+                    </select>
+                </div>
+            </div>
+            <div>&nbsp;</div>
             <div class='btn-group btn-group-justified'>
                 <a class='btn' ng-click='updateShowing("pending")' ng-class='{"btn-primary": showing==="pending", "btn-dark": showing!=="pending"}'>Pending</a>
                 <a class='btn' ng-click='updateShowing("accepted")' ng-class='{"btn-primary": showing==="accepted", "btn-dark": showing!=="accepted"}'>Accepted</a>
@@ -16,34 +26,34 @@
             <div class='alert alert-warning text-center' ng-if='!orders.length'>
                 <b>No {{showing}} orders right now.</b>
             </div>
-            <div class='col-sm-offset-1 col-sm-10'>
-                <div class='panel panel-primary'>
+            <div class='col-sm-12'>
+                <div class='panel panel-primary' ng-repeat='order in orders'>
                     <div class='panel-body'>
-                        <h4 class='pull-left'>email {{order.user.email}}</h4>
-                        <span class='pull-right'>Order Id #{{order._id}}</span>
+                        <h4 class='pull-left'>{{order.user.email}}</h4>
+                        <span class='pull-right'>Order Id #{{order.order_number}}</span>
                         <div class='clearfix'></div>
                         <div class='pull-left'>
-                            date {{order.order_date | date:longDate}}
+                            {{order.order_date | date:longDate}}
                             <div class='clearfix'></div>
-                            address {{order.address.line1}}, {{order.address.line2}}, {{order.address.city}}
+                            {{order.address.line1}}, {{order.address.line2}}, {{order.address.city}}
                         </div>
                         <div class='pull-right'>
-                            <h4 class='text-right'>phone {{order.user.phone}}</h4>
+                            <h4 class='text-right'>{{order.user.phone}}</h4>
                         </div>
                     </div>
                     <table class='table table-bordered table-hover'>
                         <thead>
                             <tr>
                                 <th>ITEM</th>
-                                <th>PRICE</th>
+                                <th class='text-right'>PRICE</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
+                            <tr ng-repeat='item in order.items'>
                                 <td>
-                                    {{item.item_name}} <span class='badge'>{{item.item_quantity}}</span> <span class='badge' ng-if='item.option'>{{item.option}}</span> <span ng-repeat='addon in item.add_on' class='badge'>{{addon.add_on_item}}</span>
+                                    {{item.item_name}} <span class='badge'>x {{item.item_quantity}}</span> <span class='badge' ng-if='item.option'>{{item.option}}</span> <span ng-repeat='sub_option in item.sub_options' class='badge'>{{sub_option.sub_option_set[0].sub_option_value}}</span> <span ng-repeat='addon in item.add_on' class='badge'>{{addon.add_on_item}}</span>
                                 </td>
-                                <td>{{getItemPrice(item)}}</td>
+                                <td class='text-right'><i class='fa fa-inr'></i> {{getItemPrice(item)}}</td>
                             </tr>
                             <tr>
                                 <td colspan="2">
@@ -51,39 +61,112 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td>Item Total</td>
-                                <td>{{getOrderTotal(order)}}</td>
+                                <td>Order Total</td>
+                                <td class='text-right'><i class='fa fa-inr'></i> {{order.order_value_without_offer}}</td>
                             </tr>
                             <tr>
                                 <td>VAT</td>
-                                <td></td>
+                                <td class='text-right'><i class='fa fa-inr'></i> {{order.tax_paid}}</td>
                             </tr>
                             <tr>
                                 <td>Delivery and Dispatch</td>
-                                <td></td>
+                                <td class='text-right'><i class='fa fa-inr'></i> {{order.delivery_charge}}</td>
                             </tr>
                             <tr>
-                            	<td>Discount</td>
-                            	<td></td>
-                        	</tr>
-                        	<tr>
-                        		<td colspan="2"><hr></td>
-                        	</tr>
-                        	<tr>
-                        		<th>Grand Total</th>
-                        		<th>{{order.order_cost}}</th>
-                        	</tr>
-                        	<tr>
-                        		<td colspan='2' class='text-center'>
-                        			<!-- <timer> -->
-                        			<span class='label label-primary'>Timer</span>
-                        			<span class='label label-primary' ng-if='order.txn_id'>PAID</span>
-                        			<span class='label label-danger' ng-if='!order.txn_id'>C.O.D</span>
-                        			<span class='label label-default pull-right'>{{showing | uppercase}}</span>
-                        		</td>
-                        	</tr>
+                                <td>Discount</td>
+                                <td class='text-right'><i class='fa fa-inr'></i> {{getDiscount(order)}}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <hr>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Grand Total</th>
+                                <th class='text-right'><i class='fa fa-inr'></i> {{order.order_value_with_offer}}</th>
+                            </tr>
+                            <tr ng-if='order.order_status==="pending"'>
+                                <td colspan="2">
+                                    <div class='col-sm-offset-2 col-sm-3 text-right'>Delivery Time:</div>
+                                    <div class="col-xs-3">
+                                        <div class="input-group">
+                                            <span class="input-group-btn">
+                                                <button type="button" class="btn btn-primary" ng-click='updateEstimateTime(order, 5)' ng-disabled='order.estimate_time>=180'>
+                                                    <i class="fa fa-plus"></i>
+                                                </button>
+                                            </span>
+                                            <input type="number" ng-model='order.estimate_time' class="form-control">
+                                            <span class="input-group-btn">
+                                                <button type="button" class="btn btn-default" ng-click='updateEstimateTime(order, -5)' ng-disabled='order.estimate_time<=10'>
+                                                    <i class="fa fa-minus"></i>
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan='2' class='text-center'>
+                                    <!-- <timer> -->
+                                    <span class='label label-primary' ng-if='order.order_status==="accepted"'>Timer</span>
+                                    <span class='label label-primary' ng-if='order.txn_id'>PAID</span>
+                                    <span class='label label-danger' ng-if='!order.txn_id'>C.O.D</span>
+                                    <span class='label label-default pull-right'>{{showing | uppercase}}</span>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+        <div class='col-sm-4'>
+            <div class='table-label'>
+                <legend>Checkin Panel</legend>
+            </div>
+            <div class='col-sm-12'>
+                <div class='well'>
+                    <label>Checkin User</label>
+                    <div class='form-group'>
+                        <div class='input-group'>
+                            <input type='text' ng-model='checkin.number' class='form-control' placeholder='10 digit mobile number'>
+                            <div class='input-group-btn'>
+                                <a class='btn btn-primary' ng-click='checkinUser()'>Checkin</a>
+                            </div>
+                        </div>
+                        <div>&nbsp;</div>
+                        <div class='input-group'>
+                            <div class='input-group-addon'>Date</div>
+                            <input type='text' datepicker-popup="MM/dd/yyyy" show-button-bar='false' min-date='minDate' max-date='maxDate' is-open="date_open" ng-click="date_open = true" class='form-control' ng-model='checkin.date'>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class='col-sm-12'>
+                <div class='well'>
+                    <label>Find vouchers by code</label>
+                    <div class='input-group'>
+                        <input type='text' class='form-control' ng-model='search.code' placeholder='Voucher code'>
+                        <div class='input-group-btn'>
+                            <a class='btn btn-primary' ng-click='getVoucherByCode()'>
+                                <span ng-if='searchingByCode'><i class='fa fa-spinner fa-spin'></i> Searching...</span>
+                                <span ng-if='!searchingByCode'>Search</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class='col-sm-12'>
+                <div class='well'>
+                    <label>Find vouchers by phone number</label>
+                    <div class='input-group'>
+                        <input type='text' class='form-control' ng-model='search.number' placeholder='10 digit mobile number'>
+                        <div class='input-group-btn'>
+                            <a class='btn btn-primary' ng-click='getVouchersByPhone()'>
+                                <span ng-if='seachingByPhone'><i class='fa fa-spinner fa-spin'></i> Searching...</span>
+                                <span ng-if='!seachingByPhone'>Search</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

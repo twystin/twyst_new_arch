@@ -220,13 +220,13 @@ angular.module('merchantApp')
         	} else if (!$scope.delivery_zone.min_amt_for_delivery && $scope.delivery_zone.min_amt_for_delivery!==0) {
         		$scope.formFailure = true;
         		SweetAlert.swal('Validation error', 'Minimum delivery amount cannot be left blank', 'error');
-        	} else if (!$scope.delivery_zone.free_delivery_amt && $scope.delivery_zone.free_delivery_amt!==0) {
+        	} else if (!$scope.delivery_zone.delivery_charge && $scope.delivery_zone.delivery_charge!==0) {
+                $scope.formFailure = true;
+                SweetAlert.swal('Validation error', 'Delivery charge cannot be left blank', 'error');
+            } else if ($scope.delivery_zone.delivery_charge && !$scope.delivery_zone.free_delivery_amt && $scope.delivery_zone.free_delivery_amt !== 0) {
         		$scope.formFailure = true;
         		SweetAlert.swal('Validation error', 'Free delivery amount required', 'error');
-        	} else if (!$scope.delivery_zone.delivery_charge && $scope.delivery_zone.delivery_charge!==0) {
-        		$scope.formFailure = true;
-        		SweetAlert.swal('Validation error', 'Delivery charge cannot be left blank', 'error');
-            } else if (!$scope.delivery_zone.payment_options || !$scope.delivery_zone.payment_options.length) {
+        	} else if (!$scope.delivery_zone.payment_options || !$scope.delivery_zone.payment_options.length) {
                 $scope.formFailure = true;
                 SweetAlert.swal('Validation error', 'Atleast one payment option must be selected');
         	} else if(is_first) {
