@@ -187,7 +187,7 @@ module.exports.delete_offer = function(token, offerId) {
             deferred.reject({err: err || true, message: 'Failed to update offer'});
         } else {
             async.each(outlets, function(outlet, callback) {
-                var index = _.findIndex(outlet.offers, function(offer) { return offer._id.toString()==offerId; });
+                var index = _.findIndex(outlet.offers, function(offer) { return offer._id.toString()===offerId; });
                 if(index!==-1) {
                     outlet.offers.splice(index, 1);
                     outlet.save(function(err) {

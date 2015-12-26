@@ -139,30 +139,51 @@ angular.module('merchantApp')
                 }
             });
 
+            $scope.$watchCollection('offer.offer_items', function(newVal, oldVal) {
+                console.log('newVal', newVal);
+                if ($scope.offer.actions.reward.reward_meta.reward_type === 'buyxgety' && $scope.offer.offer_items && $scope.offer.offer_items.menu_id) {
+                    $scope.getRewardName($scope.offer.offer_items).then(function(free_item_name) {
+                        $scope.offer.actions.reward.reward_meta.free_item_name = free_item_name;
+                    }, function(err) {
+                        console.log(err);
+                    });
+                }
+            });
+
             $scope.$watchCollection('offer.actions.reward.reward_meta', function(newVal, oldVal) {
                 if (!newVal.reward_type) {
                     return;
                 }
                 console.log(newVal);
                 if (newVal.reward_type === 'buyxgety') {
-                    delete newVal.item_free;
-                    if (newVal.item_x) {
-                        $scope.getRewardName(newVal.item_x).then(function(item_x) {
-                            newVal.free_item_name = item_x;
+                    if (oldVal.reward_type !== 'buyxgety') {
+                        console.log(oldVal);
+                        $scope.offer.offer_items = {
+                            all: true
+                        };
+                        delete newVal.free_item;
+                    }
+                    if ($scope.offer.offer_items && $scope.offer.offer_items.menu_id) {
+                        $scope.getRewardName($scope.offer.offer_items).then(function(free_item_name) {
+                            newVal.free_item_name = free_item_name;
                         }, function(err) {
                             console.log(err);
-                        });    
+                        });
                     }
-                    if (newVal.item_y) {
-                        $scope.getRewardName(newVal.item_y).then(function(item_y) {
-                            newVal.paid_item_name = item_y;
+                    if (newVal.paid_item) {
+                        $scope.getRewardName(newVal.paid_item).then(function(paid_item_name) {
+                            if (newVal.paid_item && (!newVal.paid_item.paid_item_name || newVal.paid_item.paid_item_name !== paid_item_name)) {
+                                var paid_item = _.cloneDeep(newVal.paid_item);
+                                paid_item.paid_item_name = paid_item_name;
+                                newVal.paid_item = paid_item;
+                            }
                         }, function(err) {
                             console.log(err);
                         }); 
                     }
-                    if (newVal.item_x && newVal.item_y) {
+                    if (newVal.paid_item && $scope.offer.offer_items && $scope.offer.offer_items.menu_id) {
                         $scope.offer.actions.reward.header = 'Buy ' + newVal.free_item_name;
-                        $scope.offer.actions.reward.line1 = 'Get ' + newVal.paid_item_name;
+                        $scope.offer.actions.reward.line1 = 'Get ' + (newVal.paid_item && newVal.paid_item.paid_item_name);
                         $scope.offer.actions.reward.line2 = '';
                     } else {
                         $scope.offer.actions.reward.header = '';
@@ -170,13 +191,18 @@ angular.module('merchantApp')
                         $scope.offer.actions.reward.line2 = '';
                     }
                 } else if (newVal.reward_type === 'free') {
-                    delete newVal.item_x;
-                    delete newVal.item_y;
-                    if (newVal.item_free) {
-                        $scope.getRewardName(newVal.item_free).then(function(item_free) {
-                            newVal.free_item_name = item_free;
+                    if (oldVal.reward_type && oldVal.reward_type==='free') {
+                        $scope.offer.offer_items = {
+                            all: true
+                        };
+                        delete newVal.paid_item;
+                        delete newVal.free_item_name;
+                    }
+                    if (newVal.free_item) {
+                        $scope.getRewardName(newVal.free_item).then(function(free_item_name) {
+                            newVal.free_item.free_item_name = free_item_name;
                             $scope.offer.actions.reward.header = 'FREE';
-                            $scope.offer.actions.reward.line1 = item_free;
+                            $scope.offer.actions.reward.line1 = free_item_name;
                             $scope.offer.actions.reward.line2 = '';
                         }, function(err) {
                             console.log(err);
@@ -190,11 +216,13 @@ angular.module('merchantApp')
                         $scope.offer.actions.reward.line2 = '';
                     }
                 } else if (newVal.reward_type === 'flatoff') {
-                    delete newVal.item_x;
-                    delete newVal.item_y;
-                    delete newVal.item_free;
-                    delete newVal.free_item_name;
-                    delete newVal.paid_item_name;
+                    if(oldVal.reward_type && oldVal.reward_type!=='flatoff') {
+                        delete newVal.free_item;
+                        delete newVal.paid_item;
+                        $scope.offer.offer_items = {
+                            all: true
+                        };
+                    }
                     if (newVal.off && newVal.spend) {
                         $scope.offer.actions.reward.header = 'Rs. ' + newVal.off + ' off';
                         $scope.offer.actions.reward.line1 = 'on a min spend';
@@ -205,11 +233,13 @@ angular.module('merchantApp')
                         $scope.offer.actions.reward.line2 = '';
                     }
                 } else if (newVal.reward_type === 'discount') {
-                    delete newVal.item_x;
-                    delete newVal.item_y;
-                    delete newVal.item_free;
-                    delete newVal.free_item_name;
-                    delete newVal.paid_item_name;
+                    if(oldVal.reward_type && oldVal.reward_type!=='flatoff') {
+                        delete newVal.paid_item;
+                        $scope.offer.offer_items = {
+                            all: true
+                        };
+                        delete newVal.free_item_name;
+                    }
                     if (newVal.percent && newVal.max) {
                         $scope.offer.actions.reward.header = newVal.percent + '% OFF';
                         $scope.offer.actions.reward.line1 = 'on your bill';
@@ -241,12 +271,10 @@ angular.module('merchantApp')
                         $scope.offer.offer_items.all = false;
                     }
 
-                    if (item_for === 'buyxgety_1') {
-                        $scope.offer.actions.reward.reward_meta.item_x = _.clone(item);
-                    } else if (item_for === 'buyxgety_2') {
-                        $scope.offer.actions.reward.reward_meta.item_y = _.clone(item);
+                    if (item_for === 'buyxgety_2') {
+                        $scope.offer.actions.reward.reward_meta.paid_item = _.clone(item);
                     } else if (item_for === 'free') {
-                        $scope.offer.actions.reward.reward_meta.item_free = _.clone(item);
+                        $scope.offer.actions.reward.reward_meta.free_item = _.clone(item);
                     }
                 });
             };
@@ -443,15 +471,15 @@ angular.module('merchantApp')
                 if (!$scope.offer.actions.reward.reward_meta.reward_type) {
                     deferred.reject('Choose a reward type');
                 } else if ($scope.offer.actions.reward.reward_meta.reward_type === 'buyxgety') {
-                    if (!$scope.offer.actions.reward.reward_meta.item_x) {
-                        deferred.reject('Buy X Get Y requires "FREE ITEM"');
-                    } else if (!$scope.offer.actions.reward.reward_meta.item_y) {
+                    if (!$scope.offer.actions.reward.reward_meta.paid_item) {
                         deferred.reject('Buy X Get Y requires "PAID ITEM"');
+                    } else if (!$scope.offer.offer_items.menu_id) {
+                        deferred.reject('Buy X Get Y requires "FREE ITEM"');
                     } else {
                         deferred.resolve(true);
                     }
                 } else if ($scope.offer.actions.reward.reward_meta.reward_type === 'free') {
-                    if (!$scope.offer.actions.reward.reward_meta.item_free) {
+                    if (!$scope.offer.actions.reward.reward_meta.free_item) {
                         deferred.reject('Please choose the "FREE ITEM"');
                     } else {
                         deferred.resolve(true);
