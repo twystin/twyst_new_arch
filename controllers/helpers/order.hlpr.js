@@ -67,13 +67,7 @@ module.exports.verify_order = function(token, order) {
         _.each(data.order.available_offers, function(offer){
            updated_data.offers.push(offer); 
         })
-        console.log(data.outlet._id)
-        var a = Bayeux.bayeux.getClient().publish('/'+data.outlet._id, {text: 'yaaaaaaa u have a new order'});
-        a.then(function() {
-          console.log('delivers');
-        }, function(error) {
-          console.log('problem');
-        });
+        
         deferred.resolve(updated_data);
     })
     .fail(function(err) {
@@ -170,7 +164,13 @@ module.exports.checkout = function(token, order) {
                                 deferred.reject('unable to checkout ');
                             }
                             else{
-                                console.log('saved')
+                                console.log('saved');
+                                var a = Bayeux.bayeux.getClient().publish('/'+data.outlet._id, {text: 'yaaaaaaa u have a new order'});
+                                a.then(function() {
+                                  console.log('delivers');
+                                }, function(error) {
+                                  console.log('problem');
+                                });
                                 deferred.resolve(data);   
                             }
                         })    
@@ -521,7 +521,7 @@ function get_applicable_offer(data) {
                 
             }
             else if(offer.actions.reward.reward_meta.reward_type === 'buyxgety') {
-                return checkOfferTypeBogo(data, offer);  
+                return checkOfferTypeBuyXgetY(data, offer);  
             }
             else if(offer.actions.reward.reward_meta.reward_type === 'discount') {
                 return checkOfferTypePercentageOff(data, offer);
@@ -556,31 +556,25 @@ function checkFreeItem(data, offer) {
 
     for(var i = 0; i < items.length; i++) {
 
-        if(!offer.is_already_checked && offer.offer_items && offer.offer_items.category_id === items[i].category_id
-            && offer.offer_items.sub_category_id === items[i].sub_category_id
-            && offer.offer_items.item_id === items[i].item_id
-            || offer.offer_items.option_id === items[i].option_id
-            || (items[i].sub_option_id && offer.offer_items.sub_option_id) === (items[i].sub_option_id)
-            || (items[i].addon_id && offer.offer_items.sub_option_id.add_ons) === items[i].addon_id){
-            
-            var order_value_obj = calculate_tax(calculate_order_value(passed_data, offer.offer_items.item_id), passed_data.outlet);
-                
-            console.log('for free');
-            console.log(order_value_obj);
+        if(searchItemInOfferItems(items[i], offer) && is_contain_paid_item){
+            var order_value = calculate_order_value(passed_data, offer.offer_items.item_id);
+            console.log('yaha par nahi aata')
+            console.log(order_value);
             console.log(offer.minimum_bill_value);
-            if(order_value_obj.new_order_value >= offer.minimum_bill_value) {
+            if(order_value >= offer.minimum_bill_value) {
                 console.log('offer applicable');
-                    offer.is_already_checked = true;
-                    offer.is_applicable = true;
-                    offer.order_value_without_tax = order_value_obj.order_value;
-                    offer.vat = order_value_obj.vat;
-                    offer.st = order_value_obj.st;
-                    offer.order_value_with_tax = order_value_obj.new_order_value;
-                    offer.free_item = items[i];
-                    return offer;
-                
+                var order_value_obj = calculate_tax(order_value, passed_data.outlet);
+                offer.is_already_checked = true;
+                offer.is_applicable = true;
+                offer.order_value_without_tax = order_value_obj.order_value;
+                offer.vat = order_value_obj.vat;
+                offer.st = order_value_obj.st;
+                offer.order_value_with_tax = order_value_obj.new_order_value;
+                offer.free_item = items[i];
+                return offer;            
             }
             else{
+                var order_value_obj = calculate_tax(order_value, passed_data.outlet);
                 offer.is_applicable = false;
                 offer.order_value_without_tax = order_value_obj.order_value;
                 offer.vat = order_value_obj.vat;
@@ -588,9 +582,9 @@ function checkFreeItem(data, offer) {
                 offer.order_value_with_tax = order_value_obj.new_order_value;
                 console.log('offer not applicable');
                 return offer;
-            }        
+            }          
         }
-        else{
+        else if(!(items.length-1)){
             var order_value_obj = calculate_tax(calculate_order_value(passed_data, null), passed_data.outlet);
             offer.is_applicable = false;
             offer.order_value_without_tax = order_value_obj.order_value;
@@ -603,11 +597,11 @@ function checkFreeItem(data, offer) {
     }      
 }
 
-function checkOfferTypeBogo(data, offer) {
+function checkOfferTypeBuyXgetY(data, offer) {
     logger.log();
     var deferred = Q.defer();
     
-    console.log('checking offer type bogo')
+    console.log('checking offer type bogo');
     var passed_data = data;
     var offer_id = offer._id;
     var items = passed_data.items;
@@ -615,61 +609,53 @@ function checkOfferTypeBogo(data, offer) {
     var is_contain_paid_item = false;
 
     for(var i = 0; i < items.length; i++) {
-        if(offer.actions.reward.reward_meta.paid_item.category_id === items[i].category_id
-            && offer.actions.reward.reward_meta.paid_item.sub_category_id === items[i].sub_category_id
-            && offer.actions.reward.reward_meta.paid_item.item_id === items[i].item_id
-            && offer.actions.reward.reward_meta.paid_item.option_id === items[i].option_id){            
+        if(searchItemInOfferItems(items[i], offer)){
             is_contain_paid_item = true;
-            return;
+            break;
         }
     }
-
+    console.log('is_contain_paid_item ' + is_contain_paid_item);
     for(var i = 0; i < items.length; i++) {
-        if(is_contain_paid_item && offer.offer_items.category_id === items[i].category_id
-            && offer.offer_items.sub_category_id === items[i].sub_category_id
-            && offer.offer_items.item_id === items[i].item_id
-            || offer.offer_items.option_id === items[i].option_id
-            || (items[i].sub_option_id && offer.offer_items.sub_option_id) === (items[i].sub_option_id)
-            || (items[i].addon_id && offer.offer_items.sub_option_id.add_ons) === items[i].addon_id){
-            
-            var order_value_obj = calculate_tax(calculate_order_value(passed_data, offer.offer_items.item_id), passed_data.outlet);
-            console.log('for free');
-            console.log(order_value_obj);
+        
+        if(searchItemInOfferItems(items[i], offer) && is_contain_paid_item){
+            var order_value = calculate_order_value(passed_data, offer.offer_items.item_id);
+            console.log('yaha par nahi aata')
+            console.log(order_value);
             console.log(offer.minimum_bill_value);
-            if(order_value.new_order_value >= offer.minimum_bill_value) {
+            if(order_value >= offer.minimum_bill_value) {
                 console.log('offer applicable');
-                
+                var order_value_obj = calculate_tax(order_value, passed_data.outlet);
+                offer.is_already_checked = true;
                 offer.is_applicable = true;
                 offer.order_value_without_tax = order_value_obj.order_value;
                 offer.vat = order_value_obj.vat;
                 offer.st = order_value_obj.st;
                 offer.order_value_with_tax = order_value_obj.new_order_value;
-                
+                offer.free_item = items[i];
+                return offer;            
             }
             else{
+                var order_value_obj = calculate_tax(order_value, passed_data.outlet);
                 offer.is_applicable = false;
                 offer.order_value_without_tax = order_value_obj.order_value;
                 offer.vat = order_value_obj.vat;
                 offer.st = order_value_obj.st;
                 offer.order_value_with_tax = order_value_obj.new_order_value;
-                
                 console.log('offer not applicable');
-            }
-            
-            return offer;
-                    
+                return offer;
+            }          
         }
-        else{
-            var order_value_obj = calculate_tax(calculate_order_value(passed_data, offer.offer_items.item_id), passed_data.outlet);
+        else if(!(items.length-1)){
+            var order_value_obj = calculate_tax(calculate_order_value(passed_data, null), passed_data.outlet);
             offer.is_applicable = false;
             offer.order_value_without_tax = order_value_obj.order_value;
             offer.vat = order_value_obj.vat;
             offer.st = order_value_obj.st;
             offer.order_value_with_tax = order_value_obj.new_order_value;
             console.log('offer not applicable');
-            console.log(offer)
             return offer;
         }
+    
     }
 }
 
@@ -697,7 +683,7 @@ function checkOfferTypeFlatOff(data, offer) {
         offer.vat = order_value_obj.vat;
         offer.st = order_value_obj.st;
         offer.order_value_with_tax = order_value_obj.new_order_value;
-    
+        return offer;
     }
     else{
         offer.is_applicable = false;
@@ -709,8 +695,9 @@ function checkOfferTypeFlatOff(data, offer) {
         offer.order_value_with_tax = order_value_obj.new_order_value;
         
         console.log('offer not applicable');
+        return offer;
     }
-    return offer;
+    
 }
 
 function checkOfferTypePercentageOff(data, offer) {
@@ -793,6 +780,7 @@ function generate_and_cache_order(data) {
       }
         deferred.resolve(data)
     });
+    console.log(data.outlet.offers)
     return deferred.promise;
 
 }
@@ -975,12 +963,17 @@ function massage_offer(data) {
           massaged_offer.offer_source = offer.offer_source;
         }
 
+        if(offer.offer_items) {
+            massaged_offer.offer_items = offer.offer_items;
+        }
+
         if(massaged_offer.expiry && (new Date(massaged_offer.expiry) <= new Date())) {
           return massaged_offer;
         }
         else{
-          return massaged_offer;  
-        }       
+            return massaged_offer;
+        }
+              
       }
 
     });
@@ -995,6 +988,45 @@ function massage_order(data){
     calculate_order_value()
     deferred.resolve();
     return deferred.promise;
+}
+
+function searchItemInOfferItems(item, offer) {
+    logger.log();
+
+    if(offer.actions.reward.reward_meta.paid_item.category_id === item.category_id
+    && offer.actions.reward.reward_meta.paid_item.sub_category_id === item.sub_category_id
+    && offer.actions.reward.reward_meta.paid_item.item_id === item.item_id
+    && offer.actions.reward.reward_meta.paid_item.option_id && offer.actions.reward.reward_meta.paid_item.option_id === item.option_id
+    && offer.actions.reward.reward_meta.paid_item.sub_option_id && offer.actions.reward.reward_meta.paid_item.sub_option_id === item.sub_option_id
+    && offer.actions.reward.reward_meta.paid_item.addon_id && offer.actions.reward.reward_meta.paid_item.addon_id === item.addon_id) {
+        return true;
+    }
+    else if(offer.actions.reward.reward_meta.paid_item.category_id === item.category_id
+    && offer.actions.reward.reward_meta.paid_item.sub_category_id === item.sub_category_id
+    && offer.actions.reward.reward_meta.paid_item.item_id === item.item_id
+    && offer.actions.reward.reward_meta.paid_item.option_id && offer.actions.reward.reward_meta.paid_item.option_id === item.option_id
+    && offer.actions.reward.reward_meta.paid_item.sub_option_id && offer.actions.reward.reward_meta.paid_item.sub_option_id === item.sub_option_id
+    && !offer.actions.reward.reward_meta.paid_item.addon_id){
+        return true;   
+    }
+    else if(offer.actions.reward.reward_meta.paid_item.category_id === item.category_id
+    && offer.actions.reward.reward_meta.paid_item.sub_category_id === item.sub_category_id
+    && offer.actions.reward.reward_meta.paid_item.item_id === item.item_id
+    && offer.actions.reward.reward_meta.paid_item.option_id && offer.actions.reward.reward_meta.paid_item.option_id === item.option_id
+    && !offer.actions.reward.reward_meta.paid_item.sub_option_id && !offer.actions.reward.reward_meta.paid_item.addon_id){
+        return true; 
+    }
+    else if(offer.actions.reward.reward_meta.paid_item.category_id === item.category_id
+    && offer.actions.reward.reward_meta.paid_item.sub_category_id === item.sub_category_id
+    && offer.actions.reward.reward_meta.paid_item.item_id === item.item_id
+    && !offer.actions.reward.reward_meta.paid_item.option_id){
+       
+        return true; 
+    } 
+    else {
+        return false;
+    }       
+    
 }
 
 module.exports.update_order = function(token, update_order) {
