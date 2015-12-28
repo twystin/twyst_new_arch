@@ -41,6 +41,7 @@ var Order = new Schema({
   payment_info: {}, //COD/Payu/payment object
   txn_id: {type: String},
   order_status: {type: String},
+  user_rating:{type: Number},
   is_favourite: {
     type: Boolean,
     default: false

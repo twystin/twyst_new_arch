@@ -226,6 +226,7 @@ function get_outlet(data) {
 
     OutletHelper.get_outlet(passed_data.outlet).then(function(data) {
       passed_data.outlet = data.data;
+      console.log(passed_data.outlet)
       deferred.resolve(passed_data);
     }, function(err) {
         deferred.reject({
@@ -570,7 +571,7 @@ function checkFreeItem(data, offer) {
                 offer.vat = order_value_obj.vat;
                 offer.st = order_value_obj.st;
                 offer.order_value_with_tax = order_value_obj.new_order_value;
-                offer.free_item = items[i];
+                offer.free_item_index = i;
                 return offer;            
             }
             else{
@@ -631,7 +632,7 @@ function checkOfferTypeBuyXgetY(data, offer) {
                 offer.vat = order_value_obj.vat;
                 offer.st = order_value_obj.st;
                 offer.order_value_with_tax = order_value_obj.new_order_value;
-                offer.free_item = items[i];
+                offer.free_item_index = i;
                 return offer;            
             }
             else{
@@ -645,7 +646,8 @@ function checkOfferTypeBuyXgetY(data, offer) {
                 return offer;
             }          
         }
-        else if(!(items.length-1)){
+        else if(i === items.length-1){
+            console.log()
             var order_value_obj = calculate_tax(calculate_order_value(passed_data, null), passed_data.outlet);
             offer.is_applicable = false;
             offer.order_value_without_tax = order_value_obj.order_value;
@@ -654,8 +656,7 @@ function checkOfferTypeBuyXgetY(data, offer) {
             offer.order_value_with_tax = order_value_obj.new_order_value;
             console.log('offer not applicable');
             return offer;
-        }
-    
+        }    
     }
 }
 
@@ -780,7 +781,6 @@ function generate_and_cache_order(data) {
       }
         deferred.resolve(data)
     });
-    console.log(data.outlet.offers)
     return deferred.promise;
 
 }
@@ -920,13 +920,10 @@ function massage_offer(data) {
     var deferred = Q.defer();
 
     data.outlet.offers = _.map(data.outlet.offers, function(offer) {
-      if (offer.type) {
-        return offer;
-      } 
-      else if(offer.offer_status === 'archived' || offer.offer_status === 'draft') {
+      if(offer && offer.offer_status === 'archived' || offer.offer_status === 'draft') {
         return false;
       }
-      else {
+      else if(offer){
         var massaged_offer = {};
         massaged_offer.order_value_without_tax = offer.order_value_without_tax;
         massaged_offer.vat = offer.vat;
@@ -963,8 +960,8 @@ function massage_offer(data) {
           massaged_offer.offer_source = offer.offer_source;
         }
 
-        if(offer.offer_items) {
-            massaged_offer.offer_items = offer.offer_items;
+        if(offer.actions.reward.reward_meta.reward_type == 'free' || offer.actions.reward.reward_meta.reward_type == 'buyxgety' ) {
+            massaged_offer.free_item_index = offer.free_item_index;
         }
 
         if(massaged_offer.expiry && (new Date(massaged_offer.expiry) <= new Date())) {
@@ -975,6 +972,9 @@ function massage_offer(data) {
         }
               
       }
+      else{
+        return false;
+      }
 
     });
     deferred.resolve(data);
@@ -984,9 +984,7 @@ function massage_offer(data) {
 function massage_order(data){
     logger.log();
     var deferred = Q.defer();
-
-    calculate_order_value()
-    deferred.resolve();
+    deferred.resolve(data);
     return deferred.promise;
 }
 
