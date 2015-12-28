@@ -316,6 +316,7 @@ function load_outlet_info_from_cache(data) {
 };
 
 module.exports.update_location = function(req, res) {
+  logger.log();
   var token = req.query.token || null;
 
   if (!token) {
@@ -330,6 +331,7 @@ module.exports.update_location = function(req, res) {
 };
 
 module.exports.get_orders = function(req, res) {
+  logger.log();
   var token = req.query.token || null;
 
   if (!token) {
@@ -343,3 +345,19 @@ module.exports.get_orders = function(req, res) {
   });
 };
 
+module.exports.update_order = function(req, res) {
+  logger.log();
+  var token = req.query.token || null;
+  var order = {};
+  order = _.extend(order, req.body);
+
+  if (!token) {
+    HttpHelper.error(res, null, "Not authenticated");
+  }
+
+  UserHelper.update_order(token, order).then(function(data) {
+    HttpHelper.success(res, data.data, data.message);
+  }, function(err) {
+    HttpHelper.error(res, err.data, err.message);
+  });
+};
