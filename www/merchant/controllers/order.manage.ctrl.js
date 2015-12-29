@@ -174,18 +174,30 @@ angular.module('merchantApp')
                         .then(function(res) {
                             $scope.checkin.number = '';
                             if (!_.has(res, 'data.checkins_to_go')) {
-
-                                // checkin successfull with voucher generated
-
-                                // console.log(res.data);
-                                // $scope.show_vouchers = true;
-                                // $scope.user_vouchers = [res.data];
-                                // success_msg = "Checkin successfull, User also unlocked a coupon";
+                                SweetAlert.swal({
+                                    title: 'Checkin successful',
+                                    text: 'Customer has also unlocked a new voucher',
+                                    type: 'success'
+                                }, function(confirm) {
+                                    if(confirm) {
+                                        $modal.open({
+                                            animation: true,
+                                            templateUrl: 'templates/partials/panel.voucher.tmpl.html',
+                                            size: 'lg',
+                                            controller: 'PanelVoucherController',
+                                            resolve: {
+                                                vouchers: function() {
+                                                    return [data.data];
+                                                },
+                                                outlet: function() {
+                                                    return $scope.choosen_outlet;
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
                             } else {
-
-                                // checkin successfull with voucher generated
-
-                                // success_msg = "Checkin successfull";
+                                SweetAlert.swal('Checkin successful', '', 'success');
                             }
                         }, function(err) {
                             $scope.checkin.number = '';
