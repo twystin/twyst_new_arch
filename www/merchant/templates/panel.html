@@ -6,20 +6,24 @@
                 <legend>Order Panel</legend>
             </div>
             <div class='col-xs-12'>
-                <label class='col-sm-2 control-label'>Pick Outlet</label>
-                <div class='col-sm-6'>
-                    <select ng-model='choosen_outlet' ng-disabled='!choosen_outlet' class='form-control'>
-                        <option value='' ng-if='!choosen_outlet' n>No outlets to pick from</option>
-                        <option value='{{id}}' ng-repeat='(id, _) in outlets'>{{outlets[id].basics.name}}{{outlets[id].contact.location.locality_1[0]?', ' + outlets[id].contact.location.locality_1[0]:''}}{{outlets[id].contact.location.locality_2[0]?', ' + outlets[id].contact.location.locality_2[0]:''}}</option>
-                    </select>
+                <div class="row">
+                    <label class='col-sm-2 control-label'>Pick Outlet</label>
+                    <div class='col-sm-10'>
+                        <select ng-model='choosen_outlet' ng-change='updateSub()' ng-disabled='!choosen_outlet' class='form-control'>
+                            <option value='' ng-if='!choosen_outlet' n>No outlets to pick from</option>
+                            <option value='{{id}}' ng-repeat='(id, _) in outlets'>{{outlets[id].basics.name}}{{outlets[id].contact.location.locality_1[0]?', ' + outlets[id].contact.location.locality_1[0]:''}}{{outlets[id].contact.location.locality_2[0]?', ' + outlets[id].contact.location.locality_2[0]:''}}</option>
+                        </select>
+                    </div>
                 </div>
             </div>
             <div>&nbsp;</div>
-            <div class='btn-group btn-group-justified'>
-                <a class='btn' ng-click='updateShowing("pending")' ng-class='{"btn-primary": showing==="pending", "btn-dark": showing!=="pending"}'>Pending</a>
-                <a class='btn' ng-click='updateShowing("accepted")' ng-class='{"btn-primary": showing==="accepted", "btn-dark": showing!=="accepted"}'>Accepted</a>
-                <a class='btn' ng-click='updateShowing("declined")' ng-class='{"btn-primary": showing==="declined", "btn-dark": showing!=="declined"}'>Declined</a>
-                <a class='btn' ng-click='updateShowing("delivered")' ng-class='{"btn-primary": showing==="delivered", "btn-dark": showing!=="delivered"}'>Delivered</a>
+            <div class='col-xs-12'>
+                <div class='btn-group btn-group-justified'>
+                    <a class='btn' ng-click='updateShowing("pending")' ng-class='{"btn-primary": showing==="pending", "btn-dark": showing!=="pending"}'>Pending</a>
+                    <a class='btn' ng-click='updateShowing("accepted")' ng-class='{"btn-primary": showing==="accepted", "btn-dark": showing!=="accepted"}'>Accepted</a>
+                    <a class='btn' ng-click='updateShowing("declined")' ng-class='{"btn-primary": showing==="declined", "btn-dark": showing!=="declined"}'>Declined</a>
+                    <a class='btn' ng-click='updateShowing("delivered")' ng-class='{"btn-primary": showing==="delivered", "btn-dark": showing!=="delivered"}'>Delivered</a>
+                </div>
             </div>
             <div class='clearfix'></div>
             <div>&nbsp;</div>
@@ -30,7 +34,7 @@
                 <div class='panel panel-primary' ng-repeat='order in orders'>
                     <div class='panel-body'>
                         <h4 class='pull-left'>{{order.user.email}}</h4>
-                        <span class='pull-right'>Order Id #{{order.order_number}}</span>
+                        <span class='pull-right'>Order ID #{{order.order_number}}</span>
                         <div class='clearfix'></div>
                         <div class='pull-left'>
                             {{order.order_date | date:longDate}}

@@ -1,0 +1,36 @@
+<div class='modal-header'>
+    <legend>Vouchers</legend>
+</div>
+<div class='modal-body'>
+    <form class='form-horizontal' role='form'>
+        <div class='form-group'>
+            <div class='col-sm-6 col-md-4' ng-repeat='voucher in vouchers'>
+                <legend>{{voucher.code}}</legend>
+                <h2>{{voucher.header}}</h2>
+                <h4>{{voucher.line1}}</h4>
+                <h4>{{voucher.line2}}</h4>
+                <h4 class='pull-right'>
+                	<span class='glyphicon glyphicon-user'></span>
+                	{{voucher.phone}}
+            	</h4>
+                <div class='clearfix'></div>
+                <hr>
+                <div class='text-center'>
+                    <a class='btn btn-block btn-primary' ng-click='redeemuserCoupon(voucher.code)' ng-if='voucher.status==="active" && (voucher.lapse_date > today || voucher.expiry_date > today || (!voucher.expiry_date && voucher.issued_at > THREE_HOURS)) || voucher.status==="user_redeemed" && (voucher.lapse_date > today || voucher.exipry_date > today)'>Redeem</a>
+                </div>
+                <div class='text-center'>
+                    <a class='btn btn-block btn-success' ng-if='voucher.lapse_date > today && voucher.status==="social_pool" && !voucher.used_details.used_time' disabled>Social Pool</a>
+                </div>
+                <div class='text-center'>
+                    <a class='btn btn-block btn-danger' ng-if='voucher.status=="merchant_redeemed" ||  voucher.status=="redeemed" ||  voucher.status=="user_redeemed"' disabled> Redeemed</a>
+                </div>
+                <div class='text-center'>
+                    <a class='btn btn-block btn-warning' ng-if='(voucher.lapse_date <= today || voucher.expiry_date <= today || (!voucher.expiry_date && voucher.issued_at < THREE_HOURS)) && !voucher.used_details.used_time' disabled>Expired</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<div class='modal-footer'>
+    <button type='button' class='btn btn-w-md btn-gap-v btn-warning' ng-click='cancelModal()'> Cancel</button>
+</div>

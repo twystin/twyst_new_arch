@@ -41,11 +41,40 @@ angular.module('merchantApp')
         merchantRESTSvc.getAllMenus()
             .then(function(res) {
                 _.each(res.data, function(menu) {
-                    if (!$scope.outlet_id) {
-                        $scope.outlet_id = menu.outlet._id;
+                    var index = _.findIndex($scope.menus, function(menu_obj) {
+                        return (menu_obj.menu_type === menu.menu_type);
+                    })
+                    if (index === -1) {
                         $scope.menus.push(menu);
-                    } else if ($scope.outlet_id === menu.outlet._id) {
-                        $scope.menus.push(menu);
+                    } else {
+                        _.each($scope.menus[index].menu_categories, function(category, category_index) {
+                            var cat_index = _.findIndex(menu.menu_categories, function(cat_obj) {
+                                return cat_obj.category_name === category.category_name;
+                            });
+                            if (cat_index === -1) {
+                                $scope.menu[index].menu_categories.splice(category_index, 1);
+                            } else {
+                                var _sub_categories = $scope.menus[index].menu_categories[category_index].sub_categories;
+                                _.each(_sub_categories, function(sub_category, sub_category_index) {
+                                    var sub_cat_index = _.findIndex(menu.menu_categories[cat_index].sub_categories, function(sub_category_obj) {
+                                        return sub_category.sub_category_name === sub_category_obj.sub_category_name;
+                                    });
+                                    if (sub_cat_index === -1) {
+                                        $scope.menu[index].menu_categories[category_index].sub_categories.splice(sub_category_index, 1);
+                                    } else {
+                                        var _items = $scope.menus[index].menu_categories[category_index].sub_categories[sub_category_index].items;
+                                        _.each(_items, function(item, item_index) {
+                                            var itemIndex = _.findIndex(menu.menu_categories[cat_index].sub_categories[sub_cat_index].items, function(item_obj) {
+                                                return item_obj.item_name === item.item_name;
+                                            });
+                                            if(item_index === -1) {
+                                                $scope.menu[index].menu_categories[category_index].sub_categories[sub_category_index].items.splice(item_index, 1);
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
                     }
                 });
             }, function(err) {

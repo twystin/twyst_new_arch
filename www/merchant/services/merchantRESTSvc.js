@@ -406,6 +406,22 @@ angular.module('merchantApp')
                 return deferred.promise;
             }
 
+            merchantRESTSvc.getOrders = function(outlet_id) {
+                var deferred = $q.defer();
+                var token = $cookies.get('token');
+                $http.get('/api/v4/outlet/orders/' + outlet_id + '?token=' + token)
+                    .then(function(res) {
+                        if (res.data.response) {
+                            deferred.resolve(res.data);
+                        } else {
+                            deferred.reject(res.data);
+                        }
+                    }, function(err) {
+                        deferred.reject(err);
+                    });
+                return deferred.promise;
+            }
+
             return merchantRESTSvc;
         }
     ]);
