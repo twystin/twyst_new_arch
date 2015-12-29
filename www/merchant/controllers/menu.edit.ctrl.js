@@ -271,6 +271,7 @@ angular.module('merchantApp')
                                 is_available: true,
                                 option_is_addon: false,
                                 is_vegetarian: true,
+                                is_recommended: false,
                                 item_available_on: [],
                                 item_availability: {
                                     regular_item: true

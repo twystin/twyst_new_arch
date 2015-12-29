@@ -55,8 +55,12 @@
             </div>
             <div class='col-sm-4 text-center'>
                 <input bs-switch ng-model='item.is_vegetarian' type='checkbox' switch-off-color='danger' switch-on-color='success' switch-on-text='Veg' switch-off-text='Non-Veg'>
-                <p>&nbsp;</p>
+                <div>&nbsp;</div>
                 <input bs-switch ng-model='item.item_availability.regular_item' type='checkbox' switch-off-text='Seasonal' switch-on-text='Regular'>
+                <div>&nbsp;</div>
+                <div class='row'>
+                    <input bs-switch ng-model='item.is_recommended' type='checkbox' switch-off-text='Not-Recommended' switch-on-text='Recommended' switch-off-color='danger' switch-on-color='success'>
+                </div>
             </div>
         </div>
         <div class='form-group'>
