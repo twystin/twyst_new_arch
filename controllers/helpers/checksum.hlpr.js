@@ -2,6 +2,7 @@
 /*jslint node: true */
 var crypto = require("crypto");
 var Q = require('q');
+var logger = require('tracer').colorConsole();
 
 module.exports.calculate_checksum = function(message) {
 	logger.log();
