@@ -434,12 +434,15 @@ function verify_delivery_location(coords, outlet) {
 function isOutletClosed(outlet) {
     logger.log();
     var date = new Date();
-    var time = (parseInt(date.getHours())) +':'+(parseInt(date.getMinutes())+30);
+    var time = (parseInt(date.getHours())+5) +':'+(parseInt(date.getMinutes())+30);
     date = parseInt(date.getMonth())+1+ '-'+ date.getDate()+'-'+date.getFullYear();
 
     if (outlet && outlet.business_hours ) {
       if(RecoHelper.isClosed(date, time, outlet.business_hours)) {
           return true;
+      }
+      else{
+        return false;
       }
     }
     else{
