@@ -2,6 +2,7 @@
 /*jslint node: true */
 var logger = require('tracer').colorConsole();
 var ChecksumHelper = require('./helpers/checksum.hlpr.js');
+var HttpHelper = require('./helpers/http.hlpr.js');
 var _ = require('underscore');
 
 module.exports.get_zaakpay_response = function(req, res) {
