@@ -33,7 +33,7 @@ angular.module('merchantApp')
                 polygoncomplete: function(drawingManager, eventName, scope, args) {
                     var polygon = args[0];
                     var path = polygon.getPath().getArray();
-                    var coords = _.map(path, function(coord) {
+                    var coord = _.map(path, function(coord) {
                         return {
                             latitude: coord.G,
                             longitude: coord.K
@@ -48,7 +48,7 @@ angular.module('merchantApp')
                         resolve: {
                             delivery_zone: function() {
                                 var _zone = {
-                                    coords: coords
+                                    coord: coord
                                 };
                                 if (index != -1) {
                                     _zone = _.extend(_zone, $scope.outlet.attributes.delivery.delivery_zone[index]);
@@ -299,16 +299,20 @@ angular.module('merchantApp')
             };
 
             $scope.updateCommission = function() {
-                if($scope.outlet.twyst_meta.twyst_commission.is_fixed) {
+                if ($scope.outlet.twyst_meta.twyst_commission.is_fixed) {
                     $scope.outlet.twyst_meta.twyst_commission.commission_slab = [];
                 } else {
                     delete $scope.outlet.twyst_meta.twyst_commission.value;
-                    $scope.outlet.twyst_meta.twyst_commission.commission_slab = [{has_upper_bound: true}];
+                    $scope.outlet.twyst_meta.twyst_commission.commission_slab = [{
+                        has_upper_bound: true
+                    }];
                 }
             };
 
             $scope.addCommissionSlab = function() {
-                $scope.outlet.twyst_meta.twyst_commission.commission_slab.push({has_upper_bound: true});
+                $scope.outlet.twyst_meta.twyst_commission.commission_slab.push({
+                    has_upper_bound: true
+                });
             };
 
             $scope.removeSlab = function(index) {
@@ -585,10 +589,10 @@ angular.module('merchantApp')
                 } else if (!$scope.outlet.attributes.cuisines.length && $rootScope.isPaying) {
                     $scope.showErrorMessage('Atleast one cuisine must be specified');
                     deferred.reject();
-                } else if (!_.get($scope.outlet, 'twyst_meta.cashback.min') && $scope.outlet.twyst_meta.cashback.min!==0) {
+                } else if (!_.get($scope.outlet, 'twyst_meta.cashback.min') && $scope.outlet.twyst_meta.cashback.min !== 0) {
                     $scope.showErrorMessage('Minimum cashback amount required');
                     deferred.reject();
-                } else if (!_.get($scope.outlet, 'twyst_meta.cashback.max') && $scope.outlet.twyst_meta.cashback.max!==0) { 
+                } else if (!_.get($scope.outlet, 'twyst_meta.cashback.max') && $scope.outlet.twyst_meta.cashback.max !== 0) {
                     $scope.showErrorMessage('Maximum cashback amount required');
                     deferred.reject();
                 } else if ($scope.outlet.twyst_meta.twyst_commission.is_fixed && !$scope.outlet.twyst_meta.twyst_commission.value) {
@@ -599,17 +603,17 @@ angular.module('merchantApp')
                     deferred.reject();
                 } else {
                     async.each($scope.outlet.twyst_meta.twyst_commission.commission_slab, function(slab, callback) {
-                        if (!slab.start && slab.start!==0) {
+                        if (!slab.start && slab.start !== 0) {
                             callback("All slabs require valid start amount");
-                        } else if (slab.has_upper_bound && !slab.end && slab.end!==0) {
+                        } else if (slab.has_upper_bound && !slab.end && slab.end !== 0) {
                             callback("End amount missing for slab with upper bound");
-                        } else if (!slab.value && slab.value!==0) {
+                        } else if (!slab.value && slab.value !== 0) {
                             callback("Commission amount required for all slabs");
                         } else {
                             callback();
                         }
                     }, function(err) {
-                        if(err) {
+                        if (err) {
                             $scope.showErrorMessage(err);
                             deferred.reject();
                         } else if ($scope.outlet.sms_off.value) {

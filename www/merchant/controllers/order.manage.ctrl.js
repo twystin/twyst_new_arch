@@ -157,6 +157,7 @@ angular.module('merchantApp')
                 } else if (!/^[0-9]{10}$/.test($scope.checkin.number)) {
                     SweetAlert.swal('Invalid number!', 'Number entered is invalid. Please recheck', 'warning');
                 } else {
+                    $scope.checking_in = true;
                     var req_obj = {
                         event_meta: {
                             phone: $scope.checkin.number
@@ -172,6 +173,7 @@ angular.module('merchantApp')
                     }
                     merchantRESTSvc.checkinUser(req_obj)
                         .then(function(res) {
+                            $scope.checking_in = false;
                             $scope.checkin.number = '';
                             if (!_.has(res, 'data.checkins_to_go')) {
                                 SweetAlert.swal({
@@ -200,6 +202,7 @@ angular.module('merchantApp')
                                 SweetAlert.swal('Checkin successful', '', 'success');
                             }
                         }, function(err) {
+                            $scope.checking_in = false;
                             $scope.checkin.number = '';
                             var error_msg;
                             if (err.data.indexOf('-') === -1) {
@@ -217,8 +220,10 @@ angular.module('merchantApp')
                 if (!$scope.search.code || $scope.search.code.length !== 6) {
                     SweetAlert.swal('Missing/Invalid Voucher Code','Please provide a valid voucher code to search', 'error');
                 } else {
+                    $scope.searchingByCode = true;
                     merchantRESTSvc.getVoucherByCode($scope.choosen_outlet, $scope.search.code)
                         .then(function(data) {
+                            $scope.searchingByCode = false;
                             $scope.search = {};
                             if (data.data) {
                                 // show voucher in modal
@@ -241,6 +246,7 @@ angular.module('merchantApp')
                                 SweetAlert.swal('Not Found', 'No active voucher found with that code', 'warning');
                             }
                         }, function(err) {
+                            $scope.searchingByCode = false;
                             SweetAlert.swal('Error', err.message?err.message:'Something went wrong', 'error');
                         });
                 }
@@ -252,8 +258,10 @@ angular.module('merchantApp')
                 } else if (!/^[0-9]{10}$/.test($scope.search.number)) {
                     SweetAlert.swal('Invalid number', 'Phone number entered is invalid. Please recheck', 'error');
                 } else {
+                    $scope.seachingByPhone = true;
                     merchantRESTSvc.getVouchersByPhone($scope.choosen_outlet, $scope.search.number)
                         .then(function(data) {
+                            $scope.seachingByPhone = false;
                             $scope.search = {};
                             if (!data.data.length) {
                                 SweetAlert.swal('No active vouchers', 'No active vouchers found for the customer');
@@ -275,6 +283,7 @@ angular.module('merchantApp')
                                 console.log(data);
                             }
                         }, function(err) {
+                            $scope.seachingByPhone = false;
                             SweetAlert.swal('ERROR', err.message?err.message: 'Something went wrong', 'error');
                         });
                 }
