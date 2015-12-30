@@ -134,7 +134,10 @@
                         <div class='input-group'>
                             <input type='text' ng-model='checkin.number' class='form-control' placeholder='10 digit mobile number'>
                             <div class='input-group-btn'>
-                                <a class='btn btn-primary' ng-click='checkinUser()'>Checkin</a>
+                                <a class='btn btn-primary' ng-disabled='checking_in' ng-click='checkinUser()'>
+                                    <span ng-if='checking_in'><i class='fa fa-spinner fa-spin'></i> Checking In...</span>
+                                    <span ng-if='!checking_in'>Checkin</span>
+                                </a>
                             </div>
                         </div>
                         <div>&nbsp;</div>
@@ -151,7 +154,7 @@
                     <div class='input-group'>
                         <input type='text' class='form-control' ng-model='search.code' placeholder='Voucher code'>
                         <div class='input-group-btn'>
-                            <a class='btn btn-primary' ng-click='getVoucherByCode()'>
+                            <a class='btn btn-primary' ng-disabled='searchingByCode' ng-click='getVoucherByCode()'>
                                 <span ng-if='searchingByCode'><i class='fa fa-spinner fa-spin'></i> Searching...</span>
                                 <span ng-if='!searchingByCode'>Search</span>
                             </a>
@@ -165,7 +168,7 @@
                     <div class='input-group'>
                         <input type='text' class='form-control' ng-model='search.number' placeholder='10 digit mobile number'>
                         <div class='input-group-btn'>
-                            <a class='btn btn-primary' ng-click='getVouchersByPhone()'>
+                            <a class='btn btn-primary' ng-disabled='seachingByPhone' ng-click='getVouchersByPhone()'>
                                 <span ng-if='seachingByPhone'><i class='fa fa-spinner fa-spin'></i> Searching...</span>
                                 <span ng-if='!seachingByPhone'>Search</span>
                             </a>
