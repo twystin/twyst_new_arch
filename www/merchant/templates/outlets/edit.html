@@ -216,6 +216,8 @@
                                         <label class='col-md-2 control-label'>Delivery Map</label>
                                         <div class='col-md-10'>
                                             <ui-gmap-google-map center='map2.center' zoom='map2.zoom' draggable='true' options='options' bounds='map2.bounds'>
+                                                <ui-gmap-polygon ng-repeat='zone in outlet.attributes.delivery.delivery_zone track by $index' path='zone.coord' visible='true'>
+                                                </ui-gmap-polygon>
                                                 <ui-gmap-marker coords="marker.coords" options="marker.options" events="marker.events" idkey="marker.id">
                                                 </ui-gmap-marker>
                                                 <ui-gmap-drawing-manager options='drawingManagerOptions' control='drawingManagerControl' events='drawingManagerEvents'></ui-gmap-drawing-manager>
