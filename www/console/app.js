@@ -102,4 +102,9 @@ angular.module('consoleApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angular
 				templateUrl: 'templates/bulk_checkin/manage.html',
 				controller: 'BulCheckinController'
 			})
+			.state('console.test_payment', {
+				url: '/test_payment',
+				templateUrl: 'templates/test_payment.html',
+				controller: 'TestPaymentController'
+			})
 	});

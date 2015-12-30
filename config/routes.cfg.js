@@ -156,6 +156,11 @@ module.exports = function(app) {
       app.put('/api/v4/qr/:qr_id', QrCtrl.qr_update);
   })();
 
+  (function Payment_Routes(){
+    var ZaakpayCtrl = require('../controllers/zaakpay_response.ctrl');
+    app.post('/api/v4/zaakpay/response', ZaakpayCtrl.get_zaakpay_response)
+  })();
+
   (function LegacyRoutes() {
     app.get('/app', function(req, res) {
         res.redirect('https://play.google.com/store/apps/details?id=com.twyst.app.android&hl=en');
