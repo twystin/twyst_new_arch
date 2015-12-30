@@ -1,0 +1,28 @@
+<section ng-init='calculate_checksum()'>
+        <h2> Testing Payment</h2>
+        <form action="https://api.zaakpay.com/transact?v=3" method="post">
+            <input type="hidden" name="merchantIdentifier" value="4884e5a14ab742578df520b5203b91e6">
+            <input type="hidden" name="orderId" value="1">
+            <input type="hidden" name="returnUrl" value="http://staging.twyst.in/api/v4/zaakpay/response">
+            <input type="hidden" name="buyerEmail" value="kuldeep@twyst.in">
+            <input type="hidden" name="buyerFirstName" value="kuldeep">
+            <input type="hidden" name="buyerLastName" value="patel">
+            <input type="hidden" name="buyerAddress" value="dlfphase1">
+            <input type="hidden" name="buyerCity" value="gurgaon">
+            <input type="hidden" name="buyerState" value="haryana">
+            <input type="hidden" name="buyerCountry" value="India">
+            <input type="hidden" name="buyerPincode" value="201122">
+            <input type="hidden" name="buyerPhoneNumber" value="8130857967">
+            <input type="hidden" name="txnType" value="3">
+            <input type="hidden" name="zpPayOption" value="0">
+            <input type="hidden" name="mode" value="1">
+            <input type="hidden" name="currency" value="INR">
+            <input type="hidden" name="amount" value="100">
+            <input type="hidden" name="merchantIpAddress" value="192.168.1.18">
+            <input type="hidden" name="purpose" value="1">
+            <input type="hidden" name="productDescription" value="testproduct">
+            <input type="hidden" name="txnDate" value="2015-12-29">
+            <input type="hidden" name="checksum" value={{checksum}}>
+            <input type = 'submit' value = 'pay now'>
+        </form>
+    </section>
