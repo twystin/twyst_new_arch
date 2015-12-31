@@ -51,7 +51,7 @@ angular.module('merchantApp')
                                     coord: coord
                                 };
                                 if (index != -1) {
-                                    _zone = _.extend(_zone, $scope.outlet.attributes.delivery.delivery_zone[index]);
+                                    _zone = _.merge(_zone, $scope.outlet.attributes.delivery.delivery_zone[index]);
                                 }
                                 return _zone;
                             },

@@ -1,7 +1,9 @@
-angular.module('merchantApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angularMoment', 'oitozero.ngSweetAlert', 'angular-loading-bar', 'ngAnimate', 'ngStorage', 'ordinal', 'ngFileUpload', 'uiGmapgoogle-maps', 'mgo-angular-wizard', 'ui.select2', 'frapontillo.bootstrap-switch', 'ui.tree', 'toastr', 'ordinal'])
-    .run(function($rootScope, $state, $cookies) {
+angular.module('merchantApp', ['ui.router', 'ngAudio', 'ui.bootstrap', 'ngCookies', 'angularMoment', 'oitozero.ngSweetAlert', 'angular-loading-bar', 'ngAnimate', 'ngStorage', 'ordinal', 'ngFileUpload', 'uiGmapgoogle-maps', 'mgo-angular-wizard', 'ui.select2', 'frapontillo.bootstrap-switch', 'ui.tree', 'toastr', 'ordinal'])
+    .run(function($rootScope, $state, $cookies, ngAudio) {
         $rootScope.faye = new Faye.Client('/faye');
         $rootScope.token = $cookies.get('token');
+        $rootScope.sound = ngAudio.load('sounds/song1.mp3');
+        $rootScope.sound.loop = true;
         $rootScope.isPaying = $cookies.get('isPaying') == 'true' ? true : false;
     })
     .config(function($stateProvider, $urlRouterProvider, uiGmapGoogleMapApiProvider) {

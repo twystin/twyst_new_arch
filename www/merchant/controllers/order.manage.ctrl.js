@@ -1,6 +1,6 @@
 angular.module('merchantApp')
-    .controller('OrderManageController', ['$scope', 'merchantRESTSvc', 'SweetAlert', '$state', '$q', '$modal', '$rootScope',
-        function($scope, merchantRESTSvc, SweetAlert, $state, $q, $modal, $rootScope) {
+    .controller('OrderManageController', ['$scope', 'merchantRESTSvc', 'SweetAlert', '$state', '$q', '$modal', '$rootScope', 'ngAudio',
+        function($scope, merchantRESTSvc, SweetAlert, $state, $q, $modal, $rootScope, ngAudio) {
             $scope.showing = "pending";
 
             $scope.updateShowing = function(text) {
@@ -42,12 +42,14 @@ angular.module('merchantApp')
 
                 $rootScope.faye.subscribe('/' + newVal, function(message) {
                     $scope.$apply(function() {
+                        $rootScope.sound.play();
                         SweetAlert.swal({
                             title: 'New Order',
                             text: message.text,
                             type: 'info'
                         }, function(confirm) {
                             if (confirm) {
+                                $rootScope.sound.stop();
                                 $scope.getOrders();
                             }
                         });
@@ -181,7 +183,7 @@ angular.module('merchantApp')
                                     text: 'Customer has also unlocked a new voucher',
                                     type: 'success'
                                 }, function(confirm) {
-                                    if(confirm) {
+                                    if (confirm) {
                                         $modal.open({
                                             animation: true,
                                             templateUrl: 'templates/partials/panel.voucher.tmpl.html',
@@ -218,7 +220,7 @@ angular.module('merchantApp')
             $scope.getVoucherByCode = function() {
                 console.log($scope.search);
                 if (!$scope.search.code || $scope.search.code.length !== 6) {
-                    SweetAlert.swal('Missing/Invalid Voucher Code','Please provide a valid voucher code to search', 'error');
+                    SweetAlert.swal('Missing/Invalid Voucher Code', 'Please provide a valid voucher code to search', 'error');
                 } else {
                     $scope.searchingByCode = true;
                     merchantRESTSvc.getVoucherByCode($scope.choosen_outlet, $scope.search.code)
@@ -247,7 +249,7 @@ angular.module('merchantApp')
                             }
                         }, function(err) {
                             $scope.searchingByCode = false;
-                            SweetAlert.swal('Error', err.message?err.message:'Something went wrong', 'error');
+                            SweetAlert.swal('Error', err.message ? err.message : 'Something went wrong', 'error');
                         });
                 }
             }
@@ -284,7 +286,7 @@ angular.module('merchantApp')
                             }
                         }, function(err) {
                             $scope.seachingByPhone = false;
-                            SweetAlert.swal('ERROR', err.message?err.message: 'Something went wrong', 'error');
+                            SweetAlert.swal('ERROR', err.message ? err.message : 'Something went wrong', 'error');
                         });
                 }
             }
