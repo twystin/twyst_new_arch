@@ -340,16 +340,18 @@ function calculate_order_value(data, free_item) {
         console.log(order_sub_options);
         _.each(menu_sub_options, function(sub_option){
             _.each(order_sub_options, function(order_sub_option){
-                sub_option = _.findWhere(sub_option.sub_option_set, {_id: order_sub_option})
-                console.log(sub_option);
-                if(sub_option){
-                    sub_options.push(sub_option);
+                var selected_sub_option = _.findWhere(sub_option.sub_option_set, {_id: order_sub_option})
+                console.log(selected_sub_option);
+                if(selected_sub_option){
+                    sub_options.push(selected_sub_option);
                 }
             })
         })
         console.log(sub_options);
 
         if(option && option.addons && items[i].add_ons) {
+            console.log('check here');
+            console.log(option.addons);
             menu_addons = option.addons;
             order_addons = items[i].add_ons;
         }
@@ -357,10 +359,10 @@ function calculate_order_value(data, free_item) {
         console.log(order_addons);
         _.each(menu_addons, function(addon){
             _.each(order_addons, function(order_addon){
-                addon = _.findWhere(addon.addon_set, {_id: order_addon})
-                console.log(addon);
-                if(addon){
-                    addons.push(addon);
+                var selected_addon = _.findWhere(addon.addon_set, {_id: order_addon})
+                console.log(selected_addon);
+                if(selected_addon){
+                    addons.push(selected_addon);
                 }
             })
         })
