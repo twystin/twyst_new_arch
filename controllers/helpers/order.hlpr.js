@@ -324,8 +324,10 @@ function calculate_order_value(data, free_item) {
         category = _.findWhere(menu.menu_categories, {_id: items[i].category_id});
         
         var sub_category = _.findWhere(category.sub_categories, {_id: items[i].sub_category_id});
+        console.log(sub_category)
+        console.log(items[i].item_id);
         item = _.findWhere(sub_category.items, {_id: items[i].item_id});
-        if(item.options && items[i].option_id) {
+        if(item && item.options && items[i].option_id) {
             option = _.findWhere(item.options, {_id: items[i].option_id});
             console.log(option);    
         }
@@ -346,6 +348,13 @@ function calculate_order_value(data, free_item) {
             })
         })
         console.log(sub_options);
+
+        if(option && option.addons && items[i].add_ons) {
+            menu_addons = option.addons;
+            order_addons = items[i].add_ons;
+        }
+        console.log(menu_addons);
+        console.log(order_addons);
         _.each(menu_addons, function(addon){
             _.each(order_addons, function(order_addon){
                 addon = _.findWhere(addon.addon_set, {_id: order_addon})

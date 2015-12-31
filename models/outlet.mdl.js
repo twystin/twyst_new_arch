@@ -583,7 +583,8 @@ var OutletSchema = new Schema({
           },
           is_recommended: {
             type: Boolean,
-            default: false
+            default: false,
+            required: true
           },
           item_photo: {
             type: String
