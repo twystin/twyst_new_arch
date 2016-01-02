@@ -86,7 +86,7 @@ module.exports.apply_offer = function(token, order) {
     data.items = order.items;
     data.outlet = order.outlet;
     data.user_token = token;
-    data.offer_used = order.offer_used;
+    data.offer_used = order.offer_id;
     data.order_number = order.order_number;
 
     get_user(data)
@@ -104,7 +104,7 @@ module.exports.apply_offer = function(token, order) {
         updated_data.vat = data.vat;
         updated_data.st = data.st;
         updated_data.order_value_with_tax = data.order_value_with_tax;
-        updated_data.offer_used = data.offer_used || null;
+        updated_data.offers = data.offer_used || null;
        
         deferred.resolve(updated_data);
     })
@@ -779,8 +779,6 @@ function apply_selected_offer(data) {
                     })
                     
                     if(offer_used) {
-                        delete order.available_offers;
-                        order.offers = offer_used;
                         Cache.hset(data.user._id, "order_map", JSON.stringify(order), function(err) {
                            if(err) {
                              logger.log(err);
@@ -798,8 +796,7 @@ function apply_selected_offer(data) {
                         data.vat = order.vat;
                         data.st = order.st;
                         data.order_value_with_tax = order.order_actual_value_with_tax;
-                        delete order.available_offers;
-                        order.offers = null;
+                        order.offer_used = null;
                         Cache.hset(data.user._id, "order_map", JSON.stringify(order), function(err) {
                            if(err) {
                              logger.log(err);
@@ -956,7 +953,7 @@ function massage_order(data){
                 order.address = data.address;
                 order.outlet = data.outlet;
                 order.order_number = data.order_number;
-                order.offers = data.offer_used;
+                order.offer_used = data.offer_used;
                 order.order_value_without_offer = 500
                 order.order_value_with_offer = 400
                 order.tax_paid = 12;
