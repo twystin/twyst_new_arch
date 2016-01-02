@@ -362,14 +362,14 @@ function calculate_order_value(data, free_item) {
         if(item._id === free_item && option) {
             amount = amount+(option.option_cost*(items[i].quantity-1));
             if(sub_options.length) {
-                for(var i = 0; i < sub_options.length-1; i++) {
-                    amount = amount + (sub_option[i].sub_option_cost*(items[i].quantity-1));
-                }               
+                _.each(sub_options, function(sub_option){
+                    amount = amount + (sub_option.sub_option_cost*(items[i].quantity-1));
+                })               
             }
             if(addons.length) {
-                for(var i = 0; i < addons.length-1; i++) {
-                    amount = amount + (addons[i].addon_cost*(items[i].quantity-1));
-                }
+                _.each(addons, function(addon){
+                    amount = amount + (addons.addon_cost*(items[i].quantity-1));
+                })
             }
         }
         else if(item._id === free_item && !option) {
@@ -377,19 +377,20 @@ function calculate_order_value(data, free_item) {
             if(sub_options.length) {
                 _.each(sub_options, function(sub_option){
                     amount = amount + (sub_option.sub_option_cost*(items[i].quantity-1));
-                }               
+                })
             }
             if(addons.length) {
                 _.each(addons, function(addon){
                     amount = amount + (addons.addon_cost*(items[i].quantity-1));
-                }
+                })
             }
         }         
         else if(option){
             
             amount = amount+(option.option_cost*items[i].quantity);
-            _.each(sub_options, function(sub_option){
-                amount = amount + (sub_option.sub_option_cost*items[i].quantity);
+            if(sub_options.length) {
+                _.each(sub_options, function(sub_option){
+                    amount = amount + (sub_option.sub_option_cost*items[i].quantity);
                 })
             }
             if(addons.length) {
