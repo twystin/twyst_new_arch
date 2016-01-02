@@ -97,7 +97,6 @@ module.exports.apply_offer = function(token, order) {
         return apply_selected_offer(data);
     })
     .then(function(data) {
-        //console.log(data);
         var updated_data = {};
         updated_data.order_number = data.order_number;
         updated_data.items = data.items;
@@ -134,54 +133,13 @@ module.exports.checkout = function(token, order) {
         return massage_order(data);
     })
     .then(function(data) {
-        Cache.hget(data.user._id, 'order_map', function(err, reply) {
-            if(!reply) {
-                deferred.reject('can not process this order')
-            }
-            else{
-                console.log('here');
-                var order = JSON.parse(reply);
-                if(data.order_number === order.order_number) {
-                    PaymentHelper.make_payment(data).then(function(data){
-                        var order = {};                        
-                        order.address = data.address;
-                        order.outlet = data.outlet;
-                        order.order_number = data.order_number;
-                        order.offer_used = data.offer_used;
-                        order.order_value_without_offer = 500
-                        order.order_value_with_offer = 400
-                        order.tax_paid = 12;
-                        order.cash_back = 20;
-                        order.order_status = 'pending';
-                        order.items = data.items;
-                        order.user = data.user._id;
-
-                        order = new Order(order);
-                        console.log(data.items)
-                        order.save(function(err, order){
-                            if(err){
-                                console.log(err);
-                                deferred.reject('unable to checkout ');
-                            }
-                            else{
-                                console.log('saved');
-                                var a = Bayeux.bayeux.getClient().publish('/'+data.outlet._id, {text: 'yaaaaaaa u have a new order'});
-                                a.then(function() {
-                                  console.log('delivers');
-                                }, function(error) {
-                                  console.log('problem');
-                                });
-                                deferred.resolve(data);   
-                            }
-                        })    
-                    })
-                    
-                }
-                else{
-                    deferred.resolve(data);   
-                }
-            }
-        })    
+        send_sms(date);
+    })
+    .then(function(data) {
+        send_email(date);
+    })
+    .then(function(data) {
+        calculate_checksum(date);
     })
     .fail(function(err) {
         console.log(err)
@@ -271,7 +229,7 @@ function validate_outlet(data) {
     var passed_data = data;
     var outlet = passed_data.outlet;
 
-    if(!isOutletActive(outlet)){
+    if(isOutletActive(outlet)){
         deferred.reject({
           err:  true,
           message: "outlet is not active"
@@ -316,8 +274,7 @@ function calculate_order_value(data, free_item) {
     var menu = {};
     menu = data.outlet && data.outlet.menus[0];
     var items = data.items;
-    var category, sub_category, item, option,  menu_sub_options,
-     order_sub_options, menu_addons,order_addons,  amount = 0;
+    var category, sub_category, item, option,  menu_sub_options,order_sub_options, menu_addons,order_addons,  amount = 0;
     
     for(var i = 0; i < items.length; i++) {
         var sub_options = [], addons = [];
@@ -823,7 +780,7 @@ function apply_selected_offer(data) {
                     
                     if(offer_used) {
                         delete order.available_offers;
-                        order.offer_used = offer_used;
+                        order.offers = offer_used;
                         Cache.hset(data.user._id, "order_map", JSON.stringify(order), function(err) {
                            if(err) {
                              logger.log(err);
@@ -842,7 +799,7 @@ function apply_selected_offer(data) {
                         data.st = order.st;
                         data.order_value_with_tax = order.order_actual_value_with_tax;
                         delete order.available_offers;
-                        order.offer_used = null;
+                        order.offers = null;
                         Cache.hset(data.user._id, "order_map", JSON.stringify(order), function(err) {
                            if(err) {
                              logger.log(err);
@@ -987,6 +944,51 @@ function massage_offer(data) {
 function massage_order(data){
     logger.log();
     var deferred = Q.defer();
+    Cache.hget(data.user._id, 'order_map', function(err, reply) {
+        if(!reply) {
+            deferred.reject('can not process this order')
+        }
+        else{
+            console.log('here');
+            var order = JSON.parse(reply);
+            if(data.order_number === order.order_number) {
+                var order = {};                        
+                order.address = data.address;
+                order.outlet = data.outlet;
+                order.order_number = data.order_number;
+                order.offers = data.offer_used;
+                order.order_value_without_offer = 500
+                order.order_value_with_offer = 400
+                order.tax_paid = 12;
+                order.cash_back = 20;
+                order.order_status = 'pending';
+                order.items = data.items;
+                order.user = data.user._id;
+
+                order = new Order(order);
+                console.log(data.items)
+                order.save(function(err, order){
+                    if(err){
+                        console.log(err);
+                        deferred.reject('unable to checkout ');
+                    }
+                    else{
+                        console.log('saved');
+                        var a = Bayeux.bayeux.getClient().publish('/'+data.outlet._id, {text: 'yaaaaaaa u have a new order'});
+                        a.then(function() {
+                          console.log('delivers');
+                        }, function(error) {
+                          console.log('problem');
+                        });
+                        deferred.resolve(data);   
+                    }
+                })                    
+            }
+            else{
+                deferred.reject('could not process this order');   
+            }
+        }
+    })
     deferred.resolve(data);
     return deferred.promise;
 }
