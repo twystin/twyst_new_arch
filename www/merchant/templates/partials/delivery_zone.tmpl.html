@@ -13,7 +13,7 @@
         <div class='form-group'>
             <label class='col-sm-2 control-label'>Zone Type <i class='fa fa-sm fa-asterisk'></i></label>
             <div class='col-sm-6' ng-class='{"has-error": formFailure && !delivery_zone.zone_type}'>
-                <input type='text' ng-model='delivery_zone.zone_type' class='form-control'>
+                <input type='number' min='5' ng-model='delivery_zone.zone_type' class='form-control'>
             </div>
         </div>
         <div class='form-group'>
@@ -58,7 +58,6 @@
                 </div>
             </div>
         </div>
-        
         <div class='form-group'>
             <label class='col-sm-2 control-label'>Payment Modes</label>
             <div class='col-sm-6'>

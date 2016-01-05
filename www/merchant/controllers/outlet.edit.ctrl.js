@@ -47,12 +47,14 @@ angular.module('merchantApp')
                         controller: 'DeliveryZoneController',
                         resolve: {
                             delivery_zone: function() {
+                                var orignal_coord = _.cloneDeep(coord);
                                 var _zone = {
                                     coord: coord
                                 };
                                 if (index != -1) {
                                     _zone = _.merge(_zone, $scope.outlet.attributes.delivery.delivery_zone[index]);
                                 }
+                                _zone.coord = orignal_coord;
                                 return _zone;
                             },
                             is_new: function() {
@@ -252,6 +254,25 @@ angular.module('merchantApp')
                                 _time.setHours(timing.close.hr);
                                 _time.setMinutes(timing.close.min);
                                 timing.close.time = _.clone(_time);
+                            });
+                        });
+
+                        angular.forEach($scope.outlet.attributes.delivery.delivery_zone, function(zone) {
+                            angular.forEach($scope.days, function(day) {
+                                angular.forEach(zone.delivery_timings[day].timings, function(timing) {
+                                    var open_time = new Date();
+                                    var close_time = new Date();
+                                    open_time.setMilliseconds(0);
+                                    open_time.setSeconds(0);
+                                    open_time.setHours(timing.open.hr);
+                                    open_time.setMinutes(timing.open.min);
+                                    close_time.setMilliseconds(0);
+                                    close_time.setSeconds(0);
+                                    close_time.setHours(timing.close.hr);
+                                    close_time.setMinutes(timing.close.min);
+                                    timing.open.time = open_time;
+                                    timing.close.time = close_time;
+                                });
                             });
                         });
                     }
