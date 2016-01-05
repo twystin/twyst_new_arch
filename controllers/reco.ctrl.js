@@ -331,6 +331,10 @@ function pick_outlet_fields(params) {
         massaged_item.background = 'https://s3-us-west-2.amazonaws.com/retwyst-merchants/retwyst-outlets/' + item._id + '/' + item.photos.background;
       }
       massaged_item.open_next = RecoHelper.opensAt(item.business_hours);
+      if(item.menus && item.menus.length) {
+        massaged_item.menu = item.menus[0]._id;
+      }
+      
       
       return massaged_item;
     });
