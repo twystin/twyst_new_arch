@@ -58,16 +58,15 @@ module.exports.checkout = function(req, res) {
 	});
 }
 
-module.exports.update_order = function(req, res) {
+module.exports.get_order = function(req, res) {
   var token = req.query.token || null;
-  var updated_order = {};
-  updated_order = _.extend(updated_order, req.body);
+  var order_id = req.params.order_id;
 
   if (!token) {
     HttpHelper.error(res, null, "Not authenticated");
   }
 
-  OrderHelper.update_order(token, updated_order).then(function(data) {
+  OrderHelper.get_order(token, order_id).then(function(data) {
     HttpHelper.success(res, data.data, data.message);
   }, function(err) {
     HttpHelper.error(res, err.data, err.message);

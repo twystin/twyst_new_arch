@@ -328,9 +328,41 @@ module.exports.get_orders = function(token) {
     return deferred.promise;
 };
 
-module.exports.update_order = function(token, order) {
+module.exports.cancel_order = function(token, order) {
     logger.log();
     var deferred = Q.defer();
+
+    AuthHelper.get_user(token).then(function(data) {
+      
+        Order.findOneAndUpdate({
+            _id: order.id
+          }, {
+            $set: {order_status: 'cancelled', cancel_reason: order.reason}
+          }, {
+            upsert: true
+          },
+          function(err, o) {
+            if (err || !o) {
+              deferred.reject({
+                err: err || true,
+                message: 'Couldn\'t cancel the order'
+              });
+            } else {
+              updated_outlet._id = id;
+
+              deferred.resolve({
+                data: o,
+                message: 'order cancelled successfully'
+              });
+            }
+          }
+        );
+    }, function(err) {
+        deferred.reject({
+          err: err || true,
+          message: 'Couldn\'t find the user'
+        });
+    });
     deferred.resolve(order);
     return deferred.promise;
 };

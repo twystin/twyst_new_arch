@@ -1,23 +1,17 @@
 'use strict';
 /*jslint node: true */
-
-var Cache = require('../../common/cache.hlpr');
+var crypto = require("crypto");
 var Q = require('q');
-var _ = require('lodash');
-var async = require('async');
-var mongoose = require('mongoose');
-var geolib = require('geolib');
-var moment = require('moment');
-var ObjectId = mongoose.Types.ObjectId;
-var Outlet = mongoose.model('Outlet');
-var Order = mongoose.model('Order');
 var logger = require('tracer').colorConsole();
 
+module.exports.calculate_checksum = function(message) {
+	logger.log();
+	var deferred = Q.defer();
 
-module.exports.make_payment = function(data) {
-    logger.log();
-    var deferred = Q.defer();
-
-    deferred.resolve(data);
-    return deferred.promise;
-}
+	var key = 'be92fd65d03d43bc83a5aaeffdcd709f';
+	var checksum = crypto.createHmac('sha256', key).update(message).digest('hex')
+	data.calculated_checksum = checksum;
+	deferred.resolve(data);
+	return deferred.promise;
+	
+};

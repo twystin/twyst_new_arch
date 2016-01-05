@@ -30,7 +30,9 @@ module.exports = function(app) {
 
   (function RecoRoutes() {
     var RecoCtrl = require('../controllers/reco.ctrl');
+    var DeliveryRecoCtrl = require('../controllers/delivery_reco.ctrl');
     app.get('/api/v4/recos', RecoCtrl.get);
+    app.get('/api/v4/delivery/recos', DeliveryRecoCtrl.get);
   })();
 
   (function EventRoutes() {
@@ -91,7 +93,7 @@ module.exports = function(app) {
     app.get('/api/v4/outlets', mustBe.authorized('outlet.view', OutletCtrl.all));
     app.delete('/api/v4/outlets/:outlet_id', mustBe.authorized('outlet.remove', OutletCtrl.remove));
     app.get('/api/v4/outlet/orders/:outlet_id', OutletCtrl.get_orders);
-    //app.put('/api/v4/outlet/order/:order', OutletCtrl.update_order);
+    app.put('/api/v4/outlet/order/:order_id', OutletCtrl.update_order);
   })();
 
   (function OfferRoutes() {
@@ -116,9 +118,11 @@ module.exports = function(app) {
 
   (function OrderRoutes() {
     var OrderCtrl = require('../controllers/order.ctrl');    
+    app.get('/api/v4/order/:order_id', OrderCtrl.get_order);
     app.post('/api/v4/order/verify', OrderCtrl.verify_order);
     app.post('/api/v4/order/apply/offer', OrderCtrl.apply_offer);
     app.post('/api/v4/order/checkout', OrderCtrl.checkout);
+
   })();
 
   (function ImageRoutes() {
@@ -135,7 +139,7 @@ module.exports = function(app) {
     app.get('/api/v4/coupons', UserCtrl.get_coupons);
     app.post('/api/v4/user/location', UserCtrl.update_location);
     app.get('/api/v4/user/orders', UserCtrl.get_orders);
-    //app.put('/api/v4/user/order/:order', UserCtrl.update_order);
+    app.put('/api/v4/user/cancel_order/:order_id', UserCtrl.cancel_order);
   })();
 
   (function LocationRoutes() {
@@ -157,8 +161,9 @@ module.exports = function(app) {
   })();
 
   (function Payment_Routes(){
-    var ZaakpayCtrl = require('../controllers/zaakpay_response.ctrl');
-    app.post('/api/v4/zaakpay/response', ZaakpayCtrl.get_zaakpay_response)
+    var ZaakpayCtrl = require('../controllers/payment.ctrl');
+    app.post('/api/v4/zaakpay/response', ZaakpayCtrl.get_zaakpay_response);
+    app.post('/api/v4/calculate/checksum', ZaakpayCtrl.calculate_checksum);
   })();
 
   (function LegacyRoutes() {
