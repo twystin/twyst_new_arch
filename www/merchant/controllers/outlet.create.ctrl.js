@@ -131,13 +131,14 @@ angular.module('merchantApp')
                         controller: 'DeliveryZoneController',
                         resolve: {
                             delivery_zone: function() {
+                                var orignal_coord = _.cloneDeep(coord);
                                 var _zone = {
                                     coord: coord
                                 };
                                 if (index != -1) {
                                     _zone = _.merge(_zone, $scope.outlet.attributes.delivery.delivery_zone[index]);
                                 }
-                                _zone.coord = coord;
+                                _zone.coord = orignal_coord;
                                 return _zone;
                             },
                             is_new: function() {
