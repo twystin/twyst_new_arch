@@ -229,7 +229,7 @@
                                         <div class='col-md-6'>
                                             <div ui-tree>
                                                 <ol ui-tree-nodes='' ng-model='outlet.attributes.delivery.delivery_zone'>
-                                                    <li ng-repeat='zone in outlet.attributes.delivery.delivery_zone track by $index' ui-tree-node>
+                                                    <li ng-repeat='zone in outlet.attributes.delivery.delivery_zone track by $index | orderBy: zone.zone_type' ui-tree-node>
                                                         <div ui-tree-handle>
                                                             {{$index+1}} {{zone.zone_name}} [Zone]
                                                             <a class='pull-right btn btn-danger btn-sm' data-nodrag ng-click='removeZone()'><i class='fa fa-trash-o'></i></a>

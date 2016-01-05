@@ -137,6 +137,7 @@ angular.module('merchantApp')
                                 if (index != -1) {
                                     _zone = _.merge(_zone, $scope.outlet.attributes.delivery.delivery_zone[index]);
                                 }
+                                _zone.coord = coord;
                                 return _zone;
                             },
                             is_new: function() {
