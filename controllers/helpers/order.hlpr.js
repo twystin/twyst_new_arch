@@ -100,11 +100,11 @@ module.exports.apply_offer = function(token, order) {
         var updated_data = {};
         updated_data.order_number = data.order_number;
         updated_data.items = data.items;
-        updated_data.order_value_without_tax = data.order_value_without_tax;
+        updated_data.order_actual_value_without_tax = data.order_actual_value_without_tax;
         updated_data.vat = data.vat;
         updated_data.st = data.st;
-        updated_data.order_value_with_tax = data.order_value_with_tax;
-        updated_data.offers = data.offer_used || null;
+        updated_data.order_actual_value_with_tax = data.order_actual_value_with_tax;
+        updated_data.offer_used = data.offer_used || null;
        
         deferred.resolve(updated_data);
     })
@@ -131,15 +131,6 @@ module.exports.checkout = function(token, order) {
     get_user(data)
     .then(function(data) {
         return massage_order(data);
-    })
-    .then(function(data) {
-        send_sms(date);
-    })
-    .then(function(data) {
-        send_email(date);
-    })
-    .then(function(data) {
-        calculate_checksum(date);
     })
     .fail(function(err) {
         console.log(err)
@@ -229,7 +220,7 @@ function validate_outlet(data) {
     var passed_data = data;
     var outlet = passed_data.outlet;
 
-    if(isOutletActive(outlet)){
+    if(!isOutletActive(outlet)){
         deferred.reject({
           err:  true,
           message: "outlet is not active"
@@ -266,9 +257,9 @@ function validate_outlet(data) {
     return deferred.promise;
 }
 
-function calculate_order_value(data, free_item) {
+function calculate_order_value(data, free_item, free_item_option) {
     logger.log();
-    console.log('free_item ' + data);
+    console.log('free_item ' + free_item);
     var passed_data = data;
     var items = data.items
     var menu = {};
@@ -281,7 +272,7 @@ function calculate_order_value(data, free_item) {
         category = _.findWhere(menu.menu_categories, {_id: items[i].category_id});
         var sub_category = _.findWhere(category && category.sub_categories, {_id: items[i].sub_category_id});
         
-        item = _.findWhere(sub_category.items, {_id: items[i].item_id});
+        item = _.findWhere(sub_category && sub_category.items, {_id: items[i].item_id});
 
         if(item && item.options && items[i].option_id) {
             option = _.findWhere(item.options, {_id: items[i].option_id}); 
@@ -300,10 +291,9 @@ function calculate_order_value(data, free_item) {
             })
         }
         
-
-        if(option && option.addons && items[i].add_ons) {
+        if(option && option.addons && items[i].addons) {
             menu_addons = option.addons;
-            order_addons = items[i].add_ons;
+            order_addons = items[i].addons;
             _.each(menu_addons, function(addon){
                 _.each(order_addons, function(order_addon){
                     var selected_addon = _.findWhere(addon.addon_set, {_id: order_addon})
@@ -315,8 +305,8 @@ function calculate_order_value(data, free_item) {
         }
         
         
-        console.log(items[i].quantity +'quantity')
-        if(item._id === free_item && option) {
+        console.log(items[i].quantity +'quantity');
+        if(item && item._id === free_item && option && option._id === free_item_option) {
             amount = amount+(option.option_cost*(items[i].quantity-1));
             if(sub_options.length) {
                 _.each(sub_options, function(sub_option){
@@ -329,7 +319,7 @@ function calculate_order_value(data, free_item) {
                 })
             }
         }
-        else if(item._id === free_item && !option) {
+        else if(item && item._id === free_item && !option) {
             amount = amount+(item.item_cost*(items[i].quantity-1));           
             if(sub_options.length) {
                 _.each(sub_options, function(sub_option){
@@ -370,7 +360,7 @@ function calculate_order_value(data, free_item) {
             }               
         }
     }
-    console.log('order amount '+ amount);
+    console.log('order amount in calculate_order_value '+ amount);
     return amount;
 }
 
@@ -393,9 +383,9 @@ function verify_delivery_location(coords, outlet) {
 function isOutletClosed(outlet) {
     logger.log();
     var date = new Date();
-    var time = (parseInt(date.getHours())+5) +':'+(parseInt(date.getMinutes())+30);
+    var time = moment().hours() +':'+moment().minutes();
     date = parseInt(date.getMonth())+1+ '-'+ date.getDate()+'-'+date.getFullYear();
-
+    console.log(time);
     if (outlet && outlet.business_hours ) {
       if(RecoHelper.isClosed(date, time, outlet.business_hours)) {
           return true;
@@ -466,12 +456,10 @@ function get_applicable_offer(data) {
     var passed_data = data;
     var user = passed_data.user;
     var date = new Date();
-    var time = (parseInt(date.getHours())) +':'+(parseInt(date.getMinutes())+30);
+    var time = moment().hours() +':'+moment().minutes();
     date = parseInt(date.getMonth())+1+ '-'+ date.getDate()+'-'+date.getFullYear();
     var i, offer_cost = 0;
-    _.each(passed_data.outlet.offers, function(offer){
-        offer.is_already_checked = false;
-    })
+
     passed_data.outlet.offers = _.map(data.outlet.offers, function(offer) {
         offer_cost = offer.offer_cost || 0;
         if(offer.offer_status === 'active' && new Date(offer.offer_end_date) > new Date()
@@ -509,7 +497,7 @@ function checkFreeItem(data, offer) {
     logger.log();
     var deferred = Q.defer();
 
-    console.log('checking offer type free '+offer.actions.reward.reward_meta.reward_type)
+    console.log('checking offer type free ')
     var passed_data = data;
     var offer_id = offer._id;
     var items = passed_data.items;
@@ -517,9 +505,9 @@ function checkFreeItem(data, offer) {
 
     for(var i = 0; i < items.length; i++) {
 
-        if(searchItemInOfferItems(items[i], offer) && is_contain_paid_item){
-            var order_value = calculate_order_value(passed_data, offer.offer_items.item_id);
-            console.log('yaha par nahi aata')
+        if(searchItemInOfferItems(items[i], offer)){
+            var order_value = calculate_order_value(passed_data, offer.offer_items.item_id, offer.offer_items.option_id);
+            console.log('yaha par nahi aata free wala')
             console.log(order_value);
             console.log(offer.minimum_bill_value);
             if(order_value >= offer.minimum_bill_value) {
@@ -535,7 +523,7 @@ function checkFreeItem(data, offer) {
                 return offer;            
             }
             else{
-                var order_value_obj = calculate_tax(order_value, passed_data.outlet);
+                var order_value_obj = calculate_tax(calculate_order_value(passed_data, null, null), passed_data.outlet);
                 offer.is_applicable = false;
                 offer.order_value_without_tax = order_value_obj.order_value;
                 offer.vat = order_value_obj.vat;
@@ -545,8 +533,8 @@ function checkFreeItem(data, offer) {
                 return offer;
             }          
         }
-        else if(!(items.length-1)){
-            var order_value_obj = calculate_tax(calculate_order_value(passed_data, null), passed_data.outlet);
+        else if(i === items.length-1){
+            var order_value_obj = calculate_tax(calculate_order_value(passed_data, null, null), passed_data.outlet);
             offer.is_applicable = false;
             offer.order_value_without_tax = order_value_obj.order_value;
             offer.vat = order_value_obj.vat;
@@ -570,7 +558,7 @@ function checkOfferTypeBuyXgetY(data, offer) {
     var is_contain_paid_item = false;
 
     for(var i = 0; i < items.length; i++) {
-        if(searchItemInOfferItems(items[i], offer)){
+        if(searchItemInPaidItems(items[i], offer)){
             is_contain_paid_item = true;
             break;
         }
@@ -579,7 +567,7 @@ function checkOfferTypeBuyXgetY(data, offer) {
     for(var i = 0; i < items.length; i++) {
         
         if(searchItemInOfferItems(items[i], offer) && is_contain_paid_item){
-            var order_value = calculate_order_value(passed_data, offer.offer_items.item_id);
+            var order_value = calculate_order_value(passed_data, offer.offer_items.item_id, offer.offer_items.option_id);
             console.log('yaha par nahi aata')
             console.log(order_value);
             console.log(offer.minimum_bill_value);
@@ -596,7 +584,7 @@ function checkOfferTypeBuyXgetY(data, offer) {
                 return offer;            
             }
             else{
-                var order_value_obj = calculate_tax(order_value, passed_data.outlet);
+                var order_value_obj = calculate_tax(calculate_order_value(passed_data, null, null), passed_data.outlet);
                 offer.is_applicable = false;
                 offer.order_value_without_tax = order_value_obj.order_value;
                 offer.vat = order_value_obj.vat;
@@ -608,7 +596,7 @@ function checkOfferTypeBuyXgetY(data, offer) {
         }
         else if(i === items.length-1){
             console.log()
-            var order_value_obj = calculate_tax(calculate_order_value(passed_data, null), passed_data.outlet);
+            var order_value_obj = calculate_tax(calculate_order_value(passed_data, null, null), passed_data.outlet);
             offer.is_applicable = false;
             offer.order_value_without_tax = order_value_obj.order_value;
             offer.vat = order_value_obj.vat;
@@ -628,7 +616,7 @@ function checkOfferTypeFlatOff(data, offer) {
     var passed_data = data;
     var id = offer._id;
 
-    var order_value = calculate_order_value(passed_data, null);
+    var order_value = calculate_order_value(passed_data, null, null);
                 
     console.log('for flat off');
     console.log(order_value);
@@ -670,7 +658,7 @@ function checkOfferTypePercentageOff(data, offer) {
     var id = offer._id;
     var discount = 0;
 
-    var order_value = calculate_order_value(passed_data, null);
+    var order_value = calculate_order_value(passed_data, null, null);
                 
     console.log('for percentage off');
     console.log(order_value);
@@ -712,7 +700,7 @@ function generate_and_cache_order(data) {
     var passed_data = data;
     var order_number, order_actual_value_obj = {};
     var date = new Date();
-    var month = date.getMonth();
+    var month = date.getMonth()+1;
     var year = date.getFullYear();
     year = year.toString().substr(2,2);
 
@@ -722,8 +710,8 @@ function generate_and_cache_order(data) {
         exclude: ['O', '0', '1', 'I']
     });
 
-    order_number = 'TW'+data.outlet.links.short_url+'-'+month+year+'-'+code;
-    order_actual_value_obj = calculate_tax(calculate_order_value(passed_data, null), passed_data.outlet);
+    order_number = 'TW'+data.outlet.links.short_url+month+year+code;
+    order_actual_value_obj = calculate_tax(calculate_order_value(passed_data, null, null), passed_data.outlet);
 
     var order = {};
     order.order_number = order_number;
@@ -739,7 +727,7 @@ function generate_and_cache_order(data) {
       if(err) {
         logger.log(err);
       }
-        deferred.resolve(data)
+        deferred.resolve(data);
     });
     return deferred.promise;
 
@@ -758,22 +746,17 @@ function apply_selected_offer(data) {
         else{
             var order = JSON.parse(reply);
             console.log(order);
-            if(passed_data.order_number === order.order_number) {
-                if(passed_data.offer_used) {                
-                    
+            console.log(passed_data.order_number)
+            if(passed_data.order_number.toString() === order.order_number.toString()) {
+                data.order_actual_value_without_tax = order.order_actual_value_without_tax;
+                data.vat = order.vat;
+                data.st = order.st;
+                data.order_actual_value_with_tax = order.order_actual_value_with_tax;
+                if(passed_data.offer_used) {                                    
                     offer_used = _.find(order.available_offers, function(offer){
                         
-                        if(offer && offer.is_applicable && offer._id === passed_data.offer_used) {
-                            order.order_value_without_tax = offer.order_value_without_tax;
-                            order.vat = offer.vat;
-                            order.st = offer.st;
-                            order.order_value_with_tax = offer.order_value_with_tax;
-                            
-                            data.order_value_without_tax = offer.order_value_without_tax;
-                            data.vat = offer.vat;
-                            data.st = offer.st;
-                            data.order_value_with_tax = offer.order_value_with_tax;
-
+                        if(offer && offer.is_applicable && offer._id === passed_data.offer_used) {                           
+                            order.offer_used = offer._id;                            
                             return offer;                        
                         }
                     })
@@ -785,17 +768,13 @@ function apply_selected_offer(data) {
                            }
                            else{
                                 console.log('order found and offer applied')
-                                data.offer_used = offer_used;
+                                data.offer_used = offer_used;                                
                                 deferred.resolve(data);
-                           }
+                            }
                             
                         });     
                     }
-                    else{                        
-                        data.order_value_without_tax = order.order_actual_value_without_tax;
-                        data.vat = order.vat;
-                        data.st = order.st;
-                        data.order_value_with_tax = order.order_actual_value_with_tax;
+                    else{                                                
                         order.offer_used = null;
                         Cache.hset(data.user._id, "order_map", JSON.stringify(order), function(err) {
                            if(err) {
@@ -812,22 +791,18 @@ function apply_selected_offer(data) {
                       
                 }
                 else{
-                    console.log('order found and no offer applied')
-                    data.order_value_without_tax = order.order_actual_value_without_tax;
-                    data.vat = order.vat;
-                    data.st = order.st;
-                    data.order_value_with_tax = order.order_actual_value_with_tax;
+                    console.log('order found and no offer applied')                    
                     data.offer_used = null;
                     deferred.resolve(data);
                 }
             }
             else {
                 console.log('order not found');
-                var order_value_obj = calculate_tax(calculate_order_value(passed_data, null), passed_data.outlet);
-                data.order_value_without_tax = order_value_obj.order_value_without_tax;
+                var order_value_obj = calculate_tax(calculate_order_value(passed_data, null, null), passed_data.outlet);
+                data.order_actual_value_without_tax = order_value_obj.order_value_without_tax;
                 data.vat = order_value_obj.vat;
                 data.st = order_value_obj.st;
-                data.order_value_with_tax = order_value_obj.order_value_with_tax;
+                data.order_actual_value_with_tax = order_value_obj.order_value_with_tax;
                 data.offer_used = null;
                 deferred.resolve(data);
             }
@@ -875,6 +850,7 @@ function calculate_tax(order_value, outlet) {
 function massage_offer(data) {
     logger.log();
     var deferred = Q.defer();
+    data.outlet.offers = _.compact(data.outlet.offers);
 
     data.outlet.offers = _.map(data.outlet.offers, function(offer) {
       if(offer && offer.offer_status === 'archived' || offer.offer_status === 'draft') {
@@ -899,9 +875,12 @@ function massage_offer(data) {
 
         massaged_offer.expiry = offer.offer_end_date || offer.expiry_date;
 
+        if(offer.offer_items) {
+            massaged_offer.offer_items = offer.offer_items;
+        }
         var date = new Date();
-        var time = date.getHours()+':'+date.getMinutes();
-        date = date.getMonth()+'-'+date.getDate()+'-'+date.getFullYear();
+        var time = moment().hours() +':'+moment().minutes();
+        date = date.getMonth()+1+'-'+date.getDate()+'-'+date.getFullYear();
 
         if (offer && offer.actions && offer.actions.reward && offer.actions.reward.reward_hours) {
           massaged_offer.available_now = !(RecoHelper.isClosed(date, time, offer.actions.reward.reward_hours));
@@ -948,22 +927,31 @@ function massage_order(data){
         else{
             console.log('here');
             var order = JSON.parse(reply);
+            console.log(order);
             if(data.order_number === order.order_number) {
                 var order = {};                        
                 order.address = data.address;
                 order.outlet = data.outlet;
                 order.order_number = data.order_number;
-                order.offer_used = data.offer_used;
-                order.order_value_without_offer = 500
-                order.order_value_with_offer = 400
-                order.tax_paid = 12;
-                order.cash_back = 20;
+                order.offer_used = order.offer_used;
+                if(order.offer_used) {
+                    order.order_value_without_offer = 500
+                    order.order_value_with_offer = 400
+                    order.tax_paid = 12;
+                    order.cash_back = 20;    
+                }
+                else{
+                    order.order_value_without_offer = 500
+                    order.order_value_with_offer = 400
+                    order.tax_paid = 12;
+                    order.cash_back = 20; 
+                }
+                
                 order.order_status = 'pending';
                 order.items = data.items;
                 order.user = data.user._id;
 
-                order = new Order(order);
-                console.log(data.items)
+                order = new Order(order);                
                 order.save(function(err, order){
                     if(err){
                         console.log(err);
@@ -997,23 +985,32 @@ function searchItemInPaidItems(item, offer) {
     && offer.actions.reward.reward_meta.paid_item.sub_category_id === item.sub_category_id
     && offer.actions.reward.reward_meta.paid_item.item_id === item.item_id
     && offer.actions.reward.reward_meta.paid_item.option_id && offer.actions.reward.reward_meta.paid_item.option_id === item.option_id
-    && offer.actions.reward.reward_meta.paid_item.sub_option_id && offer.actions.reward.reward_meta.paid_item.sub_option_id === item.sub_option_id
-    && offer.actions.reward.reward_meta.paid_item.addon_id && offer.actions.reward.reward_meta.paid_item.addon_id === item.addon_id) {
+    && offer.actions.reward.reward_meta.paid_item.sub_options && item.sub_options
+    && offer.actions.reward.reward_meta.paid_item.addons && item.addons) {
         return true;
     }
+
     else if(offer.actions.reward.reward_meta.paid_item.category_id === item.category_id
     && offer.actions.reward.reward_meta.paid_item.sub_category_id === item.sub_category_id
     && offer.actions.reward.reward_meta.paid_item.item_id === item.item_id
     && offer.actions.reward.reward_meta.paid_item.option_id && offer.actions.reward.reward_meta.paid_item.option_id === item.option_id
-    && offer.actions.reward.reward_meta.paid_item.sub_option_id && offer.actions.reward.reward_meta.paid_item.sub_option_id === item.sub_option_id
-    && !offer.actions.reward.reward_meta.paid_item.addon_id){
+    && offer.actions.reward.reward_meta.paid_item.sub_options &&  item.sub_options
+    && !offer.actions.reward.reward_meta.paid_item.addons){
         return true;   
     }
     else if(offer.actions.reward.reward_meta.paid_item.category_id === item.category_id
     && offer.actions.reward.reward_meta.paid_item.sub_category_id === item.sub_category_id
     && offer.actions.reward.reward_meta.paid_item.item_id === item.item_id
     && offer.actions.reward.reward_meta.paid_item.option_id && offer.actions.reward.reward_meta.paid_item.option_id === item.option_id
-    && !offer.actions.reward.reward_meta.paid_item.sub_option_id && !offer.actions.reward.reward_meta.paid_item.addon_id){
+    && offer.actions.reward.reward_meta.paid_item.addons &&  item.addons
+    && !offer.actions.reward.reward_meta.paid_item.sub_options){
+        return true;   
+    }
+    else if(offer.actions.reward.reward_meta.paid_item.category_id === item.category_id
+    && offer.actions.reward.reward_meta.paid_item.sub_category_id === item.sub_category_id
+    && offer.actions.reward.reward_meta.paid_item.item_id === item.item_id
+    && offer.actions.reward.reward_meta.paid_item.option_id && offer.actions.reward.reward_meta.paid_item.option_id === item.option_id
+    && !offer.actions.reward.reward_meta.paid_item.sub_options && !offer.actions.reward.reward_meta.paid_item.addons){
         return true; 
     }
     else if(offer.actions.reward.reward_meta.paid_item.category_id === item.category_id
@@ -1031,35 +1028,44 @@ function searchItemInPaidItems(item, offer) {
 
 function searchItemInOfferItems(item, offer) {
     logger.log();
-
+    console.log(item);
     if(offer.offer_items.category_id === item.category_id
     && offer.offer_items.sub_category_id === item.sub_category_id
     && offer.offer_items.item_id === item.item_id
     && offer.offer_items.option_id && offer.offer_items.option_id === item.option_id
-    && offer.offer_items.sub_option_id && offer.offer_items.sub_option_id === item.sub_option_id
-    && offer.offer_items.addon_id && offer.offer_items.addon_id === item.addon_id) {
+    && offer.offer_items.sub_options && item.sub_options 
+    && offer.offer_items.addons && item.addons) {
         return true;
     }
+    
     else if(offer.offer_items.category_id === item.category_id
     && offer.offer_items.sub_category_id === item.sub_category_id
     && offer.offer_items.item_id === item.item_id
     && offer.offer_items.option_id && offer.offer_items.option_id === item.option_id
-    && offer.offer_items.sub_option_id && offer.offer_items.sub_option_id === item.sub_option_id
-    && !offer_items.addon_id){
+    && offer.offer_items.sub_options && item.sub_options
+    && !offer.offer_items.addons ){
+        return true;   
+    }
+
+    else if(offer.offer_items.category_id === item.category_id
+    && offer.offer_items.sub_category_id === item.sub_category_id
+    && offer.offer_items.item_id === item.item_id
+    && offer.offer_items.option_id && offer.offer_items.option_id === item.option_id
+    && offer.offer_items.addons && item.addons
+    && !offer.offer_items.sub_options ){
         return true;   
     }
     else if(offer.offer_items.category_id === item.category_id
     && offer.offer_items.sub_category_id === item.sub_category_id
     && offer.offer_items.item_id === item.item_id
     && offer.offer_items.option_id && offer.offer_items.option_id === item.option_id
-    && !offer.offer_items.sub_option_id && !offer.actions.offer_items.addon_id){
+    && !offer.offer_items.sub_options && !offer.actions.offer_items.addons){
         return true; 
     }
     else if(offer.offer_items.category_id === item.category_id
     && offer.offer_items.sub_category_id === item.sub_category_id
     && offer.offer_items.item_id === item.item_id
-    && !offer.offer_items.option_id){
-       
+    && !offer.offer_items.option_id){       
         return true; 
     } 
     else {

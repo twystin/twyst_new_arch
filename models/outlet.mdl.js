@@ -201,6 +201,7 @@ var OutletSchema = new Schema({
     delivery: {
       delivery_zone: [{
         zone_name: String,
+        zone_type: Number,
         coord: [],
         delivery_estimated_time: Number,  
         delivery_timings: hours.hours,
