@@ -141,7 +141,7 @@ angular.module('merchantApp')
 
             $scope.$watchCollection('offer.offer_items', function(newVal, oldVal) {
                 console.log('newVal', newVal);
-                if ($scope.offer.actions.reward.reward_meta.reward_type === 'buyxgety' && $scope.offer.offer_items && $scope.offer.offer_items.menu_id) {
+                if (($scope.offer.actions.reward.reward_meta.reward_type === 'buyxgety' || $scope.offer.actions.reward.reward_meta.reward_type === 'free') && $scope.offer.offer_items && $scope.offer.offer_items.menu_id) {
                     $scope.getRewardName($scope.offer.offer_items).then(function(free_item_name) {
                         $scope.offer.actions.reward.reward_meta.free_item_name = free_item_name;
                     }, function(err) {
@@ -179,11 +179,11 @@ angular.module('merchantApp')
                             }
                         }, function(err) {
                             console.log(err);
-                        }); 
+                        });
                     }
                     if (newVal.paid_item && $scope.offer.offer_items && $scope.offer.offer_items.menu_id) {
-                        $scope.offer.actions.reward.header = 'Buy ' + newVal.free_item_name;
-                        $scope.offer.actions.reward.line1 = 'Get ' + (newVal.paid_item && newVal.paid_item.paid_item_name);
+                        $scope.offer.actions.reward.header = 'Buy ' + (newVal.paid_item && newVal.paid_item.paid_item_name);
+                        $scope.offer.actions.reward.line1 = 'Get ' + newVal.free_item_name;
                         $scope.offer.actions.reward.line2 = '';
                     } else {
                         $scope.offer.actions.reward.header = '';
@@ -191,32 +191,24 @@ angular.module('merchantApp')
                         $scope.offer.actions.reward.line2 = '';
                     }
                 } else if (newVal.reward_type === 'free') {
-                    if (oldVal.reward_type && oldVal.reward_type==='free') {
+                    if (oldVal.reward_type && oldVal.reward_type !== 'free') {
                         $scope.offer.offer_items = {
                             all: true
                         };
                         delete newVal.paid_item;
                         delete newVal.free_item_name;
                     }
-                    if (newVal.free_item) {
-                        $scope.getRewardName(newVal.free_item).then(function(free_item_name) {
-                            newVal.free_item.free_item_name = free_item_name;
-                            $scope.offer.actions.reward.header = 'FREE';
-                            $scope.offer.actions.reward.line1 = free_item_name;
-                            $scope.offer.actions.reward.line2 = '';
-                        }, function(err) {
-                            console.log(err);
-                            $scope.offer.actions.reward.header = 'testing';
-                            $scope.offer.actions.reward.line1 = 'testing';
-                            $scope.offer.actions.reward.line2 = 'testing';
-                        });
+                    if ($scope.offer.offer_items && $scope.offer.offer_items.menu_id) {
+                        $scope.offer.actions.reward.header = 'FREE';
+                        $scope.offer.actions.reward.line1 = newVal.free_item_name;
+                        $scope.offer.actions.reward.line2 = '';
                     } else {
                         $scope.offer.actions.reward.header = '';
                         $scope.offer.actions.reward.line1 = '';
                         $scope.offer.actions.reward.line2 = '';
                     }
                 } else if (newVal.reward_type === 'flatoff') {
-                    if(oldVal.reward_type && oldVal.reward_type!=='flatoff') {
+                    if (oldVal.reward_type && oldVal.reward_type !== 'flatoff') {
                         delete newVal.free_item;
                         delete newVal.paid_item;
                         $scope.offer.offer_items = {
@@ -233,7 +225,7 @@ angular.module('merchantApp')
                         $scope.offer.actions.reward.line2 = '';
                     }
                 } else if (newVal.reward_type === 'discount') {
-                    if(oldVal.reward_type && oldVal.reward_type!=='flatoff') {
+                    if (oldVal.reward_type && oldVal.reward_type !== 'flatoff') {
                         delete newVal.paid_item;
                         $scope.offer.offer_items = {
                             all: true
@@ -273,8 +265,6 @@ angular.module('merchantApp')
 
                     if (item_for === 'buyxgety_2') {
                         $scope.offer.actions.reward.reward_meta.paid_item = _.clone(item);
-                    } else if (item_for === 'free') {
-                        $scope.offer.actions.reward.reward_meta.free_item = _.clone(item);
                     }
                 });
             };
@@ -447,7 +437,7 @@ angular.module('merchantApp')
                         deferred.resolve(true);
                     }
                 } else if ($scope.offer.rule.event_match === 'after') {
-                    if (!$scope.offer.rule.event_start && $scope.offer.rule.event_start!==0) {
+                    if (!$scope.offer.rule.event_start && $scope.offer.rule.event_start !== 0) {
                         deferred.reject('Valid offer start checkin count required');
                     } else if (!$scope.offer.rule.event_end) {
                         deferred.reject('Valid offer end checkin count required');
@@ -720,7 +710,7 @@ angular.module('merchantApp')
                                                             item_name += ' ' + item.item_name + ' - ' + option.option_value;
                                                             var index = item_name.lastIndexOf(',');
                                                             if (index !== -1) {
-                                                                item_name = item_name.slice(0, index) + ' or' + item_name.slice(index+1);
+                                                                item_name = item_name.slice(0, index) + ' or' + item_name.slice(index + 1);
                                                             }
                                                             callback(item_name);
                                                         });
