@@ -37,15 +37,14 @@ module.exports.calculate_checksum = function(req, res) {
 		var ipAddr = order_form.ipAddr;
 		var amount = order_form.amount;
 		var currency = order_form.currency;
-		//var mid = order_form.mid;
-		var mid = '4884e5a14ab742578df520b5203b91e6';
+		var mid = order_form.mid;
 		var pgResponseUrl = order_form.pgResponseUrl;
 		var orderId = order_form.orderid;
 		var date = new Date();
 		var txnDate = date.getFullYear()+ '-' +date.getMonth()+1 + '-' +date.getDate();
 		var mode = 0;
-		var message = "'"+amount+"''"+ipAddr+"''"+txnDate+"'"
-		+"''"+currency+"'"+"''"+mid+"'"+"''"+orderId+"'"+mode+"'";		
+		var message = "'"+amount+"''"+ipAddr+"''"+txnDate+"''"
+		+currency+"''"+mid+"''"+orderId+"''"+mode+"'";		
 	}
 	else{
 		res.send('not implemented');
