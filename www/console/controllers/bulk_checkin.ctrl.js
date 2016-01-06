@@ -1,11 +1,11 @@
-angular.module('consoleApp').controller('BulkCheckinController', ['$scope', 'consoleRESTSvc',
-    function($scope, consoleRESTSvc) {
+angular.module('consoleApp').controller('BulkCheckinController', ['$scope', 'consoleRESTSvc', 'SweetAlert',
+    function($scope, consoleRESTSvc, SweetAlert) {
 
         $scope.fileChanged = function() {
             var reader = new FileReader();
             reader.onload = function(e) {
                 $scope.$apply(function() {
-                    $scope.jsonData = csvToJson(reader.result);
+                    $scope.jsonData = csvToJson(e.target.result);
                 });
             };
 
@@ -33,13 +33,9 @@ angular.module('consoleApp').controller('BulkCheckinController', ['$scope', 'con
 
                         consoleRESTSvc.bulkCheckin(event_data).then(function(res) {
                             console.log(res);
-                            toastr.success("Checkin Successful")
+                            SweetAlert.swal("SUCCESS", "Checkin Successful", 'success');
                         }, function(err) {
-                            if (err.message) {
-                                toastr.error(err.message);
-                            } else {
-                                toastr.error("Unable to Checkin");
-                            }
+                            SweetAlert.swal("ERROR", err.message ? err.message : "Unable to Checkin", 'error');
                             console.log(err);
                         });
                     }
