@@ -24,29 +24,40 @@ module.exports.calculate_checksum = function(req, res) {
 	logger.log();
 	var order_form = {};
 	order_form = _.extend(order_form, req.body);
+	
 	console.log(order_form);
-	var message;
+	
 	if(order_form.pgName === 'wallet') {
 		var mid = order_form.mid;
 		var amount = order_form.amount;
-		var orderId = order_form.orderd;
-		var message = "'"+mid+"''"+amount+"''"+orderd+"'";		
+		var orderId = order_form.orderid;
+		var message = "'"+mid+"''"+amount+"''"+orderId+"'";		
 	}
-	else if(order_form.pgName === 'zaakpay') {
-		var message = 'test'
+	else if(order_form.pgName === 'Zaakpay') {
+		var ipAddr = order_form.ipAddr;
+		var amount = order_form.amount;
+		var currency = order_form.currency;
+		//var mid = order_form.mid;
+		var mid = '4884e5a14ab742578df520b5203b91e6';
+		var pgResponseUrl = order_form.pgResponseUrl;
+		var orderId = order_form.orderid;
+		var date = new Date();
+		var txnDate = date.getFullYear()+ '-' +date.getMonth()+1 + '-' +date.getDate();
+		var mode = 0;
+		var message = "'"+amount+"''"+ipAddr+"''"+txnDate+"'"
+		+"''"+currency+"'"+"''"+mid+"'"+"''"+orderId+"'"+mode+"'";		
 	}
-	
-
-	
-	console.log(message);
+	else{
+		res.send('not implemented');
+	}
 
 	PaymentHelper.calculate_checksum(message, order_form.pgName).then(function(data){
-		var calculated_checksum = data.calculated_checksum;
-		var checksum = {};
-		checksum.status  = 'SUCCESS';
-		checksum.checksumValue = calculated_checksum;
-			
-		HttpHelper.success(res, xml(checksum) );
+		console.log(data);
+		var checksum = [{checksum: [{status: 'SUCCESS'}, {checksumValue: data}]}];
+		
+		var data = xml(checksum);
+		
+		res.send(data);
 	},	function(err) {
 		HttpHelper.error(res, err );
   	});

@@ -7,16 +7,20 @@ var logger = require('tracer').colorConsole();
 module.exports.calculate_checksum = function(message, type) {
 	logger.log();
 	var deferred = Q.defer();
+	console.log(message);
+	console.log(type);
 	if(type === 'wallet') {
 		var key = 'gbzbj7859G6STy3zyzL4gj4AEuaF';
 	}
-	else{
+	else if(type === 'Zaakpay'){
 		var key = 'be92fd65d03d43bc83a5aaeffdcd709f';	
 	}
+	else{
+		deferred.resolve('not valid');	
+	}
 	
-	var checksum = crypto.createHmac('sha256', key).update(message).digest('hex')
-	data.calculated_checksum = checksum;
-	deferred.resolve(data);
+	var checksum = crypto.createHmac('sha256', key).update(message).digest('hex');
+	deferred.resolve(checksum);
 	return deferred.promise;
 	
 };
