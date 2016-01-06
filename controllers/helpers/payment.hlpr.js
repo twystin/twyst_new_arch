@@ -21,9 +21,13 @@ module.exports.calculate_checksum = function(message, type) {
 	console.log(message);
 	console.log(type);
 	console.log(key);
-	
-	var checksum = crypto.createHmac('sha256', key).update(message).digest('hex');
-	deferred.resolve(checksum);
+	if(message && key) {
+		var checksum = crypto.createHmac('sha256', key).update(message).digest('hex');
+		deferred.resolve(checksum);
+	}
+	else{
+		deferred.reject('not a valid request');	
+	}
 	return deferred.promise;
 	
 };

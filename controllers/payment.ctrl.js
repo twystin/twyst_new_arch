@@ -31,7 +31,7 @@ module.exports.calculate_checksum = function(req, res) {
 		var mid = order_form.mid;
 		var amount = order_form.amount;
 		var orderId = order_form.orderid;
-		var message = "'"+mid+"''"+amount+"''"+orderId+"'";		
+		var message = "'"+amount+"''"+orderId+"''"+mid+"'";		
 	}
 	else if(order_form.pgName === 'Zaakpay') {
 		var ipAddr = order_form.ipAddr;
@@ -41,13 +41,12 @@ module.exports.calculate_checksum = function(req, res) {
 		var pgResponseUrl = order_form.pgResponseUrl;
 		var orderId = order_form.orderid;
 		var date = new Date();
-		var txnDate = date.getFullYear()+ '-' +date.getMonth()+1 + '-' +date.getDate();
+		var txnDate = date.getFullYear()+ '-' +parseInt(date.getMonth())+1 + '-' +date.getDate();
+		txnDate = '2016-01-06';
 		var mode = 0;
 		var message = "'"+amount+"''"+ipAddr+"''"+txnDate+"''"
-		+currency+"''"+mid+"''"+orderId+"''"+mode+"'";		
-	}
-	else{
-		res.send('not implemented');
+		+currency+"''"+mid+"''"+orderId+"''"+mode+"'";	
+
 	}
 
 	PaymentHelper.calculate_checksum(message, order_form.pgName).then(function(data){
