@@ -4,7 +4,7 @@
         <div class='col-sm-12' style='min-height:100vh;'>
             <section class='panel panel-default table-dynamic'>
                 <div class='panel-heading'>
-                    <strong><span class='glyphicon glyphicon-th'></span> Suggested Outlets</strong>
+                    <strong><span class='glyphicon glyphicon-th'></span> Suggested Offers</strong>
                 </div>
                 <div class='table-filters'>
                     <div class='row'>
@@ -15,24 +15,26 @@
                         </div>
                         <div class='col-sm-3 col-xs-6 filter-result-info'>
                             <span>
-                                Showing {{filtered_suggested_outlets.length}}/{{suggested_outlets.length}}
+                                Showing {{filtered_suggested_offers.length}}/{{suggested_offers.length}}
                             </span>
                         </div>
                     </div>
                 </div>
-                <table class='table table-bordered table-striped table-responsive'>
+                <table class='table table-bordered table-hover table-striped table-responsive'>
                     <thead>
                         <tr>
                             <th>
                                 <div class='th'>
-                                    S. No.
+                                    User Phone
+                                    <span class='fa fa-angle-up' ng-click='order("event_user.phone")' ng-class='{active: row === "event_user.phone"}'></span>
+                                    <span class='fa fa-angle-down' ng-click='order("-event_user.phone")' ng-class='{active: row === "-event_user.phone"}'></span>
                                 </div>
                             </th>
                             <th>
                                 <div class='th'>
-                                    User
-                                    <span class='fa fa-angle-up' ng-click='order("event_user.phone")' ng-class='{active: row === "event_user.phone"}'></span>
-                                    <span class='fa fa-angle-down' ng-click='order("-event_user.phone")' ng-class='{active: row === "-event_user.phone"}'></span>
+                                    Offer
+                                    <span class='fa fa-angle-up' ng-click='order("event_meta.offer")' ng-class='{active: row === "event_meta.offer"}'></span>
+                                    <span class='fa fa-angle-down' ng-click='order("-event_meta.offer")' ng-class='{active: row === "-event_meta.offer"}'></span>
                                 </div>
                             </th>
                             <th>
@@ -51,7 +53,7 @@
                             </th>
                             <th>
                                 <div class='th'>
-                                    Date
+                                    Date/Time
                                     <span class='fa fa-angle-up' ng-click='order("event_date")' ng-class='{active: row === "event_date"}'></span>
                                     <span class='fa fa-angle-down' ng-click='order("-event_date")' ng-class='{active: row === "-event_date"}'></span>
                                 </div>
@@ -70,13 +72,13 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat='suggested_outlet in current_page_suggested_outlets'>
-                            <td class='text-right'>{{$index + 1}}</td>
-                            <td>{{suggested_outlet.event_user.phone}}</td>
-                            <td>{{suggested_outlet.event_meta.outlet}}</td>
-                            <td>{{suggested_outlet.event_meta.location}}</td>
-                            <td>{{suggested_outlet.event_date}}</td>
-                            <td>{{suggested_outlet.event_meta.status}}</td>
+                        <tr ng-repeat='suggested_offer in current_page_suggested_offers' ui-sref='^.suggested_offers_view({suggested_offer_id: suggested_offer._id})' style='cursor: pointer;'>
+                            <td>{{suggested_offer.event_user.phone}}</td>
+                            <td>{{suggested_offer.event_meta.offer}}</td>
+                            <td>{{suggested_offer.event_meta.outlet}}</td>
+                            <td>{{suggested_offer.event_meta.location}}</td>
+                            <td>{{suggested_offer.event_date | date: 'MMM dd, yyyy hh:mm a'}}</td>
+                            <td>{{suggested_offer.event_meta.status}}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -85,12 +87,12 @@
                         <div class='col-sm-6 page-num-info'>
                             <span>
                                 Show
-                                <select ng-model='numPerPage' ng-options='num for num in numPerPageOpt' ng-change='onNumPerPageChange()'></select>
+                                <select ng-model='numPerPage' ng-options='num for num in numPerPageOpts' ng-change='onNumPerPageChange()'></select>
                                 entries per page
                             </span>
                         </div>
                         <div class='col-sm-6 text-right pagination-container'>
-                            <pagination class='pagination-sm' ng-model='currentPage' total-items='filtered_suggested_outlets.length' max-size='4' ng-change='select(currentPage)' items-per-page='numPerPage' rotate='false' previous-text="&lsaquo;" next-text="&rsaquo;" boundary-links='true'></pagination>
+                            <pagination class='pagination-sm' ng-model='currentPage' total-items='filtered_suggested_offers.length' max-size='4' ng-change='select(currentPage)' items-per-page='numPerPage' rotate='false' previous-text="&lsaquo;" next-text="&rsaquo;" boundary-links='true'></pagination>
                         </div>
                     </div>
                 </footer>

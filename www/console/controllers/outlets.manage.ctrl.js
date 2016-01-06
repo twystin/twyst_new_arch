@@ -1,11 +1,11 @@
-angular.module('consoleApp').controller('OfferManageController', ['$scope', 'consoleRESTSvc', '$filter',
-    function($scope, consoleRESTSvc, $filter) {
+angular.module('consoleApp').controller('OutletManageController', ['$scope', '$rootScope', 'consoleRESTSvc', '$filter',
+    function($scope, $rootScope, consoleRESTSvc, $filter) {
 
         $scope.searchKeywords = '';
 
-        $scope.offers = [];
+        $scope.outlets = [];
 
-        $scope.filtered_offers = [];
+        $scope.filtered_outlets = [];
 
         $scope.row = '';
 
@@ -15,11 +15,11 @@ angular.module('consoleApp').controller('OfferManageController', ['$scope', 'con
 
         $scope.currentPage = 1;
 
-        $scope.current_page_offers = [];
+        $scope.current_page_outlets = [];
 
-        consoleRESTSvc.getOffers().then(function(res) {
+        consoleRESTSvc.getOutlets().then(function(res) {
             console.log(res);
-            $scope.offers = res.data;
+            $scope.outlets = res.data;
             $scope.search();
             $scope.select($scope.currentPage);
         }, function(err) {
@@ -30,7 +30,7 @@ angular.module('consoleApp').controller('OfferManageController', ['$scope', 'con
             var end, start;
             start = (page - 1) * $scope.numPerPage;
             end = start + $scope.numPerPage;
-            return $scope.current_page_offers = $scope.filtered_offers.slice(start, end);
+            return $scope.current_page_outlets = $scope.filtered_outlets.slice(start, end);
         };
 
         $scope.onFilterChange = function() {
@@ -41,7 +41,7 @@ angular.module('consoleApp').controller('OfferManageController', ['$scope', 'con
 
         $scope.onNumPerPageChange = function() {
             $scope.select(1);
-            return $scoep.currentPage = 1;
+            return $scope.currentPage = 1;
         };
 
         $scope.onOrderChange = function() {
@@ -50,7 +50,7 @@ angular.module('consoleApp').controller('OfferManageController', ['$scope', 'con
         };
 
         $scope.search = function() {
-            $scope.filtered_offers = $filter('filter')($scope.offers, $scope.searchKeywords);
+            $scope.filtered_outlets = $filter('filter')($scope.outlets, $scope.searchKeywords);
             return $scope.onFilterChange();
         };
 
@@ -58,9 +58,8 @@ angular.module('consoleApp').controller('OfferManageController', ['$scope', 'con
             if ($scope.row === rowName) {
                 return;
             }
-
             $scope.row = rowName;
-            $scope.filtered_offers = $filter('orderBy')($scope.offers, rowName);
+            $scope.filtered_outlets = $filter('orderBy')($scope.outlets, rowName);
             return $scope.onOrderChange();
         };
     }

@@ -1,0 +1,15 @@
+<div>&nbsp;</div>
+<div class='col-sm-10 col-sm-offset-1'>
+    <div class='panel panel-default table-responsive' style='min-height:50vh;'>
+        <div class='panel-body'>
+            <ul class='list-unstyled'>
+                <li class='col-sm-4'>
+                    <input class='form-control pull-left' type='text' placeholder='Search...' ng-model='merchantFilter' ng-change='filterMerchants(true)' typeahead="outlet.name + (outlet.loc1?', ' + outlet.loc1:'') + (outlet.loc2?', ' + outlet.loc2:'') for outlet in outlets | limitTo: 10 | filter:{name: $viewValue}">
+                </li>
+                <li class="col-sm-8">
+                    <a class='pull-right btn btn-primary btn-w-md' ui-sref='^.register_merchant'>Create New</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
