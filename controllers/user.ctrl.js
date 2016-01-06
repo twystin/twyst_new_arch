@@ -345,7 +345,7 @@ module.exports.get_orders = function(req, res) {
   });
 };
 
-module.exports.update_order = function(req, res) {
+module.exports.cancel_order = function(req, res) {
   logger.log();
   var token = req.query.token || null;
   var order = {};
@@ -355,7 +355,7 @@ module.exports.update_order = function(req, res) {
     HttpHelper.error(res, null, "Not authenticated");
   }
 
-  UserHelper.update_order(token, order).then(function(data) {
+  UserHelper.cancel_order(token, order).then(function(data) {
     HttpHelper.success(res, data.data, data.message);
   }, function(err) {
     HttpHelper.error(res, err.data, err.message);
