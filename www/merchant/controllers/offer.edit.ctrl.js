@@ -273,8 +273,8 @@ angular.module('merchantApp')
             $scope.chooseItem = function(item_for, item_only) {
                 var modalInstance = $modal.open({
                     animation: true,
-                    templateUrl: 'templates/partials/chooseItemTemplate.html',
-                    controller: 'ChooseItemController',
+                    templateUrl: 'templates/partials/offer.pick_item.tmpl.html',
+                    controller: 'PickItemController',
                     size: 'md',
                     resolve: {
                         item_only: function() {
