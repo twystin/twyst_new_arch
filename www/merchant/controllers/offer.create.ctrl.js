@@ -469,7 +469,7 @@ angular.module('merchantApp')
                         deferred.resolve(true);
                     }
                 } else if ($scope.offer.actions.reward.reward_meta.reward_type === 'free') {
-                    if (!$scope.offer.actions.reward.reward_meta.free_item) {
+                    if (!$scope.offer.offer_items || !$scope.offer.offer_items.menu_id) {
                         deferred.reject('Please choose the "FREE ITEM"');
                     } else {
                         deferred.resolve(true);
