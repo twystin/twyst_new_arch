@@ -16,11 +16,10 @@ module.exports.calculate_checksum = function(message, type) {
 		key = 'be92fd65d03d43bc83a5aaeffdcd709f';	
 	}
 	else{
-		deferred.resolve('not valid');	
+		deferred.reject('request not valid');	
 	}
+	
 	console.log(message);
-	console.log(type);
-	console.log(key);
 	if(message && key) {
 		var checksum = crypto.createHmac('sha256', key).update(message).digest('hex');
 		deferred.resolve(checksum);
