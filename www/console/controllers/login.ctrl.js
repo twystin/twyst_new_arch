@@ -1,6 +1,6 @@
 angular.module('consoleApp')
-    .controller('LoginController', ['$scope', '$cookies', '$log', '$state', '$rootScope', 'consoleRESTSvc',
-        function($scope, $cookies, $log, $state, $rootScope, consoleRESTSvc) {
+    .controller('LoginController', ['$scope', '$cookies', '$log', '$state', '$rootScope', 'consoleRESTSvc', 'SweetAlert',
+        function($scope, $cookies, $log, $state, $rootScope, consoleRESTSvc, SweetAlert) {
             if ($rootScope.token) {
                 $state.go('console.default', {}, {
                     reload: true
@@ -26,15 +26,9 @@ angular.module('consoleApp')
                             });
                         });
                     }, function(err) {
-                        var message;
-                        if (err.data) {
-                            message = err.data;
-                        } else {
-                            message = 'Invalid credentials';
-                        }
                         SweetAlert.swal({
                             title: 'ERROR',
-                            text: message,
+                            text: err.data ? err.data : 'Invalid credentials',
                             type: 'error',
                             showCancelButton: false,
                             closeOnConfirm: true

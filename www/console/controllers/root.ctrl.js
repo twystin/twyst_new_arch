@@ -1,5 +1,5 @@
 angular.module('consoleApp')
-    .controller('RootController', function($scope, $rootScope, $state) {
+    .controller('RootController', function($scope, $rootScope, $state, consoleRESTSvc, $cookies, SweetAlert) {
         if (!$rootScope.token && ($state.current.name !== 'console.login')) {
             $state.go('console.login', {}, {
                 reload: true
@@ -11,16 +11,21 @@ angular.module('consoleApp')
                 if (data.response) {
                     $cookies.remove('token');
                     $rootScope.token = undefined;
-                    toastr.success("Logged out successfully");
-                    $state.go('console.login', {}, {
-                        reload: true
+                    SweetAlert.swal({
+                        title: "SUCCESS",
+                        text: "Logged out successfully",
+                        type: "success"
+                    }, function() {
+                        $state.go('console.login', {}, {
+                            reload: true
+                        });
                     });
                 } else {
-                    toastr.error(data.message, "Error");
+                    SweetAlert.swal("ERROR", data.message, "error");
                 }
             }, function(err) {
                 if (err.message) {
-                    toastr.error(err.message, "Error");
+                    SweetAlert.swal("ERROR", err.message, "error");
                 }
             });
         }
