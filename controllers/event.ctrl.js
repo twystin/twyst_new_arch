@@ -257,6 +257,7 @@ module.exports.apply = function(req, res) {
     logger.log();
     var AWSHelper = require('./helpers/aws.hlpr.js');
     var Mailer = require('../transports/email/gmail.transport');
+    var formats = require('../common/fileformats.js').file_formats;
     if (!req.body.resume) {
         HttpHelper.error(res, null, "Resume file required");
     } else if (!req.body.format) {
@@ -265,28 +266,20 @@ module.exports.apply = function(req, res) {
         var buff = new Buffer(req.body.resume.replace(/^data:application\/\w+;base64,/, ''), 'base64');
         var timestamp = Date.now();
 
-        var req_obj = {
-            Bucket: 'retwyst-app',
-            ACL: 'public-read',
-            ContentType: req.body.format,
-            Key: 'retwyst_resume/' + timestamp,
-            Body: buff
-        }
-        console.log('retwyst_resume/' + timestamp)
-        AWSHelper.uploadImage(req_obj).then(function(data) {
-            Mailer.send({
-                from: 'apply@twyst.in',
-                to: 'hemant@twyst.in, kuldeep@twyst.in, al@twyst.in, rc@twyst.in',
-                subject: 'Candidate Application',
-                text: 'New job application',
-                html: 'New job application <a target="_blank" href="https://s3-us-west-2.amazonaws.com/retwyst-app/retwyst_resume/' + timestamp + '">View Resume</a>'
-            }).then(function(res) {
-                console.log('mail success', res);
-            }, function(err) {
-                console.log('mail failed', err);
-            });
+        Mailer.send({
+            from: 'apply@twyst.in',
+            to: 'hemant@twyst.in, kuldeep@twyst.in, al@twyst.in, rc@twyst.in',
+            subject: 'Candidate Application',
+            text: 'New job application',
+            html: 'New job application',
+            attachments: [{
+                filename: 'resume' + formats[req.body.format],
+                content: buff
+            }]
+        }).then(function(reply) {
             HttpHelper.success(res, null, "Application submitted. We will get back shortly");
         }, function(err) {
+            console.log('mail failed', err);
             HttpHelper.error(res, null, "something went wrong. Please try after sometime.");
         });
     }
