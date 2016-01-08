@@ -51,6 +51,9 @@ angular.module('consoleApp').controller('SuggestedOfferManageController', ['$sco
 
         $scope.search = function() {
             $scope.filtered_suggested_offers = $filter('filter')($scope.suggested_offers, $scope.searchKeywords);
+            if ($scope.view_status) {
+                $scope.sort($scope.view_status);
+            }
             return $scope.onFilterChange();
         };
 
@@ -61,7 +64,23 @@ angular.module('consoleApp').controller('SuggestedOfferManageController', ['$sco
 
             $scope.row = rowName;
             $scope.filtered_suggested_offers = $filter('orderBy')($scope.suggested_offers, rowName);
+            if ($scope.view_status) {
+                $scope.sort($scope.view_status);
+            }
             return $scope.onOrderChange();
+        };
+
+        $scope.sort = function(sort_by) {
+            console.log('view_status', sort_by);
+            if ($scope.row) {
+                $scope.filtered_suggested_offers = $filter('orderBy')($scope.suggested_offers, $scope.row);
+            } else {
+                $scope.filtered_suggested_offers = $scope.suggested_offers;
+            }
+            $scope.filtered_suggested_offers = _.filter($scope.filtered_suggested_offers, function(suggested_offer) {
+                return suggested_offer.event_meta.status.indexOf(sort_by) !== -1;
+            });
+            $scope.onFilterChange();
         };
     }
 ])

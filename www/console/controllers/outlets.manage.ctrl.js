@@ -51,6 +51,9 @@ angular.module('consoleApp').controller('OutletManageController', ['$scope', '$r
 
         $scope.search = function() {
             $scope.filtered_outlets = $filter('filter')($scope.outlets, $scope.searchKeywords);
+            if ($scope.view_status) {
+                $scope.sort($scope.view_status);
+            }
             return $scope.onFilterChange();
         };
 
@@ -60,7 +63,23 @@ angular.module('consoleApp').controller('OutletManageController', ['$scope', '$r
             }
             $scope.row = rowName;
             $scope.filtered_outlets = $filter('orderBy')($scope.outlets, rowName);
+            if ($scope.view_status) {
+                $scope.sort($scope.view_status);
+            }
             return $scope.onOrderChange();
+        };
+
+        $scope.sort = function(sort_by) {
+            console.log('view_status', sort_by);
+            if ($scope.row) {
+                $scope.filtered_outlets = $filter('orderBy')($scope.outlets, $scope.row);
+            } else {
+                $scope.filtered_outlets = $scope.outlets;
+            }
+            $scope.filtered_outlets = _.filter($scope.filtered_outlets, function(outlet) {
+                return outlet.outlet_meta.status.indexOf(sort_by) !== -1;
+            });
+            $scope.onFilterChange();
         };
     }
 ])

@@ -51,6 +51,9 @@ angular.module('consoleApp').controller('UserFeedbackManageController', ['$scope
 
         $scope.search = function() {
             $scope.filtered_user_feedbacks = $filter('filter')($scope.user_feedbacks, $scope.searchKeywords);
+            if ($scope.view_status) {
+                $scope.sort($scope.view_status);
+            }
             return $scope.onFilterChange();
         };
 
@@ -61,7 +64,23 @@ angular.module('consoleApp').controller('UserFeedbackManageController', ['$scope
 
             $scope.row = rowName;
             $scope.filtered_user_feedbacks = $filter('orderBy')($scope.user_feedbacks, rowName);
+            if ($scope.view_status) {
+                $scope.sort($scope.view_status);
+            }
             return $scope.onOrderChange();
+        };
+
+        $scope.sort = function(sort_by) {
+            console.log('view_status', sort_by);
+            if ($scope.row) {
+                $scope.filtered_user_feedbacks = $filter('orderBy')($scope.user_feedbacks, $scope.row);
+            } else {
+                $scope.filtered_user_feedbacks = $scope.user_feedbacks;
+            }
+            $scope.filtered_user_feedbacks = _.filter($scope.filtered_user_feedbacks, function(user_feedback) {
+                return user_feedback.event_meta.status.indexOf(sort_by) !== -1;
+            });
+            $scope.onFilterChange();
         };
     }
 ])

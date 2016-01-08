@@ -51,6 +51,9 @@ angular.module('consoleApp').controller('BillManageController', ['$scope', 'cons
 
         $scope.search = function() {
             $scope.filtered_bills = $filter('filter')($scope.bills, $scope.searchKeywords);
+            if ($scope.view_status) {
+                $scope.sort($scope.view_status);
+            }
             return $scope.onFilterChange();
         };
 
@@ -60,7 +63,23 @@ angular.module('consoleApp').controller('BillManageController', ['$scope', 'cons
             }
             $scope.row = rowName;
             $scope.filtered_bills = $filter('orderBy')($scope.bills, rowName);
+            if ($scope.view_status) {
+                $scope.sort($scope.view_status);
+            }
             return $scope.onOrderChange();
+        };
+
+        $scope.sort = function(sort_by) {
+            console.log('view_status', sort_by);
+            if ($scope.row) {
+                $scope.filtered_bills = $filter('orderBy')($scope.bills, $scope.row);
+            } else {
+                $scope.filtered_bills = $scope.bills;
+            }
+            $scope.filtered_bills = _.filter($scope.filtered_bills, function(bill) {
+                return bill.event_meta.status.indexOf(sort_by) !== -1;
+            });
+            $scope.onFilterChange();
         };
     }
 ])

@@ -51,6 +51,9 @@ angular.module('consoleApp').controller('OfferManageController', ['$scope', 'con
 
         $scope.search = function() {
             $scope.filtered_offers = $filter('filter')($scope.offers, $scope.searchKeywords);
+            if ($scope.view_status) {
+                $scope.sort($scope.view_status);
+            }
             return $scope.onFilterChange();
         };
 
@@ -61,7 +64,23 @@ angular.module('consoleApp').controller('OfferManageController', ['$scope', 'con
 
             $scope.row = rowName;
             $scope.filtered_offers = $filter('orderBy')($scope.offers, rowName);
+            if ($scope.view_status) {
+                $scope.sort($scope.view_status);
+            }
             return $scope.onOrderChange();
+        };
+
+        $scope.sort = function(sort_by) {
+            console.log('view_status', sort_by);
+            if ($scope.row) {
+                $scope.filtered_offers = $filter('orderBy')($scope.offers, $scope.row);
+            } else {
+                $scope.filtered_offers = $scope.offers;
+            }
+            $scope.filtered_offers = _.filter($scope.filtered_offers, function(offer) {
+                return offer.offer_status.indexOf(sort_by) !== -1;
+            });
+            $scope.onFilterChange();
         };
     }
 ])

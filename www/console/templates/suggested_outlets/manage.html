@@ -58,7 +58,7 @@
                             </th>
                             <th>
                                 <div class='th'>
-                                    <select ng-model='view_status' class='form-control' name='viewByStatus'>
+                                    <select ng-model='view_status' ng-change='sort(view_status)' class='form-control' name='viewByStatus'>
                                         <option value='' ng-if='!view_status'>Status</option>
                                         <option value='' ng-if='view_status'>All</option>
                                         <option value='submitted'>Submitted</option>

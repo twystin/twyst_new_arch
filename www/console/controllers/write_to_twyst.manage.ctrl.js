@@ -51,6 +51,9 @@ angular.module('consoleApp').controller('WriteToTwystManageController', ['$scope
 
         $scope.search = function() {
             $scope.filtered_write_to_twyst = $filter('filter')($scope.write_to_twyst, $scope.searchKeywords);
+            if ($scope.view_status) {
+                $scope.sort($scope.view_status);
+            }
             return $scope.onFilterChange();
         };
 
@@ -61,7 +64,23 @@ angular.module('consoleApp').controller('WriteToTwystManageController', ['$scope
 
             $scope.row = rowName;
             $scope.filtered_write_to_twyst = $filter('orderBy')($scope.write_to_twyst, rowName);
+            if ($scope.view_status) {
+                $scope.sort($scope.view_status);
+            }
             return $scope.onOrderChange();
+        };
+
+        $scope.sort = function(sort_by) {
+            console.log('view_status', sort_by);
+            if ($scope.row) {
+                $scope.filtered_write_to_twyst = $filter('orderBy')($scope.write_to_twyst, $scope.row);
+            } else {
+                $scope.filtered_write_to_twyst = $scope.write_to_twyst;
+            }
+            $scope.filtered_write_to_twyst = _.filter($scope.filtered_write_to_twyst, function(write) {
+                return write.event_meta.status.indexOf(sort_by) !== -1;
+            });
+            $scope.onFilterChange();
         };
     }
 ])
