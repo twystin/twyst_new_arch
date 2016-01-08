@@ -207,6 +207,22 @@ angular.module('consoleApp').factory('consoleRESTSvc', ['$http', '$q', '$cookies
             return deferred.promise;
         };
 
+        consoleRESTSvc.updateEvent = function(event) {
+            var deferred = Q.defer();
+            var token = $cookies.get('token');
+            $http.put('/api/v4/events/update/' + event._id + '?token=' + token, event)
+                .then(function(res) {
+                    if (res.data.response) {
+                        deferred.resolve(data.data);
+                    } else {
+                        deferred.reject(data.data);
+                    }
+                }, function(err) {
+                    deferred.reject(err);
+                });
+            return deferred.promise;
+        };
+
         consoleRESTSvc.bulkCheckin = function(data) {
             var deferred = $q.defer();
             var token = $cookies.get('token');
@@ -220,6 +236,18 @@ angular.module('consoleApp').factory('consoleRESTSvc', ['$http', '$q', '$cookies
                 }, function(err) {
                     deferred.reject(err);
                 });
+            return deferred.promise;
+        };
+
+        consoleRESTSvc.registerMerchant = function(merchant) {
+            var deferred = $q.defer();
+            $http.post('/api/v4/auth/register', merchant)
+                .success(function(res) {
+                    deferred.resolve(res);
+                })
+                .error(function(err) {
+                    deferred.reject(err);
+                })
             return deferred.promise;
         };
 
