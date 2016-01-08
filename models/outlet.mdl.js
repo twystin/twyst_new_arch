@@ -530,11 +530,11 @@ var OutletSchema = new Schema({
     }],
     offer_items: {
       all: {type: Boolean},
-      menu_id: Schema.Types.ObjectId,
-      category_id: Schema.Types.ObjectId,
-      sub_category_id: Schema.Types.ObjectId,
-      item_id: Schema.Types.ObjectId,
-      option_id: Schema.Types.ObjectId,
+      menus: [Schema.Types.ObjectId],
+      categories: [Schema.Types.ObjectId],
+      sub_categories: [Schema.Types.ObjectId],
+      items: [Schema.Types.ObjectId],
+      options: [Schema.Types.ObjectId],
       sub_options: [Schema.Types.ObjectId],
       addons: [Schema.Types.ObjectId]
     }

@@ -1,6 +1,6 @@
 angular.module('merchantApp')
-    .factory('merchantRESTSvc', ['$http', '$q', '$cookies',
-        function($http, $q, $cookies) {
+    .factory('merchantRESTSvc', ['$http', '$q', '$cookies', '$rootScope',
+        function($http, $q, $cookies, $rootScope) {
             var merchantRESTSvc = {};
 
             merchantRESTSvc.login = function(user) {
@@ -293,12 +293,32 @@ angular.module('merchantApp')
                 return deferred.promise;
             }
 
+            merchantRESTSvc.refreshMenus = function() {
+                var deferred = $q.defer();
+                var token = $cookies.get('token');
+                $http.get('/api/v4/menu?token=' + token).then(function(res) {
+                    if (res.data.response) {
+                        $scope.menus = res.data.data;
+                        deferred.resolve(res.data);
+                    } else {
+                        deferred.reject(res.data);
+                    }
+                }, function(err) {
+                    deferred.reject(err);
+                });
+            }
+
             merchantRESTSvc.getAllMenus = function() {
                 var deferred = $q.defer();
                 var token = $cookies.get('token');
-                $http.get('/api/v4/menu?token=' + token)
-                    .then(function(res) {
+                if ($rootScope.menus && $rootScope.menus.length) {
+                    deferred.resolve({
+                        data: $rootScope.menus
+                    });
+                } else {
+                    $http.get('/api/v4/menu?token=' + token).then(function(res) {
                         if (res.data.response) {
+                            $rootScope.menus = res.data.data;
                             deferred.resolve(res.data);
                         } else {
                             deferred.reject(res.data);
@@ -306,6 +326,7 @@ angular.module('merchantApp')
                     }, function(err) {
                         deferred.reject(err);
                     });
+                }
                 return deferred.promise;
             }
 

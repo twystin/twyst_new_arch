@@ -273,8 +273,8 @@ angular.module('merchantApp')
             $scope.chooseItem = function(item_for, item_only) {
                 var modalInstance = $modal.open({
                     animation: true,
-                    templateUrl: 'templates/partials/chooseItemTemplate.html',
-                    controller: 'ChooseItemController',
+                    templateUrl: 'templates/partials/offer.pick_item.tmpl.html',
+                    controller: 'PickItemController',
                     size: 'md',
                     resolve: {
                         item_only: function() {
@@ -491,7 +491,7 @@ angular.module('merchantApp')
                         deferred.resolve(true);
                     }
                 } else if ($scope.offer.actions.reward.reward_meta.reward_type === 'free') {
-                    if (!$scope.offer.actions.reward.reward_meta.free_item) {
+                    if (!$scope.offer.offer_items || !$scope.offer.offer_items.menu_id) {
                         deferred.reject('Please choose the "FREE ITEM"');
                     } else {
                         deferred.resolve(true);
@@ -752,6 +752,10 @@ angular.module('merchantApp')
                     }
                 });
                 return deferred.promise;
+            };
+
+            $scope.getRange = function(num) {
+                return new Array(num);
             };
 
         }

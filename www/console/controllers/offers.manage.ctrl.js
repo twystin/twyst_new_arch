@@ -1,52 +1,86 @@
-angular.module('consoleApp').controller('OfferManageController', ['$scope', 'toastr', 'consoleRESTSvc',
-	function($scope, toastr, consoleRESTSvc) {
-		$scope.current_page = 1;
-		$scope.per_page = 12;
+angular.module('consoleApp').controller('OfferManageController', ['$scope', 'consoleRESTSvc', '$filter',
+    function($scope, consoleRESTSvc, $filter) {
 
-		$scope.loadOffers = function() {
-			consoleRESTSvc.getAllOffers().then(function(data) {
-				console.log(data);
-				$scope.offers = data.data;
-				$scope.visible_offers = $scope.offers.slice(($scope.current_page-1)*$scope.per_page, ($scope.current_page)*$scope.per_page);
-				$scope.offerCount = $scope.offers.length;
-			}, function(err) {
-				console.log(err);
-			});
-		}
+        $scope.searchKeywords = '';
 
-		$scope.filterOffers = function(reset_page) {
-			if (reset_page) {
-				$scope.current_page = 1;
-			}
+        $scope.offers = [];
 
-			if (!$scope.offerFilter) {
-				$scope.visible_offers = $scope.outlets.slice(($scope.current_page-1)*$scope.per_page, ($scope.current_page)*$scope.per_page);
-				$scope.offerCount = $scope.offers.length;
-			} else {
-				var regex = new RegExp($scope.offerFilter, 'i');
-				var filtered_offers = _.filter($scope.offers, function(offer) {
-					return regex.test(offer._id) || regex.test(offer.outlet.name) || regex.test(offer.outlet.loc1) || regex.test(offer.outlet.loc2) || regex.test(offer.offer_type) || regex.test(offer.actions.reward.header) || regex.test(offer.actions.reward.line1) || regex.test(offer.actions.reward.line2) || regex.test(offer.offer_status);
-				});
-				$scope.offerCount = filtered_offers.length;
-				$scope.visible_offers = filtered_offers.slice(($scope.current_page-1)*$scope.per_page, ($scope.current_page)*$scope.per_page);
-			}
-		}
+        $scope.filtered_offers = [];
 
-		$scope.updateOfferStatus = function(offer) {
-			var updated_offer = _.cloneDeep(offer);
-			delete updated_offer.outlet;
-			consoleRESTSvc.updateOfferStatus(offer)
-				.then(function(res) {
-					console.log(res);
-					toastr.success("Offer status updated")
-				}, function(err) {
-					if(err.message) {
-						toastr.error(err.message);
-					} else {
-						toastr.error("Unable to update the offer status right now");
-					}
-					console.log(err);
-				});
-		}
-	}
+        $scope.row = '';
+
+        $scope.numPerPageOpt = [5, 10, 20, 40];
+
+        $scope.numPerPage = $scope.numPerPageOpt[1];
+
+        $scope.currentPage = 1;
+
+        $scope.current_page_offers = [];
+
+        consoleRESTSvc.getOffers().then(function(res) {
+            console.log(res);
+            $scope.offers = res.data;
+            $scope.search();
+            $scope.select($scope.currentPage);
+        }, function(err) {
+            console.log(err);
+        });
+
+        $scope.select = function(page) {
+            var end, start;
+            start = (page - 1) * $scope.numPerPage;
+            end = start + $scope.numPerPage;
+            return $scope.current_page_offers = $scope.filtered_offers.slice(start, end);
+        };
+
+        $scope.onFilterChange = function() {
+            $scope.select(1);
+            $scope.currentPage = 1;
+            return $scope.row = '';
+        };
+
+        $scope.onNumPerPageChange = function() {
+            $scope.select(1);
+            return $scoep.currentPage = 1;
+        };
+
+        $scope.onOrderChange = function() {
+            $scope.select(1);
+            return $scope.currentPage = 1;
+        };
+
+        $scope.search = function() {
+            $scope.filtered_offers = $filter('filter')($scope.offers, $scope.searchKeywords);
+            if ($scope.view_status) {
+                $scope.sort($scope.view_status);
+            }
+            return $scope.onFilterChange();
+        };
+
+        $scope.order = function(rowName) {
+            if ($scope.row === rowName) {
+                return;
+            }
+
+            $scope.row = rowName;
+            $scope.filtered_offers = $filter('orderBy')($scope.offers, rowName);
+            if ($scope.view_status) {
+                $scope.sort($scope.view_status);
+            }
+            return $scope.onOrderChange();
+        };
+
+        $scope.sort = function(sort_by) {
+            console.log('view_status', sort_by);
+            if ($scope.row) {
+                $scope.filtered_offers = $filter('orderBy')($scope.offers, $scope.row);
+            } else {
+                $scope.filtered_offers = $scope.offers;
+            }
+            $scope.filtered_offers = _.filter($scope.filtered_offers, function(offer) {
+                return offer.offer_status.indexOf(sort_by) !== -1;
+            });
+            $scope.onFilterChange();
+        };
+    }
 ])

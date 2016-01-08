@@ -1,0 +1,68 @@
+<section id='header' class='header-container header-fixed' ng-if='token'>
+    <header class='top-header clearfix'>
+        <div class='logo'>
+            <a>
+                <img src='images/logo.png' style='max-height:40px;width:auto;'>
+            </a>
+        </div>
+        <div class='menu-buttom' toggle-off-canvas>
+            <span class='icon-bar'></span>
+            <span class='icon-bar'></span>
+            <span class='icon-bar'></span>
+        </div>
+        <div class='top-nav'>
+            <ul class='nav-left list-unstyled'>
+                <li>
+                    <a data-toggle-nav-collapsed-min class='toggle-min'><i class='fa fa-bars'></i></a>
+                </li>
+            </ul>
+            <ul class='nav navbar-nav nav-right pull-right list-unstyled'>
+                <li>
+                    <a class='btn btn-link' ng-click='logout()'><span class='text-primary'><i class='fa fa-lg fa-sign-out'></i> &nbsp; Logout</span></a>
+                </li>
+                <li>&nbsp;</li>
+            </ul>
+        </div>
+    </header>
+</section>
+<div class='main-container'>
+    <aside id='nav-container' class='nav-container nav-fixed nav-vertical' ng-if='token'>
+        <div class='nav-wrapper' style='overflow-x: auto;'>
+            <ul id='nav' class='nav' data-collapse-nav data-highlight-active>
+                <li>
+                    <a ui-sref='.default'> <i class='fa fa-dashboard'></i><span>MERCHANTS</span></a>
+                </li>
+                <li>
+                    <a ui-sref='.outlets_manage'> <i class='fa fa-map-marker'></i>OUTLETS</a>
+                </li>
+                <li>
+                    <a ui-sref='.offers_manage'> <i class='fa fa-gift'></i>OFFERS</a>
+                </li>
+                <li>
+                    <a ui-sref='.bills_manage'> <i class='fa fa-file-text-o'></i>BILLS</a>
+                </li>
+                <li>
+                    <a ui-sref='.suggested_outlets_manage'> <i class='fa fa-code'></i>SUGGESTED OUTLETS</a>
+                </li>
+                <li>
+                    <a ui-sref='.suggested_offers_manage'> <i class='fa fa-code'></i>SUBMITTED OFFERS</a>
+                </li>
+                <li>
+                    <a ui-sref='.user_feedbacks_manage'> <i class='fa fa-code'></i>USER FEEDBACK</a>
+                </li>
+                <li>
+                    <a ui-sref='.write_to_twysts_manage'> <i class='fa fa-code'></i>WRITE TO TWYST</a>
+                </li>
+                <li>
+                    <a ui-sref='.reported_problems_manage'> <i class='fa fa-code'></i>REPORTED PROBLEMS</a>
+                </li>
+                <li>
+                    <a ui-sref='.bulk_checkin'> <i class='fa fa-code'></i>BULK CHECKIN</a>
+                </li>
+            </ul>
+        </div>
+    </aside>
+    <div id='content' class='content-container'>
+        <section ui-view class='view-container'></section>
+    </div>
+</div>

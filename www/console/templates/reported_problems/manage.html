@@ -1,0 +1,117 @@
+<div>&nbsp;</div>
+<div class='container-fluid'>
+    <div class='row'>
+        <div class='col-sm-12' style='min-height:100vh;'>
+            <section class='panel panel-default table-dynamic'>
+                <div class='panel-heading'>
+                    <strong><span class='glyphicon glyphicon-th'></span> Reported Problems</strong>
+                </div>
+                <div class='table-filters'>
+                    <div class='row'>
+                        <div class='col-sm-4 col-xs-6'>
+                            <form>
+                                <input type='text' placeholder='Search...' class='form-control' ng-model='searchKeywords' ng-keyup='search()'>
+                            </form>
+                        </div>
+                        <div class='col-sm-3 col-xs-6 filter-result-info'>
+                            <span>
+                                Showing {{filtered_reported_problems.length}}/{{reported_problems.length}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <table class='table table-bordered table-striped table-responsive'>
+                    <thead>
+                        <tr>
+                            <th>
+                                <div class='th'>
+                                    Phone
+                                    <span class='fa fa-angle-up' ng-click='order("event_user.phone")' ng-class='{active: row === "event_user.phone"}'></span>
+                                    <span class='fa fa-angle-down' ng-click='order("-event_user.phone")' ng-class='{active: row === "-event_user.phone"}'></span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class='th'>
+                                    E-Mail
+                                    <span class='fa fa-angle-up' ng-click='order("event_user.email")' ng-class='{active: row === "event_user.email"}'></span>
+                                    <span class='fa fa-angle-down' ng-click='order("-event_user.email")' ng-class='{active: row === "-event_user.email"}'></span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class='th'>
+                                    Outlet
+                                    <span class='fa fa-angle-up' ng-click='order("event_outlet.basics.name")' ng-class='{active: row === "event_outlet.basics.name"}'></span>
+                                    <span class='fa fa-angle-down' ng-click='order("-event_outlet.basics.name")' ng-class='{active: row === "-event_outlet.basics.name"}'></span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class='th'>
+                                    Offer
+                                    <span class='fa fa-angle-up' ng-click='order("event_meta.offer")' ng-class='{active: row === "event_meta.offer"}'></span>
+                                    <span class='fa fa-angle-down' ng-click='order("-event_meta.offer")' ng-class='{active: row === "-event_meta.offer"}'></span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class='th'>
+                                    Issue
+                                    <span class='fa fa-angle-up' ng-click='order("event_meta.issue")' ng-class='{active: row === "event_meta.issue"}'></span>
+                                    <span class='fa fa-angle-down' ng-click='order("-event_meta.issue")' ng-class='{active: row === "-event_meta.issue"}'></span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class='th'>
+                                    Comment
+                                    <span class='fa fa-angle-up' ng-click='order("event_meta.comment")' ng-class='{active: row === "event_meta.comment"}'></span>
+                                    <span class='fa fa-angle-down' ng-click='order("-event_meta.comment")' ng-class='{active: row === "-event_meta.comment"}'></span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class='th'>
+                                    Date
+                                    <span class='fa fa-angle-up' ng-click='order("event_date")' ng-class='{active: row === "event_date"}'></span>
+                                    <span class='fa fa-angle-down' ng-click='order("-event_date")' ng-class='{active: row === "-event_date"}'></span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class='th'>
+                                    <select ng-model='view_status' ng-change='sort(view_status)' class='form-control' name='viewByStatus'>
+                                        <option value='' ng-if='!view_status'>Status</option>
+                                        <option value='' ng-if='view_status'>All</option>
+                                        <option value='submitted'>Submitted</option>
+                                        <option value='processed'>Processed</option>
+                                    </select>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat='report in current_page_reported_problems'>
+                            <td>{{report.event_user.phone}}</td>
+                            <td>{{report.event_user.email}}</td>
+                            <td>{{report.event_outlet.basics.name}}</td>
+                            <td>{{report.event_meta.offer}}</td>
+                            <td>{{report.event_meta.issue}}</td>
+                            <td>{{report.event_meta.comment}}</td>
+                            <td>{{report.event_date}}</td>
+                            <td>{{report.event_meta.status}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <footer class='table-footer'>
+                    <div class='row'>
+                        <div class='col-sm-6 page-num-info'>
+                            <span>
+                                Show
+                                <select ng-model='numPerPage' ng-options='num for num in numPerPageOpt' ng-change='onNumPerPageChange()'></select>
+                                entries per page
+                            </span>
+                        </div>
+                        <div class='col-sm-6 text-right pagination-container'>
+                            <pagination class='pagination-sm' ng-model='currentPage' total-items='filtered_reported_problems.length' max-size='4' ng-change='select(currentPage)' items-per-page='numPerPage' rotate='false' previous-text="&lsaquo;" next-text="&rsaquo;" boundary-links='true'></pagination>
+                        </div>
+                    </div>
+                </footer>
+            </section>
+        </div>
+    </div>
+</div>
