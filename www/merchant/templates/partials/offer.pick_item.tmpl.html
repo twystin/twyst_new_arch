@@ -1,17 +1,21 @@
 <div class='modal-header'>
-    <legend>Choose Item</legend>
+    <label class='h3'><strong>Choose Item</strong></label>
 </div>
 <div class='modal-body'>
     <form class='form-horizontal' role='form'>
         <div ui-tree>
             <ol ui-tree-nodes ng-model='menus'>
-                <li ng-repeat='menu in menus track by $index' ui-tree-node>
+                <li ng-repeat='menu in all_menus track by $index' data-nodrag ui-tree-node>
                     <div ui-tree-handle class='tree-node tree-node-content'>
-                        <a class='btn btn-dark btn-xs' ng-if='menu.menu_categories.length' data-nodrag ng-click='toggle(this)'>
+                        <a class='btn btn-dark btn-xs' ng-if='menu.menu_categories.length' ng-click='toggle(this)'>
                             <span class='fa' ng-class='{"fa-chevron-right": collapsed, "fa-chevron-down": !collapsed}'></span>
                         </a>
+                        <label class='btn' ng-class='{"btn-default": !menu_set[menu._id], "btn-danger": menu_set[menu._id]}' ng-model='menu_set[menu._id]' btn-checkbox>
+                            <i class='fa fa-plus' ng-if='!menu_set[menu._id]'></i>
+                            <i class='fa fa-times' ng-if='menu_set[menu._id]'></i>
+                        </label>
                         {{menu.menu_type}} [Menu]
-                        <a class='pull-right btn btn-sm btn-primary' data-nodrag ng-click='pickMenu(menu._id)' ng-if='!item_only'><i class='fa fa-plus'></i> Pick</a>
+                        <!-- <a class='pull-right btn btn-sm btn-primary' data-nodrag ng-click='pickMenu(menu._id)'><i class='fa fa-plus'></i> Pick</a> -->
                     </div>
                     <ol ui-tree-nodes ng-model='menu.menu_categories'>
                         <li ng-repeat='category in menu.menu_categories track by $index' ui-tree-node>
@@ -19,8 +23,12 @@
                                 <a class='btn btn-dark btn-xs' ng-if='category.sub_categories.length' data-nodrag ng-click='toggle(this)'>
                                     <span class='fa' ng-class='{"fa-chevron-right": collapsed, "fa-chevron-down": !collapsed}'></span>
                                 </a>
+                                <label class='btn' ng-class='{"btn-default": !category_set[category._id], "btn-danger": category_set[category._id]}' data-nodrag ng-model='category_set[category._id]' btn-checkbox>
+                                    <i class='fa fa-plus' ng-if='!category_set[category._id]'></i>
+                                    <i class='fa fa-times' ng-if='category_set[category._id]'></i>
+                                </label>
                                 {{category.category_name}} [Category]
-                                <a class='pull-right btn btn-sm btn-primary' data-nodrag ng-click='pickCategory(menu._id, category._id)' ng-if='!item_only'><i class='fa fa-plus'></i> Pick</a>
+                                <!-- <a class='pull-right btn btn-sm btn-primary' data-nodrag ng-click='pickCategory(menu._id, category._id)'><i class='fa fa-plus'></i> Pick</a> -->
                             </div>
                             <ol ui-tree-nodes ng-model='category.sub_categories' ng-class="{hidden: collapsed}">
                                 <li ng-repeat='sub_category in category.sub_categories track by $index' ui-tree-node>
@@ -28,8 +36,12 @@
                                         <a class='btn btn-dark btn-xs' ng-if='sub_category.items.length' data-nodrag ng-click='toggle(this)'>
                                             <span class='fa' ng-class='{"fa-chevron-right": collapsed, "fa-chevron-down": !collapsed}'></span>
                                         </a>
+                                        <label class='btn' ng-class='{"btn-default": !sub_category_set[sub_category._id], "btn-danger": sub_category_set[sub_category._id]}' data-nodrag ng-model='sub_category_set[sub_category._id]' btn-checkbox>
+                                            <i class='fa fa-plus' ng-if='!sub_category_set[sub_category._id]'></i>
+                                            <i class='fa fa-times' ng-if='sub_category_set[sub_category._id]'></i>
+                                        </label>
                                         {{sub_category.sub_category_name}} [Sub Category]
-                                        <a class='pull-right btn btn-sm btn-primary' data-nodrag ng-click='pickSubCategory(menu._id, category._id, sub_category._id)' ng-if='!item_only'><i class='fa fa-plus'></i> Pick</a>
+                                        <!-- <a class='pull-right btn btn-sm btn-primary' data-nodrag ng-click='pickSubCategory(menu._id, category._id, sub_category._id)'><i class='fa fa-plus'></i> Pick</a> -->
                                     </div>
                                     <ol ui-tree-nodes ng-model='sub_category.items' ng-class="{hidden: collapsed}">
                                         <li ng-repeat='item in sub_category.items track by $index' ui-tree-node>
@@ -37,8 +49,12 @@
                                                 <a class='btn btn-dark btn-xs' ng-if='item.options.length' data-nodrag ng-click='toggle(this)'>
                                                     <span class='fa' ng-class='{"fa-chevron-right": collapsed, "fa-chevron-down": !collapsed}'></span>
                                                 </a>
+                                                <label class='btn' ng-class='{"btn-default": !item_set[item._id], "btn-danger": item_set[item._id]}' data-nodrag ng-model='item_set[item._id]' btn-checkbox>
+                                                    <i class='fa fa-plus' ng-if='!item_set[item._id]'></i>
+                                                    <i class='fa fa-times' ng-if='item_set[item._id]'></i>
+                                                </label>
                                                 {{item.item_name}} <i class='fa fa-inr'></i>{{item.item_cost}} [Item]
-                                                <a class='pull-right btn btn-sm btn-primary' data-nodrag ng-click='pickItem(menu._id,category._id, sub_category._id, item._id)' ng-if='item_only && !item.options.length'><i class='fa fa-plus'></i> Pick</a>
+                                                <!-- <a class='pull-right btn btn-sm btn-primary' data-nodrag ng-click='pickItem(menu._id,category._id, sub_category._id, item._id)' ng-if='!item.options.length'><i class='fa fa-plus'></i> Pick</a> -->
                                             </div>
                                             <ol ui-tree-nodes ng-model='item.options' ng-class="{hidden: collapsed}">
                                                 <li ng-repeat='option in item.options track by $index' ui-tree-node>
@@ -46,7 +62,11 @@
                                                         <a class='btn btn-dark btn-xs' ng-if='option.sub_options.length || option.addons.length' data-nodrag ng-click='toggle(this)'>
                                                             <span class='fa' ng-class='{"fa-chevron-right": collapsed, "fa-chevron-down": !collapsed}'></span>
                                                         </a>
-                                                        <a class='pull-right btn btn-sm btn-primary' ng-if='item_only' data-nodrag ng-click='pickOption(menu._id,category._id, sub_category._id, item._id, option)'><i class='fa fa-plus'></i> Pick</a> {{item.option_title}} - {{option.option_value}} <i class='fa fa-inr'></i>{{option.option_cost}}
+                                                        <label class='btn' ng-class='{"btn-default": !option_set[option._id], "btn-danger": option_set[option._id]}' data-nodrag ng-model='option_set[option._id]' btn-checkbox>
+                                                            <i class='fa fa-plus' ng-if='!option_set[option._id]'></i>
+                                                            <i class='fa fa-times' ng-if='option_set[option._id]'></i>
+                                                        </label>
+                                                        <!-- <a class='pull-right btn btn-sm btn-primary' data-nodrag ng-click='pickOption(menu._id,category._id, sub_category._id, item._id, option)'><i class='fa fa-plus'></i> Pick</a> -->{{item.option_title}} - {{option.option_value}} <i class='fa fa-inr'></i>{{option.option_cost}}
                                                     </div>
                                                     <ol ui-tree-nodes ng-model='option.sub_options' ng-class="{hidden: collapsed}" style='margin-top:20px;'>
                                                         <li ng-repeat='sub_option in option.sub_options track by $index' ui-tree-node>
@@ -59,7 +79,7 @@
                                                             <ol ui-tree-nodes ng-model='sub_option.sub_option_set' ng-class='{hidden: collapsed}'>
                                                                 <li ng-repeat='sub_option_obj in sub_option.sub_option_set track by $index' ui-tree-node>
                                                                     <div ui-tree-handle class='tree-node tree-node-content'>
-                                                                        <label ng-if='item_only' class='btn' ng-class='{"btn-default": !sub_option_sets[sub_option._id], "btn-danger": sub_option_sets[sub_option_obj._id]}' data-nodrag ng-model='sub_option_sets[sub_option_obj._id]' btn-checkbox>
+                                                                        <label class='btn' ng-class='{"btn-default": !sub_option_sets[sub_option._id], "btn-danger": sub_option_sets[sub_option_obj._id]}' data-nodrag ng-model='sub_option_sets[sub_option_obj._id]' btn-checkbox>
                                                                             <i class='fa fa-plus' ng-if='!sub_option_sets[sub_option_obj._id]'></i>
                                                                             <i class='fa fa-times' ng-if='sub_option_sets[sub_option_obj._id]'></i>
                                                                         </label>
@@ -80,7 +100,7 @@
                                                             <ol ui-tree-nodes ng-model='addon.addon_set' ng-class='{hidden: collapsed}'>
                                                                 <li ng-repeat='addon_obj in addon.addon_set track by $index' ui-tree-node>
                                                                     <div ui-tree-handle class='tree-node tree-node-content'>
-                                                                        <label ng-if='item_only' class='btn' ng-class='{"btn-default": !addon_sets[addon_obj._id], "btn-danger": addon_sets[addon_obj._id]}' data-nodrag ng-model='addon_sets[addon_obj._id]' btn-checkbox>
+                                                                        <label class='btn' ng-class='{"btn-default": !addon_sets[addon_obj._id], "btn-danger": addon_sets[addon_obj._id]}' data-nodrag ng-model='addon_sets[addon_obj._id]' btn-checkbox>
                                                                             <i class='fa fa-plus' ng-if='!addon_sets[addon_obj._id]'></i>
                                                                             <i class='fa fa-times' ng-if='addon_sets[addon_obj._id]'></i>
                                                                         </label>
@@ -102,4 +122,8 @@
             </ol>
         </div>
     </form>
+</div>
+<div class='modal-footer'>
+    <button type='button' class='btn btn-w-md btn-gap-v btn-primary' ng-click='processSelection()'><i class='fa fa-plus'></i> Confirm</button>
+    <button type='button' class='btn btn-w-md btn-gap-v btn-danger' ng-click='cancelSelection()'><i class='fa fa-plus'></i> Cancel</button>
 </div>
