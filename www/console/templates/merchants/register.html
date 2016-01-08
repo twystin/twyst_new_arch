@@ -1,1 +1,37 @@
-
+<div>&nbsp</div>
+<div class='container-fluid'>
+    <div class='row'>
+        <div class='col-sm-offset-2 col-sm-8'>
+            <section class='panel panel-default'>
+                <div class='panel-heading'><strong><span class='glyphicon glyphicon-th'></span> Register Merchant</strong></div>
+                <div class='panel-body'>
+                    <form role='form' ng-submit='registerMerchant()'>
+                        <div class='form-group'>
+                            <label>Username</label>
+                            <input type='text' class='form-control' ng-model='merchant.username' placeholder='Username here...'>
+                        </div>
+                        <div class='form-group'>
+                            <label>Password</label>
+                            <input type='password' class='form-control' ng-model='merchant.password' placeholder='Password here...'>
+                        </div>
+                        <div class='form-group'>
+                            <label>Repeat Password</label>
+                            <input type='password' class='form-control' ng-model='merchant.rePassword' placeholder='Retype password'>
+                        </div>
+                        <div class='form-group'>
+                            <label>Is outlet paying?</label>
+                            <input type='checkbox' bs-switch switch-off-text='NO' switch-on-text='YES' ng-model='merchant.isPaying' ng-change='isPayingUpdated()'>
+                        </div>
+                        <div class='form-group' ng-if='merchant.isPaying'>
+                            <label>E-Mail ID</label>
+                            <input type='email' class='form-control' placeholder='Email address' ng-model='merchant.email'>
+                        </div>
+                        <div class='form-group'>
+                            <button class='btn btn-w-md btn-primary' type='submit'>Register</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
