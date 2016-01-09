@@ -235,6 +235,7 @@ module.exports.update_event = function(req, res) {
 
 module.exports.contact_us = function(req, res) {
     logger.log();
+    var Mailer = require('../transports/email/gmail.transport');
     if (!req.body.name) {
         HttpHelper.error(res, null, "Name required");
     } else if (!req.body.email) {
@@ -242,13 +243,18 @@ module.exports.contact_us = function(req, res) {
     } else if (!req.body.comments) {
         HttpHelper.error(res, null, "Comments cannot be left blank.");
     } else {
-        var contact_us = new ContactUs(req.body);
-        contact_us.save(function(error) {
-            if (error) {
-                HttpHelper.error(res, error || null, "Something went wrong. Please try after sometime.");
-            } else {
-                HttpHelper.success(res, null, "Thank you for reaching out. We'll get back with yuo shortly.");
-            }
+        Mailer.send({
+            from: 'contactus@twyst.in',
+            to: 'hemant@twyst.in, kuldeep@twyst.in, al@twyst.in, rc@twyst.in',
+            subject: 'Contact Us Submittion',
+            text: "From: " + req.body.name + "\nE-Mail: " + req.body.email + "\nRemarks: " + req.body.comments,
+            html: "<h4>From</h4>" + req.body.name + "<h4>E-Mail</h4>" + req.body.email + "<h4>Remarks</h4>" + req.body.comments,
+        }).then(function(reply) {
+            console.log('main reply', reply);
+            HttpHelper.success(res, null, "Thank you for reaching out. We'll get back with you shortly.");
+        }, function(err) {
+            console.log('mail failed', err);
+            HttpHelper.error(res, error || null, "Something went wrong. Please try after sometime.");
         });
     }
 }
