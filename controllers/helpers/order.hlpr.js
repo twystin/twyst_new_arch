@@ -83,7 +83,6 @@ module.exports.apply_offer = function(token, order) {
     var deferred = Q.defer();
 
     var data = {};
-    data.items = order.items;
     data.outlet = order.outlet;
     data.user_token = token;
     data.offer_used = order.offer_id;
@@ -92,6 +91,9 @@ module.exports.apply_offer = function(token, order) {
     get_user(data)
     .then(function(data){
         return get_outlet(data);
+    })
+    .then(function(data){
+        return check_offer_applicability(data);
     })
     .then(function(data){
         return apply_selected_offer(data);
@@ -122,15 +124,20 @@ module.exports.checkout = function(token, order) {
     var deferred = Q.defer();
 
     var data = {};
-    data.items = order.items;
-    data.outlet = order.outlet;
     data.user_token = token;
+    data.outlet = order.outlet;
     data.order_number = order.order_number;
-    data.address = order.address
+    data.address = order.address;
     
     get_user(data)
     .then(function(data) {
+        return get_outlet(data);
+    })
+    .then(function(data) {
         return massage_order(data);
+    })
+    .then(function(data) {
+        deferred.resolve(data);
     })
     .fail(function(err) {
         console.log(err)
@@ -221,20 +228,17 @@ function validate_outlet(data) {
     var outlet = passed_data.outlet;
 
     if(!isOutletActive(outlet)){
-        deferred.reject({
-          err:  true,
+        deferred.reject({    
           message: "outlet is not active"
         });
     }
     else if(isOutletClosed(outlet)){
         deferred.reject({
-          err:  true,
           message: "outlet is currently closed"
         });
     }
     else if (!isDeliveryOutlet(outlet)) {
         deferred.reject({
-          err:  true,
           message: "outlet does not delivers"
         });
     }
@@ -273,14 +277,14 @@ function calculate_order_value(data, free_item, free_item_option) {
         var sub_category = _.findWhere(category && category.sub_categories, {_id: items[i].sub_category_id});
         
         item = _.findWhere(sub_category && sub_category.items, {_id: items[i].item_id});
-
+        
         if(item && item.options && items[i].option_id) {
             option = _.findWhere(item.options, {_id: items[i].option_id}); 
         }
         
-        if(option && option.sub_options && items[i].sub_options) {
+        if(option && option.sub_options && items[i].sub_option_set_ids) {
             menu_sub_options = option.sub_options;
-            order_sub_options = items[i].sub_options;
+            order_sub_options = items[i].sub_option_set_ids;
             _.each(menu_sub_options, function(sub_option){
                 _.each(order_sub_options, function(order_sub_option){
                     var selected_sub_option = _.findWhere(sub_option.sub_option_set, {_id: order_sub_option})
@@ -291,9 +295,9 @@ function calculate_order_value(data, free_item, free_item_option) {
             })
         }
         
-        if(option && option.addons && items[i].addons) {
+        if(option && option.addons && items[i].addon_set_ids) {
             menu_addons = option.addons;
-            order_addons = items[i].addons;
+            order_addons = items[i].addon_set_ids;
             _.each(menu_addons, function(addon){
                 _.each(order_addons, function(order_addon){
                     var selected_addon = _.findWhere(addon.addon_set, {_id: order_addon})
@@ -709,11 +713,12 @@ function generate_and_cache_order(data) {
         length: 4,
         exclude: ['O', '0', '1', 'I']
     });
-
+    var order = {};
     order_number = 'TW'+data.outlet.links.short_url+month+year+code;
     order_actual_value_obj = calculate_tax(calculate_order_value(passed_data, null, null), passed_data.outlet);
 
-    var order = {};
+    order.user = data.user._id;
+    order.outlet = data.outlet._id;
     order.order_number = order_number;
     order.items = data.items;
     order.order_actual_value_without_tax = order_actual_value_obj.order_value;     
@@ -732,31 +737,53 @@ function generate_and_cache_order(data) {
     return deferred.promise;
 
 }
+function check_offer_applicability(data) {
+    logger.log();
+    var deferred = Q.defer();
 
+    var offer = _.find(data.outlet.offers, function(offer) {
+        if(offer._id === data.offer_used) {
+            var date = new Date();
+            var time = moment().hours() +':'+moment().minutes();
+            date = date.getMonth()+1+'-'+date.getDate()+'-'+date.getFullYear();
+
+            if(!(RecoHelper.isClosed(date, time, offer.actions.reward.reward_hours))) {
+                return offer;
+            }       
+        }
+    })
+    if(offer) {
+        deferred.resolve(data);
+    }
+    else{
+        deferred.reject('offer is not available right now');
+    }
+    
+    return deferred.promise;
+}
 function apply_selected_offer(data) {
     logger.log();
     var deferred = Q.defer();
 
-    var passed_data = data;
     var offer_used = {};
-    Cache.hget(passed_data.user._id, 'order_map', function(err, reply) {
+    Cache.hget(data.user._id, 'order_map', function(err, reply) {
         if(!reply) {
             deferred.reject('no offer available for user at this outlet')
         }
         else{
             var order = JSON.parse(reply);
             console.log(order);
-            console.log(passed_data.order_number)
-            if(passed_data.order_number.toString() === order.order_number.toString()) {
+            console.log(data.order_number)
+            if(data.order_number.toString() === order.order_number.toString()) {
                 data.order_actual_value_without_tax = order.order_actual_value_without_tax;
                 data.vat = order.vat;
                 data.st = order.st;
                 data.order_actual_value_with_tax = order.order_actual_value_with_tax;
-                if(passed_data.offer_used) {                                    
+                if(data.offer_used) {                                    
                     offer_used = _.find(order.available_offers, function(offer){
                         
-                        if(offer && offer.is_applicable && offer._id === passed_data.offer_used) {                           
-                            order.offer_used = offer._id;                            
+                        if(offer && offer.is_applicable && offer._id === data.offer_used) {                           
+                            order.offer_used = offer;                            
                             return offer;                        
                         }
                     })
@@ -796,15 +823,8 @@ function apply_selected_offer(data) {
                     deferred.resolve(data);
                 }
             }
-            else {
-                console.log('order not found');
-                var order_value_obj = calculate_tax(calculate_order_value(passed_data, null, null), passed_data.outlet);
-                data.order_actual_value_without_tax = order_value_obj.order_value_without_tax;
-                data.vat = order_value_obj.vat;
-                data.st = order_value_obj.st;
-                data.order_actual_value_with_tax = order_value_obj.order_value_with_tax;
-                data.offer_used = null;
-                deferred.resolve(data);
+            else {                
+                deferred.reject('order not found');
             }
         } 
     })
@@ -925,46 +945,34 @@ function massage_order(data){
             deferred.reject('can not process this order')
         }
         else{
-            console.log('here');
             var order = JSON.parse(reply);
             console.log(order);
             if(data.order_number === order.order_number) {
-                var order = {};                        
                 order.address = data.address;
-                order.outlet = data.outlet;
-                order.order_number = data.order_number;
-                order.offer_used = order.offer_used;
-                if(order.offer_used) {
-                    order.order_value_without_offer = 500
-                    order.order_value_with_offer = 400
-                    order.tax_paid = 12;
-                    order.cash_back = 20;    
-                }
-                else{
-                    order.order_value_without_offer = 500
-                    order.order_value_with_offer = 400
-                    order.tax_paid = 12;
-                    order.cash_back = 20; 
-                }
-                
                 order.order_status = 'pending';
-                order.items = data.items;
-                order.user = data.user._id;
+                order.cod_cashback = data.outlet.twyst_meta.cashback.min;
+                order.inapp_cashback = data.outlet.twyst_meta.cashback.max;
+                if(order.offer_used) {
+                    order.order_value_without_offer = order.order_value_without_tax;
+                    order.order_value_with_offer = order.offer_used.order_value_without_tax;
+                    order.tax_paid = order.offer_used.st+order.offer_used.vat;
+                    order.actual_amount_paid = order.offer_used.order_value_with_tax;
 
-                order = new Order(order);                
+                }
+                else {
+                    order.order_value_without_offer = order.order_value_without_tax;
+                    order.order_value_with_offer = null;
+                    order.tax_paid = order.st+order.vat;
+                    order.actual_amount_paid = order.order_value_with_tax
+                }
+                order = new Order(order); 
                 order.save(function(err, order){
                     if(err){
                         console.log(err);
                         deferred.reject('unable to checkout ');
                     }
                     else{
-                        console.log('saved');
-                        var a = Bayeux.bayeux.getClient().publish('/'+data.outlet._id, {text: 'yaaaaaaa u have a new order'});
-                        a.then(function() {
-                          console.log('delivers');
-                        }, function(error) {
-                          console.log('problem');
-                        });
+                        console.log('saved');                        
                         deferred.resolve(data);   
                     }
                 })                    
@@ -1074,31 +1082,23 @@ function searchItemInOfferItems(item, offer) {
     
 }
 
-module.exports.update_order = function(token, update_order) {
+module.exports.get_order = function(token, order_id) {
     logger.log();
     var deferred = Q.defer();
-    var id = update_order._id;
+
     AuthHelper.get_user(token).then(function(data) {
       
-        Order.findOneAndUpdate({
-            _id: id
-          }, {
-            $set: update_order
-          }, {
-            upsert: true
-          },
-          function(err, o) {
-            if (err || !o) {
+        Order.findOne({ _id: order_id}, function(err, order) {
+            if (err || !order) {
               deferred.reject({
                 err: err || true,
-                message: 'Couldn\'t update the order'
+                message: 'Couldn\'t find the order'
               });
             } else {
-              updated_outlet._id = id;
 
               deferred.resolve({
-                data: o,
-                message: 'Updated order successfully'
+                data: order,
+                message: 'order found'
               });
             }
           }
@@ -1112,3 +1112,94 @@ module.exports.update_order = function(token, update_order) {
 
   return deferred.promise;
 };
+
+module.exports.confirm_order = function(token, order) {
+    logger.log();
+    var deferred = Q.defer();
+    var payment_mode = order.payment_mode;
+    var order_number = order.order_number;
+
+    get_user(data)
+    .then(function(data) {
+        return update_order(data);
+    })
+    .then(function(data) {
+        return send_sms(data);
+    })
+    .then(function(data) {
+        return send_email(data);
+    })
+    .then(function(data) {
+        return send_notification(data);
+    })
+    .then(function(data) {
+        deferred.resolve(data);
+    })
+    .fail(function(err) {
+        console.log(err)
+      deferred.reject(err);
+    });
+}
+
+function update_order(data) {
+    logger.log();
+    var deferred = Q.defer();
+
+    Order.findOneAndUpdate({
+        order_number: order_number
+    }, {
+        $push: {
+            'menus': menu
+        }
+    }).exec(function(err) {
+        if (err) {
+            deferred.reject({
+                err: false,
+                message: 'Unable to find the menu'
+            })
+        } else {
+            
+            deferred.resolve({
+                data: {},
+                message: 'Menu cloned successfully'
+            });
+        }
+    });
+}
+
+function send_sms(data) {
+    logger.log();
+    var deferred = Q.defer();
+    
+    deferred.resolve({
+        data: {},
+        message: 'sms sent successfully'
+    });
+        
+}
+
+function send_email(data) {
+    logger.log();
+    var deferred = Q.defer();
+    
+    deferred.resolve({
+        data: {},
+        message: 'email sent successfully'
+    });    
+}
+
+function send_notification(data) {
+    logger.log();
+    var deferred = Q.defer();
+
+    var a = Bayeux.bayeux.getClient().publish('/'+data.outlet._id, {text: 'yaaaaaaa u have a new order'});
+    a.then(function() {
+      console.log('delivers');
+    }, function(error) {
+      console.log('error');
+    });
+    deferred.resolve({
+        data: {},
+        message: 'notification sent successfully'
+    });        
+}

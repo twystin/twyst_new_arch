@@ -23,7 +23,7 @@ var Order = new Schema({
       lat: {type: String},
       long: {type: String}
     },
-    tags: {type: String,
+    tag: {type: String,
       enum: ['home', 'office', 'other']}
   },
   outlet: {
@@ -38,10 +38,15 @@ var Order = new Schema({
   tax_paid: {type: Number},
   actual_amount_paid: {type: Number},
   cashback: {type: Number, default: 0},
-  payment_info: {}, //COD/Payu/payment object
-  txn_id: {type: String},
+  payment_info: {
+    payment_mode: {type: String},//COD/Payu/payment object
+    txn_id: {type: String},
+  }, 
   order_status: {type: String},
-  user_rating:{type: Number},
+  user_rating: {
+    type: Number,
+    default: 0
+  },
   is_favourite: {
     type: Boolean,
     default: false
@@ -73,14 +78,12 @@ var Order = new Schema({
       type: Number
     },
     sub_options: [{
-      _id: {
-        type: Schema.Types.ObjectId,
-        default: new mongoose.Types.ObjectId()
-      },
+      sub_option_id: Schema.ObjectId,
       sub_option_title: {
         type: String,
       },
       sub_option_set: [{
+        sub_option_set_id: Schema.ObjectId,
         sub_option_value: {
           type: String,
         },
@@ -94,14 +97,12 @@ var Order = new Schema({
       }]
     }],
     addons: [{
-      _id: {
-        type: Schema.Types.ObjectId,
-        default: new mongoose.Types.ObjectId()
-      },
+      addon_id: Schema.ObjectId,
       addon_title: {
         type: String,
       },
       addon_set: [{
+        addon_set_id: Schema.ObjectId,
         addon_value: {
           type: String,
         },
