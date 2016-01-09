@@ -36,8 +36,8 @@ module.exports.calculate_checksum = function(req, res) {
 	}
 	else if(order_form.pgName === 'Zaakpay') {
 		var ipAddr = order_form.ipAddr;
-		var amount = order_form.amount;
-		var currency = order_form.currency*100;
+		var amount = order_form.amount*100;
+		var currency = order_form.currency;
 		var mid = order_form.mid;
 		var orderId = order_form.orderid;
 		var txnDate = moment().format('YYYY-MM-DD');

@@ -11,6 +11,7 @@ var Cache = require('../common/cache.hlpr.js');
 var _ = require('underscore');
 var Q = require('q');
 var logger = require('tracer').colorConsole();
+var geolib = require('geolib');
 
 function get_outlets(params) {
   logger.log();
@@ -20,16 +21,10 @@ function get_outlets(params) {
     if (err) {
       deferred.reject('Could not get outlets');
     } else {
-      var outlets = JSON.parse(reply);
-      outlets = _.map(outlets, function(outlet){
-        if(outlet.menus && outlet.menus.length) {
-          return outlet;
-        }
-      })
-      console.log(outlets.length)
+      
       deferred.resolve({
         query: params,
-        outlets: outlets
+        outlets: JSON.parse(reply)
       });
     }
   });
@@ -65,105 +60,23 @@ function get_user(params) {
   return deferred.promise;
 }
 
-function set_user_checkins(params) {
-  logger.log();
-
-  var deferred = Q.defer();
-  if (params.user) {
-    Cache.hget(params.user._id, "checkin_map", function(err, reply) {
-      if (err || !reply) {
-        deferred.resolve(params);
-      } else {
-        var cmap = JSON.parse(reply);
-        var outlets = params.outlets;
-        if (cmap) {
-          _.each(cmap, function(value, key) {
-            if(outlets[key]) {
-              outlets[key].recco = outlets[key].recco || {};
-              outlets[key].recco.checkins = value;
-            }
-          });
-          params.outlets = outlets;
-          deferred.resolve(params);
-        } else {
-          deferred.resolve(params);
-        }
-      }
-    });
-  } else {
-    deferred.resolve(params);
-  }
-  return deferred.promise;
-}
-
-function set_user_coupons(params) {
-  logger.log();
-  var deferred = Q.defer();
-  if (params.user) {
-    Cache.hget(params.user._id, 'coupon_map', function(err, reply) {
-      if (err || !reply) {
-        deferred.resolve(params);
-      } else {
-        var cmap = JSON.parse(reply);
-        var outlets = params.outlets;
-        if (cmap) {
-          _.each(cmap, function(value, key) {
-            if (outlets[key]) {
-              outlets[key].recco = outlets[key].recco || {};
-              outlets[key].recco.coupons = value.coupons.length;
-            }
-          });
-          params.outlets = outlets;
-          deferred.resolve(params);
-        } else {
-          deferred.resolve(params);
-        }
-      }
-    });
-  } else {
-    deferred.resolve(params);
-  }
-  return deferred.promise;
-}
-
-function set_social_pool_coupons(params) {
-  logger.log();
-
-  var deferred = Q.defer();
-  if (params.user) {
-    Cache.hget(params.user._id, 'social_pool_coupons', function(err, reply) {
-      
-      if(err || !reply) {
-        deferred.resolve(params);
-      } else {
-        var social_pool = JSON.parse(reply);
-        var outlets = params.outlets;
-        if(social_pool) {
-          _.each(social_pool, function(coupon) {
-            if(outlets[coupon.issued_by]) {
-              outlets[coupon.issued_by].offers.push(coupon)
-            }
-          });
-          deferred.resolve(params);
-        } else {
-          deferred.resolve(params);
-        }
-      }
-    })
-  } else {
-    deferred.resolve(params);
-  }
-  return deferred.promise;
-}
 
 function set_distance(params) {
   logger.log();
 
   var deferred = Q.defer();
-
-  
+  if (params.query.lat && params.query.long) {
+    params.outlets = _.mapObject(params.outlets, function(val, key) {
+      val.recco = val.recco || {};
+      val.recco.distance = RecoHelper.distance({
+        latitude: params.query.lat,
+        longitude: params.query.long
+      }, val.contact.location.coords);
+      return val;
+    });
+  }
   deferred.resolve(params);
-  return deferred.promise;
+  return deferred.promise; 
 }
 
 function set_open_closed(params) {
@@ -171,6 +84,7 @@ function set_open_closed(params) {
 
   var deferred = Q.defer();
   params.outlets = _.compact(params.outlets);
+  //console.log(params.outlets)
   if (params.query.date && params.query.time) {
     params.outlets = _.mapObject(params.outlets, function(val, key) {
       val.recco = val.recco || {};
@@ -180,6 +94,52 @@ function set_open_closed(params) {
       return val;
     });
   }
+  deferred.resolve(params);
+  return deferred.promise;
+}
+
+function map_valid_delivery_zone(params) {
+  logger.log();
+  var deferred = Q.defer();
+
+  if (params.query.lat && params.query.long) {
+    params.outlets = _.map(params.outlets, function(val) {    
+      if(val.attributes.delivery.delivery_zone && val.attributes.delivery.delivery_zone.length) {        
+        var delivery_zone = _.map(val.attributes.delivery.delivery_zone, function(current_zone) {          
+          if(current_zone.coord && current_zone.coord.length &&
+            geolib.isPointInside({latitude: params.query.lat, longitude: params.query.long},
+            current_zone.coord)){
+            console.log('it delivers ' + val.basics.name);
+            return current_zone;
+          }
+        })
+        delivery_zone = _.compact(delivery_zone);
+        if(delivery_zone.length) {
+          val.valid_zone = delivery_zone; 
+          return val; 
+        }
+        else{
+          return null;
+        }
+    
+      }
+    });
+    
+  }  
+  deferred.resolve(params);
+  return deferred.promise;  
+}
+
+function set_delivery_experiance(params) {
+  logger.log();
+  var deferred = Q.defer();
+  
+  params.outlets = _.mapObject(params.outlets, function(val, key) {
+    val.recco = val.recco || {};
+    val.recco.delivery_experiance = null;
+    return val;
+  });
+  
   deferred.resolve(params);
   return deferred.promise;
 }
@@ -219,9 +179,10 @@ function pick_outlet_fields(params) {
     }
 
     params.outlets = _.map(params.outlets, function(item) {
-      if(item.outlet_meta.status === 'archived' || item.outlet_meta.status === 'draft') {
+      if(item.outlet_meta.status === 'archived') {// || item.outlet_meta.status === 'draft') {
         return false;        
       }
+
       var massaged_item = {};
       massaged_item._id = item._id;
       massaged_item.name = item.basics.name;
@@ -236,6 +197,11 @@ function pick_outlet_fields(params) {
       massaged_item.phone = item.contact.phones.mobile[0] && item.contact.phones.mobile[0].num;  
       massaged_item.is_paying =  item.basics.is_paying;
       massaged_item.cuisines = item.attributes.cuisines;
+      massaged_item.delivery_experiance = item.recco.delivery_experiance || null;
+      massaged_item.delivery_time = item.valid_zone[0].delivery_estimated_time;
+      massaged_item.minimum_order = item.valid_zone[0].min_amt_for_delivery;
+      massaged_item.cashback = item.twyst_meta.cashback || null;
+      massaged_item.offers = [];
       if (fmap && fmap[item._id]) {
         massaged_item.following = true;
       } else {
@@ -253,7 +219,6 @@ function pick_outlet_fields(params) {
         massaged_item.menu = item.menus[0]._id;
       }
       
-      console.log(massaged_item);
       return massaged_item;
     });
     
@@ -286,19 +251,16 @@ module.exports.get = function(req, res) {
       return get_user(data);
     })
     .then(function(data) {
-      return set_user_checkins(data);
-    })
-    .then(function(data) {
-      return set_user_coupons(data);
-    })
-    .then(function(data) {
-      return set_social_pool_coupons(data);
-    })
-    .then(function(data) {
       return set_distance(data);
     })
     .then(function(data) {
       return set_open_closed(data);
+    })
+    .then(function(data) {
+      return set_delivery_experiance(data);
+    })
+    .then(function(data) {
+      return map_valid_delivery_zone(data);
     })
     .then(function(data) {
       return calculate_relevance(data);
