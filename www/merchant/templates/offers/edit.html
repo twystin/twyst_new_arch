@@ -95,8 +95,8 @@
                                         <label class='col-sm-2 control-label'>Applicable for <i class='fa fa-sm fa-asterisk'></i></label>
                                         <div class='col-sm-6'>
                                             <div class='btn-group'>
-                                                <label class='btn' ng-class='{"btn-default": !offer.actions.reward.applicability.dine_in, "btn-primary": offer.actions.reward.applicability.dine_in}' ng-model='offer.actions.reward.applicability.dine_in' btn-checkbox>Dine-In</label>
-                                                <label class='btn' ng-class='{"btn-default": !offer.actions.reward.applicability.delivery, "btn-primary": offer.actions.reward.applicability.delivery}' ng-model='offer.actions.reward.applicability.delivery' btn-checkbox>Delivery</label>
+                                                <label class='btn' ng-class='{"btn-default": !offer.actions.reward.applicability.dine_in, "btn-primary": offer.actions.reward.applicability.dine_in}' ng-model='offer.actions.reward.applicability.dine_in' ng-change='filterOutlets()' btn-checkbox>Dine-In</label>
+                                                <label class='btn' ng-class='{"btn-default": !offer.actions.reward.applicability.delivery, "btn-primary": offer.actions.reward.applicability.delivery}' ng-model='offer.actions.reward.applicability.delivery' ng-change='filterOutlets()' btn-checkbox>Delivery</label>
                                             </div>
                                         </div>
                                     </div>
@@ -370,21 +370,6 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class='form-group'>
-                                        <label class='col-sm-2 control-label'>Applicable for <i class='fa fa-sm fa-asterisk'></i></label>
-                                        <div class='col-sm-6'>
-                                            <div class='row'>
-                                                <label class='col-sm-2'>Dine-In</label>
-                                                <div class='col-sm-4'>
-                                                    <input bs-switch type='checkbox' ng-model='offer.actions.reward.applicability.dine_in' switch-off-text='NO' switch-on-text='YES'>
-                                                </div>
-                                                <label class='col-sm-2'>Delivery</label>
-                                                <div class='col-sm-4'>
-                                                    <input bs-switch type='checkbox' ng-model='offer.actions.reward.applicability.delivery' switch-off-text='NO' switch-on-text='YES'>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
                                     <div class='form-group' ng-if='offer.offer_type==="checkin"'>
                                         <label class='col-sm-2 control-label'>Lapses In <i class='fa fa-sm fa-asterisk'></i></label>
                                         <div class='col-sm-2' ng-class='{"has-error": formFailure && !offer.offer_lapse_days}'>
@@ -470,7 +455,7 @@
                                         </label>
                                         <div class='col-sm-6 table-responsive'>
                                             <ul class='list-group'>
-                                                <li class='list-group-item' ng-repeat='outlet in outlets track by $index' ng-show='!offer.offer_outlets || offer.offer_outlets.indexOf(outlet._id)===-1'>
+                                                <li class='list-group-item' ng-repeat='outlet in filtered_outlets track by $index' ng-show='!offer.offer_outlets || offer.offer_outlets.indexOf(outlet._id)===-1'>
                                                     {{outlet.basics.name}}, {{outlet.contact.location.locality_1[0]}}, {{outlet.contact.location.locality_2[0]}}
                                                     <button class='btn btn-sm btn-success pull-right' ng-click='addOutlet(outlet._id)'><i class='fa fa-plus'></i></button>
                                                 </li>
