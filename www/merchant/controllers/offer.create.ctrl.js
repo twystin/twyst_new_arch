@@ -21,11 +21,25 @@ angular.module('merchantApp')
                 'offer': 'Promoted offer'
             };
 
-            $scope.reward_types = {
+            $scope.delivery_reward_types = {
                 'buyxgety': 'Buy X Get Y',
                 'free': 'Free',
                 'flatoff': 'Flat Off',
                 'discount': 'Discount'
+            };
+
+            $scope.generic_reward_types = {
+                'buyonegetone': 'Buy One Get One',
+                'discount': 'Discount',
+                'flatoff': 'Flat Off',
+                'free': 'Free',
+                'happyhours': 'Happy Hours',
+                'reduced': 'Reduced Price',
+                'custom': 'Custom',
+                'unlimited': 'Unlimited',
+                'onlyhappyhours': 'Only Happy Hours',
+                'combo': 'Combo',
+                'buffet': 'Buffet'
             };
 
             $scope.event_matches = {
@@ -75,8 +89,8 @@ angular.module('merchantApp')
                             }
                         },
                         applicability: {
-                            dine_in: true,
-                            delivery: true
+                            dine_in: false,
+                            delivery: false
                         }
                     }
                 },
@@ -100,10 +114,12 @@ angular.module('merchantApp')
             merchantRESTSvc.getOutlets()
                 .then(function(res) {
                     $scope.outlets = _.indexBy(res.data.outlets, '_id');
+                    $scope.filtered_outlets = _.cloneDeep($scope.outlets);
                 }, function(err) {
                     console.log(err);
                     SweetAlert.swal('Error getting outlets', err.message ? err.message : 'Something went wrong', 'error');
-                    $scope.outlets = [];
+                    $scope.outlets = {};
+                    $scope.filtered_outlets = _.cloneDeep($scope.outlets);
                 });
 
             $scope.$watchCollection('offer.offer_type', function(newVal, oldVal) {
@@ -139,122 +155,12 @@ angular.module('merchantApp')
                 }
             });
 
-            $scope.$watchCollection('offer.offer_items', function(newVal, oldVal) {
-                console.log('newVal', newVal);
-                if (($scope.offer.actions.reward.reward_meta.reward_type === 'buyxgety' || $scope.offer.actions.reward.reward_meta.reward_type === 'free') && $scope.offer.offer_items && $scope.offer.offer_items.menu_id) {
-                    $scope.getRewardName($scope.offer.offer_items).then(function(free_item_name) {
-                        $scope.offer.actions.reward.reward_meta.free_item_name = free_item_name;
-                    }, function(err) {
-                        console.log(err);
-                    });
-                }
-            });
-
-            $scope.$watchCollection('offer.actions.reward.reward_meta', function(newVal, oldVal) {
-                if (!newVal.reward_type) {
-                    return;
-                }
-                console.log(newVal);
-                if (newVal.reward_type === 'buyxgety') {
-                    if (oldVal.reward_type !== 'buyxgety') {
-                        console.log(oldVal);
-                        $scope.offer.offer_items = {
-                            all: true
-                        };
-                        delete newVal.free_item;
-                    }
-                    if ($scope.offer.offer_items && $scope.offer.offer_items.menu_id) {
-                        $scope.getRewardName($scope.offer.offer_items).then(function(free_item_name) {
-                            newVal.free_item_name = free_item_name;
-                        }, function(err) {
-                            console.log(err);
-                        });
-                    }
-                    if (newVal.paid_item) {
-                        $scope.getRewardName(newVal.paid_item).then(function(paid_item_name) {
-                            if (newVal.paid_item && (!newVal.paid_item.paid_item_name || newVal.paid_item.paid_item_name !== paid_item_name)) {
-                                var paid_item = _.cloneDeep(newVal.paid_item);
-                                paid_item.paid_item_name = paid_item_name;
-                                newVal.paid_item = paid_item;
-                            }
-                        }, function(err) {
-                            console.log(err);
-                        });
-                    }
-                    if (newVal.paid_item && $scope.offer.offer_items && $scope.offer.offer_items.menu_id) {
-                        $scope.offer.actions.reward.header = 'Buy ' + (newVal.paid_item && newVal.paid_item.paid_item_name);
-                        $scope.offer.actions.reward.line1 = 'Get ' + newVal.free_item_name;
-                        $scope.offer.actions.reward.line2 = '';
-                    } else {
-                        $scope.offer.actions.reward.header = '';
-                        $scope.offer.actions.reward.line1 = '';
-                        $scope.offer.actions.reward.line2 = '';
-                    }
-                } else if (newVal.reward_type === 'free') {
-                    if (oldVal.reward_type && oldVal.reward_type !== 'free') {
-                        $scope.offer.offer_items = {
-                            all: true
-                        };
-                        delete newVal.paid_item;
-                        delete newVal.free_item_name;
-                    }
-                    if ($scope.offer.offer_items && $scope.offer.offer_items.menu_id) {
-                        $scope.offer.actions.reward.header = 'FREE';
-                        $scope.offer.actions.reward.line1 = newVal.free_item_name;
-                        $scope.offer.actions.reward.line2 = '';
-                    } else {
-                        $scope.offer.actions.reward.header = '';
-                        $scope.offer.actions.reward.line1 = '';
-                        $scope.offer.actions.reward.line2 = '';
-                    }
-                } else if (newVal.reward_type === 'flatoff') {
-                    if (oldVal.reward_type && oldVal.reward_type !== 'flatoff') {
-                        delete newVal.free_item;
-                        delete newVal.paid_item;
-                        $scope.offer.offer_items = {
-                            all: true
-                        };
-                    }
-                    if (newVal.off && newVal.spend) {
-                        $scope.offer.actions.reward.header = 'Rs. ' + newVal.off + ' off';
-                        $scope.offer.actions.reward.line1 = 'on a min spend';
-                        $scope.offer.actions.reward.line2 = 'of Rs. ' + newVal.spend;
-                    } else {
-                        $scope.offer.actions.reward.header = '';
-                        $scope.offer.actions.reward.line1 = '';
-                        $scope.offer.actions.reward.line2 = '';
-                    }
-                } else if (newVal.reward_type === 'discount') {
-                    if (oldVal.reward_type && oldVal.reward_type !== 'flatoff') {
-                        delete newVal.paid_item;
-                        $scope.offer.offer_items = {
-                            all: true
-                        };
-                        delete newVal.free_item_name;
-                    }
-                    if (newVal.percent && newVal.max) {
-                        $scope.offer.actions.reward.header = newVal.percent + '% OFF';
-                        $scope.offer.actions.reward.line1 = 'on your bill';
-                        $scope.offer.actions.reward.line2 = 'max discount Rs.' + newVal.max;
-                    } else {
-                        $scope.offer.actions.reward.header = '';
-                        $scope.offer.actions.reward.line1 = '';
-                        $scope.offer.actions.reward.line2 = '';
-                    }
-                }
-            });
-
-            $scope.chooseItem = function(item_for, item_only) {
+            $scope.chooseItem = function(item_for) {
                 var modalInstance = $modal.open({
                     animation: true,
                     templateUrl: 'templates/partials/offer.pick_item.tmpl.html',
                     controller: 'PickItemController',
-                    size: 'md',
-                    resolve: {
-                        item_only: function() {
-                            return item_only;
-                        }
-                    }
+                    size: 'md'
                 });
 
                 modalInstance.result.then(function(item) {
@@ -350,6 +256,16 @@ angular.module('merchantApp')
                     });
             };
 
+            $scope.filterOutlets = function() {
+                $scope.filtered_outlets = _.indexBy(_.filter($scope.outlets, function(outlet) {
+                    if ($scope.offer.actions.reward.applicability.delivery) {
+                        return outlet.attributes.home_delivery;
+                    } else {
+                        return true;
+                    }
+                }), '_id');
+            };
+
             $scope.backToStart = function() {
                 WizardHandler.wizard().goTo(0);
             };
@@ -371,8 +287,8 @@ angular.module('merchantApp')
 
                 $scope.validateOfferType().then(function() {
                     $scope.validateOfferRules().then(function() {
-                        $scope.validateRewardDetails().then(function() {
-                            $scope.validateRewardInfo().then(function() {
+                        $scope.validateRewardInfo().then(function() {
+                            $scope.validateRewardDetails().then(function() {
                                 $scope.scrollToTop();
                                 $scope.formFailure = false;
                                 deferred.resolve(true);
@@ -458,39 +374,131 @@ angular.module('merchantApp')
 
             $scope.validateRewardDetails = function() {
                 var deferred = $q.defer();
-                if (!$scope.offer.actions.reward.reward_meta.reward_type) {
+                if (!$scope.offer.actions.reward.applicability.delivery && !$scope.offer.actions.reward.applicability.dine_in) {
+                    deferred.reject('Offer cannot be invalid for both dine-in and delivery');
+                } else if (!$scope.offer.actions.reward.reward_meta.reward_type) {
                     deferred.reject('Choose a reward type');
                 } else if ($scope.offer.actions.reward.reward_meta.reward_type === 'buyxgety') {
                     if (!$scope.offer.actions.reward.reward_meta.paid_item) {
                         deferred.reject('Buy X Get Y requires "PAID ITEM"');
-                    } else if (!$scope.offer.offer_items.menu_id) {
+                    } else if (!($scope.offer.offer_items.menus && $scope.offer.offer_items.menus.length)) {
                         deferred.reject('Buy X Get Y requires "FREE ITEM"');
                     } else {
                         deferred.resolve(true);
                     }
                 } else if ($scope.offer.actions.reward.reward_meta.reward_type === 'free') {
-                    if (!$scope.offer.offer_items || !$scope.offer.offer_items.menu_id) {
-                        deferred.reject('Please choose the "FREE ITEM"');
+                    if ($scope.offer.actions.reward.applicability.delivery) {
+                        if (!$scope.offer.offer_items || !($scope.offer.offer_items.menus && $scope.offer.offer_items.menus.length)) {
+                            deferred.reject('Please choose the "FREE ITEM"');
+                        } else {
+                            deferred.resolve(true);
+                        }
                     } else {
-                        deferred.resolve(true);
+                        if (!$scope.offer.actions.reward.reward_meta.title) {
+                            deferred.reject("Free offer requires free item name");
+                        } else if (!$scope.offer.actions.reward.reward_meta._with) {
+                            deferred.reject("Free offer requires conditions");
+                        } else {
+                            deferred.resolve(true);
+                        }
                     }
                 } else if ($scope.offer.actions.reward.reward_meta.reward_type === 'flatoff') {
-                    if (!$scope.offer.actions.reward.reward_meta.off) {
-                        deferred.reject('Flatoff required off amount.');
-                    } else if (!$scope.offer.actions.reward.reward_meta.spend) {
-                        deferred.reject('Flatoff required minimum spend.');
-                    } else if (!$scope.offer.offer_items.all && !$scope.offer.offer_items.menu_id) {
-                        deferred.reject('Please choose the items first');
+                    if ($scope.offer.actions.reward.applicability.delivery) {
+                        if (!$scope.offer.actions.reward.reward_meta.off) {
+                            deferred.reject('Flatoff required off amount.');
+                        } else if (!$scope.offer.actions.reward.reward_meta.spend) {
+                            deferred.reject('Flatoff required minimum spend.');
+                        } else if (!$scope.offer.offer_items.all && !($scope.offer.offer_items.menus && $scope.offer.offer_items.menus.length)) {
+                            deferred.reject('Please choose the items first');
+                        } else {
+                            deferred.resolve(true);
+                        }
+                    } else {
+                        if (!$scope.offer.actions.reward.reward_meta.off) {
+                            deferred.reject("Flatoff required off amount")
+                        } else if (!$scope.offer.actions.reward.reward_meta.spend) {
+                            deferred.reject("Flatoff required minimum spend");
+                        } else {
+                            deferred.resolve(true);
+                        }
+                    }
+                } else if ($scope.offer.actions.reward.reward_meta.reward_type === 'discount') {
+                    if ($scope.offer.actions.reward.applicability.delivery) {
+                        if (!$scope.offer.actions.reward.reward_meta.percent) {
+                            deferred.reject("Valid discount percentage required");
+                        } else if (!$scope.offer.actions.reward.reward_meta.max) {
+                            deferred.reject("Max discount amount required");
+                        } else if (!$scope.offer.offer_items.all && !($scope.offer.offer_items.menus && $scope.offer.offer_items.menus.length)) {
+                            deferred.reject('Please choose the items first');
+                        } else {
+                            deferred.resolve(true);
+                        }
+                    } else {
+                        if (!$scope.offer.actions.reward.reward_meta.percent) {
+                            deferred.reject("Discount requires valid disount percentage");
+                        } else if (!$scope.offer.actions.reward.reward_meta.max) {
+                            deferred.reject("Discouut requires maximum discount amount");
+                        } else {
+                            deferred.resolve(true);
+                        }
+                    }
+                } else if ($scope.offer.actions.reward.reward_meta.reward_type === "buyonegetone") {
+                    if (!$scope.offer.actions.reward.reward_meta.bogo) {
+                        deferred.reject("'Buy One Get One' requires item names")
                     } else {
                         deferred.resolve(true);
                     }
-                } else if ($scope.offer.actions.reward.reward_meta.reward_type === 'discount') {
-                    if (!$scope.offer.actions.reward.reward_meta.percent) {
-                        deferred.reject("Valid discount percentage required");
-                    } else if (!$scope.offer.actions.reward.reward_meta.max) {
-                        deferred.reject("Max discount amount required");
-                    } else if (!$scope.offer.offer_items.all && !$scope.offer.offer_items.menu_id) {
-                        deferred.reject('Please choose the items first');
+                } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'happyhours') {
+                    if (!$scope.offer.actions.reward.reward_meta.extension) {
+                        deferred.reject("'Happy hours' offer requires extension duration (in hrs.)")
+                    } else {
+                        deferred.resolve(true);
+                    }
+                } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'reduced') {
+                    if (!$scope.offer.actions.reward.reward_meta.what) {
+                        deferred.reject("Reduced offer requires item info");;
+                    } else if (!$scope.offer.actions.reward.reward_meta.worth) {
+                        deferred.reject("Reduced offer requires actual worth");
+                    } else if (!$scope.offer.actions.reward.reward_meta.for_what) {
+                        deferred.reject("Reduced offer requires deal price");
+                    } else {
+                        deferred.resolve(true);
+                    }
+                } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'custom') {
+                    if (!$scope.offer.actions.reward.reward_meta.title) {
+                        deferred.reject("Custom offer requires offer details");
+                    } else {
+                        deferred.resolve(true);
+                    }
+                } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'unlimited') {
+                    if (!$scope.offer.actions.reward.reward_meta.item) {
+                        deferred.reject("Unlimited offer requires item name");
+                    } else if (!$scope.offer.actions.reward.reward_meta.conditions) {
+                        deferred.reject("Unlimited offer requires offer criteria");
+                    } else {
+                        deferred.resolve(true);
+                    }
+                } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'onlyhappyhours') {
+                    if (!$scope.offer.actions.reward.reward_meta.title) {
+                        deferred.reject("'Only happy hours' offer requires deal info");
+                    } else if (!$scope.offer.actions.reward.reward_meta.conditions) {
+                        deferred.reject("'Only happy hours' offer requires deal items");
+                    } else {
+                        deferred.resolve(true);
+                    }
+                } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'combo') {
+                    if (!$scope.offer.actions.reward.reward_meta.items) {
+                        deferred.reject("Combo offer requires deal items");
+                    } else if (!$scope.offer.actions.reward.reward_meta._for) {
+                        deferred.reject("Combo offer requires deal price");
+                    } else {
+                        deferred.resolve(true);
+                    }
+                } else if ($scope.offer.actions.reward.reward_meta.reward_type == 'buffet') {
+                    if (!$scope.offer.actions.reward.reward_meta.title) {
+                        deferred.reject("Buffet offer requires deal info");
+                    } else if (!$scope.offer.actions.reward.reward_meta.cost) {
+                        deferred.reject("Buffet offer requires deal price");
                     } else {
                         deferred.resolve(true);
                     }
@@ -516,8 +524,6 @@ angular.module('merchantApp')
                 var deferred = $q.defer();
                 if (!$scope.offer.minimum_bill_value && $scope.offer.minimum_bill_value !== 0) {
                     deferred.reject("Minimum bill value required");
-                } else if (!$scope.offer.actions.reward.applicability.dine_in && !$scope.offer.actions.reward.applicability.delivery) {
-                    deferred.reject('Offer cannot be invalid for both dine-in and delivery');
                 } else if (!$scope.offer.offer_lapse_days && $scope.offer.offer_type === 'checkin') {
                     deferred.reject('Offer lapse duration required');
                 } else if (!$scope.offer.offer_valid_days && $scope.offer.offer_type === 'checkin') {
@@ -662,84 +668,5 @@ angular.module('merchantApp')
                 }
                 return deferred.promise;
             };
-
-            $scope.getRewardName = function(item_obj) {
-                var deferred = $q.defer();
-                async.each($scope.menus, function(menu, callback) {
-                    if (menu._id !== item_obj.menu_id) {
-                        callback();
-                    } else {
-                        async.each(menu.menu_categories, function(category, callback) {
-                            if (category._id !== item_obj.category_id) {
-                                callback();
-                            } else if (!item_obj.sub_category_id) {
-                                callback('All ' + category.category_name);
-                            } else {
-                                async.each(category.sub_categories, function(sub_category, callback) {
-                                    if (sub_category._id !== item_obj.sub_category_id) {
-                                        callback();
-                                    } else if (!item_obj.item_id) {
-                                        callback('All ' + sub_category.sub_category_name);
-                                    } else {
-                                        async.each(sub_category.items, function(item, callback) {
-                                            if (item._id !== item_obj.item_id) {
-                                                callback();
-                                            } else if (!item_obj.option_id) {
-                                                callback(item.item_name);
-                                            } else {
-                                                async.each(item.options, function(option, callback) {
-                                                    if (option._id !== item_obj.option_id) {
-                                                        callback();
-                                                    } else if ((!item_obj.sub_options || !item_obj.sub_options.length)) {
-                                                        callback(item.item_name + ' - ' + option.option_value);
-                                                    } else {
-                                                        var item_name = '';
-                                                        async.each(option.sub_options, function(sub_option, callback) {
-                                                            async.each(sub_option.sub_option_set, function(sub_opt, callback) {
-                                                                if (item_obj.sub_options.indexOf(sub_opt._id) !== -1) {
-                                                                    item_name += ', ' + sub_opt.sub_option_value;
-                                                                    callback();
-                                                                } else {
-                                                                    callback();
-                                                                }
-                                                            }, function() {
-                                                                callback();
-                                                            });
-                                                        }, function() {
-                                                            item_name = item_name.slice(2);
-                                                            item_name += ' ' + item.item_name + ' - ' + option.option_value;
-                                                            var index = item_name.lastIndexOf(',');
-                                                            if (index !== -1) {
-                                                                item_name = item_name.slice(0, index) + ' or' + item_name.slice(index + 1);
-                                                            }
-                                                            callback(item_name);
-                                                        });
-                                                    }
-                                                }, function(item_name) {
-                                                    callback(item_name);
-                                                });
-                                            }
-                                        }, function(item_name) {
-                                            callback(item_name);
-                                        });
-                                    }
-                                }, function(item_name) {
-                                    callback(item_name);
-                                });
-                            }
-                        }, function(item_name) {
-                            callback(item_name);
-                        });
-                    }
-                }, function(item_name) {
-                    if (item_name) {
-                        deferred.resolve(item_name);
-                    } else {
-                        deferred.reject('error');
-                    }
-                });
-                return deferred.promise;
-            };
-
         }
     ]);

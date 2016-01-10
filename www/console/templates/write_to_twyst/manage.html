@@ -26,29 +26,29 @@
                             <th>
                                 <div class='th'>
                                     Phone
-                                    <span class='fa fa-angle-up' ng-click='order("")' ng-class='{active: row === ""}'></span>
-                                    <span class='fa fa-angle-down' ng-click='order("-")' ng-class='{active: row === "-"}'></span>
+                                    <span class='fa fa-angle-up' ng-click='order("event_user.phone")' ng-class='{active: row === "event_user.phone"}'></span>
+                                    <span class='fa fa-angle-down' ng-click='order("-event_user.phone")' ng-class='{active: row === "-event_user.phone"}'></span>
                                 </div>
                             </th>
                             <th>
                                 <div class='th'>
                                     E-Mail
-                                    <span class='fa fa-angle-up' ng-click='order("")' ng-class='{active: row === ""}'></span>
-                                    <span class='fa fa-angle-down' ng-click='order("-")' ng-class='{active: row === "-"}'></span>
+                                    <span class='fa fa-angle-up' ng-click='order("event_user.email")' ng-class='{active: row === "event_user.email"}'></span>
+                                    <span class='fa fa-angle-down' ng-click='order("-event_user.email")' ng-class='{active: row === "-event_user.email"}'></span>
                                 </div>
                             </th>
                             <th>
                                 <div class='th'>
                                     Comment
-                                    <span class='fa fa-angle-up' ng-click='order("")' ng-class='{active: row === ""}'></span>
-                                    <span class='fa fa-angle-down' ng-click='order("-")' ng-class='{active: row === "-"}'></span>
+                                    <span class='fa fa-angle-up' ng-click='order("event_meta.comments")' ng-class='{active: row === "event_meta.comments"}'></span>
+                                    <span class='fa fa-angle-down' ng-click='order("-event_meta.comments")' ng-class='{active: row === "-event_meta.comments"}'></span>
                                 </div>
                             </th>
                             <th>
                                 <div class='th'>
                                     Date
-                                    <span class='fa fa-angle-up' ng-click='order("")' ng-class='{active: row === ""}'></span>
-                                    <span class='fa fa-angle-down' ng-click='order("-")' ng-class='{active: row === "-"}'></span>
+                                    <span class='fa fa-angle-up' ng-click='order("event_date")' ng-class='{active: row === "event_date"}'></span>
+                                    <span class='fa fa-angle-down' ng-click='order("-event_date")' ng-class='{active: row === "-event_date"}'></span>
                                 </div>
                             </th>
                             <th>
@@ -78,7 +78,7 @@
                         <div class='col-sm-6 page-num-info'>
                             <span>
                                 Show
-                                <select ng-model='numPerPage' ng-options='num for num in numPerPageOpts' ng-change='onNumPerPageChange()'></select>
+                                <select ng-model='numPerPage' ng-options='num for num in numPerPageOpt' ng-change='onNumPerPageChange()'></select>
                                 entries per page
                             </span>
                         </div>

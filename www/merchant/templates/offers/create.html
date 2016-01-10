@@ -90,23 +90,56 @@
                                 <legend>Reward Details</legend>
                                 <form class='form-horizontal' role='form'>
                                     <div class='form-group'>
-                                        <label class='col-sm-2 control-label'>Reward Type <i class='fa fa-sm fa-asterisk'></i></label>
-                                        <div class='col-sm-6' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.reward_type}'>
-                                            <select class='form-control' ng-model='offer.actions.reward.reward_meta.reward_type'>
-                                                <option value='' ng-if='!offer.actions.reward.reward_meta.reward_type'>Choose a reward type</option>
-                                                <option ng-repeat='(key, val) in reward_types' value='{{key}}'>{{val}}</option>
-                                            </select>
+                                        <label class='col-sm-2 control-label'>Applicable for <i class='fa fa-sm fa-asterisk'></i></label>
+                                        <div class='col-sm-6'>
+                                            <div class='btn-group'>
+                                                <label class='btn' ng-class='{"btn-default": !offer.actions.reward.applicability.dine_in, "btn-primary": offer.actions.reward.applicability.dine_in}' ng-model='offer.actions.reward.applicability.dine_in' ng-change='filterOutlets()' btn-checkbox>Dine-In</label>
+                                                <label class='btn' ng-class='{"btn-default": !offer.actions.reward.applicability.delivery, "btn-primary": offer.actions.reward.applicability.delivery}' ng-model='offer.actions.reward.applicability.delivery' ng-change='filterOutlets()' btn-checkbox>Delivery</label>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class='form-group'>
+                                        <label class='col-sm-2 control-label'>Reward Type <i class='fa fa-sm fa-asterisk'></i></label>
+                                        <div class='col-sm-6' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.reward_type}'>
+                                            <select class='form-control' ng-model='offer.actions.reward.reward_meta.reward_type' ng-disabled='!offer.actions.reward.applicability.dine_in && !offer.actions.reward.applicability.delivery'>
+                                                <option value='' ng-if='!offer.actions.reward.reward_meta.reward_type && !offer.actions.reward.applicability.dine_in && !offer.actions.reward.applicability.delivery'>Define Applicability First</option>
+                                                <option value='' ng-if='!offer.actions.reward.reward_meta.reward_type  && (offer.actions.reward.applicability.dine_in || offer.actions.reward.applicability.delivery)'>Choose a reward type</option>
+                                                <option ng-show='!offer.actions.reward.applicability.delivery' ng-repeat='(key, val) in generic_reward_types' value='{{key}}'>{{val}}</option>
+                                                <option ng-show='offer.actions.reward.applicability.delivery' ng-repeat='(key, val) in delivery_reward_types' value='{{key}}'>{{val}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class='form-group' ng-if='offer.actions.reward.reward_meta.reward_type'>
+                                        <label class='col-sm-2 control-label'>Reward Info</label>
+                                        <div class='col-sm-10'>
+                                            <div class='form-group'>
+                                                <label class='col-sm-2 control-label'>Header <i class='fa fa-sm fa-asterisk'></i></label>
+                                                <div class='col-sm-5' ng-class='{"has-error": formFailure && !offer.actions.reward.header}'>
+                                                    <input type='text' ng-model='offer.actions.reward.header' class='form-control'>
+                                                </div>
+                                            </div>
+                                            <div class='form-group'>
+                                                <label class='col-sm-2 control-label'>Line 1 <i class='fa fa-sm fa-asterisk'></i></label>
+                                                <div class='col-sm-5' ng-class='{"has-error": formFailure && !offer.actions.reward.line1}'>
+                                                    <input type='text' ng-model='offer.actions.reward.line1' class='form-control'>
+                                                </div>
+                                            </div>
+                                            <div class='form-group'>
+                                                <label class='col-sm-2 control-label'>Line 2</label>
+                                                <div class='col-sm-5'>
+                                                    <input type='text' ng-model='offer.actions.reward.line2' class='form-control'>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class='form-group' ng-if='offer.actions.reward.reward_meta.reward_type'>
                                         <label class='col-sm-2 control-label'>Reward Specifics <i class='fa fa-sm fa-asterisk'></i></label>
                                         <div class='col-sm-10' ng-if='offer.actions.reward.reward_meta.reward_type==="buyxgety"'>
                                             <div class='form-group'>
                                                 <label class='col-sm-2 control-label'>Free Item <i class='fa fa-sm fa-asterisk'></i></label>
                                                 <div class='col-sm-5'>
-                                                    <h4 ng-if='offer.offer_items.menu_id && offer.actions.reward.reward_meta.free_item_name'>{{offer.actions.reward.reward_meta.free_item_name}}</h4>
-                                                    <button type='button' class='btn btn-block' ng-class='{"btn-primary": !formFailure, "btn-danger": formFailure}' ng-click='chooseItem("buyxgety_1", true)' ng-if='!offer.offer_items.menu_id'>Choose Item</button>
-                                                    <button type='button' class='btn btn-block btn-success' ng-click='chooseItem("buyxgety_1", true)' ng-if='offer.offer_items.menu_id'>Update Item</button>
+                                                    <button type='button' class='btn btn-block' ng-class='{"btn-primary": !formFailure, "btn-danger": formFailure}' ng-click='chooseItem("buyxgety_1", true)' ng-if='!offer.offer_items.menus.length'>Choose Item</button>
+                                                    <button type='button' class='btn btn-block btn-success' ng-click='chooseItem("buyxgety_1", true)' ng-if='offer.offer_items.menus.length'>Update Item</button>
                                                 </div>
                                             </div>
                                             <div class='form-group'>
@@ -118,13 +151,103 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class='col-sm-10' ng-if='offer.actions.reward.reward_meta.reward_type==="free"'>
+                                        <div class='col-sm-10' ng-if='offer.actions.reward.reward_meta.reward_type==="free" && offer.actions.reward.applicability.delivery'>
                                             <div class='form-group'>
                                                 <label class='col-sm-2 control-label'>Free Item <i class='fa fa-sm fa-asterisk'></i></label>
                                                 <div class='col-sm-5'>
-                                                    <h4 ng-if='offer.offer_items.menu_id && offer.actions.reward.reward_meta.free_item_name'>{{offer.actions.reward.reward_meta.free_item_name}}</h4>
-                                                    <button type='button' class='btn btn-block' ng-class='{"btn-primary": !formFailure, "btn-danger": formFailure}' ng-click='chooseItem("free", true)' ng-if='!offer.offer_items.menu_id'>Choose Item</button>
-                                                    <button type='button' class='btn btn-block btn-success' ng-click='chooseItem("free", true)' ng-if='offer.offer_items.menu_id'>Update Item</button>
+                                                    <h4 ng-if='offer.offer_items.menus.length && offer.actions.reward.reward_meta.free_item_name'>{{offer.actions.reward.reward_meta.free_item_name}}</h4>
+                                                    <button type='button' class='btn btn-block' ng-class='{"btn-primary": !formFailure, "btn-danger": formFailure}' ng-click='chooseItem("free", true)' ng-if='!offer.offer_items.menus.length'>Choose Item</button>
+                                                    <button type='button' class='btn btn-block btn-success' ng-click='chooseItem("free", true)' ng-if='offer.offer_items.menus.length'>Update Item</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class='col-sm-10' ng-if='offer.actions.reward.reward_meta.reward_type==="free" && !offer.actions.reward.applicability.delivery'>
+                                            <div class='form-group'>
+                                                <label class='col-sm-2 control-label'>Free Item <i class='fa fa-sm fa-asterisk'></i></label>
+                                                <div class='col-sm-5'>
+                                                    <input type='text' ng-model='offer.actions.reward.reward_meta.title' class='form-control'>
+                                                </div>
+                                            </div>
+                                            <div class='form-group'>
+                                                <label class='col-sm-2 control-label'>Conditions <i class='fa fa-sm fa-asterisk'></i></label>
+                                                <div class='col-sm-5'>
+                                                    <input type='text' ng-model='offer.actions.reward.reward_meta._with' class='form-control' placeholder='Eg. min order of Rs.X or with purchase of Y'>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class='col-md-10' ng-if='offer.actions.reward.reward_meta.reward_type=="happyhours"' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.extension}'>
+                                            <label class='col-md-2 control-label'>Extention By <i class='fa fa-sm fa-asterisk'></i></label>
+                                            <div class='col-md-5'>
+                                                <div class='input-group'>
+                                                    <input type='number' ng-model='offer.actions.reward.reward_meta.extension' class='form-control'>
+                                                    <div class='input-group-addon'>hrs.</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class='col-md-10' ng-if='offer.actions.reward.reward_meta.reward_type=="reduced"'>
+                                            <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.what}'>
+                                                <label class='col-sm-2 control-label'>Item <i class='fa fa-sm fa-asterisk'></i></label>
+                                                <div class='col-sm-5'>
+                                                    <input type='text' ng-model='offer.actions.reward.reward_meta.what' class='form-control'>
+                                                </div>
+                                            </div>
+                                            <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.worth}'>
+                                                <label class='col-sm-2 control-label'>Worth <i class='fa fa-sm fa-asterisk'></i></label>
+                                                <div class='col-sm-5'>
+                                                    <div class='input-group'>
+                                                        <div class='input-group-addon'>
+                                                            <i class='fa fa-inr'></i>
+                                                        </div>
+                                                        <input type='number' ng-model='offer.actions.reward.reward_meta.worth' class='form-control'>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.for_what}'>
+                                                <label class='col-sm-2 control-label'>For <i class='fa fa-sm fa-asterisk'></i></label>
+                                                <div class='col-sm-5'>
+                                                    <div class='input-group'>
+                                                        <div class='input-group-addon'><i class='fa fa-inr'></i></div>
+                                                        <input type='number' ng-model='offer.actions.reward.reward_meta.for_what' class='form-control'>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class='col-md-10' ng-if='offer.actions.reward.reward_meta.reward_type=="custom"'>
+                                            <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.title}'>
+                                                <label class='col-sm-2 control-label'>Custom Text <i class='fa fa-sm fa-asterisk'></i></label>
+                                                <div class='col-sm-5'>
+                                                    <textarea class='form-control' ng-model='offer.actions.reward.reward_meta.title' rows='5'></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class='col-md-10' ng-if='offer.actions.reward.reward_meta.reward_type=="unlimited"'>
+                                            <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.item}'>
+                                                <label class='col-sm-2 control-label'>Item <i class='fa fa-sm fa-asterisk'></i></label>
+                                                <div class='col-sm-5'>
+                                                    <input type='text' ng-model='offer.actions.reward.reward_meta.item' class='form-control'>
+                                                </div>
+                                            </div>
+                                            <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.conditions}'>
+                                                <label class='col-sm-2 control-label'>For <i class='fa fa-sm fa-asterisk'></i></label>
+                                                <div class='col-sm-5'>
+                                                    <div class='input-group'>
+                                                        <div class='input-group-addon'><i class='fa fa-inr'></i></div>
+                                                        <input type='text' ng-model='offer.actions.reward.reward_meta.conditions' class='form-control'>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class='col-md-10' ng-if='offer.actions.reward.reward_meta.reward_type=="onlyhappyhours"'>
+                                            <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.title}'>
+                                                <label class='col-sm-2 control-label'>Deal <i class='fa fa-sm fa-asterisk'></i></label>
+                                                <div class='col-sm-5'>
+                                                    <input type='text' class='form-control' ng-model='offer.actions.reward.reward_meta.title'>
+                                                </div>
+                                            </div>
+                                            <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.conditions}'>
+                                                <label class='col-md-2 control-label'>Conditions <i class='fa fa-sm fa-asterisk'></i></label>
+                                                <div class='col-md-5'>
+                                                    <input type='text' class='form-control' ng-model='offer.actions.reward.reward_meta.conditions'>
                                                 </div>
                                             </div>
                                         </div>
@@ -168,8 +291,47 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class='col-sm-10' ng-if='offer.actions.reward.reward_meta.reward_type==="buyonegetone"'>
+                                            <div class='form-group'>
+                                                <label class='col-sm-2 control-label'>BOGO Item <i class='fa fa-sm fa-asterisk'></i></label>
+                                                <div class='col-sm-5' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.bogo}'>
+                                                    <input type='text' ng-model='offer.actions.reward.reward_meta.bogo' class='form-control' placeholder='provide item name here'>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class='col-sm-10' ng-if='offer.actions.reward.reward_meta.reward_type==="combo"'>
+                                            <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.items}'>
+                                                <label class='col-sm-2 control-label'>Items <i class='fa fa-sm fa-asterisk'></i></label>
+                                                <div class='col-sm-5'>
+                                                    <input type='text' class='form-control' ng-model='offer.actions.reward.reward_meta.items'>
+                                                </div>
+                                            </div>
+                                            <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta._for}'>
+                                                <label class='col-sm-2 control-label'>For <i class='fa fa-sm fa-asterisk'></i></label>
+                                                <div class='col-sm-5'>
+                                                    <input type='number' class='form-control' ng-model='offer.actions.reward.reward_meta._for'>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class='col-md-10' ng-if='offer.actions.reward.reward_meta.reward_type=="buffet"'>
+                                            <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.title}'>
+                                                <label class='col-sm-2 control-label'>Deal <i class='fa fa-sm fa-asterisk'></i></label>
+                                                <div class='col-sm-5'>
+                                                    <textarea rows='3' ng-model='offer.actions.reward.reward_meta.title' class='form-control' ng-change='updateBuffetOffer(offer)'></textarea>
+                                                </div>
+                                            </div>
+                                            <div class='form-group' ng-class='{"has-error": formFailure && !offer.actions.reward.reward_meta.cost}'>
+                                                <label class='col-sm-2 control-label'>Cost <i class='fa fa-sm fa-asterisk'></i></label>
+                                                <div class='col-sm-5'>
+                                                    <div class='input-group'>
+                                                        <div class='input-group-addon'><i class='fa fa-inr'></i></div>
+                                                        <input type='number' ng-model='offer.actions.reward.reward_meta.cost' class='form-control' ng-change='updateBuffetOffer(offer)'>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class='form-group' ng-if='offer.actions.reward.reward_meta.reward_type==="flatoff" || offer.actions.reward.reward_meta.reward_type==="discount"'>
+                                    <div class='form-group' ng-if='(offer.actions.reward.reward_meta.reward_type==="flatoff" || offer.actions.reward.reward_meta.reward_type==="discount") && offer.actions.reward.applicability.delivery'>
                                         <label class='col-sm-2 control-label'>Apply to all items</label>
                                         <div class='col-sm-6'>
                                             <input bs-switch ng-model='offer.offer_items.all' type='checkbox' switch-off-text='NO' switch-on-text='YES'>
@@ -178,37 +340,8 @@
                                     <div class='form-group' ng-if='(offer.actions.reward.reward_meta.reward_type==="flatoff" || offer.actions.reward.reward_meta.reward_type==="discount") && !offer.offer_items.all'>
                                         <label class='col-sm-2 control-label'>Reward Items <i class='fa fa-sm fa-asterisk'></i></label>
                                         <div class='col-sm-6'>
-                                            <button class='btn btn-block' ng-class='{"btn-primary": !formFailure, "btn-danger": formFailure}' ng-if='!offer.offer_items.menu_id' ng-click='chooseItem("", false)'>Choose Items</button>
-                                            <button class='btn btn-block btn-success' ng-if='offer.offer_items.menu_id' ng-click='chooseItem("", false)'>Update Items</button>
-                                        </div>
-                                    </div>
-                                    <div class='form-group'>
-                                        <label class='col-sm-2 control-label'>Reward Info</label>
-                                        <div class='col-sm-10' ng-if='!offer.actions.reward.reward_meta.reward_type || (offer.actions.reward.reward_meta.reward_type==="discount" && !(offer.actions.reward.reward_meta.percent && offer.actions.reward.reward_meta.max)) || (offer.actions.reward.reward_meta.reward_type==="free" && !offer.actions.reward.reward_meta.free_item) || (offer.actions.reward.reward_meta.reward_type==="flatoff" && !(offer.actions.reward.reward_meta.off && offer.actions.reward.reward_meta.spend)) || (offer.actions.reward.reward_meta.reward_type==="buyxgety" && !(offer.actions.reward.reward_meta.paid_item && offer.offer_items.menu_id))'>
-                                            <div class='alert' ng-class='{"alert-warning": !formFailure, "alert-danger": formFailure}'>
-                                                <b ng-if='!offer.actions.reward.reward_meta.reward_type'>Choose a valid reward type first</b>
-                                                <b ng-if='offer.actions.reward.reward_meta.reward_type'>Input reward specifics to edit details</b>
-                                            </div>
-                                        </div>
-                                        <div class='col-sm-10' ng-if='(offer.actions.reward.reward_meta.reward_type==="discount" && (offer.actions.reward.reward_meta.percent && offer.actions.reward.reward_meta.max)) || (offer.actions.reward.reward_meta.reward_type==="free" && offer.offer_items.menu_id) || (offer.actions.reward.reward_meta.reward_type==="flatoff" && (offer.actions.reward.reward_meta.off && offer.actions.reward.reward_meta.spend)) || (offer.actions.reward.reward_meta.reward_type==="buyxgety" && (offer.actions.reward.reward_meta.paid_item && offer.offer_items.menu_id))'>
-                                            <div class='form-group'>
-                                                <label class='col-sm-2 control-label'>Header <i class='fa fa-sm fa-asterisk'></i></label>
-                                                <div class='col-sm-5' ng-class='{"has-error": formFailure && !offer.actions.reward.header}'>
-                                                    <input type='text' ng-model='offer.actions.reward.header' class='form-control'>
-                                                </div>
-                                            </div>
-                                            <div class='form-group'>
-                                                <label class='col-sm-2 control-label'>Line 1 <i class='fa fa-sm fa-asterisk'></i></label>
-                                                <div class='col-sm-5' ng-class='{"has-error": formFailure && !offer.actions.reward.line1}'>
-                                                    <input type='text' ng-model='offer.actions.reward.line1' class='form-control'>
-                                                </div>
-                                            </div>
-                                            <div class='form-group'>
-                                                <label class='col-sm-2 control-label'>Line 2</label>
-                                                <div class='col-sm-5'>
-                                                    <input type='text' ng-model='offer.actions.reward.line2' class='form-control'>
-                                                </div>
-                                            </div>
+                                            <button class='btn btn-block' ng-class='{"btn-primary": !formFailure, "btn-danger": formFailure}' ng-if='!offer.offer_items.menus.length' ng-click='chooseItem("", false)'>Choose Items</button>
+                                            <button class='btn btn-block btn-success' ng-if='offer.offer_items.menus.length' ng-click='chooseItem("", false)'>Update Items</button>
                                         </div>
                                     </div>
                                     <div class='form-group'>
@@ -232,21 +365,6 @@
                                             <div class='input-group'>
                                                 <span class='input-group-addon'><i class='fa fa-inr'></i></span>
                                                 <input type='number' class='form-control' ng-model='offer.minimum_bill_value'>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class='form-group'>
-                                        <label class='col-sm-2 control-label'>Applicable for <i class='fa fa-sm fa-asterisk'></i></label>
-                                        <div class='col-sm-6'>
-                                            <div class='row'>
-                                                <label class='col-sm-2'>Dine-In</label>
-                                                <div class='col-sm-4'>
-                                                    <input bs-switch type='checkbox' ng-model='offer.actions.reward.applicability.dine_in' switch-off-text='NO' switch-on-text='YES'>
-                                                </div>
-                                                <label class='col-sm-2'>Delivery</label>
-                                                <div class='col-sm-4'>
-                                                    <input bs-switch type='checkbox' ng-model='offer.actions.reward.applicability.delivery' switch-off-text='NO' switch-on-text='YES'>
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -335,7 +453,7 @@
                                         </label>
                                         <div class='col-sm-6 table-responsive'>
                                             <ul class='list-group'>
-                                                <li class='list-group-item' ng-repeat='outlet in outlets track by $index' ng-show='!offer.offer_outlets || offer.offer_outlets.indexOf(outlet._id)===-1'>
+                                                <li class='list-group-item' ng-repeat='outlet in filtered_outlets track by $index' ng-show='!offer.offer_outlets || offer.offer_outlets.indexOf(outlet._id)===-1'>
                                                     {{outlet.basics.name}}, {{outlet.contact.location.locality_1[0]}}, {{outlet.contact.location.locality_2[0]}}
                                                     <button class='btn btn-sm btn-success pull-right' ng-click='addOutlet(outlet._id)'><i class='fa fa-plus'></i></button>
                                                 </li>
@@ -474,7 +592,7 @@
                                             <span ng-if='offer.actions.reward.applicability.delivery' class='label label-success'>Delivery</span>
                                         </div>
                                         <div>
-                                            <h4>Minimum Bill <span class='label label-success'>Rs.{{offer.minimum_bill_value}}</span></h4>
+                                            <h4>Minimum Bill <span class='label label-success'><i class='fa fa-inr'></i>{{offer.minimum_bill_value}}</span></h4>
                                         </div>
                                         <div ng-if='offer.offer_type=="offer"'>
                                             <h4>Offer Cost <span class='label label-success'>{{offer.offer_cost}}</span> Twyst Bucks</h4>

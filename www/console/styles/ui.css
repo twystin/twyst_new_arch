@@ -4646,7 +4646,7 @@ img.img80_80 {
 
 .ui-timeline:before {
     background-color: #d5d5d5;
-    bottom: 0px;
+    bottom: 0;
     content: "";
     position: absolute;
     left: 0;

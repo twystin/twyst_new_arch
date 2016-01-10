@@ -26,7 +26,7 @@ angular.module('merchantApp')
                 }
             }, function(err) {
                 console.log(err);
-                $socpe.outlets = {};
+                $scope.outlets = {};
             });
 
             $scope.orders = [];
