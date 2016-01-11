@@ -8,7 +8,6 @@ var Cache = require('../common/cache.hlpr');
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
 var Outlet = mongoose.model('Outlet');
-var ContactUs = mongoose.model('ContactUs');
 var Event = mongoose.model('Event');
 var HttpHelper = require('../common/http.hlpr');
 var AuthHelper = require('../common/auth.hlpr');
@@ -264,7 +263,9 @@ module.exports.apply = function(req, res) {
     var AWSHelper = require('./helpers/aws.hlpr.js');
     var Mailer = require('../transports/email/gmail.transport');
     var formats = require('../common/fileformats.js').file_formats;
-    if (!req.body.resume) {
+    if (!req.body.position) {
+        HttpHelper.error(res, null, 'Please specify the position');
+    } else if (!req.body.resume) {
         HttpHelper.error(res, null, "Resume file required");
     } else if (!req.body.format) {
         HttpHelper.error(res, null, "file format required");
@@ -275,7 +276,7 @@ module.exports.apply = function(req, res) {
         Mailer.send({
             from: 'apply@twyst.in',
             to: 'hemant@twyst.in, kuldeep@twyst.in, al@twyst.in, rc@twyst.in',
-            subject: 'Candidate Application',
+            subject: 'Candidate Application (' + req.body.position + ')',
             text: 'New job application',
             html: 'New job application',
             attachments: [{

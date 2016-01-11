@@ -2,21 +2,16 @@
 <html lang="en">
 
 <head>
-
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
-
     <title>Twyst</title>
-
     <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.min.css" type="text/css">
-
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Merriweather:400,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="../bower_components/font-awesome/css/font-awesome.min.css" type="text/css">
-
     <link rel="stylesheet" href="creative.css" type="text/css">
     <link rel='stylesheet' href='style.css' type='text/css'>
     <link rel='stylesheet' href="../bower_components/angular-toastr/dist/angular-toastr.css"></link>
@@ -31,26 +26,20 @@
     <script src='js/creative.js'></script>
     <script src='js/app.js'></script>
     <script src='js/file_handler.directive.js'></script>
-
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
         <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
-
 </head>
 
 <body id="page-top" on-load='onload()' ng-app='twystHome' ng-controller='MainCtrl'>
-
     <nav id="mainNav" class="navbar navbar-default navbar-fixed-top">
         <div class="container-fluid">
-            
             <div class="navbar-header">
                 <img class="navbar-brand page-scroll" src='img/logo.png'>
             </div>
-
-
             <div class="navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav navbar-right">
                     <li>
@@ -58,11 +47,8 @@
                     </li>
                 </ul>
             </div>
-
         </div>
-
     </nav>
-
     <header>
         <div class="header-content">
             <div class="header-content-inner">
@@ -76,9 +62,6 @@
             </div>
         </div>
     </header>
-
-    
-
     <section class="bg-primary" id="about">
         <div class="container">
             <div class="row">
@@ -93,7 +76,6 @@
             </div>
         </div>
     </section>
-
     <section id="services">
         <div class="container">
             <div class="row">
@@ -108,7 +90,6 @@
             </div>
         </div>
     </section>
-
     <aside class="bg-dark">
         <div class="container text-center">
             <div class="call-to-action">
@@ -117,53 +98,48 @@
             </div>
         </div>
     </aside>
-
     <footer class="footer">
-      <div class="container-fluid">
-        <div style="margin-bottom:50px" class="row">
-          <div class="col-xs-12 col-md-4">
-            <h3 class="text-left">About</h3>
-            <p class="text-justify">Twyst is a start-up based out of Gurgaon, started by a team with a combined experience of 40 years across product, strategy, operations and marketing. More</p>
-          </div>
-          <div class="col-xs-12 col-md-4 text-left">
-            <h3>Follow</h3>
-            <div class="social">
-                <a href="https://twitter.com/twystin" target="_blank"><i class="fa fa-twitter fa-lg"></i></a>
-                <a href="https://www.facebook.com/twystin" target="_blank"><i class="fa fa-facebook fa-lg"></i></a></div>
-          </div>
-          <div class="col-xs-12 col-md-4 text-left">
-            <h3 class="text-left">Connect</h3>
-            <button class="btn btn-lg btn-danger" ng-click='contactUs()'>Get in Touch</button><span>&nbsp;&nbsp;&nbsp;</span>
-            <div class='clearfix'>&nbsp;</div>
-            <button class="btn btn-lg btn-danger" ng-click='applyToTwyst()'>Work With Us</button>
-          </div>
+        <div class="container-fluid">
+            <div style="margin-bottom:50px" class="row">
+                <div class="col-xs-12 col-md-4">
+                    <h3 class="text-left">About</h3>
+                    <p class="text-justify">Twyst is a start-up based out of Gurgaon, started by a team with a combined experience of 40 years across product, strategy, operations and marketing. More</p>
+                </div>
+                <div class="col-xs-12 col-md-4 text-left">
+                    <h3>Follow</h3>
+                    <div class="social">
+                        <a href="https://twitter.com/twystin" target="_blank"><i class="fa fa-twitter fa-lg"></i></a>
+                        <a href="https://www.facebook.com/twystin" target="_blank"><i class="fa fa-facebook fa-lg"></i></a></div>
+                </div>
+                <div class="col-xs-12 col-md-4 text-left">
+                    <h3 class="text-left">Connect</h3>
+                    <button class="btn btn-lg btn-danger" ng-click='contactUs()'>Get in Touch</button><span>&nbsp;&nbsp;&nbsp;</span>
+                    <div class='clearfix'>&nbsp;</div>
+                    <button class="btn btn-lg btn-danger" ng-click='applyToTwyst()'>Work With Us</button>
+                </div>
+            </div>
+            <div style="margin-top:50px" class="row">
+                <div class="col-xs-12 col-md-4">
+                    <a href="#" class="sp-effect3"><img src="img/logo.png" alt="" class="logo" style='max-height: 60px;width: auto;' /></a>
+                    <div class="rights">
+                        <p>Copyright &copy; 2015 Twyst Technologies Pvt. Ltd.</p>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-md-2" style="margin-top:60px">
+                    <a href="http://twyst.in/terms_of_use.pdf" style='color: white'> Terms of Use</a>
+                </div>
+                <div class="col-xs-12 col-md-2" style="margin-top:60px">
+                    <a href="http://twyst.in/privacy_policy.pdf" style='color: white'> Privacy Policy</a>
+                </div>
+            </div>
         </div>
-        <div style="margin-top:50px" class="row">
-          <div class="col-xs-12 col-md-4"><a href="#" class="sp-effect3"><img src="img/logo.png" alt="" class="logo" style='max-height: 60px;width: auto;'/></a>
-            <div class="rights">
-              <p>Copyright &copy; 2015 Twyst Technologies Pvt. Ltd.</p>
-            </div>
-          </div>
-            <div class="col-xs-12 col-md-2" style="margin-top:60px" >
-
-              <a href="http://twyst.in/terms_of_use.pdf" style = 'color: white'> Terms of Use</a>
-              
-            </div>
-            <div class="col-xs-12 col-md-2" style="margin-top:60px" >
-              <a href="http://twyst.in/privacy_policy.pdf" style = 'color: white'> Privacy Policy</a>
-            </div>
-        </div>
-      </div>
     </footer>
-
     <script src="../bower_components/jquery/dist/jquery.js"></script>
-
     <script src="../bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="../bower_components/angular-toastr/dist/angular-toastr.tpls.js"></script>
     <script src="../bower_components/jquery.easing/js/jquery.easing.min.js"></script>
     <script src="../bower_components/FitText.js/jquery.fittext.js"></script>
     <script src="../bower_components/WOW/dist/wow.min.js"></script>
-
     <script type='text/ng-template' id='contact_form.html'>
         <div class='container-fluid'>
             <div class='well well-lg'>
@@ -208,6 +184,14 @@
                     <fieldset>
                         <legend>Join Twyst</legend>
                         <div class='form-group'>
+                            <label class='col-sm-3 control-label'>Position *</label>
+                            <div class='col-sm-9 col-md-6'>
+                                <select class='form-control' ng-model='application.position'>
+                                    <option ng-repeat='name in positions track by $index' val='{{name}}'>{{name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class='form-group'>
                             <label class='col-sm-3 control-label'>Resume</label>
                             <div class='col-sm-9 col-md-6'>
                                 <input type="file" ngf-select ng-model="application.resume" name="file" accept="application/*" ngf-max-size="20MB" required>
@@ -223,7 +207,6 @@
             </div>
         </div>
     </script>
-
 </body>
 
 </html>
