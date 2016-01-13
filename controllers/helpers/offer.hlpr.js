@@ -11,6 +11,8 @@ var Outlet = mongoose.model('Outlet');
 var logger = require('tracer').colorConsole();
 var AuthHelper = require('../../common/auth.hlpr');
 var Cache = require('../../common/cache.hlpr.js');
+var RecoHelper = require('./reco.hlpr');
+var moment = require('moment');
 
 module.exports.create_offer = function(token, new_offer) {
     logger.log();
@@ -270,5 +272,40 @@ module.exports.apply_offer = function(token, order, offer) {
             });
         }
     });
+    return deferred.promise;
+}
+
+module.exports.get_offers = function(token, outlet_id) {
+    logger.log();
+    var deferred = Q.defer();
+    Outlet.findOne({
+        '_id': outlet_id
+    })
+    .exec(function(err, outlet) {
+        if(err || !outlet) {
+            deferred.reject({
+                err: err,
+                message: 'Unable to load offer details'
+            })
+        } else {
+            var date = new Date();
+            var time = moment().hours() +':'+moment().minutes();
+            date = parseInt(date.getMonth())+1+ '-'+ date.getDate()+'-'+date.getFullYear();
+            var offers = _.map(outlet.offers, function(offer) {
+                if(offer.offer_status === 'active' && new Date(offer.offer_end_date) > new Date()
+                && !(RecoHelper.isClosed(date, time, offer.actions.reward.reward_hours))) {
+                    return offer;
+                }
+                else{
+                    return false;
+                }
+            });
+            if(offers.length) {
+                deferred.resolve({data: offers, message: 'Offers found'});
+            } else {
+                deferred.reject({ err: null, message: 'Unable to load offers'});
+            }
+        }
+    })
     return deferred.promise;
 }

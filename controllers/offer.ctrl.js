@@ -89,3 +89,21 @@ module.exports.all = function(req, res) {
 	});
 
 }
+module.exports.get_offers = function(req, res) {
+	logger.log();
+	var token = req.query.token || null;
+	var outlet = req.params.outlet_id || null;
+	if (!token) {
+		HttpHelper.error(res, null, "Not Authenticated");
+	}
+	else if(!outlet) {
+		HttpHelper.error(res, null, "no outlet is passed");
+	}
+
+	OfferHelper.get_offers(token, outlet).then(function(data) {
+		HttpHelper.success(res, data.data, data.message);
+	}, function(err) {
+		HttpHelper.error(res, err.err || null, err.message);
+	});
+
+}
