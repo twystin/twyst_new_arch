@@ -376,6 +376,19 @@ module.exports.get_orders = function(token, outlet_id) {
 module.exports.update_order = function(token, order) {
     logger.log();
     var deferred = Q.defer();
+
+    if(order.update_type === 'accept') {
+
+    }
+    else if(order.update_type === 'reject') {
+
+    }
+    else if(order.update_type === 'dispatch') {
+
+    }
+    else{
+      //unknown update
+    }
     deferred.resolve(order);
     return deferred.promise;
 

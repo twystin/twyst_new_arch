@@ -119,7 +119,8 @@ function map_valid_delivery_zone(params) {
         delivery_zone =  _.max(delivery_zone, function(zone){ return zone.zone_type});
         console.log(delivery_zone);
         if(delivery_zone) {
-          val.valid_zone = delivery_zone; 
+          val.valid_zone = delivery_zone;
+          val.delivery_zones = val.attributes.delivery.delivery_zone;
           return val; 
         }
         else{
@@ -214,7 +215,8 @@ function pick_outlet_fields(params) {
       massaged_item.payment_options = item.valid_zone.payment_options;
       massaged_item.delivery_conditions = item.valid_zone.delivery_conditions;
       massaged_item.cashback = item.twyst_meta.cashback || null;
-      massaged_item.offers = [];
+      massaged_item.delivery_zones = item.delivery_zones;
+      massaged_item.offers = item.offers.length;
       if (fmap && fmap[item._id]) {
         massaged_item.following = true;
       } else {
