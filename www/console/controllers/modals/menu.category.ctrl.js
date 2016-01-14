@@ -1,5 +1,5 @@
-angular.module('merchantApp').controller('MenuCategoryController', function($scope, $modalInstance, category, is_new, SweetAlert) {
-    $scope.menu_categories = ['Indian', 'Desserts', 'Cakes', 'Chinese', 'Soup'];
+angular.module('consoleApp').controller('MenuCategoryController', function($scope, $modalInstance, category, is_new, SweetAlert) {
+    $scope.menu_categories = ['Indian', 'Dessert', 'Cakes', 'Chinese', 'Soup'];
 
     $scope.is_new = is_new;
     $scope.category = category;

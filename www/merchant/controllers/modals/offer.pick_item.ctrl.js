@@ -187,6 +187,7 @@ angular.module('merchantApp')
                                 return sub_category._id;
                             });
                             if (!_.intersection(sub_category_ids, $scope.sub_categories).length) {
+                                $scope.sub_categories = $scope.sub_categories.concat(sub_category_ids);
                                 sub_categories = sub_categories.concat(sub_category_ids);
                             }
                             if (menus.indexOf(menu._id) === -1) {
@@ -201,6 +202,7 @@ angular.module('merchantApp')
                                     return item._id;
                                 });
                                 if (!_.intersection(item_ids, $scope.items).length) {
+                                    $scope.items = $scope.items.concat(item_ids);
                                     items = items.concat(item_ids);
                                 }
                                 if (menus.indexOf(menu._id) === -1) {
@@ -218,6 +220,7 @@ angular.module('merchantApp')
                                         return option._id;
                                     });
                                     if (!_.intersection(option_ids, $scope.options).length) {
+                                        $scope.options = $scope.options.concat(option_ids);
                                         options = options.concat(option_ids);
                                     }
                                     if (menus.indexOf(menu._id) === -1) {
@@ -234,16 +237,22 @@ angular.module('merchantApp')
                                     // console.log('option', option._id, $scope.options.indexOf(option._id) !== -1);
                                     if ($scope.options.indexOf(option._id) !== -1) {
                                         options.push(option);
-                                        var sub_option_ids = _.map(option.sub_options, function(sub_option) {
-                                            return sub_option._id;
-                                        });
-                                        var addon_ids = _.map(option.addons, function(addon) {
-                                            return addon._id;
-                                        });
+                                        var sub_option_ids = _.flatten(_.map(option.sub_options, function(sub_option) {
+                                            return _.map(sub_option.sub_option_set, function(sub_option_obj) {
+                                                return sub_option_obj._id;
+                                            });
+                                        }));
+                                        var addon_ids = _.flatten(_.map(option.addons, function(addon) {
+                                            return _.map(addon.addon_set, function(addon_obj) {
+                                                return addon_obj._id;
+                                            });
+                                        }));
                                         if (!_.intersection(sub_option_ids, $scope.sub_options).length) {
+                                            $scope.sub_options = $scope.sub_options.concat(sub_option_ids);
                                             sub_options = sub_options.concat(sub_option_ids);
                                         }
                                         if (!_.intersection(addon_ids, $scope.addons).length) {
+                                            $scope.addons = $scope.addons.concat(addon_ids);
                                             addons = addons.concat(addon_ids);
                                         }
                                         if (menus.indexOf(menu._id) === -1) {

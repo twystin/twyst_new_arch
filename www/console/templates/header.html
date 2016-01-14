@@ -41,6 +41,9 @@
                 <li>
                     <a ui-sref='.bills_manage'> <i class='fa fa-file-text-o'></i>BILLS</a>
                 </li>
+                <li ng-if='role === 2 || role === "2"'>
+                    <a ui-sref='.menus_manage'> <i class='fa fa-code'></i>MENUS</a>
+                </li>
                 <li>
                     <a ui-sref='.suggested_outlets_manage'> <i class='fa fa-code'></i>SUGGESTED OUTLETS</a>
                 </li>
@@ -58,6 +61,9 @@
                 </li>
                 <li>
                     <a ui-sref='.bulk_checkin'> <i class='fa fa-code'></i>BULK CHECKIN</a>
+                </li>
+                <li ng-if='role === 2 || role === "2"'>
+                    <a ui-sref='.menu_update_requests_manage'> <i class='fa fa-code'></i>MENU REQUESTS</a>
                 </li>
             </ul>
         </div>

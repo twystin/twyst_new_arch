@@ -1,0 +1,35 @@
+<div>&nbsp;</div>
+<div class='container-fluid'>
+    <div class='row'>
+        <div class='col-sm-12' style='min-height:100vh;'>
+            <section class='panel panel-default table-dynamic'>
+                <div class='panel-heading'>
+                    <strong><span class='glyphicon glyphicon-th'></span> Menu Update Requests</strong>
+                </div>
+                <div class='table-filters'>
+                    <div class='row'>
+                        <div class='col-sm-4 col-xs-6'>
+                            <form>
+                                <input type='text' placeholder='Search...' class='form-control' ng-model='searchKeywords' ng-keyup='search()'>
+                            </form>
+                        </div>
+                        <div class='col-sm-3 col-xs-6'>
+                            <span>Showing {{filtered_menu_update_requests.length}}/{{menu_update_requests.length}} requests.</span>
+                        </div>
+                    </div>
+                </div>
+                <table class='table table-bordered table-hover table-striped table-responsive'>
+                    <thead>
+                        <tr>
+                            <th>
+                                <div class='th'>
+                                    Actions
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                </table>
+            </section>
+        </div>
+    </div>
+</div>

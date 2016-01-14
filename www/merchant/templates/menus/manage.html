@@ -77,14 +77,8 @@
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a ng-click='cloneMenu(menu._id, menu.outlet._id)'>
-                                                        <i class='fa fa-files-o'></i> Clone
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a ng-click='removeMenu(menu._id)'>
-                                                        <i class='fa fa-trash-o text-danger'></i>
-                                                        <span class="text-danger">&nbsp;Delete</span>
+                                                    <a ng-click='requestMenuUpdate(menu._id)'>
+                                                        <i class='fa fa-support'></i> Request Update
                                                     </a>
                                                 </li>
                                             </ul>
@@ -108,14 +102,8 @@
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a ng-click='cloneMenu(menu._id, menu.outlet._id)'>
-                                                        <i class='fa fa-files-o'></i> Clone
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a ng-click='removeMenu(menu._id)'>
-                                                        <i class='fa fa-trash-o text-danger'></i>
-                                                        <span class="text-danger">Delete</span>
+                                                    <a ng-click='requestMenuUpdate(menu._id)'>
+                                                        <i class='fa fa-support'></i> Request Update
                                                     </a>
                                                 </li>
                                             </ul>
@@ -135,60 +123,60 @@
     </div>
 </div>
 <!-- <div class='col-xs-12' ng-init='getMenus()'>
-	<div class='well well-lg'>
-		<legend ng-if='menus.length !== 0'>Create More Menus</legend>
-		<legend nf-if='menus.length === 0'>Create your First Menu</legend>
-		<div class='form-group'>
-			<button type='button' class='btn btn-w-md btn-gap-v btn-round btn-primary' ui-sref='merchant.menus_create'>Create Menu</button>
-		</div>
-	</div>
-	<div class='well well-lg'>
-		<legend>Menus</legend>
-		<div class='row' ng-if='menus.length'>
-			<div class='col-md-4'>
-				<div class='panel panel-primary'>
-					<div class='panel-heading'>{{menu.menu_type}}</div>
-					<div class='panel-body'>
-						<p>{{menu.outlet.name}}</p>
-						<p>{{menu.outlet.loc1 + (menu.outlet.loc1?', ':'') + menu.outlet.loc2}}</p>
-					</div>
-					<div class='panel-footer'>
-						<div class='row'>
-							<div class='col-xs-6'>
-								<a class='btn btn-block btn-default' ui-sref='merchant.menus_view({menu_id: menu._id})'>View</a>
-							</div>
-							<div class='col-xs-6'>
-								<a class='btn btn-block btn-primary' ui-sref='merchant.menus_update({menu_id: menu._id})'>Update</a>
-							</div>
-							<div class='col-xs-12'><div>&nbsp;</div></div>
-							<div class='col-xs-6'>
-								<a class='btn btn-block btn-warning' ng-click='deleteMenu(menu._id)'>Delete</a>
-							</div>
-							<div class='col-xs-6'>
-								<a class='btn btn-block btn-success' ng-click='cloneMenu($index)'>Clone</a>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<script type='text/ng-template' id='cloneMenuTemplate.html'>
-		<div class='modal-header'>
-			<h3 class='modal-title'>Choose the outlet</h3>
-		</div>
-		<div class='modal-body'>
-			<div class='form-group'>
-				<div class='col-sm-8'>
-					<select ng-model='req_obj.outlet' class='form-control'>
-					<option value=''>Choose an outlet</option>
-					<option ng-repeat='outlet in outlets' value='{{outlet._id}}'>{{outlet.basics.name}}, {{outlet.contact.location.locality_1[0]}} {{outlet.contact.location.locality_1[0]?', ':''}} {{outlet.contact.location.locality_2[0]}}</option>
-					</select>
-				</div>
-				<div class='col-sm-4'>
-					<button type='button' class='btn btn-block btn-primary' ng-click='cloneMenu()'>Clone</button>
-				</div>
-			</div>
-		</div>
-	</script>
+    <div class='well well-lg'>
+        <legend ng-if='menus.length !== 0'>Create More Menus</legend>
+        <legend nf-if='menus.length === 0'>Create your First Menu</legend>
+        <div class='form-group'>
+            <button type='button' class='btn btn-w-md btn-gap-v btn-round btn-primary' ui-sref='merchant.menus_create'>Create Menu</button>
+        </div>
+    </div>
+    <div class='well well-lg'>
+        <legend>Menus</legend>
+        <div class='row' ng-if='menus.length'>
+            <div class='col-md-4'>
+                <div class='panel panel-primary'>
+                    <div class='panel-heading'>{{menu.menu_type}}</div>
+                    <div class='panel-body'>
+                        <p>{{menu.outlet.name}}</p>
+                        <p>{{menu.outlet.loc1 + (menu.outlet.loc1?', ':'') + menu.outlet.loc2}}</p>
+                    </div>
+                    <div class='panel-footer'>
+                        <div class='row'>
+                            <div class='col-xs-6'>
+                                <a class='btn btn-block btn-default' ui-sref='merchant.menus_view({menu_id: menu._id})'>View</a>
+                            </div>
+                            <div class='col-xs-6'>
+                                <a class='btn btn-block btn-primary' ui-sref='merchant.menus_update({menu_id: menu._id})'>Update</a>
+                            </div>
+                            <div class='col-xs-12'><div>&nbsp;</div></div>
+                            <div class='col-xs-6'>
+                                <a class='btn btn-block btn-warning' ng-click='deleteMenu(menu._id)'>Delete</a>
+                            </div>
+                            <div class='col-xs-6'>
+                                <a class='btn btn-block btn-success' ng-click='cloneMenu($index)'>Clone</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type='text/ng-template' id='cloneMenuTemplate.html'>
+        <div class='modal-header'>
+            <h3 class='modal-title'>Choose the outlet</h3>
+        </div>
+        <div class='modal-body'>
+            <div class='form-group'>
+                <div class='col-sm-8'>
+                    <select ng-model='req_obj.outlet' class='form-control'>
+                    <option value=''>Choose an outlet</option>
+                    <option ng-repeat='outlet in outlets' value='{{outlet._id}}'>{{outlet.basics.name}}, {{outlet.contact.location.locality_1[0]}} {{outlet.contact.location.locality_1[0]?', ':''}} {{outlet.contact.location.locality_2[0]}}</option>
+                    </select>
+                </div>
+                <div class='col-sm-4'>
+                    <button type='button' class='btn btn-block btn-primary' ng-click='cloneMenu()'>Clone</button>
+                </div>
+            </div>
+        </div>
+    </script>
 </div> -->

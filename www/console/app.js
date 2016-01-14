@@ -1,6 +1,7 @@
 angular.module('consoleApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angularMoment', 'oitozero.ngSweetAlert', 'angular-loading-bar', 'ngAnimate', 'ngStorage', 'ordinal', 'ngFileUpload', 'uiGmapgoogle-maps', 'mgo-angular-wizard', 'ui.select2', 'frapontillo.bootstrap-switch', 'ui.tree', 'toastr', 'ordinal'])
     .run(function($rootScope, $state, $cookies) {
         $rootScope.token = $cookies.get('token');
+        $rootScope.role = $cookies.get('role');
     })
     .config(function($stateProvider, $urlRouterProvider) {
 

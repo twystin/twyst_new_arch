@@ -73,6 +73,8 @@ module.exports = function(app) {
     app.post('/api/v4/offer/extend', EventCtrl.extend_offer);
     app.post('/api/v4/offer/report/problem', EventCtrl.report_problem);
 
+    app.post('/api/v4/menu/request_update', EventCtrl.request_menu_update);
+
     app.post('/api/v4/referral/join', EventCtrl.referral_join);
 
     app.post('/api/v4/comments/', EventCtrl.comments);

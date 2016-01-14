@@ -3,6 +3,7 @@ angular.module('merchantApp', ['ui.router', 'ngAudio', 'ui.bootstrap', 'ngCookie
         $rootScope.faye = new Faye.Client('/faye');
         $rootScope.token = $cookies.get('token');
         $rootScope.sound = ngAudio.load('sounds/song1.mp3');
+        $rootScope.sound = ngAudio.load('sounds/song1.wav');
         $rootScope.sound.loop = true;
         $rootScope.isPaying = $cookies.get('isPaying') == 'true' ? true : false;
     })

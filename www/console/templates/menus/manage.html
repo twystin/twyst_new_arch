@@ -1,0 +1,161 @@
+<div>&nbsp;</div>
+<div class='container-fluid'>
+    <div class='row'>
+        <div class='col-sm-12' style='min-height:100vh;'>
+            <section class='panel panel-default table-dynamic'>
+                <div class='panel-heading'>
+                    <strong><span class='glyphicon glyphicon-th'></span> Menus</strong>
+                </div>
+                <div class='table-filters'>
+                    <div class='row'>
+                        <div class='col-sm-4 col-xs-6'>
+                            <form>
+                                <input type='text' placeholder='Search...' class='form-control' ng-model='searchKeywords' ng-keyup='search()'>
+                            </form>
+                        </div>
+                        <div class='col-sm-3 col-xs-6 filter-result-info'>
+                            <span>Showing {{filtered_menus.length}}/{{menus.length}} menus.</span>
+                        </div>
+                    </div>
+                </div>
+                <table class='table table-bordered table-hover table-striped table-responsive'>
+                    <thead>
+                        <tr>
+                            <th>
+                                <div class='th'>
+                                    Actions
+                                </div>
+                            </th>
+                            <th>
+                                <div class='th'>
+                                    Menu Title
+                                    <span class='fa fa-angle-up' ng-click='order("menu_type")' ng-class='{active: row === "menu_type"}'></span>
+                                    <span class='fa fa-angle-down' ng-click='order("-menu_type")' ng-class='{active: row === "-menu_type"}'></span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class='th'>
+                                    Outlet Name
+                                    <span class='fa fa-angle-up' ng-click='order("outlet.name")' ng-class='{active: row === "outlet.name"}'></span>
+                                    <span class='fa fa-angle-down' ng-click='order("-outlet.name")' ng-class='{active: row === "-outlet.name"}'></span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class='th'>
+                                    Locality 1
+                                    <span class='fa fa-angle-up' ng-click='order("outlet.loc1")' ng-class='{active: row === "outlet.loc1"}'></span>
+                                    <span class='fa fa-angle-down' ng-click='order("-outlet.loc1")' ng-class='{active: row === "-outlet.loc1"}'></span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class='th'>
+                                    Locality 2
+                                    <span class='fa fa-angle-up' ng-click='order("outlet.loc2")' ng-class='{active: row === "outlet.loc2"}'></span>
+                                    <span class='fa fa-angle-down' ng-click='order("-outlet.loc2")' ng-class='{active: row === "-outlet.loc2"}'></span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class='th'>
+                                    <select ng-model='view_status' ng-change='sort(view_status)' class='form-control' name='viewByStatus'>
+                                        <option value='' ng-if='!view_status'>Status</option>
+                                        <option value='' ng-if='view_status'>All</option>
+                                        <option value='active'>Active</option>
+                                        <option value='draft'>Draft</option>
+                                        <option value='archived'>Archived</option>
+                                    </select>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat='menu in current_page_menus' style='cursor:pointer;'>
+                            <td>
+                                <div>
+                                    <div class='hidden-xs'>
+                                        <a class='btn btn-default' ui-sref='^.menus_edit({menu_id: menu._id})'>
+                                            <i class='fa fa-pencil'></i> Edit
+                                        </a>
+                                        <div class='btn-group dropdown'>
+                                            <button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown'>
+                                                More
+                                                <span class='caret'></span>
+                                            </button>
+                                            <ul class='dropdown-menu'>
+                                                <li>
+                                                    <a ui-sref='^.menus_view({menu_id: menu._id})'>
+                                                        <i class='fa fa-eye'></i> View
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a ng-click='cloneMenu(menu._id, menu.outlet._id)'>
+                                                        <i class='fa fa-files-o'></i> Clone
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a ng-click='removeMenu(menu._id)'>
+                                                        <i class='fa fa-trash-o text-danger'></i>
+                                                        <span class="text-danger">Delete</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class='visible-xs'>
+                                        <div class='btn-group dropdown'>
+                                            <button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown'>
+                                                More
+                                                <span class='caret'></span>
+                                            </button>
+                                            <ul class='dropdown-menu'>
+                                                <li>
+                                                    <a ui-sref='^.menus_edit({menu_id: menu._id})'>
+                                                        <i class='fa fa-pencil'></i> Edit
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a ui-sref='^.menus_view({menu_id: menu._id})'>
+                                                        <i class='fa fa-eye'></i> View
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a ng-click='cloneMenu(menu._id, menu.outlet._id)'>
+                                                        <i class='fa fa-files-o'></i> Clone
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a ng-click='removeMenu(menu._id)'>
+                                                        <i class='fa fa-trash-o text-danger'></i>
+                                                        <span class="text-danger">Delete</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{menu.menu_type}}</td>
+                            <td>{{menu.outlet.name}}</td>
+                            <td>{{menu.outlet.loc1}}</td>
+                            <td>{{menu.outlet.loc2}}</td>
+                            <td>{{menu.status}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <footer class='table-footer'>
+                    <div class='row'>
+                        <div class='col-sm-6 page-num-info'>
+                            <span>
+                                Show
+                                <select ng-model='numPerPage' ng-options='num for num in numPerPageOpt' ng-change='onNumPerPageChange()'></select>
+                                entries per page
+                            </span>
+                        </div>
+                        <div class='col-sm-6 text-right pagination-container'>
+                            <pagination class='pagination-sm' ng-model='currentPage' total-items='filtered_menus.length' max-size='4' ng-change='select(currentPage)' items-per-page='numPerPage' rotate='false' previous-text="&lsaquo;" next-text="&rsaquo;" boundary-links='true'></pagination>
+                        </div>
+                    </div>
+                </footer>
+            </section>
+        </div>
+    </div>
+</div>

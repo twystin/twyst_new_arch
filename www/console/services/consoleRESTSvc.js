@@ -251,6 +251,61 @@ angular.module('consoleApp').factory('consoleRESTSvc', ['$http', '$q', '$cookies
             return deferred.promise;
         };
 
+
+        /*=================================
+        =            MENU APIs            =
+        =================================*/
+
+        consoleRESTSvc.getMenus = function() {
+            var deferred = $q.defer();
+            var token = $cookies.get('token');
+            $http.get('/api/v4/menu?token=' + token).then(
+                function(res) {
+                    if (res.data.response) {
+                        deferred.resolve(res.data);
+                    } else {
+                        deferred.reject(res.data);
+                    }
+                },
+                function(err) {
+                    deferred.reject(err);
+                });
+            return deferred.promise;
+        };
+
+        consoleRESTSvc.getMenu = function(menu_id) {
+            var deferred = $q.defer();
+            var token = $cookies.get('token');
+            $http.get('/api/v4/menus/' + menu_id + '?token=' + token).then(
+                function(res) {
+                    if (res.data.response) {
+                        deferred.resolve(res.data);
+                    } else {
+                        deferred.reject(res.data);
+                    }
+                },
+                function(err) {
+                    deferred.reject(err);
+                });
+            return deferred.promise;
+        };
+
+        consoleRESTSvc.deleteMenu = function(menu_id) {
+            var deferred = $q.defer();
+            var token = $cookies.get('token');
+            $http.delete('/api/v4/menus/' + menu_id + '?token=' + token)
+                .then(function(res) {
+                    if (res.data.response) {
+                        deferred.resolve(res.data);
+                    } else {
+                        deferred.reject(res.data);
+                    }
+                }, function(err) {
+                    deferred.reject(err);
+                });
+            return deferred.promise;
+        };
+
         return consoleRESTSvc;
     }
 ])
