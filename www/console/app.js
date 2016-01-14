@@ -59,6 +59,21 @@ angular.module('consoleApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angular
                 templateUrl: 'templates/bills/view.html',
                 controller: 'BillViewController'
             })
+            .state('console.menus_manage', {
+                url: '/menus',
+                templateUrl: 'templates/menus/manage.html',
+                controller: 'MenuManageController'
+            })
+            .state('console.menus_edit', {
+                url: '/menus/edit/:menu_id',
+                templateUrl: 'templates/menus/edit.html',
+                controller: 'MenuEditController'
+            })
+            .state('console.menus_view', {
+                url: '/menus/view/:menu_id',
+                templateUrl: 'templates/menus/view.html',
+                controller: 'MenuViewController'
+            })
             .state('console.suggested_outlets_manage', {
                 url: '/suggested_outlets',
                 templateUrl: 'templates/suggested_outlets/manage.html',
@@ -94,4 +109,9 @@ angular.module('consoleApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angular
                 templateUrl: 'templates/bulk_checkin/manage.html',
                 controller: 'BulkCheckinController'
             })
+            .state('console.menu_update_requests_manage', {
+                url: '/menu_update_requests',
+                templateUrl: 'templates/menu_update_requests/manage.html',
+                controller: 'MenuUpdateRequestManageController'
+            });
     });

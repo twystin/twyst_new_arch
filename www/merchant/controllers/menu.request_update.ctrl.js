@@ -1,8 +1,11 @@
-angular.module('merchantApp').controller('MenuRequestUpdateController', function($scope, $modalInstance, merchantRESTSvc, menu_id, SweetAlert) {
+angular.module('merchantApp').controller('MenuRequestUpdateController', function($scope, $modalInstance, merchantRESTSvc, menu_id, outlet, menu_type, SweetAlert) {
 
     $scope.update_request = {
         event_meta: {
-            menu_id: menu_id
+            menu_id: menu_id,
+            outlet: outlet,
+            menu_type: menu_type,
+            status: 'pending'
         }
     };
 
