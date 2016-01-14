@@ -79,6 +79,12 @@ module.exports.confirm_order = function(req, res) {
 	else if(!order.order_number) {
 		HttpHelper.error(res, null, "could not process without order number");	
 	}
+	else if(!order.outlet) {
+		HttpHelper.error(res, null, "could not process without outlet");	
+	}
+	else if(!order.payment_mode) {
+		HttpHelper.error(res, null, "could not process without payment mode");	
+	}
 
 	OrderHelper.confirm_order(token, order).then(function(data) {
 		HttpHelper.success(res, data, data.message);

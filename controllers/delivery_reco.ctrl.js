@@ -105,6 +105,7 @@ function map_valid_delivery_zone(params) {
   if (params.query.lat && params.query.long) {
     params.outlets = _.map(params.outlets, function(val) {    
       if(val.attributes.delivery.delivery_zone && val.attributes.delivery.delivery_zone.length) {        
+        var delivery_zone = val.attributes.delivery.delivery_zone;
         var delivery_zone = _.map(val.attributes.delivery.delivery_zone, function(current_zone) {          
           if(current_zone.coord && current_zone.coord.length &&
             geolib.isPointInside({latitude: params.query.lat, longitude: params.query.long},
@@ -113,9 +114,13 @@ function map_valid_delivery_zone(params) {
             return current_zone;
           }
         })
+
         delivery_zone = _.compact(delivery_zone);
-        if(delivery_zone.length) {
-          val.valid_zone = delivery_zone; 
+        delivery_zone =  _.max(delivery_zone, function(zone){ return zone.zone_type});
+        console.log(delivery_zone);
+        if(delivery_zone) {
+          val.valid_zone = delivery_zone;
+          val.delivery_zones = val.attributes.delivery.delivery_zone;
           return val; 
         }
         else{
@@ -123,8 +128,15 @@ function map_valid_delivery_zone(params) {
         }
     
       }
+      else{
+        console.log('no delivery zone');
+        return null; 
+      }
     });
     
+  }
+  else{
+    deferred.reject('please pass lat, long to get results');
   }  
   deferred.resolve(params);
   return deferred.promise;  
@@ -182,7 +194,7 @@ function pick_outlet_fields(params) {
       if(item.outlet_meta.status === 'archived') {// || item.outlet_meta.status === 'draft') {
         return false;        
       }
-
+      
       var massaged_item = {};
       massaged_item._id = item._id;
       massaged_item.name = item.basics.name;
@@ -198,10 +210,13 @@ function pick_outlet_fields(params) {
       massaged_item.is_paying =  item.basics.is_paying;
       massaged_item.cuisines = item.attributes.cuisines;
       massaged_item.delivery_experiance = item.recco.delivery_experiance || null;
-      massaged_item.delivery_time = item.valid_zone[0].delivery_estimated_time;
-      massaged_item.minimum_order = item.valid_zone[0].min_amt_for_delivery;
+      massaged_item.delivery_time = item.valid_zone.delivery_estimated_time;
+      massaged_item.minimum_order = item.valid_zone.min_amt_for_delivery;
+      massaged_item.payment_options = item.valid_zone.payment_options;
+      massaged_item.delivery_conditions = item.valid_zone.delivery_conditions;
       massaged_item.cashback = item.twyst_meta.cashback || null;
-      massaged_item.offers = [];
+      massaged_item.delivery_zones = item.delivery_zones;
+      massaged_item.offers = item.offers.length;
       if (fmap && fmap[item._id]) {
         massaged_item.following = true;
       } else {

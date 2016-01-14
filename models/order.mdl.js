@@ -52,7 +52,6 @@ var Order = new Schema({
     default: false
   },
   items: [{
-  	item_id: Schema.ObjectId,
     item_name: {
       type: String
     },
@@ -72,20 +71,33 @@ var Order = new Schema({
       type: String
     },
     option: {
-      type: String 
-    },
-    option_cost: {
-      type: Number
-    },
+      _id: {type: Schema.Types.ObjectId},
+      option_title: {
+        type: String
+      },
+      option_value: {
+        type: String
+      },
+      option_cost: {
+        type: Number
+      },
+      is_vegetarian: false,      
+      option_is_addon: {
+        type: Boolean,
+        default: false,
+      }
+    },    
     sub_options: [{
-      sub_option_id: Schema.ObjectId,
       sub_option_title: {
         type: String,
       },
       sub_option_set: [{
-        sub_option_set_id: Schema.ObjectId,
         sub_option_value: {
           type: String,
+        },
+        is_available: {
+          type: Boolean,
+          default: true
         },
         is_vegetarian: {
           type: Boolean,
@@ -97,12 +109,10 @@ var Order = new Schema({
       }]
     }],
     addons: [{
-      addon_id: Schema.ObjectId,
       addon_title: {
         type: String,
       },
       addon_set: [{
-        addon_set_id: Schema.ObjectId,
         addon_value: {
           type: String,
         },
@@ -118,7 +128,7 @@ var Order = new Schema({
           type: Number
         }
       }]
-    }] 
+    }]
   }]
 
 })

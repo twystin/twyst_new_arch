@@ -20,6 +20,7 @@ var keygen = require('keygenerator');
 var Bayeux = require('../../app_server');
 var PaymentHelper = require('./payment.hlpr');
 var TaxConfig = require('../../config/taxes.cfg');
+var Transporter = require('../../transports/transporter.js');
 
 
 module.exports.verify_order = function(token, order) {
@@ -32,6 +33,7 @@ module.exports.verify_order = function(token, order) {
     data.coords = order.coords;
     data.user_token = token;
     console.log(data.items);
+
     basic_checks(data)
     .then(function(data){
         return get_user(data);
@@ -62,7 +64,6 @@ module.exports.verify_order = function(token, order) {
         updated_data.vat = data.order.vat;
         updated_data.st = data.order.st;
         updated_data.order_actual_value_with_tax = data.order.order_actual_value_with_tax;
-        console.log(updated_data);
         updated_data.offers = [];
         _.each(data.order.available_offers, function(offer){
            updated_data.offers.push(offer); 
@@ -137,7 +138,13 @@ module.exports.checkout = function(token, order) {
         return massage_order(data);
     })
     .then(function(data) {
-        deferred.resolve(data);
+        return calculate_cashback(data);
+    })
+    .then(function(data) {
+        return remove_order_from_cache(data);
+    })
+    .then(function(data) {        
+        deferred.resolve(data.order);
     })
     .fail(function(err) {
         console.log(err)
@@ -227,7 +234,7 @@ function validate_outlet(data) {
     var passed_data = data;
     var outlet = passed_data.outlet;
 
-    if(!isOutletActive(outlet)){
+    if(isOutletActive(outlet)){
         deferred.reject({    
           message: "outlet is not active"
         });
@@ -269,18 +276,25 @@ function calculate_order_value(data, free_item, free_item_option) {
     var menu = {};
     menu = data.outlet && data.outlet.menus[0];
     var items = data.items;
-    var category, sub_category, item, option,  menu_sub_options,order_sub_options, menu_addons,order_addons,  amount = 0;
+    var  amount = 0;
     
     for(var i = 0; i < items.length; i++) {
-        var sub_options = [], addons = [];
+        console.log(items[i].item_id);
+        var sub_options = [], addons = [], category, sub_category, item, option, menu_sub_options, order_sub_options, menu_addons,order_addons;
         category = _.findWhere(menu.menu_categories, {_id: items[i].category_id});
         var sub_category = _.findWhere(category && category.sub_categories, {_id: items[i].sub_category_id});
         
         item = _.findWhere(sub_category && sub_category.items, {_id: items[i].item_id});
-        
+        items[i].item_details = item;
         if(item && item.options && items[i].option_id) {
-            option = _.findWhere(item.options, {_id: items[i].option_id}); 
+            option = _.findWhere(item.options, {_id: items[i].option_id});
+            items[i].option = option;
         }
+        else{
+            option = null;
+            items[i].option = null;
+        }
+        console.log(option)
         
         if(option && option.sub_options && items[i].sub_option_set_ids) {
             menu_sub_options = option.sub_options;
@@ -309,7 +323,8 @@ function calculate_order_value(data, free_item, free_item_option) {
         }
         
         
-        console.log(items[i].quantity +'quantity');
+        console.log(items[i].quantity +'quantity' + 'option' + option);
+        console.log(option)
         if(item && item._id === free_item && option && option._id === free_item_option) {
             amount = amount+(option.option_cost*(items[i].quantity-1));
             if(sub_options.length) {
@@ -351,6 +366,8 @@ function calculate_order_value(data, free_item, free_item_option) {
             }
         }
         else {
+            console.log('without option');
+            console.log(item.item_cost);
             amount = amount+(item.item_cost*items[i].quantity);
             if(sub_options.length) {
                 _.each(sub_options, function(sub_option){
@@ -387,7 +404,7 @@ function verify_delivery_location(coords, outlet) {
 function isOutletClosed(outlet) {
     logger.log();
     var date = new Date();
-    var time = moment().hours() +':'+moment().minutes();
+    var time = date.getHours() +':'+date.getMinutes();
     date = parseInt(date.getMonth())+1+ '-'+ date.getDate()+'-'+date.getFullYear();
     console.log(time);
     if (outlet && outlet.business_hours ) {
@@ -511,7 +528,6 @@ function checkFreeItem(data, offer) {
 
         if(searchItemInOfferItems(items[i], offer)){
             var order_value = calculate_order_value(passed_data, offer.offer_items.item_id, offer.offer_items.option_id);
-            console.log('yaha par nahi aata free wala')
             console.log(order_value);
             console.log(offer.minimum_bill_value);
             if(order_value >= offer.minimum_bill_value) {
@@ -946,12 +962,32 @@ function massage_order(data){
         }
         else{
             var order = JSON.parse(reply);
-            console.log(order);
+            var items = [];
+            _.each(order.items, function(item){
+                var massaged_item = {};
+                massaged_item.category = item.category_id;
+                massaged_item.sub_category = item.sub_category_id;
+                massaged_item._id = item.item_details._id;                
+                massaged_item.item_name = item.item_details.item_name;
+                massaged_item.item_quantity = item.quantity;
+                massaged_item.item_description = item.item_details.description;
+                massaged_item.item_photo = item.item_details.item_photo;
+                massaged_item.item_tags = item.item_details.item_tags;
+                massaged_item.item_cost = item.item_details.item_cost;
+                massaged_item.option = item.option;
+                delete massaged_item.option.addons;
+                delete massaged_item.option.sub_options;
+                massaged_item.sub_options = item.sub_options;
+                massaged_item.addons = item.addons;
+
+                items.push(massaged_item);
+            })
+
             if(data.order_number === order.order_number) {
                 order.address = data.address;
                 order.order_status = 'pending';
-                order.cod_cashback = data.outlet.twyst_meta.cashback.min;
-                order.inapp_cashback = data.outlet.twyst_meta.cashback.max;
+                order.items = items;
+                
                 if(order.offer_used) {
                     order.order_value_without_offer = order.order_value_without_tax;
                     order.order_value_with_offer = order.offer_used.order_value_without_tax;
@@ -965,23 +1001,56 @@ function massage_order(data){
                     order.tax_paid = order.st+order.vat;
                     order.actual_amount_paid = order.order_value_with_tax
                 }
+                data.order = order;
                 order = new Order(order); 
+                //console.log(order)
                 order.save(function(err, order){
                     if(err){
                         console.log(err);
                         deferred.reject('unable to checkout ');
                     }
                     else{
-                        console.log('saved');                        
+                        console.log('saved');
                         deferred.resolve(data);   
                     }
                 })                    
             }
             else{
-                deferred.reject('could not process this order');   
+                deferred.reject({
+                    err: err || true,
+                    message: 'could not process this order'
+                });                                
             }
         }
     })
+    return deferred.promise;
+}
+
+
+function calculate_cashback(data) {
+    logger.log();
+    var deferred = Q.defer();
+
+    if(!data.order.offer_used) {
+        var cod_cashback = data.outlet.outlet_meta.cashback.min;
+        var inapp_cashback = data.outlet.outlet_meta.cashback.max;
+        cod_cashback = data.order.order_value_without_tax*5/100;
+        inapp_cashback = data.order.order_value_without_tax*10/100;
+        data.order.cod_cashback = cod_cashback;
+        data.order.inapp_cashback = inapp_cashback;
+    }
+    else{
+        data.order.cod_cashback = 0;
+        data.order.inapp_cashback = 0;   
+    }
+    deferred.resolve(data);
+    return deferred.promise;
+}
+
+function remove_order_from_cache(data) {
+    logger.log();
+    var deferred = Q.defer();
+
     deferred.resolve(data);
     return deferred.promise;
 }
@@ -1116,10 +1185,17 @@ module.exports.get_order = function(token, order_id) {
 module.exports.confirm_order = function(token, order) {
     logger.log();
     var deferred = Q.defer();
-    var payment_mode = order.payment_mode;
-    var order_number = order.order_number;
+    
+    var data = {};
+    data.payment_mode = order.payment_mode;
+    data.order_number = order.order_number;
+    data.user_token = token;
+    data.outlet = order.outlet;
 
     get_user(data)
+    .then(function(data) {
+        return get_outlet(data);
+    })
     .then(function(data) {
         return update_order(data);
     })
@@ -1137,8 +1213,9 @@ module.exports.confirm_order = function(token, order) {
     })
     .fail(function(err) {
         console.log(err)
-      deferred.reject(err);
+        deferred.reject(err);
     });
+    return deferred.promise;
 }
 
 function update_order(data) {
@@ -1146,60 +1223,66 @@ function update_order(data) {
     var deferred = Q.defer();
 
     Order.findOneAndUpdate({
-        order_number: order_number
+        order_number: data.order_number
     }, {
-        $push: {
-            'menus': menu
-        }
+        'payment_info.payment_mode': data.payment_mode
     }).exec(function(err) {
         if (err) {
-            deferred.reject({
-                err: false,
-                message: 'Unable to find the menu'
-            })
-        } else {
-            
-            deferred.resolve({
-                data: {},
-                message: 'Menu cloned successfully'
-            });
+            console.log(err);
+            deferred.reject(err)
+        } else {            
+            deferred.resolve(data);
         }
     });
+    return deferred.promise;
 }
 
 function send_sms(data) {
     logger.log();
     var deferred = Q.defer();
+
+    var payload  = {}
     
-    deferred.resolve({
-        data: {},
-        message: 'sms sent successfully'
+    payload.from = 'TWYSTR'
+    
+    payload.message = 'You have a new order';
+   
+    outlet.contact.phones.reg_mobile.forEach(function (phone) {
+        if(phone && phone.num) {
+            payload.phone = phone.num;
+            //Transporter.send('sms', 'vf', payload);
+        }
     });
-        
+
+    deferred.resolve(data);
+    return deferred.promise;
 }
 
 function send_email(data) {
     logger.log();
     var deferred = Q.defer();
     
-    deferred.resolve({
-        data: {},
-        message: 'email sent successfully'
-    });    
+    deferred.resolve(data); 
+    return deferred.promise;   
 }
 
 function send_notification(data) {
     logger.log();
     var deferred = Q.defer();
 
-    var a = Bayeux.bayeux.getClient().publish('/'+data.outlet._id, {text: 'yaaaaaaa u have a new order'});
-    a.then(function() {
-      console.log('delivers');
+    var send_to_merchant = Bayeux.bayeux.getClient().publish('/'+data.outlet._id, {text: {message: 'you have a new order', order_number: data.order_number}}, {attempts: 7});
+    send_to_merchant.then(function() {
+      console.log('deliverd to merchant panel');
     }, function(error) {
-      console.log('error');
+      console.log('error in sending to merchant');
     });
-    deferred.resolve({
-        data: {},
-        message: 'notification sent successfully'
-    });        
+
+    var send_to_console = Bayeux.bayeux.getClient().publish('/console', {text: {message: 'you have a new order', order_number: data.order_number}}, {attempts: 7});
+    send_to_console.then(function() {
+      console.log('deliverd to console');
+    }, function(error) {
+      console.log('error in sending to console');
+    });
+    deferred.resolve(data); 
+    return deferred.promise;       
 }

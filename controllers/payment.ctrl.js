@@ -12,11 +12,41 @@ module.exports.get_zaakpay_response = function(req, res) {
   	var zaakpay_response = {};
   	zaakpay_response = _.extend(zaakpay_response, req.body);
   	console.log(zaakpay_response);
+  	var message, type;
+  	if(zaakpay_response.paymentMethod) { // for zaakpay
+		var orderId = zaakpay_response.orderid;
+		var responseCode = zaakpay_response.responseCode;		
+		var responseDescription = zaakpay_response.responseDescription;
+		var amount = zaakpay_response.amount*100;
+		var paymentMethod = zaakpay_response.paymentMethod;
+		var cardhasid = zaakpay_response.cardhasid;
+		type = 'Zaakpay';
 
-  	PaymentHelper.calculate_checksum(zaakpay_response).then(function(data){
-		HttpHelper.success(res, data );
+		message = "'"+orderId+"''"+responseCode+"''"+responseDescription+"''"
+		+amount+"''"+paymentMethod+"''"+cardhasid+"'";		
+  	}
+  	else{// for mobikwik
+  		var orderId = zaakpay_response.orderid;
+		var responseCode = zaakpay_response.responseCode;		
+		var responseDescription = zaakpay_response.responseDescription;
+		var amount = zaakpay_response.amount;
+		type = 'wallet';
+				
+		message = "'"+orderId+"''"+amount+"''"+responseCode+"''"
+		+responseDescription+"'";			
+  	}
+
+  	PaymentHelper.calculate_checksum(message, type).then(function(checksum){
+  		if(checksum === zaakpay_response.checksum) {
+  			//confirm order
+  			HttpHelper.success(res, checksum);
+  		}
+  		else{
+  			console.log('fraud detected');
+  			HttpHelper.error(res, 'checsum not valid');
+  		}
 	},	function(err) {
-		HttpHelper.error(res, err );
+		HttpHelper.error(res, err);
   	});
     
 };

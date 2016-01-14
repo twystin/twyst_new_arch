@@ -363,6 +363,5 @@ module.exports.cancel_order = function(token, order) {
           message: 'Couldn\'t find the user'
         });
     });
-    deferred.resolve(order);
     return deferred.promise;
 };
