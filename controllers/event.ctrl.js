@@ -103,6 +103,11 @@ module.exports.report_problem = function(req, res) {
     create_new(res, setup_event(req, 'report_problem'));
 };
 
+module.exports.request_menu_update = function(req, res) {
+    logger.log();
+    create_new(res, setup_event(req, 'menu_update'));
+}
+
 module.exports.comments = function(req, res) {
     logger.log();
     create_new(res, setup_event(req, 'write_to_twyst'));
@@ -454,6 +459,7 @@ function process_event(data) {
         'suggestion': require('./processors/suggestion.proc'),
         'extend_offer': require('./processors/extend_offer.proc'),
         'report_problem': require('./processors/report_problem.proc'),
+        'menu_update': require('./processors/menu_update.proc'),
         'write_to_twyst': require('./processors/comments.proc'),
         'generate_coupon': require('./processors/generate_coupon.proc'),
         'deal_log': require('./processors/deal_log.proc'),

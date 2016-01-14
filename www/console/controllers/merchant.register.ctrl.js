@@ -3,9 +3,12 @@ angular.module('consoleApp').controller('RegisterMerchantController', ['$scope',
 
         $scope.init = function() {
             $scope.merchant = {
-                isPaying: false
+                isPaying: false,
+                is_merchant: true
             };
         };
+
+        $scope.init();
 
         $scope.registerMerchant = function() {
             if (!$scope.merchant) {
@@ -28,8 +31,15 @@ angular.module('consoleApp').controller('RegisterMerchantController', ['$scope',
                     role: 3
                 };
 
+                if (!$scope.merchant.is_merchant) {
+                    merchant.role = 2;
+                }
+
                 if ($scope.merchant.isPaying) {
                     merchant.isPaying = true;
+                }
+
+                if ($scope.merchant.isPaying || !$scope.merchant.is_merchant) {
                     merchant.email = $scope.merchant.email;
                 }
 

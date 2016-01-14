@@ -41,7 +41,7 @@ angular.module('consoleApp').controller('OfferManageController', ['$scope', 'con
 
         $scope.onNumPerPageChange = function() {
             $scope.select(1);
-            return $scoep.currentPage = 1;
+            return $scope.currentPage = 1;
         };
 
         $scope.onOrderChange = function() {

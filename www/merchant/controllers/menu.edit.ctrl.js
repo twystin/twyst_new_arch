@@ -179,7 +179,7 @@ angular.module('merchantApp')
                     });
 
                     modalInstance.result.then(function(sub_category) {
-                        if(category.sub_categories[0].sub_category_name === 'Default') {
+                        if (category.sub_categories[0].sub_category_name === 'Default') {
                             category.sub_categories[0] = _.merge(category.sub_categories[0], sub_category);
                         } else {
                             category.sub_categories.push(sub_category);
@@ -333,6 +333,9 @@ angular.module('merchantApp')
                         },
                         is_new: function() {
                             return false
+                        },
+                        limit_access: function() {
+                            return true
                         }
                     }
                 });
@@ -429,6 +432,9 @@ angular.module('merchantApp')
                         },
                         option_title: function() {
                             return item.option_title;
+                        },
+                        limit_access: function() {
+                            return true
                         }
                     }
                 });
@@ -507,6 +513,9 @@ angular.module('merchantApp')
                         },
                         is_new: function() {
                             return false
+                        },
+                        limit_access: function() {
+                            return true;
                         }
                     }
                 });
@@ -585,6 +594,9 @@ angular.module('merchantApp')
                         },
                         is_new: function() {
                             return false
+                        },
+                        limit_access: function() {
+                            return true;
                         }
                     }
                 });

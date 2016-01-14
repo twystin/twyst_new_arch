@@ -1,8 +1,9 @@
 angular.module('merchantApp')
-    .controller('MenuSubOptionController', function($scope, $modalInstance, sub_option, is_new, SweetAlert) {
+    .controller('MenuSubOptionController', function($scope, $modalInstance, sub_option, is_new, limit_access, SweetAlert) {
 
         $scope.is_new = is_new;
         $scope.sub_option = sub_option;
+        $scope.limit_access = limit_access;
 
         $scope.addValuePair = function() {
             $scope.sub_option.sub_option_set.push({
@@ -11,7 +12,7 @@ angular.module('merchantApp')
         };
 
         $scope.removeValuePair = function(index) {
-        	$scope.sub_option.sub_option_set.splice(index, 1);
+            $scope.sub_option.sub_option_set.splice(index, 1);
         };
 
         $scope.resolveSubOption = function() {

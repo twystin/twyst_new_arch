@@ -1,7 +1,8 @@
 angular.module('merchantApp')
-    .controller('MenuItemController', function($scope, $modalInstance, item, is_new, SweetAlert, $q) {
+    .controller('MenuItemController', function($scope, $modalInstance, item, is_new, limit_access, SweetAlert, $q) {
 
         $scope.is_new = is_new;
+        $scope.limit_access = limit_access;
         $scope.item = item;
         if (!is_new) {
             _.each($scope.days, function(day) {
@@ -43,7 +44,7 @@ angular.module('merchantApp')
             var deferred = $q.defer();
             if (!$scope.item.item_name) {
                 deferred.reject('Item name required.');
-            } else if (!$scope.item.item_cost && $scope.item.item_cost!==0) {
+            } else if (!$scope.item.item_cost && $scope.item.item_cost !== 0) {
                 deferred.reject('Item cost required.');
             } else if (!$scope.item.item_tags || !$scope.item.item_tags.length) {
                 deferred.reject('Atleast one tag required')

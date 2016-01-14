@@ -3,9 +3,12 @@
     <div class='row'>
         <div class='col-sm-offset-2 col-sm-8'>
             <section class='panel panel-default'>
-                <div class='panel-heading'><strong><span class='glyphicon glyphicon-th'></span> Register Merchant</strong></div>
+                <div class='panel-heading'><strong><span class='glyphicon glyphicon-th'></span> Register Account</strong></div>
                 <div class='panel-body'>
                     <form role='form' ng-submit='registerMerchant()'>
+                        <div class='form-group'>
+                            <input bs-switch type='checkbox' ng-model='merchant.is_merchant' switch-off-text='Account Manager' switch-on-text='Merchant'>
+                        </div>
                         <div class='form-group'>
                             <label>Username</label>
                             <input type='text' class='form-control' ng-model='merchant.username' placeholder='Username here...'>
@@ -18,11 +21,11 @@
                             <label>Repeat Password</label>
                             <input type='password' class='form-control' ng-model='merchant.rePassword' placeholder='Retype password'>
                         </div>
-                        <div class='form-group'>
+                        <div class='form-group' ng-if='merchant.is_merchant'>
                             <label>Is outlet paying?</label>
                             <input type='checkbox' bs-switch switch-off-text='NO' switch-on-text='YES' ng-model='merchant.isPaying' ng-change='isPayingUpdated()'>
                         </div>
-                        <div class='form-group' ng-if='merchant.isPaying'>
+                        <div class='form-group' ng-if='merchant.isPaying || !merchant.is_merchant'>
                             <label>E-Mail ID</label>
                             <input type='email' class='form-control' placeholder='Email address' ng-model='merchant.email'>
                         </div>

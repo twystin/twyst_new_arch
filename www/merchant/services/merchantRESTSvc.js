@@ -443,6 +443,21 @@ angular.module('merchantApp')
                 return deferred.promise;
             }
 
+            merchantRESTSvc.menuUpdateRequest = function(req_obj) {
+                var deferred = $q.defer();
+                var token = $cookies.get('token');
+                $http.post('/api/v4/menu/request_update?token=' + token, req_obj).then(function(res) {
+                    if (res.data.response) {
+                        deferred.resolve(res.data);
+                    } else {
+                        deferred.reject(res.data);
+                    }
+                }, function(err) {
+                    deferred.reject(err);
+                });
+                return deferred.promise;
+            }
+
             return merchantRESTSvc;
         }
     ]);

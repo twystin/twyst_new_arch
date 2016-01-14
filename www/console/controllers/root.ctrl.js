@@ -10,7 +10,9 @@ angular.module('consoleApp')
             consoleRESTSvc.logout().then(function(data) {
                 if (data.response) {
                     $cookies.remove('token');
+                    $cookies.remove('role');
                     $rootScope.token = undefined;
+                    $rootScope.role = undefined;
                     SweetAlert.swal({
                         title: "SUCCESS",
                         text: "Logged out successfully",

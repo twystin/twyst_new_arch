@@ -1,6 +1,11 @@
 angular.module('consoleApp')
     .controller('LoginController', ['$scope', '$cookies', '$log', '$state', '$rootScope', 'consoleRESTSvc', 'SweetAlert',
         function($scope, $cookies, $log, $state, $rootScope, consoleRESTSvc, SweetAlert) {
+
+            $scope.user = {
+                isAdmin: true
+            };
+
             if ($rootScope.token) {
                 $state.go('console.default', {}, {
                     reload: true
@@ -12,8 +17,10 @@ angular.module('consoleApp')
                     .then(function(res) {
                         $cookies.put('token', res.data.data.token);
                         $cookies.put('isPaying', res.data.data.is_paying);
+                        $cookies.put('role', res.data.data.role);
                         $rootScope.token = res.data.data.token;
                         $rootScope.isPaying = res.data.data.is_paying;
+                        $rootScope.role = res.data.data.role;
                         SweetAlert.swal({
                             title: 'Logged In Successfully',
                             type: 'success',
