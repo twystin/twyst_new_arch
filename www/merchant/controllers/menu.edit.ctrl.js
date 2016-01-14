@@ -30,32 +30,6 @@ angular.module('merchantApp')
                 scope.toggle();
             };
 
-            $scope.addCategory = function() {
-                var modalInstance = $modal.open({
-                    animation: true,
-                    templateUrl: 'templates/partials/menu.category.tmpl.html',
-                    controller: 'MenuCategoryController',
-                    size: 'lg',
-                    resolve: {
-                        category: function() {
-                            return {
-                                sub_categories: [{
-                                    sub_category_name: 'Default',
-                                    items: []
-                                }]
-                            };
-                        },
-                        is_new: function() {
-                            return true;
-                        }
-                    }
-                });
-
-                modalInstance.result.then(function(category) {
-                    $scope.menu.menu_categories.push(category);
-                });
-            };
-
             $scope.cloneCategory = function(index) {
                 SweetAlert.swal({
                     title: 'Clone category!',
@@ -96,7 +70,7 @@ angular.module('merchantApp')
             $scope.editCategory = function(index) {
                 var modalInstance = $modal.open({
                     animation: true,
-                    templateUrl: 'templates/partials/menu.category.tmpl.html',
+                    templateUrl: '../common/templates/partials/menu.category.tmpl.html',
                     controller: 'MenuCategoryController',
                     size: 'lg',
                     resolve: {
@@ -127,65 +101,6 @@ angular.module('merchantApp')
                         $scope.menu.menu_categories.splice(index, 1);
                     }
                 });
-            };
-
-            $scope.addSubCategory = function(category) {
-                if (category.sub_categories.length === 1 && category.sub_categories[0].sub_category_name === 'Default' && category.sub_categories[0].items.length) {
-                    SweetAlert.swal({
-                        title: 'Are you sure?',
-                        text: 'Existing items will be shifted to the new sub category',
-                        type: 'warning',
-                        confirmButtonColor: '#DD6B55',
-                        showCancelButton: 'true',
-                        confirmButtonText: 'Yes, Continue'
-                    }, function(confirm) {
-                        var modalInstance = $modal.open({
-                            animation: true,
-                            templateUrl: 'templates/partials/menu.sub_category.tmpl.html',
-                            controller: 'MenuSubCategoryController',
-                            size: 'lg',
-                            resolve: {
-                                sub_category: function() {
-                                    return {
-                                        items: []
-                                    };
-                                },
-                                is_new: function() {
-                                    return true;
-                                }
-                            }
-                        });
-
-                        modalInstance.result.then(function(sub_category) {
-                            category.sub_categories[0] = _.merge(category.sub_categories[0], sub_category);
-                        });
-                    });
-                } else {
-                    var modalInstance = $modal.open({
-                        animation: true,
-                        templateUrl: 'templates/partials/menu.sub_category.tmpl.html',
-                        controller: 'MenuSubCategoryController',
-                        size: 'lg',
-                        resolve: {
-                            sub_category: function() {
-                                return {
-                                    items: []
-                                };
-                            },
-                            is_new: function() {
-                                return true;
-                            }
-                        }
-                    });
-
-                    modalInstance.result.then(function(sub_category) {
-                        if (category.sub_categories[0].sub_category_name === 'Default') {
-                            category.sub_categories[0] = _.merge(category.sub_categories[0], sub_category);
-                        } else {
-                            category.sub_categories.push(sub_category);
-                        }
-                    });
-                }
             };
 
             $scope.cloneSubCategory = function(category, index) {
@@ -225,7 +140,7 @@ angular.module('merchantApp')
             $scope.editSubCategory = function(category, index) {
                 var modalInstance = $modal.open({
                     animation: true,
-                    templateUrl: 'templates/partials/menu.sub_category.tmpl.html',
+                    templateUrl: '../common/templates/partials/menu.sub_category.tmpl.html',
                     controller: 'MenuSubCategoryController',
                     size: 'lg',
                     resolve: {
@@ -255,38 +170,6 @@ angular.module('merchantApp')
                     if (confirm) {
                         category.sub_categories.splice(index, 1);
                     }
-                });
-            };
-
-            $scope.addItem = function(sub_category) {
-                var modalInstance = $modal.open({
-                    animation: true,
-                    templateUrl: 'templates/partials/menu.item.tmpl.html',
-                    controller: 'MenuItemController',
-                    size: 'lg',
-                    resolve: {
-                        item: function() {
-                            return {
-                                item_type: 'type_1',
-                                is_available: true,
-                                option_is_addon: false,
-                                is_vegetarian: true,
-                                is_recommended: false,
-                                item_available_on: [],
-                                item_availability: {
-                                    regular_item: true
-                                },
-                                options: []
-                            }
-                        },
-                        is_new: function() {
-                            return true
-                        }
-                    }
-                });
-
-                modalInstance.result.then(function(item) {
-                    sub_category.items.push(item);
                 });
             };
 
@@ -324,7 +207,7 @@ angular.module('merchantApp')
             $scope.editItem = function(sub_category, index) {
                 var modalInstance = $modal.open({
                     animation: true,
-                    templateUrl: 'templates/partials/menu.item.tmpl.html',
+                    templateUrl: '../common/templates/partials/menu.item.tmpl.html',
                     controller: 'MenuItemController',
                     size: 'lg',
                     resolve: {
@@ -360,35 +243,6 @@ angular.module('merchantApp')
                 });
             };
 
-            $scope.addOption = function(item) {
-                var modalInstance = $modal.open({
-                    animation: true,
-                    templateUrl: 'templates/partials/menu.option.tmpl.html',
-                    controller: 'MenuOptionController',
-                    size: 'lg',
-                    resolve: {
-                        option: function() {
-                            return {
-                                is_available: true,
-                                is_vegetarian: true,
-                                sub_options: [],
-                                addons: []
-                            };
-                        },
-                        is_new: function() {
-                            return true;
-                        },
-                        option_title: function() {
-                            return item.option_title;
-                        }
-                    }
-                });
-
-                modalInstance.result.then(function(option) {
-                    item.options.push(option);
-                });
-            };
-
             $scope.cloneOption = function(item, index) {
                 SweetAlert.swal({
                     title: 'Clone option!',
@@ -420,7 +274,7 @@ angular.module('merchantApp')
             $scope.editOption = function(item, index) {
                 var modalInstance = $modal.open({
                     animation: true,
-                    templateUrl: 'templates/partials/menu.option.tmpl.html',
+                    templateUrl: '../common/templates/partials/menu.option.tmpl.html',
                     controller: 'MenuOptionController',
                     size: 'lg',
                     resolve: {
@@ -459,29 +313,6 @@ angular.module('merchantApp')
                 });
             };
 
-            $scope.addSubOption = function(option) {
-                var modalInstance = $modal.open({
-                    animation: true,
-                    templateUrl: 'templates/partials/menu.sub_option.tmpl.html',
-                    controller: 'MenuSubOptionController',
-                    size: 'lg',
-                    resolve: {
-                        sub_option: function() {
-                            return {
-                                sub_option_set: []
-                            };
-                        },
-                        is_new: function() {
-                            return true;
-                        }
-                    }
-                });
-
-                modalInstance.result.then(function(sub_option) {
-                    option.sub_options.push(sub_option);
-                });
-            };
-
             $scope.cloneSubOption = function(option, index) {
                 SweetAlert.swal({
                     title: 'Clone sub option!',
@@ -504,7 +335,7 @@ angular.module('merchantApp')
             $scope.editSubOption = function(option, index) {
                 var modalInstance = $modal.open({
                     animation: true,
-                    templateUrl: 'templates/partials/menu.sub_option.tmpl.html',
+                    templateUrl: '../common/templates/partials/menu.sub_option.tmpl.html',
                     controller: 'MenuSubOptionController',
                     size: 'lg',
                     resolve: {
@@ -540,29 +371,6 @@ angular.module('merchantApp')
                 });
             };
 
-            $scope.addAddon = function(option) {
-                var modalInstance = $modal.open({
-                    animation: true,
-                    templateUrl: 'templates/partials/menu.addon.tmpl.html',
-                    controller: 'MenuAddonController',
-                    size: 'lg',
-                    resolve: {
-                        addon: function() {
-                            return {
-                                addon_set: []
-                            };
-                        },
-                        is_new: function() {
-                            return true
-                        }
-                    }
-                });
-
-                modalInstance.result.then(function(addon) {
-                    option.addons.push(addon);
-                });
-            };
-
             $scope.cloneAddon = function(option, index) {
                 SweetAlert.swal({
                     title: 'Clone addon!',
@@ -585,7 +393,7 @@ angular.module('merchantApp')
             $scope.editAddon = function(option, index) {
                 var modalInstance = $modal.open({
                     animation: true,
-                    templateUrl: 'templates/partials/menu.addon.tmpl.html',
+                    templateUrl: '../common/templates/partials/menu.addon.tmpl.html',
                     controller: 'MenuAddonController',
                     size: 'lg',
                     resolve: {

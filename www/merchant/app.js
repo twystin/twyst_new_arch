@@ -2,7 +2,6 @@ angular.module('merchantApp', ['ui.router', 'ngAudio', 'ui.bootstrap', 'ngCookie
     .run(function($rootScope, $state, $cookies, ngAudio) {
         $rootScope.faye = new Faye.Client('/faye');
         $rootScope.token = $cookies.get('token');
-        $rootScope.sound = ngAudio.load('sounds/song1.mp3');
         $rootScope.sound = ngAudio.load('sounds/song1.wav');
         $rootScope.sound.loop = true;
         $rootScope.isPaying = $cookies.get('isPaying') == 'true' ? true : false;
@@ -58,15 +57,15 @@ angular.module('merchantApp', ['ui.router', 'ngAudio', 'ui.bootstrap', 'ngCookie
                 templateUrl: 'templates/menus/manage.html',
                 controller: 'MenuManageController'
             })
-            .state('merchant.menus_create', {
-                url: '/menus/create',
-                templateUrl: 'templates/menus/create.html',
-                controller: 'MenuCreateController'
-            })
             .state('merchant.menus_edit', {
                 url: '/menus/edit/:menu_id',
                 templateUrl: 'templates/menus/edit.html',
                 controller: 'MenuEditController'
+            })
+            .state('merchant.menus_request_update', {
+                url: '/menus/request/:menu_id',
+                templateUrl: 'templates/menus/request.html',
+                controller: 'MenuRequestUpdateController'
             })
             .state('merchant.menus_view', {
                 url: '/menus/view/:menu_id',

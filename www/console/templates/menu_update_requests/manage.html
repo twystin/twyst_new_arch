@@ -23,12 +23,83 @@
                         <tr>
                             <th>
                                 <div class='th'>
-                                    Actions
+                                    Menu Title
+                                    <span class='fa fa-angle-up' ng-click='order("event_meta.menu_type")' ng-class='{active: row === "event_meta.menu_type"}'></span>
+                                    <span class='fa fa-angle-down' ng-click='order("-event_meta.menu_type")' ng-class='{active: row === "-event_meta.menu_type"}'></span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class='th'>
+                                    Outlet Name
+                                    <span class='fa fa-angle-up' ng-click='order("event_meta.outlet.name")' ng-class='{active: row === "event_meta.outlet.name"}'></span>
+                                    <span class='fa fa-angle-down' ng-click='order("-event_meta.outlet.name")' ng-class='{active: row === "-event_meta.outlet.name"}'></span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class='th'>
+                                    Locality 1
+                                    <span class='fa fa-angle-up' ng-click='order("event_meta.outlet.loc1")' ng-class='{active: row === "event_meta.outlet.loc1"}'></span>
+                                    <span class='fa fa-angle-down' ng-click='order("-event_meta.outlet.loc1")' ng-class='{active: row === "-event_meta.outlet.loc1"}'></span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class='th'>
+                                    Locality 2
+                                    <span class='fa fa-angle-up' ng-click='order("event_meta.outlet.loc2")' ng-class='{active: row === "event_meta.outlet.loc2"}'></span>
+                                    <span class='fa fa-angle-down' ng-click='order("-event_meta.outlet.loc2")' ng-class='{active: row === "-event_meta.outlet.loc2"}'></span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class='th'>
+                                    <select ng-model='view_status' ng-change='sort(view_status)' class='form-control' name='viewByStatus'>
+                                        <option value='' ng-if='!view_status'>Status</option>
+                                        <option value='' ng-if='view_status'>All</option>
+                                        <option value='pending'>Pending</option>
+                                        <option value='approved'>Approved</option>
+                                        <option value='rejected'>Rejected</option>
+                                    </select>
                                 </div>
                             </th>
                         </tr>
                     </thead>
+                    <tbody>
+                        <tr ng-repeat='request in current_page_requests'>
+                            <td>
+                                {{request.event_meta.menu_type}}
+                            </td>
+                            <td>
+                                {{request.event_meta.outlet.name}}
+                            </td>
+                            <td>
+                                {{request.event_meta.outlet.loc1}}
+                            </td>
+                            <td>
+                                {{request.event_meta.outlet.loc2}}
+                            </td>
+                            <td>
+                                <div class='btn-group'>
+                                    <label class='btn' ng-class='{"btn-default": request.event_meta.status !== "pending", "btn-primary": request.event_meta.status === "pending"}' ng-change='updateStatus(request)' ng-model='request.event_meta.status' btn-checkbox>Pending</label>
+                                    <label class='btn' ng-class='{"btn-default": request.event_meta.status !== "approved", "btn-primary": request.event_meta.status === "approved"}' ng-change='updateStatus(request)' ng-model='request.event_meta.status' btn-checkbox>Approved</label>
+                                    <label class='btn' ng-class='{"btn-default": request.event_meta.status !== "rejected", "btn-primary": request.event_meta.status === "rejected"}' ng-change='updateStatus(request)' ng-model='request.event_meta.status' btn-checkbox>Rejected</label>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
+                <footer class='table-footer'>
+                    <div class='row'>
+                        <div class='col-sm-6 page-num-info'>
+                            <span>
+                                Show
+                                <select ng-model='numPerPage' ng-options='num for num in numPerPageOpt' ng-change='onNumPerPageChange()'></select>
+                                entries per page
+                            </span>
+                        </div>
+                        <div class='col-sm-6 text-right pagination-container'>
+                            <pagination class='pagination-sm' ng-model='currentPage' total-items='filtered_request.length' max-size='4' ng-change='select(currentPage)' items-per-page='numPerPage' rotate='false' previous-text="&lsaquo;" next-text="&rsaquo;" boundary-links='true'></pagination>
+                        </div>
+                    </div>
+                </footer>
             </section>
         </div>
     </div>

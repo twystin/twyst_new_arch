@@ -91,7 +91,8 @@ angular.module('merchantApp')
                 });
             };
 
-            $scope.requestMenuUpdate = function(menu_id) {
+            $scope.requestMenuUpdate = function(menu) {
+                console.log(menu);
                 var modalInstance = $modal.open({
                     animation: true,
                     templateUrl: 'templates/partials/menu.request_update.tmpl.html',
@@ -99,7 +100,13 @@ angular.module('merchantApp')
                     size: 'md',
                     resolve: {
                         menu_id: function() {
-                            return menu_id;
+                            return menu._id;
+                        },
+                        outlet: function() {
+                            return menu.outlet;
+                        },
+                        menu_type: function() {
+                            return menu.menu_type;
                         }
                     }
                 });
