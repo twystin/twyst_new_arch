@@ -117,10 +117,9 @@ function map_valid_delivery_zone(params) {
 
         delivery_zone = _.compact(delivery_zone);
         delivery_zone =  _.max(delivery_zone, function(zone){ return zone.zone_type});
-        console.log(delivery_zone);
+        
         if(delivery_zone) {
           val.valid_zone = delivery_zone;
-          val.delivery_zones = val.attributes.delivery.delivery_zone;
           return val; 
         }
         else{

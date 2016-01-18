@@ -349,7 +349,8 @@ module.exports.cancel_order = function(req, res) {
   logger.log();
   var token = req.query.token || null;
   var order = {};
-  order = _.extend(order, req.body);
+  order.reason = req.body.reason;
+  order.order_id = req.params.order_id;
 
   if (!token) {
     HttpHelper.error(res, null, "Not authenticated");

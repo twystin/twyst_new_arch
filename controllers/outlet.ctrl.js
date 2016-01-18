@@ -959,6 +959,7 @@ module.exports.get_orders = function(req, res) {
 module.exports.update_order = function(req, res) {
   var token = req.query.token || null;
   var order = {};
+  order.order_id = req.params.order_id;
   order = _.extend(order, req.body);
 
   if (!token) {
@@ -966,6 +967,8 @@ module.exports.update_order = function(req, res) {
   }
 
   OutletHelper.update_order(token, order).then(function(data) {
+    console.log('asdgffdg');
+    console.log(data)
     HttpHelper.success(res, data.data, data.message);
   }, function(err) {
     HttpHelper.error(res, err.data, err.message);

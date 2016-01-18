@@ -43,6 +43,11 @@ var Order = new Schema({
     txn_id: {type: String},
   }, 
   order_status: {type: String},
+  actions: [{
+    action_type: {type: String}, //accept/reject/dispatch
+    action_by: {type: Schema.Types.ObjectId},
+    action_at: {type: Date, default: new Date()},
+  }],
   user_rating: {
     type: Number,
     default: 0
@@ -85,50 +90,51 @@ var Order = new Schema({
       option_is_addon: {
         type: Boolean,
         default: false,
-      }
+      },
+      sub_options: [{
+        sub_option_title: {
+          type: String,
+        },
+        sub_option_set: [{
+          sub_option_value: {
+            type: String,
+          },
+          is_available: {
+            type: Boolean,
+            default: true
+          },
+          is_vegetarian: {
+            type: Boolean,
+            default: true
+          },
+          sub_option_cost: {
+            type: Number
+          }
+        }]
+      }],
+      addons: [{
+        addon_title: {
+          type: String,
+        },
+        addon_set: [{
+          addon_value: {
+            type: String,
+          },
+          is_available: {
+            type: Boolean,
+            default: true
+          },
+          is_vegetarian: {
+            type: Boolean,
+            default: true
+          },
+          addon_cost: {
+            type: Number
+          }
+        }]
+      }]
     },    
-    sub_options: [{
-      sub_option_title: {
-        type: String,
-      },
-      sub_option_set: [{
-        sub_option_value: {
-          type: String,
-        },
-        is_available: {
-          type: Boolean,
-          default: true
-        },
-        is_vegetarian: {
-          type: Boolean,
-          default: true
-        },
-        sub_option_cost: {
-          type: Number
-        }
-      }]
-    }],
-    addons: [{
-      addon_title: {
-        type: String,
-      },
-      addon_set: [{
-        addon_value: {
-          type: String,
-        },
-        is_available: {
-          type: Boolean,
-          default: true
-        },
-        is_vegetarian: {
-          type: Boolean,
-          default: true
-        },
-        addon_cost: {
-          type: Number
-        }
-      }]
-    }]
+    
   }]
 
 })
