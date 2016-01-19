@@ -1286,6 +1286,60 @@ module.exports.get_order = function(token, order_id) {
   return deferred.promise;
 };
 
+module.exports.get_orders = function(token) {
+    logger.log();
+    var deferred = Q.defer();
+
+    AuthHelper.get_user(token).then(function(data) {
+        logger.error(data.data.role, data.data.outlets);
+        if (data.data.role === 1) {
+            Order.find({}).populate('outlet').exec(function(err, orders) {
+                if (err || !orders) {
+                    deferred.reject({
+                        err: err || false,
+                        message: 'Unable to load orders'
+                    });
+                } else {
+                    process_orders(orders, deferred);
+                }
+            });
+        } else if (data.data.role >= 2 && data.data.role < 6) {
+            Order.find({
+                outlet: {
+                    $in: data.data.outlets
+                }
+            }).populate('outlet').exec(function(err, orders) {
+                if (err || !orders) {
+                    deferred.reject({
+                        err: err || false,
+                        message: 'Unable to load orders'
+                    });
+                } else {
+                    process_orders(orders, deferred);
+                }
+            });
+        } else {
+            Order.find({user: data.data._id }).populate('outlet').populate('outlet').exec(function(err, orders) {
+                if (err || !orders) {
+                    deferred.reject({
+                        err: err || false,
+                        message: 'Unable to load orders'
+                    });
+                } else {
+                    process_orders(orders, deferred);
+                }
+            });
+        }
+    }, function(err) {
+        deferred.reject({
+            err: err || false,
+            message: 'Couldn\'t fund the user'
+        });
+    });
+
+    return deferred.promise;
+}
+
 module.exports.confirm_order = function(token, order) {
     logger.log();
     var deferred = Q.defer();
@@ -1324,6 +1378,33 @@ module.exports.confirm_order = function(token, order) {
         deferred.reject(err);
     });
     return deferred.promise;
+}
+
+function process_orders(orders, deferred) {
+    var processed_orders = _.map(orders, function(order){
+        var updated_order = {};    
+        updated_order.outlet_name = order.outlet.basics.name;
+        _.each(order.items, function(item) {
+            
+        })
+        updated_order.items = order.items;
+        updated_order.address = order.address;
+        updated_order.is_favourite = order.is_favourite;
+        if(order.offer_used) {
+            updated_order.order_cost = order.order_value_with_offer + order.tax_paid;
+        }
+        else{
+            updated_order.order_cost = order.order_value_without_offer + order.tax_paid;
+        }
+        updated_order.cashback = order.cashback;
+        updated_order.order_date = order.order_date;
+        updated_order.order_status = order.order_status;
+        return updated_order;
+    });
+    deferred.resolve({
+        data: processed_orders,
+        message: 'found the orders'
+    });
 }
 
 function update_order(data) {

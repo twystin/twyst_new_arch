@@ -80,6 +80,16 @@ angular.module('consoleApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angular
                 templateUrl: 'templates/offers/view.html',
                 controller: 'OfferViewController'
             })
+            .state('console.orders_manage', {
+                url: '/orders',
+                templateUrl: 'templates/orders/manage.html',
+                controller: 'OrderManageController'
+            })
+            .state('console.orders_view', {
+                url: '/orders/:order_id',
+                templateUrl: 'templates/orders/view.html',
+                controller: 'OrderViewController'
+            })
             .state('console.bills_manage', {
                 url: '/bills',
                 templateUrl: 'templates/bills/manage.html',

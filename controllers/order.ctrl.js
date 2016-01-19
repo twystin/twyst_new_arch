@@ -114,6 +114,18 @@ module.exports.get_order = function(req, res) {
   });
 };
 
+module.exports.all = function(req, res) {
+	var token = req.query.token || undefined;
 
+	if (!token) {
+		HttpHelper.error(res, null, "Not authenticated");
+	}
+
+	OrderHelper.get_orders(token).then(function(data) {
+		HttpHelper.success(res, data.data, data.message);
+	}, function(err) {
+		HttpHelper.error(res, err.data, err.message);
+	});
+}
 
 

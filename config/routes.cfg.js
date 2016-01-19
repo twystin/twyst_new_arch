@@ -121,6 +121,7 @@ module.exports = function(app) {
 
   (function OrderRoutes() {
     var OrderCtrl = require('../controllers/order.ctrl');    
+    app.get('/api/v4/orders', OrderCtrl.all);
     app.get('/api/v4/order/:order_id', OrderCtrl.get_order);
     app.post('/api/v4/order/verify', OrderCtrl.verify_order);
     app.post('/api/v4/order/apply/offer', OrderCtrl.apply_offer);
@@ -142,7 +143,6 @@ module.exports = function(app) {
     app.put('/api/v4/friends', UserCtrl.update_friends);
     app.get('/api/v4/coupons', UserCtrl.get_coupons);
     app.post('/api/v4/user/location', UserCtrl.update_location);
-    app.get('/api/v4/user/orders', UserCtrl.get_orders);
     app.put('/api/v4/user/cancel_order/:order_id', UserCtrl.cancel_order);
   })();
 
