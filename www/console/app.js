@@ -1,7 +1,38 @@
-angular.module('consoleApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angularMoment', 'oitozero.ngSweetAlert', 'angular-loading-bar', 'ngAnimate', 'ngStorage', 'ordinal', 'ngFileUpload', 'uiGmapgoogle-maps', 'mgo-angular-wizard', 'ui.select2', 'frapontillo.bootstrap-switch', 'ui.tree', 'toastr', 'ordinal'])
-    .run(function($rootScope, $state, $cookies) {
+angular.module('consoleApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angularMoment', 'oitozero.ngSweetAlert', 'angular-loading-bar', 'ngAnimate', 'ngStorage', 'ordinal', 'ngFileUpload', 'uiGmapgoogle-maps', 'mgo-angular-wizard', 'ui.select2', 'frapontillo.bootstrap-switch', 'ui.tree', 'toastr', 'ordinal', 'notification', 'ngAudio'])
+    .run(function($rootScope, $state, $cookies, $notification, ngAudio) {
+        $rootScope.faye = new Faye.Client('/faye');
         $rootScope.token = $cookies.get('token');
         $rootScope.role = $cookies.get('role');
+        $rootScope.sound = ngAudio.load('sounds/song1.wav');
+        $rootScope.sound.loop = true;
+        $rootScope.paths = JSON.parse($cookies.get('paths') || '[]');
+        $rootScope.notification_count = 0;
+        _.each($rootScope.paths, function(path) {
+            $rootScope.faye.subscribe(path, function(message) {
+                $rootScope.notification_count += 1;
+                $rootScope.sound.play();
+                var notification = $notification('New Order', {
+                    body: message.text || 'Message here',
+                    delay: 0,
+                    dir: 'auto'
+                });
+
+                notification.$on('click', function() {
+                    console.debug('The user has clicked in my notification.');
+                    notification.close();
+                    // $rootScope.sound.stop();
+                });
+
+                notification.$on('close', function() {
+                    console.debug('The user has closed my notification.');
+                    notification.close();
+                    $rootScope.notification_count -= 1;
+                    if (!$rootScope.notification_count) {
+                        $rootScope.sound.stop();
+                    }
+                });
+            });
+        });
     })
     .config(function($stateProvider, $urlRouterProvider) {
 

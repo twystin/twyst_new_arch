@@ -15,7 +15,6 @@
                             <i class='fa fa-times' ng-if='menu_set[menu._id]'></i>
                         </label>
                         {{menu.menu_type}} [Menu]
-                        <!-- <a class='pull-right btn btn-sm btn-primary' data-nodrag ng-click='pickMenu(menu._id)'><i class='fa fa-plus'></i> Pick</a> -->
                     </div>
                     <ol ui-tree-nodes ng-model='menu.menu_categories'>
                         <li ng-repeat='category in menu.menu_categories track by $index' ui-tree-node>
@@ -28,7 +27,6 @@
                                     <i class='fa fa-times' ng-if='category_set[category._id]'></i>
                                 </label>
                                 {{category.category_name}} [Category]
-                                <!-- <a class='pull-right btn btn-sm btn-primary' data-nodrag ng-click='pickCategory(menu._id, category._id)'><i class='fa fa-plus'></i> Pick</a> -->
                             </div>
                             <ol ui-tree-nodes ng-model='category.sub_categories' ng-class="{hidden: collapsed}">
                                 <li ng-repeat='sub_category in category.sub_categories track by $index' ui-tree-node>
@@ -41,7 +39,6 @@
                                             <i class='fa fa-times' ng-if='sub_category_set[sub_category._id]'></i>
                                         </label>
                                         {{sub_category.sub_category_name}} [Sub Category]
-                                        <!-- <a class='pull-right btn btn-sm btn-primary' data-nodrag ng-click='pickSubCategory(menu._id, category._id, sub_category._id)'><i class='fa fa-plus'></i> Pick</a> -->
                                     </div>
                                     <ol ui-tree-nodes ng-model='sub_category.items' ng-class="{hidden: collapsed}">
                                         <li ng-repeat='item in sub_category.items track by $index' ui-tree-node>
@@ -54,7 +51,6 @@
                                                     <i class='fa fa-times' ng-if='item_set[item._id]'></i>
                                                 </label>
                                                 {{item.item_name}} <i class='fa fa-inr'></i>{{item.item_cost}} [Item]
-                                                <!-- <a class='pull-right btn btn-sm btn-primary' data-nodrag ng-click='pickItem(menu._id,category._id, sub_category._id, item._id)' ng-if='!item.options.length'><i class='fa fa-plus'></i> Pick</a> -->
                                             </div>
                                             <ol ui-tree-nodes ng-model='item.options' ng-class="{hidden: collapsed}">
                                                 <li ng-repeat='option in item.options track by $index' ui-tree-node>
@@ -66,7 +62,7 @@
                                                             <i class='fa fa-plus' ng-if='!option_set[option._id]'></i>
                                                             <i class='fa fa-times' ng-if='option_set[option._id]'></i>
                                                         </label>
-                                                        <!-- <a class='pull-right btn btn-sm btn-primary' data-nodrag ng-click='pickOption(menu._id,category._id, sub_category._id, item._id, option)'><i class='fa fa-plus'></i> Pick</a> -->{{item.option_title}} - {{option.option_value}} <i class='fa fa-inr'></i>{{option.option_cost}}
+                                                        {{item.option_title}} - {{option.option_value}} <i class='fa fa-inr'></i>{{option.option_cost}}
                                                     </div>
                                                     <ol ui-tree-nodes ng-model='option.sub_options' ng-class="{hidden: collapsed}" style='margin-top:20px;'>
                                                         <li ng-repeat='sub_option in option.sub_options track by $index' ui-tree-node>
