@@ -13,7 +13,7 @@ angular.module('merchantApp')
 
             $scope.getOutlets = function() {
                 merchantRESTSvc.getOutlets().then(function(res) {
-                    $scope.outlets = res.data.outlets;
+                    $scope.outlets = res.data;
                 }, function(err) {
                     $scope.outlets = [];
                     console.log(err);

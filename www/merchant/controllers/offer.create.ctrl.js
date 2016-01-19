@@ -113,7 +113,7 @@ angular.module('merchantApp')
 
             merchantRESTSvc.getOutlets()
                 .then(function(res) {
-                    $scope.outlets = _.indexBy(res.data.outlets, '_id');
+                    $scope.outlets = _.indexBy(res.data, '_id');
                     $scope.filtered_outlets = _.cloneDeep($scope.outlets);
                 }, function(err) {
                     console.log(err);

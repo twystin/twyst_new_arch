@@ -23,7 +23,7 @@ angular.module('merchantApp')
 
             $scope.getOffers = function() {
                 merchantRESTSvc.getOutlets().then(function(data) {
-                    $scope.outlets = data.data.outlets;
+                    $scope.outlets = data.data;
                     $scope.offers = [];
                     $scope.offer_ids = [];
                     _.each($scope.outlets, function(outlet) {

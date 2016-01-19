@@ -5,6 +5,12 @@ angular.module('merchantApp', ['ui.router', 'ngAudio', 'ui.bootstrap', 'ngCookie
         $rootScope.sound = ngAudio.load('sounds/song1.wav');
         $rootScope.sound.loop = true;
         $rootScope.isPaying = $cookies.get('isPaying') == 'true' ? true : false;
+
+        $rootScope.$on('$stateChangeStart', function() {
+            $('document').ready(function() {
+                $(window).scrollTop(0);
+            });
+        });
     })
     .config(function($stateProvider, $urlRouterProvider, uiGmapGoogleMapApiProvider) {
         uiGmapGoogleMapApiProvider.configure({

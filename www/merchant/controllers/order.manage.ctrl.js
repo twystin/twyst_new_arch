@@ -1,6 +1,7 @@
 angular.module('merchantApp').controller('OrderManageController', ['$scope', 'merchantRESTSvc', 'SweetAlert', '$state', '$q', '$modal', '$rootScope', 'ngAudio', '$notification',
     function($scope, merchantRESTSvc, SweetAlert, $state, $q, $modal, $rootScope, ngAudio, $notification) {
         $scope.showing = "pending";
+        $scope.show_checkin = false;
 
         $scope.updateShowing = function(text) {
             $scope.showing = text;
@@ -18,9 +19,9 @@ angular.module('merchantApp').controller('OrderManageController', ['$scope', 'me
         $scope.choosen_outlet;
 
         merchantRESTSvc.getOutlets().then(function(res) {
-            $scope.outlets = _.indexBy(res.data.outlets, '_id');
+            $scope.outlets = _.indexBy(res.data, '_id');
             if (Object.keys($scope.outlets).length) {
-                $scope.choosen_outlet = res.data.outlets[0]._id;
+                $scope.choosen_outlet = res.data[0]._id;
                 $scope.getOrders();
             }
         }, function(err) {

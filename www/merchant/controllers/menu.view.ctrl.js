@@ -2,7 +2,7 @@ angular.module('merchantApp')
     .controller('MenuViewController', ['$scope', 'merchantRESTSvc', 'SweetAlert', '$state', '$q', '$modal', '$stateParams',
         function($scope, merchantRESTSvc, SweetAlert, $state, $q, $modal, $stateParams) {
         	merchantRESTSvc.getOutlets().then(function(res) {
-                $scope.outlets = res.data.outlets;
+                $scope.outlets = res.data;
             }, function(err) {
                 $scope.outlets = [];
                 console.log(err);
