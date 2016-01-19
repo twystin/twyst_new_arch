@@ -2,10 +2,13 @@
 /*jslint node: true */
 var logger = require('tracer').colorConsole();
 var PaymentHelper = require('./helpers/payment.hlpr.js');
+var OrderHelper = require('./helpers/order.hlpr.js');
 var HttpHelper = require('../common/http.hlpr.js');
 var _ = require('underscore');
 var xml = require('xml');
 var moment = require('moment');
+var mongoose = require('mongoose');
+var Order = mongoose.model('Order');
 
 module.exports.get_zaakpay_response = function(req, res) {
 	logger.log();
@@ -38,8 +41,26 @@ module.exports.get_zaakpay_response = function(req, res) {
 
   	PaymentHelper.calculate_checksum(message, type).then(function(checksum){
   		if(checksum === zaakpay_response.checksum) {
-  			//confirm order
-  			HttpHelper.success(res, checksum);
+  			var data = {};
+  			data.order_number = zaakpay_response.orderId;
+  			Order.findOne({order_number: data.order_number}).exec(function(err, order) {
+		        if (err) {
+		          console.log(err);
+		        } 
+		        else {
+		        	data.outlet = order.outlet;
+		        	if(zaakpay_response.paymentMethod) {
+		        		data.payment_mode = zaakpay_response.paymentMethod;
+		        		data.cardhasid = zaakpay_response.cardhasid;
+		        	}
+		        	else{
+		        		data.payment_mode = 'mobikwik';
+		        	}
+		        	OrderHelper.confirm_order(data).then(function(data){
+		  				HttpHelper.success(res, checksum);	
+		  			})		        
+		        }
+		    });
   		}
   		else{
   			console.log('fraud detected');

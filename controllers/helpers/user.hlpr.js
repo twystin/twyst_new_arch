@@ -254,8 +254,6 @@ function findFriendBySourceId(friendId) {
   return deferred.promise;
 }
 
-
-
 function addUserReferral(user_obj, friendObjId) {
     logger.log();
     Friend.findOne({'_id': ObjectId(friendObjId)}).exec(function(err, obj) {
@@ -299,6 +297,9 @@ module.exports.get_orders = function(token) {
                 orders = _.map(orders, function(order){
                     var updated_order = {};    
                     updated_order.outlet_name = order.outlet.basics.name;
+                    _.each(order.items, function(item) {
+                        
+                    })
                     updated_order.items = order.items;
                     updated_order.address = order.address;
                     updated_order.is_favourite = order.is_favourite;
@@ -333,22 +334,25 @@ module.exports.cancel_order = function(token, order) {
     var deferred = Q.defer();
 
     AuthHelper.get_user(token).then(function(data) {
-      
+        
+        var current_action = {};
+        current_action.action_type = 'cancelled';
+        current_action.action_by = data.user._id;
+
         Order.findOneAndUpdate({
-            _id: order.id
+            _id: order.order_id
           }, {
-            $set: {order_status: 'cancelled', cancel_reason: order.reason}
-          }, {
-            upsert: true
+            $set: {order_status: 'cancelled'},
+            $push: {actions: current_action}
           },
-          function(err, o) {
-            if (err || !o) {
+          function(err, order) {
+            if (err || !order) {
               deferred.reject({
                 err: err || true,
                 message: 'Couldn\'t cancel the order'
               });
             } else {
-              updated_outlet._id = id;
+              //notify merchant/console/am
 
               deferred.resolve({
                 data: o,

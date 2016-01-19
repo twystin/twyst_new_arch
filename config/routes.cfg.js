@@ -150,6 +150,7 @@ module.exports = function(app) {
     var LocationCtrl = require('../controllers/location.ctrl');
     app.get('/api/v4/locations', LocationCtrl.get_locations);
     app.get('/api/v4/locations/outlets', LocationCtrl.get_outlet_locations);
+    app.post('/api/v4/locations/verify', LocationCtrl.verify_delivery_location);
   })();
 
   (function SearchRoutes() {

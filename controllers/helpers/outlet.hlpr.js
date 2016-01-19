@@ -377,19 +377,147 @@ module.exports.update_order = function(token, order) {
     logger.log();
     var deferred = Q.defer();
 
-    if(order.update_type === 'accept') {
+    AuthHelper.get_user(token).then(function(data) {
+      if(data.data.role < 6) {
+        data.order = order;
 
-    }
-    else if(order.update_type === 'reject') {
-
-    }
-    else if(order.update_type === 'dispatch') {
-
-    }
-    else{
-      //unknown update
-    }
-    deferred.resolve(order);
+        if(order.update_type === 'accept') {
+          accept_order(data).then(function(data){
+            deferred.resolve(data);
+          })
+        }
+        else if(order.update_type === 'reject') {
+          reject_order(data).then(function(data){
+            deferred.resolve(data);
+          })
+        }
+        else if(order.update_type === 'dispatch') {
+          dispatch_order(data).then(function(data){
+            deferred.resolve(data);
+          })
+        }
+        else{
+          console.log('unknown update');
+          //unknown update
+        }
+      }
+      else{
+  
+        deferred.reject({
+          err: true,
+          message: 'You are not authorized to update this order'
+        });
+      }
+          
+    }, function(err) {
+      deferred.reject({
+        err: err || true,
+        message: 'Couldn\'t find the user'
+      });
+    });
+    
     return deferred.promise;
 
 };
+
+function accept_order(data) {
+  logger.log();
+  var deferred = Q.defer();
+
+  var current_action = {};
+  current_action.action_type = 'accepted';
+  current_action.action_by = data.data._id;
+  
+  console.log(data.order);
+  Order.findOneAndUpdate({
+      _id: data.order.order_id
+    }, {
+      $set: {order_status: 'accepted'},
+      $push: {actions: current_action}
+    },
+    function(err, order) {
+      if (err || !order) {
+        console.log(err);
+        deferred.reject({
+          err: err || true,
+          message: 'Couldn\'t accept the order'
+        });
+      } else {
+        //notify user/console/am
+
+        deferred.resolve({
+          data: order,
+          message: 'order accepted successfully'
+        });
+      }
+    }
+  );
+  return deferred.promise;      
+}
+
+function reject_order(data) {
+  logger.log();
+  var deferred = Q.defer();
+
+  var current_action = {};
+  current_action.action_type = 'rejected';
+  current_action.action_by = data.data._id;
+
+  Order.findOneAndUpdate({
+      _id: data.order.order_id
+    }, {
+      $set: {order_status: 'rejected'},
+      $push: {actions: current_action}
+    },
+    function(err, order) {
+      if (err || !order) {
+        deferred.reject({
+          err: err || true,
+          message: 'Couldn\'t reject the order'
+        });
+      } else {
+        //notify user/console/am
+
+        deferred.resolve({
+          data: order,
+          message: 'order rejected successfully'
+        });
+      }
+    }
+  );       
+  return deferred.promise;  
+}
+
+function dispatch_order(data) {
+  logger.log();
+  var deferred = Q.defer();
+
+ 
+  var current_action = {};
+  current_action.action_type = 'dispatched';
+  current_action.action_by = data.user._id;
+
+  Order.findOneAndUpdate({
+      _id: order.order_id
+    }, {
+      $set: {order_status: 'dispatched'},
+      $push: {actions: current_action}
+    },
+    function(err, order) {
+      if (err || !order) {
+        deferred.reject({
+          err: err || true,
+          message: 'Couldn\'t update the order'
+        });
+      } else {
+        //notify user/console/am
+
+        deferred.resolve({
+          data: order,
+          message: 'order updated successfully'
+        });
+      }
+    }
+  );       
+}
+
