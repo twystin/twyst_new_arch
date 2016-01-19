@@ -1,7 +1,13 @@
 <div>&nbsp;</div>
 <div class='container-fluid'>
     <div class='row'>
-        <div class='col-sm-8 table-responsive'>
+        <div class='col-sm-12'>
+            <label class='control-label'>Checkin Panel:&nbsp;&nbsp; </label> 
+            <input bs-switch type='checkbox' ng-model='show_checkin' switch-on-text='Show' switch-off-text='Hide'>
+        </div>
+    </div>
+    <div class='row'>
+        <div class='table-responsive' ng-class='{"col-sm-8": show_checkin, "col-sm-12": !show_checkin}'>
             <div class='table-label'>
                 <legend>Order Panel</legend>
             </div>
@@ -47,7 +53,7 @@
                 </div>
             </div>
         </div>
-        <div class='col-sm-4'>
+        <div class='col-sm-4' ng-if='show_checkin'>
             <div class='table-label'>
                 <legend>Checkin Panel</legend>
             </div>

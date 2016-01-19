@@ -1,7 +1,7 @@
 angular.module('merchantApp')
     .controller('DeliveryZoneController', function($scope, $modalInstance, delivery_zone, is_new, is_first, merchantRESTSvc, $rootScope, SweetAlert) {
         merchantRESTSvc.getOutlets().then(function(res) {
-            $scope.outlets = _.indexBy(res.data.outlets, '_id');
+            $scope.outlets = _.indexBy(res.data, '_id');
         }, function(err) {
             console.log(err);
             $scope.outlets = {};

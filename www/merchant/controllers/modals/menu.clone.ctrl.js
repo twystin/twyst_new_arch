@@ -4,7 +4,7 @@ angular.module('merchantApp').controller('MenuCloneController', function($scope,
     };
 
     merchantRESTSvc.getOutlets().then(function(data) {
-        $scope.outlets = _.filter(data.data.outlets, function(outlet) {
+        $scope.outlets = _.filter(data.data, function(outlet) {
             return outlet._id !== outlet_id;
         });
     }, function(err) {

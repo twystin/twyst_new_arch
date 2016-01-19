@@ -316,7 +316,7 @@ angular.module('merchantApp')
                 });
 
             merchantRESTSvc.getOutlets().then(function(res) {
-                angular.forEach(res.data.outlets, function(outlet) {
+                angular.forEach(res.data, function(outlet) {
                     if (outlet._id === $stateParams.outlet_id) {
                         $scope.outlet = angular.copy(outlet);
                         $scope.outlet.attributes.cost_for_two.min = $scope.outlet.attributes.cost_for_two.min.toString();

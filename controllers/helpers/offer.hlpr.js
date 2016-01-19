@@ -218,35 +218,55 @@ module.exports.delete_offer = function(token, offerId) {
 module.exports.get_all_offers = function(token) {
     logger.log();
     var deferred = Q.defer();
-    Cache.get('outlets', function(err, reply) {
-        if(err || !reply) {
+    AuthHelper.get_user(token).then(function(data) {
+        var user = data.data;
+        if (user.role > 2) {
             deferred.reject({
                 err: false,
-                message: 'Unable to load offers right now'
+                message: 'Access denied'
             });
         } else {
-            var offer_ids = [];
-            var offers = [];
-            var outlets = JSON.parse(reply);
-            _.each(outlets, function(outlet) {
-                _.each(outlet.offers, function(offer) {
-                    if(offer_ids.indexOf(offer._id.toString())===-1) {
-                        offer_ids.push(offer._id.toString());
-                        offer.outlet = {
-                            _id: outlet._id,
-                            name: outlet.basics.name,
-                            loc1: outlet.contact.location.locality_1[0],
-                            loc2: outlet.contact.location.locality_2[0]
-                        };
-                        offers.push(offer);
-                    }
-                });
+            var outlet_ids = _.map(user.outlets, function(outlet) {
+                return outlet.toString();
             });
-            deferred.resolve({
-                data: offers,
-                message: 'All offers loaded from server'
+            Cache.get('outlets', function(err, reply) {
+                if(err || !reply) {
+                    deferred.reject({
+                        err: false,
+                        message: 'Unable to load offers right now'
+                    });
+                } else {
+                    var offer_ids = [];
+                    var offers = [];
+                    var outlets = JSON.parse(reply);
+                    _.each(outlets, function(outlet) {
+                        if(user.role === 1 || outlet_ids.indexOf(outlet._id) !== -1) {
+                            _.each(outlet.offers, function(offer) {
+                                if(offer_ids.indexOf(offer._id.toString())===-1) {
+                                    offer_ids.push(offer._id.toString());
+                                    offer.outlet = {
+                                        _id: outlet._id,
+                                        name: outlet.basics.name,
+                                        loc1: outlet.contact.location.locality_1[0],
+                                        loc2: outlet.contact.location.locality_2[0]
+                                    };
+                                    offers.push(offer);
+                                }
+                            });
+                        }
+                    });
+                    deferred.resolve({
+                        data: offers,
+                        message: 'All offers loaded from server'
+                    });
+                }
             });
         }
+    }, function(err) {
+        deferred.reject({
+            err: err || false,
+            message: 'Couldn\'t find the user'
+        });
     });
     return deferred.promise;
 }

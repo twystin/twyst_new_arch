@@ -4,7 +4,7 @@ angular.module('merchantApp')
 
             $scope.menu_types = ['Dine-In', 'Takeaway', 'Delivery', 'Weekend', 'Dinner', 'All'];
             merchantRESTSvc.getOutlets().then(function(res) {
-                $scope.outlets = res.data.outlets;
+                $scope.outlets = res.data;
             }, function(err) {
                 $scope.outlets = [];
                 console.log(err);

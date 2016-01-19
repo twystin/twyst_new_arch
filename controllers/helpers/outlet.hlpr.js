@@ -10,6 +10,7 @@ require('../../models/outlet.mdl');
 var Outlet = mongoose.model('Outlet');
 var User = mongoose.model('User');
 var Order = mongoose.model('Order');
+var Account = mongoose.model('Account');
 var AuthHelper = require('../../common/auth.hlpr.js');
 var logger = require('tracer').colorConsole();
 
@@ -38,10 +39,10 @@ module.exports.get_all_outlets = function(token) {
   var deferred = Q.defer();
   logger.log();
   AuthHelper.get_user(token).then(function(data) {
-    if(data.data.role>2) {
+    if(data.data.role>=2) {
       User.findOne({
         _id: data.data._id
-      }).select('outlets').populate('outlets').exec(function(err, outlets) {
+      }).select('outlets').populate('outlets').exec(function(err, result) {
         if (err) {
           deferred.reject({
             err: err || true,
@@ -49,7 +50,7 @@ module.exports.get_all_outlets = function(token) {
           });
         } else {
           deferred.resolve({
-            data: outlets,
+            data: result.outlets || [],
             message: 'Got your outlets'
           });
         }
@@ -65,7 +66,6 @@ module.exports.get_all_outlets = function(token) {
           var outlets = _.map(JSON.parse(reply), function(obj) {
             return obj; 
           });;
-
           deferred.resolve({
             data: outlets,
             message: 'Got your outlets'
@@ -91,7 +91,7 @@ module.exports.update_outlet = function(token, updated_outlet) {
         err: true,
         message: 'Unauthorized access'
       });
-    } else if(data.data.role>2) {
+    } else if(data.data.role>=2) {
       outlets = (data.data.outlets && data.data.outlets.toString().split(',')) || null;
       if (_.includes(outlets, id)) {
         Outlet.findOneAndUpdate({
@@ -110,6 +110,7 @@ module.exports.update_outlet = function(token, updated_outlet) {
               });
             } else {
               updated_outlet._id = id;
+              _updateAccountManage(updated_outlet);
               _updateOutletInCache(updated_outlet);
               deferred.resolve({
                 data: o,
@@ -144,6 +145,7 @@ module.exports.update_outlet = function(token, updated_outlet) {
                 message: 'Couldn\'t update the outlet'
               });
             } else {
+              _updateAccountManage(outlet);
               _updateOutletInCache(outlet);
               deferred.resolve({
                 data: outlet,
@@ -286,6 +288,28 @@ module.exports.remove_outlet = function(token, outlet_id) {
 
   return deferred.promise;
 };
+
+var _updateAccountManage = function(outlet) {
+  User.findOne({
+    email: outlet.basics.account_mgr_email
+  }).exec(function(err, account_manager) {
+    if(err || !account_manager) {
+      logger.error(err && err.stack);
+    } else {
+      var outlet_ids = _.map(account_manager.outlets, function(outlet) {
+        return outlet.toString();
+      });
+      if (outlet_ids.indexOf(outlet._id.toString()) === -1) {
+        account_manager.outlets.push(outlet._id);
+        account_manager.save(function(err) {
+          if(err) {
+            logger.error(err.stack);
+          }
+        });
+      }
+    }
+  });
+}
 
 var _updateOutletInCache = function(outlet) {
   Cache.get('outlets', function(err, reply) {
