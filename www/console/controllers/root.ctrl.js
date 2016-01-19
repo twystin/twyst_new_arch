@@ -11,8 +11,10 @@ angular.module('consoleApp')
                 if (data.response) {
                     $cookies.remove('token');
                     $cookies.remove('role');
+                    $cookies.put('paths', '[]');
                     $rootScope.token = undefined;
                     $rootScope.role = undefined;
+                    $rootScope.paths = [];
                     SweetAlert.swal({
                         title: "SUCCESS",
                         text: "Logged out successfully",

@@ -15,12 +15,23 @@ angular.module('consoleApp')
             $scope.logIn = function() {
                 consoleRESTSvc.login($scope.user)
                     .then(function(res) {
+                        console.log(res);
                         $cookies.put('token', res.data.data.token);
                         $cookies.put('isPaying', res.data.data.is_paying);
                         $cookies.put('role', res.data.data.role);
                         $rootScope.token = res.data.data.token;
                         $rootScope.isPaying = res.data.data.is_paying;
                         $rootScope.role = res.data.data.role;
+                        $rootScope.paths = [];
+                        if ($rootScope.role === 2) {
+                            $rootScope.paths = _.map(res.data.data.outlets, function(outlet) {
+                                return '/' + outlet;
+                            });
+                            $cookies.put('paths', JSON.stringify($rootScope.paths));
+                        } else {
+                            $rootScope.paths = ['/console'];
+                            $cookies.put('paths', JSON.stringify($rootScope.paths));
+                        }
                         SweetAlert.swal({
                             title: 'Logged In Successfully',
                             type: 'success',
