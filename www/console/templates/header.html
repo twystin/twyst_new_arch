@@ -29,7 +29,7 @@
     <aside id='nav-container' class='nav-container nav-fixed nav-vertical' ng-if='token'>
         <div class='nav-wrapper' style='overflow-x: auto;'>
             <ul id='nav' class='nav' data-collapse-nav data-highlight-active>
-                <li>
+                <li ng-if='role !== 2 && role !== "2"'>
                     <a ui-sref='.default'> <i class='fa fa-dashboard'></i><span>MERCHANTS</span></a>
                 </li>
                 <li>
@@ -38,25 +38,25 @@
                 <li>
                     <a ui-sref='.offers_manage'> <i class='fa fa-gift'></i>OFFERS</a>
                 </li>
-                <li>
+                <li ng-if='role !== 2 && role !== "2"'>
                     <a ui-sref='.bills_manage'> <i class='fa fa-file-text-o'></i>BILLS</a>
                 </li>
                 <li ng-if='role === 2 || role === "2"'>
                     <a ui-sref='.menus_manage'> <i class='fa fa-code'></i>MENUS</a>
                 </li>
-                <li>
+                <li ng-if='role !== 2 && role !== "2"'>
                     <a ui-sref='.suggested_outlets_manage'> <i class='fa fa-code'></i>SUGGESTED OUTLETS</a>
                 </li>
-                <li>
+                <li ng-if='role !== 2 && role !== "2"'>
                     <a ui-sref='.suggested_offers_manage'> <i class='fa fa-code'></i>SUBMITTED OFFERS</a>
                 </li>
-                <li>
+                <li ng-if='role !== 2 && role !== "2"'>
                     <a ui-sref='.user_feedbacks_manage'> <i class='fa fa-code'></i>USER FEEDBACK</a>
                 </li>
-                <li>
+                <li ng-if='role !== 2 && role !== "2"'>
                     <a ui-sref='.write_to_twysts_manage'> <i class='fa fa-code'></i>WRITE TO TWYST</a>
                 </li>
-                <li>
+                <li ng-if='role !== 2 && role !== "2"'>
                     <a ui-sref='.reported_problems_manage'> <i class='fa fa-code'></i>REPORTED PROBLEMS</a>
                 </li>
                 <li>
