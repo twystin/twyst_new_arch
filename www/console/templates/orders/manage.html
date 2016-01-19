@@ -72,6 +72,7 @@
                     </thead>
                     <tbody>
                         <tr ng-repeat='order in current_page_orders'>
+                        	<td><a class='btn btn-link' ui-sref='^.orders_view(order._id)'>View</a></td>
                             <td>{{order.order_number}}</td>
                             <td>{{order.user.phone}}</td>
                             <td>{{order.user.email}}</td>
