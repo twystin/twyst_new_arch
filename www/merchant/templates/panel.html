@@ -33,93 +33,17 @@
             <div class='col-sm-12'>
                 <div class='panel panel-primary' ng-repeat='order in orders'>
                     <div class='panel-body'>
-                        <h4 class='pull-left'>{{order.user.email}}</h4>
-                        <span class='pull-right'>Order ID #{{order.order_number}}</span>
+                        <span class='pull-left'>Order #{{order.order_number}}</span>
+                        <div class='pull-right'>{{order.user.phone}}</div>
                         <div class='clearfix'></div>
-                        <div class='pull-left'>
-                            {{order.order_date | date:longDate}}
-                            <div class='clearfix'></div>
-                            {{order.address.line1}}, {{order.address.line2}}, {{order.address.city}}
-                        </div>
-                        <div class='pull-right'>
-                            <h4 class='text-right'>{{order.user.phone}}</h4>
-                        </div>
+                        <div>&nbsp;</div>
+                        <div class='pull-left'><span class='label label-warning'>{{order.order_status | uppercase}}</span></div>
+                        <div class='pull-right'>{{order.user.email}}</div>
+                        <div class='clearfix'></div>
+                        <div>&nbsp;</div>
+                        <div class='pull-left'><a class='btn btn-info btn-block'>{{order.items.length}} item(s).</a></div>
+                        <div class='pull-right'><a class='btn btn-w-md btn-primary btn-block' ng-click='viewOrder(order, $index)'>View</a></div>
                     </div>
-                    <table class='table table-bordered table-hover'>
-                        <thead>
-                            <tr>
-                                <th>ITEM</th>
-                                <th class='text-right'>PRICE</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-repeat='item in order.items'>
-                                <td>
-                                    {{item.item_name}} <span class='badge'>x {{item.item_quantity}}</span> <span class='badge' ng-if='item.option'>{{item.option}}</span> <span ng-repeat='sub_option in item.sub_options' class='badge'>{{sub_option.sub_option_set[0].sub_option_value}}</span> <span ng-repeat='addon in item.add_on' class='badge'>{{addon.add_on_item}}</span>
-                                </td>
-                                <td class='text-right'><i class='fa fa-inr'></i> {{getItemPrice(item)}}</td>
-                            </tr>
-                            <tr>
-                                <td colspan="2">
-                                    <hr>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Order Total</td>
-                                <td class='text-right'><i class='fa fa-inr'></i> {{order.order_value_without_offer}}</td>
-                            </tr>
-                            <tr>
-                                <td>VAT</td>
-                                <td class='text-right'><i class='fa fa-inr'></i> {{order.tax_paid}}</td>
-                            </tr>
-                            <tr>
-                                <td>Delivery and Dispatch</td>
-                                <td class='text-right'><i class='fa fa-inr'></i> {{order.delivery_charge}}</td>
-                            </tr>
-                            <tr>
-                                <td>Discount</td>
-                                <td class='text-right'><i class='fa fa-inr'></i> {{getDiscount(order)}}</td>
-                            </tr>
-                            <tr>
-                                <td colspan="2">
-                                    <hr>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Grand Total</th>
-                                <th class='text-right'><i class='fa fa-inr'></i> {{order.order_value_with_offer}}</th>
-                            </tr>
-                            <tr ng-if='order.order_status==="pending"'>
-                                <td colspan="2">
-                                    <div class='col-sm-offset-2 col-sm-3 text-right'>Delivery Time:</div>
-                                    <div class="col-xs-3">
-                                        <div class="input-group">
-                                            <span class="input-group-btn">
-                                                <button type="button" class="btn btn-primary" ng-click='updateEstimateTime(order, 5)' ng-disabled='order.estimate_time>=180'>
-                                                    <i class="fa fa-plus"></i>
-                                                </button>
-                                            </span>
-                                            <input type="number" ng-model='order.estimate_time' class="form-control">
-                                            <span class="input-group-btn">
-                                                <button type="button" class="btn btn-default" ng-click='updateEstimateTime(order, -5)' ng-disabled='order.estimate_time<=10'>
-                                                    <i class="fa fa-minus"></i>
-                                                </button>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan='2' class='text-center'>
-                                    <!-- <timer> -->
-                                    <span class='label label-primary' ng-if='order.order_status==="accepted"'>Timer</span>
-                                    <span class='label label-primary' ng-if='order.txn_id'>PAID</span>
-                                    <span class='label label-danger' ng-if='!order.txn_id'>C.O.D</span>
-                                    <span class='label label-default pull-right'>{{showing | uppercase}}</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </div>

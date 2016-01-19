@@ -66,6 +66,7 @@ angular.module('merchantApp').controller('OrderManageController', ['$scope', 'me
         $scope.getOrders = function() {
             merchantRESTSvc.getOrders($scope.choosen_outlet).then(function(res) {
                 console.log(res);
+                $scope.orders = res.data;
             }, function(err) {
                 console.log(err);
             });
@@ -296,5 +297,24 @@ angular.module('merchantApp').controller('OrderManageController', ['$scope', 'me
                     });
             }
         }
+
+        $scope.viewOrder = function(order, index) {
+            console.log('order', order);
+            var modalInstance = $modal.open({
+                animation: true,
+                templateUrl: 'templates/partials/view_order.tmpl.html',
+                controller: 'OrderViewController',
+                size: 'lg',
+                resolve: {
+                    order: function() {
+                        return order;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function(order) {
+                $scope.orders[index] = order;
+            });
+        };
     }
 ]);

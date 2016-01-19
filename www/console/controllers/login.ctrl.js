@@ -28,9 +28,15 @@ angular.module('consoleApp')
                             confirmButtonText: 'Continue',
                             closeOnConfirm: false
                         }, function() {
-                            $state.go('console.default', {}, {
-                                reload: true
-                            });
+                            if (res.data.data.role === 2) {
+                                $state.go('console.menus_manage', {}, {
+                                    reload: true
+                                });
+                            } else {
+                                $state.go('console.default', {}, {
+                                    reload: true
+                                });
+                            }
                         });
                     }, function(err) {
                         SweetAlert.swal({
