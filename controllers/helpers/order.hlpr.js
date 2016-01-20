@@ -240,7 +240,7 @@ function validate_outlet(data) {
     var passed_data = data;
     var outlet = passed_data.outlet;
 
-    if(isOutletActive(outlet)){
+    if(!isOutletActive(outlet)){
         deferred.reject({    
           message: "outlet is not active"
         });
@@ -564,12 +564,12 @@ function get_applicable_offer(data) {
                 
             }
             else {
-                return offer;
+                return null;
             }
         }
         else{            
             console.log('offer type alag ahai ' + offer.actions.reward.reward_meta.reward_type)
-            return offer;
+            return null;
         }        
     })
     deferred.resolve(passed_data);
@@ -1093,21 +1093,22 @@ function massage_order(data){
                 order.items = items;
                 
                 if(order.offer_used) {
-                    order.order_value_without_offer = order.order_value_without_tax;
+                    order.order_value_without_offer = order.order_actual_value_without_tax;
                     order.order_value_with_offer = order.offer_used.order_value_without_tax;
                     order.tax_paid = order.offer_used.st+order.offer_used.vat;
                     order.actual_amount_paid = order.offer_used.order_value_with_tax;
 
                 }
                 else {
-                    order.order_value_without_offer = order.order_value_without_tax;
+                    order.offer_used = null;
+                    order.order_value_without_offer = order.order_actual_value_without_tax;
                     order.order_value_with_offer = null;
                     order.tax_paid = order.st+order.vat;
-                    order.actual_amount_paid = order.order_value_with_tax
+                    order.actual_amount_paid = order.order_actual_value_with_tax
                 }
                 data.order = order;
                 order = new Order(order); 
-                //console.log(order)
+    
                 order.save(function(err, order){
                     if(err){
                         console.log(err);
@@ -1291,7 +1292,6 @@ module.exports.get_orders = function(token) {
     var deferred = Q.defer();
 
     AuthHelper.get_user(token).then(function(data) {
-        logger.error(data.data.role, data.data.outlets);
         if (data.data.role === 1) {
             Order.find({}).populate('outlet').exec(function(err, orders) {
                 if (err || !orders) {

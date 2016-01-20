@@ -105,7 +105,6 @@ function map_valid_delivery_zone(params) {
   if (params.query.lat && params.query.long) {
     params.outlets = _.map(params.outlets, function(val) {    
       if(val.attributes.delivery.delivery_zone && val.attributes.delivery.delivery_zone.length) {        
-        var delivery_zone = val.attributes.delivery.delivery_zone;
         var delivery_zone = _.map(val.attributes.delivery.delivery_zone, function(current_zone) {          
           if(current_zone.coord && current_zone.coord.length &&
             geolib.isPointInside({latitude: params.query.lat, longitude: params.query.long},
@@ -113,31 +112,36 @@ function map_valid_delivery_zone(params) {
             console.log('it delivers ' + val.basics.name);
             return current_zone;
           }
+          else{
+            return null;
+          }
         })
 
         delivery_zone = _.compact(delivery_zone);
-        delivery_zone =  _.max(delivery_zone, function(zone){ return zone.zone_type});
-        
-        if(delivery_zone) {
-          val.valid_zone = delivery_zone;
-          return val; 
+        if(delivery_zone.length) {
+          delivery_zone =  _.max(delivery_zone, function(zone){ return zone.zone_type});
+          if(delivery_zone) {
+            val.valid_zone = delivery_zone;
+            return val; 
+          }
+          else{
+            return null;
+          }  
         }
         else{
           return null;
         }
-    
       }
       else{
-        console.log('no delivery zone');
         return null; 
       }
     });
-    
+    deferred.resolve(params);  
   }
   else{
-    deferred.reject('please pass lat, long to get results');
-  }  
-  deferred.resolve(params);
+    deferred.reject('please pass lat,long to get results');
+  }
+  
   return deferred.promise;  
 }
 
@@ -215,7 +219,7 @@ function pick_outlet_fields(params) {
       massaged_item.delivery_conditions = item.valid_zone.delivery_conditions;
       massaged_item.cashback = item.twyst_meta.cashback || null;
       massaged_item.delivery_zones = item.delivery_zones;
-      massaged_item.offers = item.offers.length;
+      massaged_item.offer_count = item.offers.length;
       if (fmap && fmap[item._id]) {
         massaged_item.following = true;
       } else {
