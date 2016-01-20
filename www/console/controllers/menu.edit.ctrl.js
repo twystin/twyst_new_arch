@@ -10,7 +10,7 @@ angular.module('consoleApp').controller('MenuEditController', ['$scope', 'consol
 
         consoleRESTSvc.getOutlets().then(function(res) {
             console.log(res);
-            $scope.outlets = res.data.outlets;
+            $scope.outlets = res.data;
         }, function(err) {
             console.log(err);
         });

@@ -100,6 +100,11 @@ angular.module('consoleApp', ['ui.router', 'ui.bootstrap', 'ngCookies', 'angular
                 templateUrl: 'templates/bills/view.html',
                 controller: 'BillViewController'
             })
+            .state('console.menus_create', {
+                url: '/menus/create',
+                templateUrl: 'templates/menus/create.html',
+                controller: 'MenuCreateController'
+            })
             .state('console.menus_manage', {
                 url: '/menus',
                 templateUrl: 'templates/menus/manage.html',
