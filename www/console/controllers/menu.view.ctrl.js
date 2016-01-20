@@ -1,7 +1,7 @@
 angular.module('consoleApp').controller('MenuViewController', ['$scope', 'consoleRESTSvc', 'SweetAlert', '$state', '$q', '$modal', '$stateParams',
     function($scope, consoleRESTSvc, SweetAlert, $state, $q, $modal, $stateParams) {
         consoleRESTSvc.getOutlets().then(function(res) {
-            $scope.outlets = res.data.outlets;
+            $scope.outlets = res.data;
         }, function(err) {
             $scope.outlets = [];
             console.log(err);

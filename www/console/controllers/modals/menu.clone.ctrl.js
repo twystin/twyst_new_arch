@@ -4,7 +4,7 @@ angular.module('consoleApp').controller('MenuCloneController', function($scope, 
     };
 
     consoleRESTSvc.getOutlets().then(function(data) {
-        $scope.outlets = _.filter(data.data.outlets, function(outlet) {
+        $scope.outlets = _.filter(data.data, function(outlet) {
             return outlet._id !== outlet_id;
         });
     }, function(err) {
