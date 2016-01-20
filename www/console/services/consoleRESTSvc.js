@@ -306,6 +306,43 @@ angular.module('consoleApp').factory('consoleRESTSvc', ['$http', '$q', '$cookies
             return deferred.promise;
         };
 
+
+        /*==================================
+        =            ORDER APIs            =
+        ==================================*/
+        
+        consoleRESTSvc.getOrders = function() {
+            var deferred = $q.defer();
+            var token = $cookies.get('token');
+            $http.get('/api/v4/orders?token=' + token)
+                .then(function(res) {
+                    if (res.data.response) {
+                        deferred.resolve(res.data);
+                    } else {
+                        deferred.reject(res.data);
+                    }
+                }, function(err) {
+                    deferred.reject(err);
+                });
+            return deferred.promise;
+        };
+        
+        consoleRESTSvc.getOrder = function(order_id) {
+            var deferred = $q.defer();
+            var token = $cookies.get('token');
+            $http.get('/api/v4/orders?token=' + token)
+                .then(function(res) {
+                    if(res.data.response) {
+                        deferred.resolve(res.data);
+                    } else {
+                        deferred.reject(res.data);
+                    }
+                }, function(err) {
+                    deferred.reject(err);
+                });
+            return deferred.promise;
+        };
+
         return consoleRESTSvc;
     }
 ])
