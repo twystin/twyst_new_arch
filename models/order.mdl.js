@@ -57,6 +57,7 @@ var Order = new Schema({
     type: Boolean,
     default: false
   },
+  menu_id: {type: Schema.Types.ObjectId},
   items: [{
     item_name: {
       type: String

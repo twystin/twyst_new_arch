@@ -1137,7 +1137,7 @@ function calculate_cashback(data) {
     var deferred = Q.defer();
     
     if(!data.order.offer_used && data.outlet.outlet_meta.cashback_info) {
-        var cod_cashback = 0, inapp_cashback = 0,var order_amount_ratio = 1;
+        var cod_cashback = 0, inapp_cashback = 0, order_amount_ratio = 1;
         order_amount_ratio = _.find(data.outlet.outlet_meta.cashback_info.order_amount_slab, function(slab){
             if(data.order.order_value_without_tax > slab.start &&
                 data.order.order_value_without_tax < slab.end) {
@@ -1339,7 +1339,7 @@ module.exports.get_orders = function(token) {
                 }
             });
         } else {
-            Order.find({user: data.data._id }).populate('outlet').populate('outlet').exec(function(err, orders) {
+            Order.find({user: data.data._id }).populate('outlet').exec(function(err, orders) {
                 if (err || !orders) {
                     deferred.reject({
                         err: err || false,
@@ -1404,10 +1404,10 @@ function process_orders(orders, deferred) {
     var processed_orders = _.map(orders, function(order){
         var updated_order = {};    
         updated_order.outlet_name = order.outlet.basics.name;
-        _.each(order.items, function(item) {
-            
-        })
+        console.log(order.menu_id)
         updated_order.items = order.items;
+        updated_order.outlet_id = order.outlet._id;
+        updated_order.menu_id = order.menu_id;
         updated_order.address = order.address;
         updated_order.is_favourite = order.is_favourite;
         if(order.offer_used) {
