@@ -320,6 +320,7 @@ module.exports.get_offers = function(token, outlet_id) {
                     return false;
                 }
             });
+            offers = _.compact(offers);
             if(offers.length) {
                 deferred.resolve({data: offers, message: 'Offers found'});
             } else {

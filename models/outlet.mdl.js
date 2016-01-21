@@ -44,6 +44,10 @@ var OutletSchema = new Schema({
       type: Date,
       default: Date.now
     },
+    modified_by: {
+      type: Schema.ObjectId,
+      ref: 'User'
+    },
     live_at: {
       type: Date,
       default: Date.now
@@ -52,6 +56,7 @@ var OutletSchema = new Schema({
       type: Date,
       default: Date.now
     },
+
     featured: Boolean,
     is_paying: {type: Boolean, required: true, default: false },
     account_mgr_email: {type: String},
@@ -355,11 +360,26 @@ var OutletSchema = new Schema({
         value: {type: Number}
       }]
     },
-    cashback:{
-      min: {
+    cashback_info: {
+      base_cashback: {
         type: Number
       },
-      max: {
+      payment_mode: {
+        in_app_ratio: {
+          type: Number,
+          default: 1
+        },
+        cod_ratio: {
+          type: Number,
+          default: 1
+        }
+      },
+      order_amount_slab: [{
+        start: {type: Number},
+        end: {type: Number},
+        ratio: {type: Number}
+      }],
+      max_cashback: {
         type: Number
       }
     },

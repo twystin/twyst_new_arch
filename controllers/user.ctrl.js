@@ -335,10 +335,16 @@ module.exports.cancel_order = function(req, res) {
   var token = req.query.token || null;
   var order = {};
   order.reason = req.body.reason;
-  order.order_id = req.params.order_id;
+  order.order_number = req.body.order_number;
 
   if (!token) {
     HttpHelper.error(res, null, "Not authenticated");
+  }
+  else if (!order.reason) {
+    HttpHelper.error(res, null, "please pass cancel reason");
+  }
+  else if (!order.order_number) {
+    HttpHelper.error(res, null, "please pass order id");
   }
 
   UserHelper.cancel_order(token, order).then(function(data) {
