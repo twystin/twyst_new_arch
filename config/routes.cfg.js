@@ -143,7 +143,7 @@ module.exports = function(app) {
     app.put('/api/v4/friends', UserCtrl.update_friends);
     app.get('/api/v4/coupons', UserCtrl.get_coupons);
     app.post('/api/v4/user/location', UserCtrl.update_location);
-    app.put('/api/v4/user/cancel_order/:order_id', UserCtrl.cancel_order);
+    app.post('/api/v4/user/cancel_order', UserCtrl.cancel_order);
   })();
 
   (function LocationRoutes() {
@@ -166,9 +166,10 @@ module.exports = function(app) {
   })();
 
   (function Payment_Routes(){
-    var ZaakpayCtrl = require('../controllers/payment.ctrl');
-    app.post('/api/v4/zaakpay/response', ZaakpayCtrl.get_zaakpay_response);
-    app.post('/api/v4/calculate/checksum', ZaakpayCtrl.calculate_checksum);
+    var PaymentCtrl = require('../controllers/payment.ctrl');
+    app.post('/api/v4/zaakpay/response', PaymentCtrl.get_zaakpay_response);
+    app.post('/api/v4/calculate/checksum', PaymentCtrl.calculate_checksum);
+    app.post('/api/v4/zaakpay/refund', PaymentCtrl.initiate_refund);
   })();
 
   (function LegacyRoutes() {

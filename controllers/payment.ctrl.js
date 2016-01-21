@@ -107,3 +107,65 @@ module.exports.calculate_checksum = function(req, res) {
 		HttpHelper.error(res, err );
   	});
 }
+
+module.exports.initiate_refund = function(req, res) {
+	logger.log();
+
+	var token = req.query.token || null;
+
+	if (!token) {
+		HttpHelper.error(res, null, "Not authenticated");
+	}
+	else if (!order_id) {
+		HttpHelper.error(res, null, "could not process without order id");
+	}
+	else if (!req.body.refund_type) {
+		HttpHelper.error(res, null, "could not process without refund type");
+	}
+	else if (!req.body.reason) {
+		HttpHelper.error(res, null, "could not process without refund reason");
+	}
+
+	var passed_order = {};
+	passed_order.order_id = req.body.order_id;
+	passed_order.updateReason = req.body.reason;
+	if(req.body.refund_type === 'full_refund') {
+		passed_data.updateDesired = 14;
+	}
+	else if(req.body.refund_type === 'partial_refund'){
+		passed_data.updateDesired = 22;
+		passed_order.amount = req.body.amount;	
+	}
+
+	Order.findOne({_id: order.order_id}).exec(function(err, order) {
+        if (err) {
+          console.log(err);
+        }
+        else if(!order) {
+        	HttpHelper.error(res, null, 'could not found order id' );	
+        }
+        else if(order.status != 'cancelled' && order.payment_info && order.payment_info.payment_mode === 'Zaakpay'){
+        	passed_order.refund_mode = 'Zaakpay';
+        	passed_order.order_number = order.order_number; 
+
+    		PaymentHelper.process_refund(passed_order).then(function(data){
+    			HttpHelper.success(res, 'refund processed');	
+    		}, function(err) {
+			    HttpHelper.error(res, err, 'could not process refund');
+			 });	        
+        }
+        else if(order.status != 'cancelled' && order.payment_info && order.payment_info.payment_mode === 'mobikwik'){
+        	passed_order.refund_mode = 'Zaakpay';
+        	passed_order.order_number = order.order_number;
+
+        	PaymentHelper.process_refund(passed_order).then(function(data){
+
+    		})	
+        			        
+        }
+        else{
+        	HttpHelper.error(res, null, 'could not process  refund against this order id' );	
+        }
+    });
+	
+}

@@ -14,7 +14,9 @@ var Order = mongoose.model('Order');
 var AuthHelper = require('../../common/auth.hlpr.js');
 var async = require('async');
 var logger = require('tracer').colorConsole();
-
+var request = require('request');
+var PaymentHelper = require('./payment.hlpr.js');
+var update_url = 'https://api.zaakpay.com/updatetransaction';
 
 module.exports.update_user = function(token, updated_user) {
   logger.log();
@@ -285,40 +287,128 @@ function addUserReferral(user_obj, friendObjId) {
 module.exports.cancel_order = function(token, order) {
     logger.log();
     var deferred = Q.defer();
+    console.log(order);
+    var data = {};
+    data.user_token = token;
+    data.order = order;
 
-    AuthHelper.get_user(token).then(function(data) {
-        
-        var current_action = {};
-        current_action.action_type = 'cancelled';
-        current_action.action_by = data.user._id;
-
-        Order.findOneAndUpdate({
-            _id: order.order_id
-          }, {
-            $set: {order_status: 'cancelled'},
-            $push: {actions: current_action}
-          },
-          function(err, order) {
-            if (err || !order) {
-              deferred.reject({
-                err: err || true,
-                message: 'Couldn\'t cancel the order'
-              });
-            } else {
-              //notify merchant/console/am
-
-              deferred.resolve({
-                data: o,
-                message: 'order cancelled successfully'
-              });
-            }
-          }
-        );
-    }, function(err) {
-        deferred.reject({
-          err: err || true,
-          message: 'Couldn\'t find the user'
-        });
+    get_user(data)
+    .then(function(data) {
+        return update_order(data);
+    })
+    .then(function(data) {
+        return initiate_refund(data);
+    })
+    .then(function(data) {
+        return send_notifications(data);
+    })
+    .then(function(data) {        
+        deferred.resolve(data.order);
+    })
+    .fail(function(err) {
+        console.log(err)
+      deferred.reject(err);
     });
     return deferred.promise;
 };
+
+function get_user(data) {
+    logger.log();
+    var deferred = Q.defer();
+
+    var  passed_data = data;
+    var token = passed_data.user_token;
+    AuthHelper.get_user(token).then(function(data) {
+        var user = data.data;
+        if(user.isBlacklisted) {
+            deferred.reject({
+                err: err || true,
+                message: 'you can not order at this outlet'
+            });
+        }
+        else{
+            passed_data.user = user;
+            deferred.resolve(passed_data);
+        }
+      }, function(err) {
+        deferred.reject({
+          err: err || true,
+          message: "Couldn\'t find user"
+        });
+      });
+    return deferred.promise;
+}
+
+function update_order(data) {
+    logger.log();
+    var deferred = Q.defer();
+    
+    var current_action = {};
+    current_action.action_type = 'cancelled';
+    current_action.action_by = data.user._id;
+
+    Order.findOneAndUpdate({
+        order_number: data.order.order_number
+      }, {
+        $set: {order_status: 'cancelled'},
+        $push: {actions: current_action}
+      },
+      function(err, order) {
+        if (err || !order) {
+          deferred.reject({
+            err: err || true,
+            message: 'Couldn\'t cancel the order'
+          });
+        } else {
+          deferred.resolve(data);
+        }
+      }
+    );
+    return deferred.promise;
+}
+
+function initiate_refund(data){
+    logger.log();
+    var deferred = Q.defer();
+
+    var merchantIdentifier = '4884e5a14ab742578df520b5203b91e6';
+    var orderId = 'JKJLLFKKLKDE';//data.order.order_number;
+    var mode = 0;
+    var updateDesired = 22;
+    var updateReason = 'your user wants a refund';
+    var amount = 10;
+
+    var message = "'"+merchantIdentifier+"''"+orderId+"''"+amount+"''"+mode+"''"+updateDesired+"''"+updateReason+"'"; 
+
+    PaymentHelper.calculate_checksum(message, 'Zaakpay').then(function(data){
+        console.log(data);
+        var form = {
+            merchantIdentifier: merchantIdentifier,
+            orderId: 'JKJLLFKKLKDE',
+            amount: 10,
+            mode: 0,
+            updateDesired: updateDesired,
+            updateReason: updateReason,
+            checksum: data
+
+        }
+
+        request.post({url: update_url, form: form},function(err, httpResponse, body){
+            console.log(body);
+            deferred.resolve(data);    
+        })
+        
+    },  function(err) {
+        deferred.reject('unable to cance order');
+    });
+
+    return deferred.promise;
+}
+
+function send_notifications(data) {
+    logger.log();
+    var deferred = Q.defer();
+    deferred.resolve(data);
+    return deferred.promise;
+
+}
