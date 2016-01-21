@@ -1135,12 +1135,32 @@ function massage_order(data){
 function calculate_cashback(data) {
     logger.log();
     var deferred = Q.defer();
+    
+    if(!data.order.offer_used && data.outlet.outlet_meta.cashback_info) {
+        var cod_cashback = 0, inapp_cashback = 0,var order_amount_ratio = 1;
+        order_amount_ratio = _.find(data.outlet.outlet_meta.cashback_info.order_amount_slab, function(slab){
+            if(data.order.order_value_without_tax > slab.start &&
+                data.order.order_value_without_tax < slab.end) {
+                return ratio;
+            }
+        });
+        var in_app_ratio = data.outlet.outlet_meta.cashback_info.in_app_ratio;
+        var cod_ratio = data.outlet.outlet_meta.cashback_info.cod_ratio;
 
-    if(!data.order.offer_used && data.outlet.outlet_meta.cashback) {
-        var cod_cashback = data.outlet.outlet_meta.cashback.min;
-        var inapp_cashback = data.outlet.outlet_meta.cashback.max;
-        cod_cashback = data.order.order_value_without_tax*5/100;
-        inapp_cashback = data.order.order_value_without_tax*10/100;
+        if(order_amount_ratio > in_app_ratio) {
+            inapp_cashback = data.order.order_value_without_tax*data.outlet.outlet_meta.cashback_info.base_cashback*order_amount_ratio/100;
+        }
+        else{
+            inapp_cashback = data.order.order_value_without_tax*data.outlet.outlet_meta.cashback_info.base_cashback*in_app_ratio/100;    
+        }
+
+        if(order_amount_ratio > cod_ratio) {
+            cod_cashback = data.order.order_value_without_tax*data.outlet.outlet_meta.cashback_info.base_cashback*order_amount_ratio/100;    
+        }
+        else{
+            cod_cashback = data.order.order_value_without_tax*data.outlet.outlet_meta.cashback_info.base_cashback*cod_ratio/100;        
+        }
+                
         data.order.cod_cashback = cod_cashback;
         data.order.inapp_cashback = inapp_cashback;
     }

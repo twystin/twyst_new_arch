@@ -43,6 +43,7 @@ var Order = new Schema({
     txn_id: {type: String},
   }, 
   order_status: {type: String},
+  estimeted_delivery_time: {type: String},
   actions: [{
     action_type: {type: String}, //accept/reject/dispatch
     action_by: {type: Schema.Types.ObjectId},
