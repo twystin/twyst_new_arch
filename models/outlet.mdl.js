@@ -364,15 +364,13 @@ var OutletSchema = new Schema({
       base_cashback: {
         type: Number
       },
-      payment_mode: {
-        in_app_ratio: {
-          type: Number,
-          default: 1
-        },
-        cod_ratio: {
-          type: Number,
-          default: 1
-        }
+      in_app_ratio: {
+        type: Number,
+        default: 1
+      },
+      cod_ratio: {
+        type: Number,
+        default: 1
       },
       order_amount_slab: [{
         start: {type: Number},
@@ -630,9 +628,9 @@ var OutletSchema = new Schema({
             },
             end_date: {
               type: Date
-            }
-          },
-          item_available_on: [],//days 
+            },
+            available_hours: hours.hours
+          },          
           option_title: {
             type: String
           },

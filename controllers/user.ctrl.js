@@ -344,7 +344,7 @@ module.exports.cancel_order = function(req, res) {
     HttpHelper.error(res, null, "please pass cancel reason");
   }
   else if (!order.order_number) {
-    HttpHelper.error(res, null, "please pass order id");
+    HttpHelper.error(res, null, "please pass order number");
   }
 
   UserHelper.cancel_order(token, order).then(function(data) {

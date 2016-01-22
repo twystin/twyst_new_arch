@@ -13,6 +13,7 @@ var AuthHelper = require('../../common/auth.hlpr');
 var Cache = require('../../common/cache.hlpr.js');
 var RecoHelper = require('./reco.hlpr');
 var moment = require('moment');
+var Offer = mongoose.model('Offer');
 
 module.exports.create_offer = function(token, new_offer) {
     logger.log();
@@ -312,7 +313,7 @@ module.exports.get_offers = function(token, outlet_id) {
             var time = moment().hours() +':'+moment().minutes();
             date = parseInt(date.getMonth())+1+ '-'+ date.getDate()+'-'+date.getFullYear();
             var offers = _.map(outlet.offers, function(offer) {
-                if(offer.offer_status === 'active' && new Date(offer.offer_end_date) > new Date()
+                if(offer.offer_type === 'offer' && offer.offer_status === 'active' && new Date(offer.offer_end_date) > new Date()
                 && !(RecoHelper.isClosed(date, time, offer.actions.reward.reward_hours))) {
                     return offer;
                 }
@@ -328,5 +329,20 @@ module.exports.get_offers = function(token, outlet_id) {
             }
         }
     })
+    return deferred.promise;
+}
+
+module.exports.create_cashback_offer = function(token, new_offer) {
+    logger.log();
+    var deferred = Q.defer();
+
+    var offer = {};
+    offer = _.extend(offer, new_offer);
+    offer._id = new ObjectId();
+
+    AuthHelper.get_user(token).then(function(data) {
+        
+    });
+
     return deferred.promise;
 }
