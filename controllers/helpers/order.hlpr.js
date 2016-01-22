@@ -828,6 +828,8 @@ function generate_and_cache_order(data) {
     order.delivery_charge = order_actual_value_obj.delivery_charge;
     order.order_actual_value_with_tax = order_actual_value_obj.new_order_value;     
     order.available_offers = data.outlet.offers;
+    order.estimeted_delivery_time = passed_data.outlet.valid_zone.delivery_estimated_time;
+    order.menu_id = outlet.menus[0]._id;
     data.order = order;
     
     Cache.hset(data.user._id, "order_map", JSON.stringify(order), function(err) {
@@ -1090,6 +1092,7 @@ function massage_order(data){
             if(data.order_number === order.order_number) {
                 order.address = data.address;
                 order.order_status = 'checkout';
+                order.estimeted_delivery_time = order.estimeted_delivery_time;
                 order.items = items;
                 
                 if(order.offer_used) {

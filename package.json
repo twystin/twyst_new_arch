@@ -59,7 +59,8 @@
     "geolib": "^2.0.18",
     "faye": "latest",
     "crypto": "latest",
-    "xml": "latest"
+    "xml": "latest",
+    "request": "~2.67.0"
   },
   "devDependencies": {
     "chai": "latest",

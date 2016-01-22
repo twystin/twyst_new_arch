@@ -107,3 +107,20 @@ module.exports.get_offers = function(req, res) {
 	});
 
 }
+
+module.exports.create_cashback_offer = function(req, res) {
+	logger.log();
+	var token = req.query.token || null;
+	var new_offer = {};
+
+	if(!token) {
+		HttpHelper.error(res, null, "Not Authenticated");
+	}
+
+	new_offer = _.extend(new_offer, req.body);
+	OfferHelper.create_cashback_offer(token, new_offer).then(function(data) {
+		HttpHelper.success(res, data.data, data.message);
+	}, function(err) {
+		HttpHelper.error(res, err.err, err.message);
+	})
+}

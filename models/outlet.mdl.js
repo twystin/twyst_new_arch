@@ -628,9 +628,9 @@ var OutletSchema = new Schema({
             },
             end_date: {
               type: Date
-            }
-          },
-          item_available_on: [],//days 
+            },
+            available_hours: hours.hours
+          },          
           option_title: {
             type: String
           },
