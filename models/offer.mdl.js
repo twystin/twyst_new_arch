@@ -17,7 +17,7 @@ var Offer = new Schema({
     phone: {
         type: String
     },
-    offers: [
+    offers: [{
         offer_source: {
             type: String
         },
@@ -50,6 +50,7 @@ var Offer = new Schema({
         },
         offer_applicability: {
             type: Date
+        }
         }
     ]
 
