@@ -313,9 +313,62 @@ module.exports.get_offers = function(token, outlet_id) {
             var time = moment().hours() +':'+moment().minutes();
             date = parseInt(date.getMonth())+1+ '-'+ date.getDate()+'-'+date.getFullYear();
             var offers = _.map(outlet.offers, function(offer) {
-                if(offer.offer_type === 'offer' && offer.offer_status === 'active' && new Date(offer.offer_end_date) > new Date()
-                && !(RecoHelper.isClosed(date, time, offer.actions.reward.reward_hours))) {
-                    return offer;
+                if(offer && offer.offer_type === 'offer' &&  offer.offer_status === 'archived' || offer.offer_status === 'draft') {
+                    return false;
+                }
+                else if(offer){
+                    var massaged_offer = {};
+                    massaged_offer.order_value_without_tax = offer.order_value_without_tax;
+                    massaged_offer.vat = offer.vat;
+                    massaged_offer.st = offer.st;
+                    massaged_offer.packing_charge = offer.packing_charge;
+                    massaged_offer.delivery_charge = offer.delivery_charge;
+                    massaged_offer.order_value_with_tax = offer.order_value_with_tax;
+                    massaged_offer.is_applicable = offer.is_applicable;
+                    massaged_offer._id = offer._id;
+                    massaged_offer.header = offer.actions && offer.actions.reward && offer.actions.reward.header || offer.header;
+                    massaged_offer.line1 = offer.actions && offer.actions.reward && offer.actions.reward.line1 || offer.line1;
+                    massaged_offer.line2 = offer.actions && offer.actions.reward && offer.actions.reward.line2 || offer.line2;
+                    massaged_offer.description = offer.actions && offer.actions.reward && offer.actions.reward.description || '';
+                    massaged_offer.terms = offer.actions && offer.actions.reward && offer.actions.reward.terms || '';
+
+                    massaged_offer.type = offer.offer_type;
+                    massaged_offer.meta = offer.actions && offer.actions.reward && offer.actions.reward.reward_meta || offer.meta;
+
+                    massaged_offer.expiry = offer.offer_end_date || offer.expiry_date;
+
+                    if(offer.offer_items) {
+                        massaged_offer.offer_items = offer.offer_items;
+                    }
+                    var date = new Date();
+                    var time = moment().hours() +':'+moment().minutes();
+                    date = date.getMonth()+1+'-'+date.getDate()+'-'+date.getFullYear();
+
+                    if (offer && offer.actions && offer.actions.reward && offer.actions.reward.reward_hours) {
+                      massaged_offer.available_now = !(RecoHelper.isClosed(date, time, offer.actions.reward.reward_hours));
+                      if (!massaged_offer.available_now) {
+                        massaged_offer.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
+                      }
+
+                    }
+                    if(offer.offer_type === 'offer' || offer.offer_type === 'deal' || offer.offer_type ==='bank_deal') {
+                      massaged_offer.offer_cost =  offer.offer_cost;  
+                    }
+                    if(offer.offer_type === 'bank_deal') {
+                      massaged_offer.offer_source = offer.offer_source;
+                    }
+
+                    if(offer.actions.reward.reward_meta.reward_type == 'free' || offer.actions.reward.reward_meta.reward_type == 'buyxgety' ) {
+                        massaged_offer.free_item_index = offer.free_item_index;
+                    }
+
+                    if(massaged_offer.expiry && (new Date(massaged_offer.expiry) <= new Date())) {
+                      return massaged_offer;
+                    }
+                    else{
+                        return massaged_offer;
+                    }
+                      
                 }
                 else{
                     return false;
@@ -326,11 +379,13 @@ module.exports.get_offers = function(token, outlet_id) {
                 deferred.resolve({data: offers, message: 'Offers found'});
             } else {
                 deferred.reject({ err: null, message: 'Unable to load offers'});
-            }
+            } 
+            
         }
     })
     return deferred.promise;
 }
+
 
 module.exports.create_cashback_offer = function(token, new_offer) {
     logger.log();

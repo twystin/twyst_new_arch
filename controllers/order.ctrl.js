@@ -7,6 +7,7 @@ var _ = require('lodash');
 
 module.exports.verify_order = function(req, res) {
 	logger.log();
+	console.log(req.body)
 	var token = req.query.token || null;
 	var new_order = {};
 

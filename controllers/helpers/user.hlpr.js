@@ -291,7 +291,7 @@ module.exports.cancel_order = function(token, order) {
     var data = {};
     data.user_token = token;
     data.order = order;
-
+    
     get_user(data)
     .then(function(data) {
         return update_order(data);
@@ -372,7 +372,7 @@ function initiate_refund(data){
     var deferred = Q.defer();
 
     var merchantIdentifier = '4884e5a14ab742578df520b5203b91e6';
-    var orderId = 'JKJLLFKKLKDE';//data.order.order_number;
+    var orderId = '1';//data.order.order_number;
     var mode = 0;
     var updateDesired = 22;
     var updateReason = 'your user wants a refund';
@@ -384,7 +384,7 @@ function initiate_refund(data){
         console.log(data);
         var form = {
             merchantIdentifier: merchantIdentifier,
-            orderId: 'JKJLLFKKLKDE',
+            orderId: '1',
             amount: 10,
             mode: 0,
             updateDesired: updateDesired,
