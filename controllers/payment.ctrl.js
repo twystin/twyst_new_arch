@@ -17,16 +17,16 @@ module.exports.get_zaakpay_response = function(req, res) {
   	console.log(zaakpay_response);
   	var message, type;
   	if(zaakpay_response.paymentMethod) { // for zaakpay
-		var orderId = zaakpay_response.orderid;
+		var orderId = zaakpay_response.orderId;
 		var responseCode = zaakpay_response.responseCode;		
 		var responseDescription = zaakpay_response.responseDescription;
 		var amount = zaakpay_response.amount*100;
 		var paymentMethod = zaakpay_response.paymentMethod;
-		var cardhasid = zaakpay_response.cardhasid;
+		var cardhashid = zaakpay_response.cardhashid;
 		type = 'Zaakpay';
 
 		message = "'"+orderId+"''"+responseCode+"''"+responseDescription+"''"
-		+amount+"''"+paymentMethod+"''"+cardhasid+"'";		
+		+amount+"''"+paymentMethod+"''"+cardhashid+"'";		
   	}
   	else{// for mobikwik
   		var orderId = zaakpay_response.orderid;
@@ -51,14 +51,16 @@ module.exports.get_zaakpay_response = function(req, res) {
 		        	data.outlet = order.outlet;
 		        	if(zaakpay_response.paymentMethod) {
 		        		data.payment_mode = zaakpay_response.paymentMethod;
-		        		data.cardhasid = zaakpay_response.cardhasid;
+		        		data.cardhashid = zaakpay_response.cardhashid;
 		        	}
 		        	else{
 		        		data.payment_mode = 'mobikwik';
 		        	}
 		        	OrderHelper.confirm_order(data).then(function(data){
-		  				HttpHelper.success(res, checksum);	
-		  			})		        
+		  				HttpHelper.success(res, checksum, 'order confirmed');	
+		  			},	function(err) {
+						HttpHelper.error(res, err);
+				  	});		        
 		        }
 		    });
   		}
