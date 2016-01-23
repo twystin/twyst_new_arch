@@ -396,7 +396,19 @@ module.exports.create_cashback_offer = function(token, new_offer) {
     offer._id = new ObjectId();
 
     AuthHelper.get_user(token).then(function(data) {
-        
+        outlet.save(function(err, data) {
+            if(err) {
+                console.log(err);
+            }
+            else{
+                deferred.resolve(data);
+            }
+        });   
+    }, function(err) {
+        deferred.reject({
+            err: err || false,
+            message: 'Couldn\'t find the user'
+        });
     });
 
     return deferred.promise;
