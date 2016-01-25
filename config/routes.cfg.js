@@ -101,12 +101,21 @@ module.exports = function(app) {
   (function OfferRoutes() {
     var OfferCtrl = require('../controllers/offer.ctrl');
     app.post('/api/v4/offers', OfferCtrl.new);
-    app.post('/api/v4/offers/cashback', OfferCtrl.create_cashback_offer);
     app.get('/api/v4/offers', OfferCtrl.all);
     app.get('/api/v4/offers/:outlet_id', OfferCtrl.get_offers);
     app.put('/api/v4/offers/:offer_id', mustBe.authorized('outlet.update', OfferCtrl.update));
     app.get('/api/v4/offers/:offer_id', mustBe.authorized('outlet.view', OfferCtrl.get));
     app.delete('/api/v4/offers/:offer_id', mustBe.authorized('outlet.update', OfferCtrl.delete));
+
+  })();
+
+  (function CashbackOfferRoutes() {
+    var CashbackOfferCtrl = require('../controllers/cashback_offer.ctrl');
+    app.post('/api/v4/cashback/offers', CashbackOfferCtrl.create);
+    app.get('/api/v4/cashback/offers', CashbackOfferCtrl.all);
+    app.put('/api/v4/cashback/offers/:offer_id', CashbackOfferCtrl.update);
+    app.get('/api/v4/cashback/offers/:offer_id', CashbackOfferCtrl.get);
+    app.delete('/api/v4/cashback/offers/:offer_id', CashbackOfferCtrl.delete);
 
   })();
 

@@ -2,10 +2,10 @@
 /*jslint node: true */
 var logger = require('tracer').colorConsole();
 var HttpHelper = require('../common/http.hlpr');
-var OfferHelper = require('./helpers/offer.hlpr');
+var CashbackOfferHelper = require('./helpers/cashback_offer.hlpr');
 var _ = require('lodash');
 
-module.exports.new = function(req, res) {
+module.exports.create = function(req, res) {
 	logger.log();
 	var token = req.query.token || null;
 	var new_offer = {};
@@ -15,7 +15,7 @@ module.exports.new = function(req, res) {
 	}
 
 	new_offer = _.extend(new_offer, req.body);
-	OfferHelper.create_offer(token, new_offer).then(function(data) {
+	CashbackOfferHelper.create_cashback_offer(token, new_offer).then(function(data) {
 		HttpHelper.success(res, data.data, data.message);
 	}, function(err) {
 		HttpHelper.error(res, err.err, err.message);
@@ -31,7 +31,7 @@ module.exports.get = function(req, res) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
 
-	OfferHelper.get_offer(token, offer_id).then(function(data) {
+	CashbackOfferHelper.get_cashback_offer(token, offer_id).then(function(data) {
 		HttpHelper.success(res, data.data, data.message);
 	}, function(err) {
 		HttpHelper.error(res, err.err, err.message);
@@ -49,7 +49,7 @@ module.exports.update = function(req, res) {
 	var updated_offer = {};
 	updated_offer = _.extend(updated_offer, req.body);
 
-	OfferHelper.update_offer(token, updated_offer)
+	CashbackOfferHelper.update_cashback_offer(token, updated_offer)
 		.then(function(data) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
@@ -67,7 +67,7 @@ module.exports.delete = function(req, res) {
         HttpHelper.error(res, null, "Not Authenticated");
     }
 
-    OfferHelper.delete_offer(token, offer_id).then(function(data) {
+    CashbackOfferHelper.delete_cashback_offer(token, offer_id).then(function(data) {
         HttpHelper.success(res, data.data, data.message);
     }, function(err) {
         HttpHelper.error(res, err.err || true, err.message);
@@ -82,29 +82,10 @@ module.exports.all = function(req, res) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
 
-	OfferHelper.get_all_offers(token).then(function(data) {
+	CashbackOfferHelper.get_all_cashback_offers(token).then(function(data) {
 		HttpHelper.success(res, data.data, data.message);
 	}, function(err) {
 		HttpHelper.error(res, err.err || null, err.message);
 	});
 
 }
-module.exports.get_offers = function(req, res) {
-	logger.log();
-	var token = req.query.token || null;
-	var outlet = req.params.outlet_id || null;
-	if (!token) {
-		HttpHelper.error(res, null, "Not Authenticated");
-	}
-	else if(!outlet) {
-		HttpHelper.error(res, null, "no outlet is passed");
-	}
-
-	OfferHelper.get_offers(token, outlet).then(function(data) {
-		HttpHelper.success(res, data.data, data.message);
-	}, function(err) {
-		HttpHelper.error(res, err.err || null, err.message);
-	});
-
-}
-
