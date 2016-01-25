@@ -13,7 +13,6 @@ var AuthHelper = require('../../common/auth.hlpr');
 var Cache = require('../../common/cache.hlpr.js');
 var RecoHelper = require('./reco.hlpr');
 var moment = require('moment');
-var Offer = mongoose.model('Offer');
 
 module.exports.create_offer = function(token, new_offer) {
     logger.log();
@@ -383,33 +382,5 @@ module.exports.get_offers = function(token, outlet_id) {
             
         }
     })
-    return deferred.promise;
-}
-
-
-module.exports.create_cashback_offer = function(token, new_offer) {
-    logger.log();
-    var deferred = Q.defer();
-
-    var offer = {};
-    offer = _.extend(offer, new_offer);
-    offer._id = new ObjectId();
-
-    AuthHelper.get_user(token).then(function(data) {
-        outlet.save(function(err, data) {
-            if(err) {
-                console.log(err);
-            }
-            else{
-                deferred.resolve(data);
-            }
-        });   
-    }, function(err) {
-        deferred.reject({
-            err: err || false,
-            message: 'Couldn\'t find the user'
-        });
-    });
-
     return deferred.promise;
 }
