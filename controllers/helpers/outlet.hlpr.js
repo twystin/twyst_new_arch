@@ -291,7 +291,8 @@ module.exports.remove_outlet = function(token, outlet_id) {
 
 var _updateAccountManage = function(outlet) {
   User.findOne({
-    email: outlet.basics.account_mgr_email
+    email: outlet.basics.account_mgr_email,
+    role: 2
   }).exec(function(err, account_manager) {
     if(err || !account_manager) {
       logger.error(err && err.stack);

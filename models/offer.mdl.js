@@ -3,6 +3,7 @@
 
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var hours = require('./partials/hours.mdl').hours;
 
 var Offer = new Schema({
     partner_name: {
@@ -22,7 +23,8 @@ var Offer = new Schema({
             type: String
         },
         offer_type: {
-            type: String
+            type: String,
+            enum: ['coupon', 'voucher']
         },
         offer_voucher_count: {
             type: Number
@@ -48,11 +50,8 @@ var Offer = new Schema({
         offer_end_date: {
             type: Date
         },
-        offer_applicability: {
-            type: Date
-        }
-        }
-    ]
+        offer_applicability: hours
+    }]
 
 })
 

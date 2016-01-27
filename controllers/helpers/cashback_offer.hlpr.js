@@ -25,17 +25,19 @@ module.exports.create_cashback_offer = function(token, new_offer) {
         offer = new CashbackOffer(offer);
 
         offer.save(function(err, offer) {
-            if(err) {
+            if (err) {
                 console.log(err);
                 deferred.reject({
                     err: err || false,
                     message: 'Couldn\'t create offer'
                 });
+            } else {
+                deferred.resolve({
+                    data: offer,
+                    message: 'Offer created successfully'
+                });
             }
-            else{
-                deferred.resolve({data: offer, message: 'Offer created successfully'});
-            }
-        });   
+        });
     }, function(err) {
         deferred.reject({
             err: err || false,
@@ -46,91 +48,84 @@ module.exports.create_cashback_offer = function(token, new_offer) {
     return deferred.promise;
 }
 
-module.exports.get_cashbcak_offer = function(token, offerId) {
+module.exports.get_cashback_offer = function(token, offerId) {
     logger.log();
     var deferred = Q.defer();
 
-    CashbackOffer.findOne({
-        'offers._id': offerId
-    })
-    .exec(function(err, cashback_offers) {
-        if(err || !cashback_offers) {
-            deferred.reject({
-                err: err,
-                message: 'Unable to load offer details'
-            })
-        } else {
-            var offer = _.filter(cashback_offers.offers, function(offer) {
-                return offer._id.toString() === offerId;
-            });
-            if(offer.length) {
-                deferred.resolve({data: offer[0], message: 'Offer found'});
-            } else {
-                deferred.reject({ err: null, message: 'Unable to load offer details'});
-            }
-        }
-    })
-    return deferred.promise;
-}
-
-module.exports.update_cashback_offer = function(token, new_offer) {
-    logger.log();
-    var deferred = Q.defer();
-
-    new_offer._id = ObjectId(new_offer._id);
-    
-    CashbackOffer.findOne({'offers._id': new_offer._id})
-    .exec(function(err, cashback_offers) {
-        if(err || !offers) {
-            deferred.reject({err: err || true, message: 'Failed to update offer'});
-        } else {
-            var offer = _.findWhere(outlet.offers, {_id: new_offer._id});
-            if(offer._id === new_offer._id) {
-                offer = _.merge(offer, new_offer);
-                cashback_offers.save(function(err) {
-                    if(err) {
-                       deferred.reject({err: err || true, message: 'Failed to update offer'}); 
-                    } else {
-                        deferred.resolve({data: new_offer, message: "Offer updated successfully"});
-                    }
+    CashbackOffer.findById(offerId)
+        .exec(function(err, cashback_offers) {
+            if (err || !cashback_offers) {
+                deferred.reject({
+                    err: err,
+                    message: 'Unable to load offer details'
                 })
-            }    
-            else{
-                deferred.resolve({data: new_offer, message: "Offer updated successfully"});
+            } else {
+                deferred.resolve({
+                    data: cashback_offers,
+                    message: 'Offer found'
+                });
             }
-        }
-    });
+        })
     return deferred.promise;
 }
+
+
+module.exports.update_cashback_offer = function(token, updated_offer) {
+    logger.log();
+    var deferred = Q.defer();
+
+    CashbackOffer.findById(updated_offer._id)
+        .exec(function(err, cashback_offer) {
+            if (err || !cashback_offer) {
+                deferred.reject({
+                    err: err || true,
+                    message: 'Failed to update offer'
+                });
+            } else {
+                cashback_offer = _.merge(cashback_offer, updated_offer);
+                cashback_offer.save(function(err) {
+                    if (err) {
+                        deferred.reject({
+                            err: err || true,
+                            message: 'Failed to update offer'
+                        });
+                    } else {
+                        deferred.resolve({
+                            data: cashback_offer,
+                            message: "Offer updated successfully"
+                        });
+                    }
+                });
+            }
+        });
+    return deferred.promise;
+}
+
 
 
 module.exports.delete_cashback_offer = function(token, offerId) {
     logger.log();
     var deferred = Q.defer();
 
-    CashbackOffer.findOne({
-        'offers._id': ObjectId(offerId)
-    }).exec(function(err, cashback_offers) {
-        if(err || !cashback_offers) {
-            deferred.reject({err: err || true, message: 'Failed to update offer'});
-        } else {
-            var index = _.findIndex(cashback_offers.offers, function(offer) { return offer._id.toString() === offerId; });
-                
-            if(index !== -1) {
-                cashback_offers.offers.splice(index, 1);
-                cashback_offers.save(function(err) {
-                    if(err) {
-                        console.log(err);
-                        deferred.reject({err: err || true, message: 'An error occured while deleting offer'});
-                    } else {
-                        deferred.resolve({data: {}, message: 'Offer deleted successfully'});
-                    }
+    CashbackOffer.findOneAndRemove({
+            _id: offerId
+        })
+        .exec(function(err) {
+            if (err) {
+                deferred.reject({
+                    data: err || true,
+                    message: 'Unable to delete the cashback offers right now'
                 });
-            } 
-        }
-    });
+            } else {
+                deferred.resolve({
+                    data: {},
+                    message: 'Deleted cashback offers successfully'
+                });
+            }
+        });
     return deferred.promise;
 }
+
 
 module.exports.get_all_cashback_offers = function(token) {
     logger.log();
@@ -145,15 +140,21 @@ module.exports.get_all_cashback_offers = function(token) {
             });
         } else {
             CashbackOffer.find({}).exec(function(err, cashback_offers) {
-                if(err || !cashback_offers) {
-                    deferred.reject({err: err || true, message: 'Failed to update offer'});
+                if (err || !cashback_offers) {
+                    deferred.reject({
+                        err: err || true,
+                        message: 'Failed to update offer'
+                    });
                 } else {
-                    
-                    deferred.resolve({data: cashback_offers, message: 'Offer loaded successfully'});
-                   
+
+                    deferred.resolve({
+                        data: cashback_offers,
+                        message: 'Offer loaded successfully'
+                    });
+
                 }
             });
-               
+
         }
     }, function(err) {
         deferred.reject({
