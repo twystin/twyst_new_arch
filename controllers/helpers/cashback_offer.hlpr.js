@@ -107,40 +107,25 @@ module.exports.delete_cashback_offer = function(token, offerId) {
     logger.log();
     var deferred = Q.defer();
 
-    CashbackOffer.findOne({
-        'offers._id': ObjectId(offerId)
-    }).exec(function(err, cashback_offers) {
-        if (err || !cashback_offers) {
-            deferred.reject({
-                err: err || true,
-                message: 'Failed to update offer'
-            });
-        } else {
-            var index = _.findIndex(cashback_offers.offers, function(offer) {
-                return offer._id.toString() === offerId;
-            });
-
-            if (index !== -1) {
-                cashback_offers.offers.splice(index, 1);
-                cashback_offers.save(function(err) {
-                    if (err) {
-                        console.log(err);
-                        deferred.reject({
-                            err: err || true,
-                            message: 'An error occured while deleting offer'
-                        });
-                    } else {
-                        deferred.resolve({
-                            data: {},
-                            message: 'Offer deleted successfully'
-                        });
-                    }
+    CashbackOffer.findOneAndRemove({
+            _id: offerId
+        })
+        .exec(function(err) {
+            if (err) {
+                deferred.reject({
+                    data: err || true,
+                    message: 'Unable to delete the cashback offers right now'
+                });
+            } else {
+                deferred.resolve({
+                    data: {},
+                    message: 'Deleted cashback offers successfully'
                 });
             }
-        }
-    });
+        });
     return deferred.promise;
 }
+
 
 module.exports.get_all_cashback_offers = function(token) {
     logger.log();
