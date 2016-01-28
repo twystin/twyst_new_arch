@@ -50,6 +50,23 @@ var CashbackOffer = new Schema({
             type: Date
         },
         offer_applicability: hours.hours
+        ,
+        created_at: {
+            type: Date,
+            default: Date.now()
+        },
+        created_by: {
+          type: Schema.Types.ObjectId,
+          ref: 'User'
+        },
+        last_updated_at: {
+            type: Date,
+            default: Date.now()
+        },
+        last_updated_by: {
+            type: Schema.Types.ObjectId,
+            ref: 'User'
+        }
     }]
 
 })

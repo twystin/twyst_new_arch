@@ -16,7 +16,6 @@ var async = require('async');
 var logger = require('tracer').colorConsole();
 var request = require('request');
 var PaymentHelper = require('./payment.hlpr.js');
-var update_url = 'https://api.zaakpay.com/updatetransaction';
 
 module.exports.update_user = function(token, updated_user) {
   logger.log();
@@ -302,8 +301,9 @@ module.exports.cancel_order = function(token, order) {
     .then(function(data) {
         return send_notifications(data);
     })
-    .then(function(data) {        
-        deferred.resolve(data.order);
+    .then(function(data) {
+        console.log('we are here');
+        deferred.resolve(data);
     })
     .fail(function(err) {
         console.log(err)
@@ -346,21 +346,40 @@ function update_order(data) {
     var current_action = {};
     current_action.action_type = 'cancelled';
     current_action.action_by = data.user._id;
-
-    Order.findOneAndUpdate({
+    console.log(data.order)
+    Order.findOne({
         order_number: data.order.order_number
-      }, {
-        $set: {order_status: 'cancelled'},
-        $push: {actions: current_action}
-      },
+      }, 
       function(err, order) {
         if (err || !order) {
           deferred.reject({
             err: err || true,
-            message: 'Couldn\'t cancel the order'
+            message: 'Couldn\'t find this order'
           });
         } else {
-          deferred.resolve(data);
+            if(order.order_status === 'pending') {
+                order.order_status = 'cancelled';
+                order.actions.push(current_action);
+                order.save(function(err, order){
+                    if(err || !order){
+                        deferred.reject({
+                            err: err || true,
+                            message: 'Couldn\'t cancel this order'
+                        });   
+                    }
+                    else{
+                        data.order = order;
+                        deferred.resolve(data);
+                    }
+                })    
+            }
+            else{
+                deferred.reject({
+                    err: err || true,
+                    message: 'Couldn\'t cancel this order'
+                }); 
+            }
+            
         }
       }
     );
@@ -371,37 +390,34 @@ function initiate_refund(data){
     logger.log();
     var deferred = Q.defer();
 
-    var merchantIdentifier = '4884e5a14ab742578df520b5203b91e6';
-    var orderId = '1';//data.order.order_number;
-    var mode = 0;
-    var updateDesired = 22;
-    var updateReason = 'your user wants a refund';
-    var amount = 10;
-
-    var message = "'"+merchantIdentifier+"''"+orderId+"''"+amount+"''"+mode+"''"+updateDesired+"''"+updateReason+"'"; 
-
-    PaymentHelper.calculate_checksum(message, 'Zaakpay').then(function(data){
-        console.log(data);
-        var form = {
-            merchantIdentifier: merchantIdentifier,
-            orderId: '1',
-            amount: 10,
-            mode: 0,
-            updateDesired: updateDesired,
-            updateReason: updateReason,
-            checksum: data
-
+    if(data.order.payment_info.is_inapp) {
+        console.log('inapp payment process refund '+data.order.payment_info.payment_mode);
+        if(data.order.payment_info.payment_mode === 'Zaakpay')  {
+            data.order.refund_mode = 'Zaakpay';
+            data.order.updateDesired = 14;
+            data.order.updateReason = 'user want to cancel transaction';    
         }
-
-        request.post({url: update_url, form: form},function(err, httpResponse, body){
-            console.log(body);
-            deferred.resolve(data);    
-        })
-        
-    },  function(err) {
-        deferred.reject('unable to cance order');
-    });
-
+        else if(data.order.payment_info.payment_mode === 'wallet') {
+            data.order.refund_mode = 'wallet';
+            data.order.refund_type = 'partial_refund';//change to full refund
+        }
+        else{
+            console.log('unknown payment mode');
+            deferred.resolve(data);
+        }
+        PaymentHelper.process_refund(data.order).then(function (data) {
+            deferred.resolve(data);
+        }, function(err) {
+            deferred.reject({
+              err: err || true,
+              message: "could not proces refund right now"
+            });
+        });
+    }
+    else{
+        console.log('cod payment no refund');
+        deferred.resolve(data);  
+    }
     return deferred.promise;
 }
 
