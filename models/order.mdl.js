@@ -39,6 +39,7 @@ var Order = new Schema({
   actual_amount_paid: {type: Number},
   cashback: {type: Number, default: 0},
   payment_info: {
+    is_inapp: {type: Boolean, default: false},
     payment_mode: {type: String},//COD/Payu/payment object
     txn_id: {type: String},
   }, 

@@ -41,7 +41,7 @@ module.exports.login = function(req, res) {
                     if (data.data.role === 1 || data.data.role === 2) {
                         data.data.is_admin = true;
                     }
-                    console.log(data);
+                    //console.log(data);
                     HttpHelper.success(res, data, "Logged in successfully");
                 } else {
                     HttpHelper.success(res, data.data.token, "Logged in successfully");

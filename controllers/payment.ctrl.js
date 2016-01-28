@@ -16,7 +16,7 @@ module.exports.get_zaakpay_response = function(req, res) {
   	zaakpay_response = _.extend(zaakpay_response, req.body);
   	console.log(zaakpay_response);
   	var message, type;
-  	if(zaakpay_response.paymentMethod) { // for zaakpay
+  	if(zaakpay_response.paymentMethod === 'Zaakpay') { // for zaakpay
 		var orderId = zaakpay_response.orderId;
 		var responseCode = zaakpay_response.responseCode;		
 		var responseDescription = zaakpay_response.responseDescription;
@@ -28,7 +28,7 @@ module.exports.get_zaakpay_response = function(req, res) {
 		message = "'"+orderId+"''"+responseCode+"''"+responseDescription+"''"
 		+amount+"''"+paymentMethod+"''"+cardhashid+"'";		
   	}
-  	else{// for mobikwik
+  	else if(zaakpay_response.paymentMethod === 'wallet'){// for mobikwik
   		var orderId = zaakpay_response.orderid;
 		var responseCode = zaakpay_response.responseCode;		
 		var responseDescription = zaakpay_response.responseDescription;
@@ -41,21 +41,23 @@ module.exports.get_zaakpay_response = function(req, res) {
 
   	PaymentHelper.calculate_checksum(message, type).then(function(checksum){
   		if(checksum === zaakpay_response.checksum) {
+  			console.log('checksum verified');
   			var data = {};
   			data.order_number = zaakpay_response.orderId;
   			Order.findOne({order_number: data.order_number}).exec(function(err, order) {
-		        if (err) {
+		        if (err || !order) {
 		          console.log(err);
+		          console.log('order not found');
+
 		        } 
 		        else {
 		        	data.outlet = order.outlet;
-		        	if(zaakpay_response.paymentMethod) {
-		        		data.payment_mode = zaakpay_response.paymentMethod;
+		        	data.payment_mode = zaakpay_response.paymentMethod;
+
+		        	if(zaakpay_response.paymentMethod === 'Zaakpay') {		       
 		        		data.cardhashid = zaakpay_response.cardhashid;
 		        	}
-		        	else{
-		        		data.payment_mode = 'mobikwik';
-		        	}
+		        	
 		        	OrderHelper.confirm_order(data).then(function(data){
 		  				HttpHelper.success(res, checksum, 'order confirmed');	
 		  			},	function(err) {
@@ -146,28 +148,25 @@ module.exports.initiate_refund = function(req, res) {
         else if(!order) {
         	HttpHelper.error(res, null, 'could not found order id' );	
         }
-        else if(order.status != 'cancelled' && order.payment_info && order.payment_info.payment_mode === 'Zaakpay'){
+        else if(order.status != 'cancelled' && order.status != 'pending' && order.payment_info
+         && order.payment_info.is_inapp && order.payment_info.payment_mode === 'Zaakpay'){
         	passed_order.refund_mode = 'Zaakpay';
-        	passed_order.order_number = order.order_number; 
-
-    		PaymentHelper.process_refund(passed_order).then(function(data){
-    			HttpHelper.success(res, 'refund processed');	
-    		}, function(err) {
-			    HttpHelper.error(res, err, 'could not process refund');
-			 });	        
+        	passed_order.order_number = order.order_number; 	        
         }
-        else if(order.status != 'cancelled' && order.payment_info && order.payment_info.payment_mode === 'mobikwik'){
-        	passed_order.refund_mode = 'Zaakpay';
-        	passed_order.order_number = order.order_number;
-
-        	PaymentHelper.process_refund(passed_order).then(function(data){
-
-    		})	
-        			        
+        else if(order.status != 'cancelled' && order.status != 'pending' && order.payment_info
+         && order.payment_info.is_inapp && order.payment_info.payment_mode === 'wallet'){
+        	passed_order.refund_mode = 'wallet';
+        	passed_order.order_number = order.order_number;			        
         }
         else{
         	HttpHelper.error(res, null, 'could not process  refund against this order id' );	
         }
+
+        PaymentHelper.process_refund(passed_order).then(function(data){
+			HttpHelper.success(res, 'refund processed');	
+		}, function(err) {
+		    HttpHelper.error(res, err, 'could not process refund');
+		});
     });
 	
 }

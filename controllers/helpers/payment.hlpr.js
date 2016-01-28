@@ -3,8 +3,12 @@
 var crypto = require("crypto");
 var Q = require('q');
 var logger = require('tracer').colorConsole();
+var zaakpay_refund_url = 'https://api.zaakpay.com/updatetransaction';
+var mobikwik_refund_url = 'https://mobikwik.com/mobikwik/walletrefund';
+var request = require('request');
+var rest = require('restler');
 
-module.exports.calculate_checksum = function(message, type) {
+var calculate_checksum = module.exports.calculate_checksum = function(message, type) {
 	logger.log();
 	var deferred = Q.defer();
 	
@@ -35,49 +39,150 @@ module.exports.process_refund = function(order) {
 	logger.log();
 	var deferred = Q.defer();
 	
-	var checksum;
+	var form = {}, update_url;
+	console.log(order)
 	if(order.refund_mode === 'Zaakpay') {
+		console.log('prcessing refund for zaakpay');
 		var merchantIdentifier = '4884e5a14ab742578df520b5203b91e6';
 	    var orderId = order.order_number;
 	    var mode = 0;
 	    var updateDesired = order.updateDesired;
 	    var updateReason = order.updateReason;
-	    var amount = order.amount;
+	    var amount;
+	    if(updateDesired === 22) {
+	    	amount = order.amount;	
+	    }
+	    
+		if(updateDesired === 22) {
+			var message = "'"+merchantIdentifier+"''"+orderId+"''"+amount+"''"+mode+"''"+updateDesired+"''"+updateReason+"'";
+			calculate_checksum(message, 'Zaakpay').then(function(data){
+				form = {
+			        merchantIdentifier: merchantIdentifier,
+			        orderId: order.order_number,
+			        amount: amount,
+			        mode: 0,
+			        updateDesired: order.updateDesired,
+			        updateReason: order.updateReason,
+			        checksum: data
 
-	    message = "'"+merchantIdentifier+"''"+orderId+"''"+amount+"''"+mode+"''"+updateDesired+"''"+updateReason+"'";
-		checksum = calculate_checksum(message, 'Zaakpay');
+			    }
+			    update_url = zaakpay_refund_url;
+			    console.log(update_url);
+			    console.log(form);
+			    request.post({url: update_url, form: form},function(err, httpResponse, body){
+			        console.log('should not execute')
+			        console.log(body);
+			        deferred.resolve(order);    
+			    });
+			})
+		}
+		else if(updateDesired === 14) {
+			var message = "'"+merchantIdentifier+"''"+orderId+"''"+mode+"''"+updateDesired+"''"+updateReason+"'";
+			calculate_checksum(message, 'Zaakpay').then(function(data){
+				form = {
+			        merchantIdentifier: merchantIdentifier,
+			        orderId: order.order_number,
+			        mode: 0,
+			        updateDesired: order.updateDesired,
+			        updateReason: order.updateReason,
+			        checksum: data
+			    }
+			    update_url = zaakpay_refund_url;
+			    console.log(update_url);
+			    console.log(form);
+			    request.post({url: update_url, form: form},function(err, httpResponse, body){
+			        console.log('should not execute')
+			        console.log(body);
+			        deferred.resolve(order);    
+			    });
+			})
+		}
+		else{
+			deferred.reject({
+                err: err || true,
+                data: null,
+                message: 'unkwnown updateDesired for zaakpay'
+            });
+		}
+		
+	    update_url = zaakpay_refund_url;
 	}
-	else if(order.refund_mode === 'mobikwik') {
-		var merchantIdentifier = '4884e5a14ab742578df520b5203b91e6';
+	else if(order.refund_mode === 'wallet') {
+		console.log('prcessing refund for wallet');
+		var mid = 'MBK2136';
 	    var orderId = order.order_number;
-	    var mode = 0;
-	    var updateDesired = order.updateDesired;
-	    var updateReason = order.updateReason;
-	    var amount = order.amount;
+		var amount = order.amount;
+		if(order.refund_type === 'partial_refund') {
+			console.log('prcessing partial refund');
+			var message = "'"+mid+"''"+orderId+"''"+3+"'";
+			calculate_checksum(message, 'wallet').then(function(data){
 
-	    message = "'"+merchantIdentifier+"''"+orderId+"''"+amount+"''"+mode+"''"+updateDesired+"''"+updateReason+"'";
-		checksum = calculate_checksum(message, 'mobikwik');
+		 		form = {
+			        mid: mid,
+			        txid: orderId,
+			        amount: 3,//amount
+			        ispartial: 'yes',
+			        checksum: data
+
+			    }
+			    update_url = mobikwik_refund_url;
+			    console.log(update_url);
+			    console.log(form);
+			    request.post({url: update_url, form: form},function(err, httpResponse, body){
+			        console.log('should not execute')
+			        console.log(body);
+			        deferred.resolve(order);    
+			    });	
+			})
+	 	}
+	 	else if(order.refund_type === 'full_refund'){
+	 		console.log('prcessing full refund');
+	 		var message = "'"+mid+"''"+orderId+"''"+1+"'";
+			calculate_checksum(message, 'wallet').then(function(data){
+				console.log(data);
+				form = {
+			        mid: mid,
+			        txid: orderId,
+			        amount: 1,//order.actual_amount_paid,
+			        checksum: data
+
+			    }
+			    update_url = mobikwik_refund_url;
+			    console.log(update_url);
+			    console.log(form);
+			    request.post({url: update_url, form: form},function(err, httpResponse, body){
+			        console.log('should not execute')
+			        console.log(body);
+			        deferred.resolve(order);    
+			    });
+			    
+			})			
+	 	}
+	 	else{
+	 		deferred.reject({
+                err:  true,
+                data: null,
+                message: 'unkwnown refund mode'
+            });
+	 	}
+
 	}
 	else{
-		deferred.reject('unkwnown refund mode');
+		deferred.reject({
+            err:  true,
+            data: null,
+            message: 'unkwnown refund mode'
+        });
 	}
-	
-
-	var form = {
-        merchantIdentifier: merchantIdentifier,
-        orderId: order.order_number,
-        amount: order.amount,
-        mode: 0,
-        updateDesired: order.updateDesired,
-        updateReason: order.updateReason,
-        checksum: data
-
-    }
-
-    request.post({url: update_url, form: form},function(err, httpResponse, body){
-        console.log(body);
-        deferred.resolve(data);    
-    });
+	//rest.post(update_url, {
+	//	data: {
+	//		form: form
+	//	}
+	//}).on('complete', function(data, response) {
+		
+		//console.log(response);
+		//deferred.resolve(order);
+	//});
 	return deferred.promise;
 	
 };
