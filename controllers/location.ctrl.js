@@ -34,9 +34,9 @@ module.exports.verify_delivery_location = function(req, res) {
 
     var data = {};
     data.outlet = req.body.outlet;
-    data.coords = req.body.coords;
+    data.locations = req.body.locations;
 
-    if(req.body.coords && !req.body.coords.lat || !req.body.coords.long || !req.body.outlet) {
+    if(req.body.locations && !req.body.locations.length  || !req.body.outlet) {
         HttpHelper.error(res, 'some parameters missing');
     }
 
@@ -45,13 +45,8 @@ module.exports.verify_delivery_location = function(req, res) {
         return get_delivery_zone(data);
     })
     .then(function(data) {
-        console.log(data);
-        if(!data.outlet.valid_zone) {
-          HttpHelper.error(res, 'outlet does not deliver at selected location');  
-        }
-        else{
-          HttpHelper.success(res, data.outlet.valid_zone, 'Returning valid delivery zone');
-        }
+        HttpHelper.success(res, data.locations, 'Returning valid delivery zone');
+       
     })
     .fail(function(err) {
         console.log(err)
@@ -82,36 +77,41 @@ function get_outlet(data) {
 function get_delivery_zone(data) {
     logger.log();
     var deferred = Q.defer();
-
-    if(data.outlet.attributes.delivery.delivery_zone && data.outlet.attributes.delivery.delivery_zone.length) {        
+    _.each(data.locations, function(location){
+        if(data.outlet.attributes.delivery.delivery_zone && data.outlet.attributes.delivery.delivery_zone.length) {        
         
-        var delivery_zone = _.map(data.outlet.attributes.delivery.delivery_zone, function(current_zone) {          
-          if(current_zone.coord && current_zone.coord.length &&
-            geolib.isPointInside({latitude: data.coords.lat, longitude: data.coords.long},
-            current_zone.coord)){
-            return current_zone;
-          }
-        })
-
-        delivery_zone = _.compact(delivery_zone);
-        delivery_zone =  _.max(delivery_zone, function(zone){ return zone.zone_type});
-        if(delivery_zone) {
-          data.outlet.valid_zone = delivery_zone;          
-          deferred.resolve(data);
+            var delivery_zone = _.map(data.outlet.attributes.delivery.delivery_zone, function(current_zone) {          
+              if(current_zone.coord && current_zone.coord.length &&
+                geolib.isPointInside({latitude: location.lat, longitude: location.long},
+                current_zone.coord)){
+                return current_zone;
+              }
+            })
+            
+            delivery_zone = _.compact(delivery_zone);
+            if(delivery_zone.length) {
+                delivery_zone =  _.max(delivery_zone, function(zone){ return zone.zone_type});
+                if(delivery_zone) {
+                  location.valid_zone = delivery_zone;
+                  location.is_deliver = true;
+                }
+                else{
+                    location.is_deliver = false;                
+                }    
+            }
+            else{
+                location.is_deliver = false;
+            }
+                
         }
         else{
+            console.log('no delivers zone set up for outlet');
             deferred.reject({
                 err: true, 
-                message: 'outlet does not deliver in selected deliver zone'
+                message: 'no delivers zone set up for selected outlet'
             })
         }    
-    }
-    else{
-        console.log('no delivers zone set up for outlet');
-        deferred.reject({
-            err: true, 
-            message: 'no delivers zone set up for selected outlet'
-        })
-    }
+    })
+    deferred.resolve(data);
     return deferred.promise;
 }
