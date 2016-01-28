@@ -40,17 +40,21 @@ module.exports.get_all_outlets = function(token) {
   logger.log();
   AuthHelper.get_user(token).then(function(data) {
     if(data.data.role>=2) {
-      User.findOne({
-        _id: data.data._id
-      }).select('outlets').populate('outlets').exec(function(err, result) {
-        if (err) {
+      Cache.get('outlets', function(err, reply) {
+        if(err || !reply) {
           deferred.reject({
             err: err || true,
-            message: 'Couldn\'t get the outlets'
+            message: 'Couldn\'t get outlet list'
           });
         } else {
+          var outlet_ids = _.map(data.data.outlets, function(outlet_id) {
+            return outlet_id.toString();
+          })
+          var outlets = _.filter(JSON.parse(reply), function(outlet) {
+            return outlet_ids.indexOf(outlet._id.toString()) !== -1;
+          });;
           deferred.resolve({
-            data: result.outlets || [],
+            data: outlets,
             message: 'Got your outlets'
           });
         }
@@ -94,31 +98,31 @@ module.exports.update_outlet = function(token, updated_outlet) {
     } else if(data.data.role>=2) {
       outlets = (data.data.outlets && data.data.outlets.toString().split(',')) || null;
       if (_.includes(outlets, id)) {
-        Outlet.findOneAndUpdate({
-            _id: id
-          }, {
-            $set: updated_outlet
-          }, {
-            upsert: true
-          },
-          function(err, o) {
-            if (err || !o) {
-              logger.log(err);
+        Outlet.findById(id).exec(function(err, outlet) {
+         if (err || !outlet) {
+          deferred.reject({
+            err: err || true,
+            message: "Could not update the outlet"
+          });
+         } else {
+          var outlet = _.extend(outlet, updated_outlet);
+          outlet.save(function(err) {
+            if(err) {
               deferred.reject({
                 err: err || true,
-                message: 'Couldn\'t update the outlet'
+                message: 'Could not update the outlet'
               });
             } else {
-              updated_outlet._id = id;
-              _updateAccountManage(updated_outlet);
-              _updateOutletInCache(updated_outlet);
+              _updateAccountManage(outlet);
+              _updateOutletInCache(outlet);
               deferred.resolve({
-                data: o,
+                data: outlet,
                 message: 'Updated outlet successfully'
               });
             }
-          }
-        );
+          });
+         }
+        });
       } else {
         deferred.reject({
           err: true,
@@ -290,27 +294,42 @@ module.exports.remove_outlet = function(token, outlet_id) {
 };
 
 var _updateAccountManage = function(outlet) {
-  User.findOne({
-    email: outlet.basics.account_mgr_email,
-    role: 2
-  }).exec(function(err, account_manager) {
-    if(err || !account_manager) {
-      logger.error(err && err.stack);
-    } else {
-      var outlet_ids = _.map(account_manager.outlets, function(outlet) {
-        return outlet.toString();
-      });
-      if (outlet_ids.indexOf(outlet._id.toString()) === -1) {
-        account_manager.outlets.push(outlet._id);
-        account_manager.save(function(err) {
-          if(err) {
-            logger.error(err.stack);
-          }
-        });
-      }
-    }
-  });
+    User.find({
+        $or: [{
+            email: outlet.basics.account_mgr_email,
+            role: 2
+        }, {
+            role: 2,
+            outlets: {
+                $in: [outlet]
+            }
+        }]
+    }).exec(function(err, account_managers) {
+        if (err || !(account_managers && account_managers.length)) {
+            logger.error(err && err.stack);
+        } else {
+            var new_account_manager = _.findWhere(account_managers, function(account) {
+                return user.email === outlet.basics.account_mgr_email;
+            });
+            var old_account_manager = _.findWhere(account_managers, function(account) {
+                return user.email !== outlet.basics.account_mgr_email;
+            });
+            if (old_account_manager) {
+                old_account_manager.outlets = _.filter(old_account_manager.outlets, function(outlet_id) {
+                    return outlet._id.toString() !== outlet._id.toString();
+                });
+                old_account_manager.save();
+            }
+
+            if (new_account_manager) {
+                new_account_manager.outlets.push(outlet._id);
+                new_account_manager.save();
+            }
+        }
+    });
 }
+
+
 
 var _updateOutletInCache = function(outlet) {
   Cache.get('outlets', function(err, reply) {
