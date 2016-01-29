@@ -789,7 +789,7 @@ function check_minimum_bill_amount(data) {
     }
     else{
         deferred.reject({
-            err: true,
+            err: null,
             message: 'minimum amount for delivery at selected location is ' + data.outlet.valid_zone.min_amt_for_delivery
         });
     }
@@ -829,7 +829,7 @@ function generate_and_cache_order(data) {
     order.order_actual_value_with_tax = order_actual_value_obj.new_order_value;     
     order.available_offers = data.outlet.offers;
     order.estimeted_delivery_time = passed_data.outlet.valid_zone.delivery_estimated_time;
-    order.menu_id = outlet.menus[0]._id;
+    order.menu_id = data.outlet.menus[0]._id;
     data.order = order;
     
     Cache.hset(data.user._id, "order_map", JSON.stringify(order), function(err) {
@@ -1439,11 +1439,12 @@ function update_payment_mode(data) {
     }, {
         'order_status': 'pending',
         'payment_info.payment_mode': data.payment_mode
-    }).exec(function(err) {
+    }).exec(function(err, order) {
         if (err) {
             console.log(err);
             deferred.reject(err)
         } else {            
+            data.order_id = order && order._id; 
             deferred.resolve(data);
         }
     });
@@ -1484,8 +1485,8 @@ function send_notification(data) {
     var notif = [], payload_merchant = {}, payload_console = {};
     payload_merchant.path = data.outlet._id;
     payload_console.path = 'console';
-    payload_merchant.message = {text: {message: 'you have a new order', order_number: data.order_number}};
-    payload_console.message = {text: {message: 'you have a new order', order_number: data.order_number}};
+    payload_merchant.message = {message: 'you have a new order', order_id: data.order_id, type: 'new'};
+    payload_console.message = {message: 'you have a new order', order_id: data.order_id, type: 'new'};
     notif.push(payload_merchant);
     notif.push(payload_console);
 
