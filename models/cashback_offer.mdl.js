@@ -25,6 +25,9 @@ var CashbackOffer = new Schema({
         offer_type: {
             type: String
         },
+        offer_logo: {
+            type: String
+        },
         offer_voucher_count: {
             type: Number
         },
@@ -43,14 +46,16 @@ var CashbackOffer = new Schema({
         offer_processing_fee: {
             type: Number
         },
+        offer_status: {
+            type: String
+        },
         offer_start_date: {
             type: Date
         },
         offer_end_date: {
             type: Date
         },
-        offer_applicability: hours.hours
-        ,
+        offer_applicability: hours.hours,
         created_at: {
             type: Date,
             default: Date.now()

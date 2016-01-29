@@ -31,12 +31,12 @@ var Order = new Schema({
     ref: 'Outlet'
   },
   order_number: {type: String},
-  offer_used: {type: Schema.Types.ObjectId},
+  offer_used: {type: Schema.Types.ObjectId, default: null},
   order_date: {type: Date, default: new Date()},
-  order_value_without_offer: {type: Number},
-  order_value_with_offer: {type: Number},
-  tax_paid: {type: Number},
-  actual_amount_paid: {type: Number},
+  order_value_without_offer: {type: Number, default: 0},
+  order_value_with_offer: {type: Number, default: 0},
+  tax_paid: {type: Number, default: 0},
+  actual_amount_paid: {type: Number, default: 0},
   cashback: {type: Number, default: 0},
   payment_info: {
     is_inapp: {type: Boolean, default: false},
@@ -49,10 +49,16 @@ var Order = new Schema({
     action_type: {type: String}, //accept/reject/dispatch
     action_by: {type: Schema.Types.ObjectId},
     action_at: {type: Date, default: new Date()},
+    comments: {type: String}
   }],
-  user_rating: {
-    type: Number,
-    default: 0
+  user_feedback: {
+    is_on_time: {
+      type: Boolean,
+      default: true
+    },
+    rating: {
+      type: Number
+    }
   },
   is_favourite: {
     type: Boolean,
@@ -77,6 +83,9 @@ var Order = new Schema({
     }],
     item_cost: {
       type: String
+    },
+    item_rating: {
+      type: Number
     },
     option: {
       _id: {type: Schema.Types.ObjectId},
@@ -136,8 +145,7 @@ var Order = new Schema({
           }
         }]
       }]
-    },    
-    
+    }     
   }]
 
 })
