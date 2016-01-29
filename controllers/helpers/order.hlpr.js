@@ -789,7 +789,7 @@ function check_minimum_bill_amount(data) {
     }
     else{
         deferred.reject({
-            err: true,
+            err: null,
             message: 'minimum amount for delivery at selected location is ' + data.outlet.valid_zone.min_amt_for_delivery
         });
     }
@@ -829,7 +829,7 @@ function generate_and_cache_order(data) {
     order.order_actual_value_with_tax = order_actual_value_obj.new_order_value;     
     order.available_offers = data.outlet.offers;
     order.estimeted_delivery_time = passed_data.outlet.valid_zone.delivery_estimated_time;
-    order.menu_id = outlet.menus[0]._id;
+    order.menu_id = data.outlet.menus[0]._id;
     data.order = order;
     
     Cache.hset(data.user._id, "order_map", JSON.stringify(order), function(err) {
