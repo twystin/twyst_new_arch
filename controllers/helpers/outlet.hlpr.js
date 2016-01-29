@@ -13,6 +13,7 @@ var Order = mongoose.model('Order');
 var Account = mongoose.model('Account');
 var AuthHelper = require('../../common/auth.hlpr.js');
 var logger = require('tracer').colorConsole();
+var Transporter = require('../../transports/transporter');
 
 module.exports.get_outlet = function(id) {
   var deferred = Q.defer();
@@ -54,7 +55,7 @@ module.exports.get_all_outlets = function(token) {
           var outlets = _.filter(JSON.parse(reply), function(outlet) {
             return outlet_ids.indexOf(outlet._id.toString()) !== -1;
           });
-          outlets = _.filter(result.outlets, function(outlet){
+          outlets = _.filter(outlets, function(outlet){
             return outlet.outlet_meta.status !== 'archived';
           });
           deferred.resolve({
@@ -117,7 +118,7 @@ module.exports.update_outlet = function(token, updated_outlet) {
                 message: 'Could not update the outlet'
               });
             } else {
-              _updateAccountManage(outlet);
+              _updateAccountManager(outlet);
               _updateOutletInCache(outlet);
               deferred.resolve({
                 data: outlet,
@@ -153,7 +154,7 @@ module.exports.update_outlet = function(token, updated_outlet) {
                 message: 'Couldn\'t update the outlet'
               });
             } else {
-              _updateAccountManage(outlet);
+              _updateAccountManager(outlet);
               _updateOutletInCache(outlet);
               deferred.resolve({
                 data: outlet,
@@ -191,8 +192,7 @@ module.exports.create_outlet = function(token, created_outlet) {
         Cache.get('outlets', function(err, reply) {
           if(err) {
             logger.error("Error retrieving outlets for adding new outlet", err);
-          }
-          else if(!reply){
+          } else if(!reply){
                 var outlets = {};
                 outlets[outlet._id.toString()] = outlet;
                 Cache.set('outlets', JSON.stringify(outlets), function(err) {
@@ -200,8 +200,7 @@ module.exports.create_outlet = function(token, created_outlet) {
                     logger.error("Error setting updated list of outlets", err);
                   }
                 });  
-          }
-           else {
+          } else {
             var outlets = JSON.parse(reply);
             outlets[outlet._id.toString()] = outlet;
             Cache.set('outlets', JSON.stringify(outlets), function(err) {
@@ -297,7 +296,7 @@ module.exports.remove_outlet = function(token, outlet_id) {
   return deferred.promise;
 };
 
-var _updateAccountManage = function(outlet) {
+var _updateAccountManager = function(outlet) {
     User.find({
         $or: [{
             email: outlet.basics.account_mgr_email,
@@ -307,28 +306,45 @@ var _updateAccountManage = function(outlet) {
             outlets: {
                 $in: [outlet]
             }
+        }, {
+          email: {
+            $in: ['al@twyst.in', 'rc@twyst.in'],
+            role: 2
+          }
         }]
     }).exec(function(err, account_managers) {
         if (err || !(account_managers && account_managers.length)) {
             logger.error(err && err.stack);
         } else {
-            var new_account_manager = _.findWhere(account_managers, function(account) {
-                return user.email === outlet.basics.account_mgr_email;
+            // list of all account to be checked for PUSH
+            var set_account_managers = _.filter(account_managers, function(account) {
+              return account.email === outlet.basics.account_mgr_email || account.email === 'al@twyst.in' || account.email === 'rc@twyst.in';
+            })
+            // list of all account to be checked for POP
+            var remove_account_managers = _.filter(account_managers, function(account) {
+                return user.email !== outlet.basics.account_mgr_email && account.email !== 'al@twyst.in' && account.email !== 'rc@twyst.in';
             });
-            var old_account_manager = _.findWhere(account_managers, function(account) {
-                return user.email !== outlet.basics.account_mgr_email;
-            });
-            if (old_account_manager) {
-                old_account_manager.outlets = _.filter(old_account_manager.outlets, function(outlet_id) {
-                    return outlet._id.toString() !== outlet._id.toString();
-                });
-                old_account_manager.save();
-            }
 
-            if (new_account_manager) {
-                new_account_manager.outlets.push(outlet._id);
-                new_account_manager.save();
-            }
+            _.each(set_account_managers, function(account_obj) {
+              var outlet_ids = _.map(account_obj.outlets, function(outlet_id) {
+                return outlet_id.toString();
+              });
+              if (outlet_ids.indexOf(outlet._id.toString()) === -1) {
+                account_obj.outlets.push(outlet._id);
+                account_obj.save();
+              }
+            });
+
+            _.each(remove_account_managers, function(account_obj) {
+              var outlet_ids = _.map(account_obj.outlets, function(outlet_id) {
+                return outlet_id.toString();
+              });
+              var index = outlet_ids.indexOf(outlet._id.toString());
+              if (index !== -1) {
+                account_obj.outlets.splice(index, 1);
+                account_obj.save();
+              }
+            });
         }
     });
 }
@@ -383,18 +399,15 @@ module.exports.get_orders = function(token, outlet_id) {
           err: err || true,
           message: 'Couldn\'t get the orders'
         });
-      } 
-      else {  
+      } else {  
         orders = _.map(orders, function(order){
           
           var updated_user = {};
           if(order.user.email) {
             updated_user.email = order.user.email;
-          }
-          else if(order.user.google && order.user.google.email) {
+          } else if(order.user.google && order.user.google.email) {
             updated_user.email = order.user.google.email;
-          }
-          else {
+          } else {
             updated_user.email = order.user.profile.email;
           }
           updated_user.first_name = order.user.first_name;
@@ -432,19 +445,31 @@ module.exports.update_order = function(token, order) {
         if(order.update_type === 'accept') {
           accept_order(data).then(function(data){
             deferred.resolve(data);
+          }, function(err) {
+            deferred.reject({
+              err: err.err || true,
+              message: err.message ? err.message : 'Something went wrong'
+            });
           })
-        }
-        else if(order.update_type === 'reject') {
+        } else if(order.update_type === 'reject') {
           reject_order(data).then(function(data){
             deferred.resolve(data);
+          }, function(err) {
+            deferred.reject({
+              err: err.err || true,
+              message: err.message ? err.message : 'Something went wrong'
+            });
           })
-        }
-        else if(order.update_type === 'dispatch') {
+        } else if(order.update_type === 'dispatch') {
           dispatch_order(data).then(function(data){
             deferred.resolve(data);
+          }, function(err) {
+            deferred.reject({
+              err: err.err || true,
+              message: err.message ? err.message : 'Something went wrong'
+            });
           })
-        }
-        else{
+        } else{
           console.log('unknown update');
           //unknown update
         }
@@ -492,6 +517,11 @@ function accept_order(data) {
         });
       } else {
         //notify user/console/am
+        send_notification(['console', data.order.outlet], {
+          message: 'Order accepted by merchant',
+          order_id: data.order.order_id,
+          type: 'accept'
+        });
 
         deferred.resolve({
           data: order,
@@ -525,6 +555,11 @@ function reject_order(data) {
         });
       } else {
         //notify user/console/am
+        send_notification(['console', data.order.outlet], {
+          message: 'Order rejected by merchant - ' + data.order.reject_reason,
+          order_id: data.order.order_id,
+          type: 'reject'
+        });
 
         deferred.resolve({
           data: order,
@@ -543,7 +578,7 @@ function dispatch_order(data) {
  
   var current_action = {};
   current_action.action_type = 'dispatched';
-  current_action.action_by = data.user._id;
+  current_action.action_by = data.data._id;
 
   Order.findOneAndUpdate({
       _id: order.order_id
@@ -559,6 +594,11 @@ function dispatch_order(data) {
         });
       } else {
         //notify user/console/am
+        send_notification(['console', data.order.outlet], {
+          message: 'Order dispatched by merchant',
+          order_id: data.order.order_id,
+          type: 'dispatch'
+        });
 
         deferred.resolve({
           data: order,
@@ -569,3 +609,11 @@ function dispatch_order(data) {
   );       
 }
 
+function send_notification(paths, payload) {
+  _.each(paths, function(path) {
+    Transporter.send('faye', 'faye', {
+      path: path, 
+      message: payload
+    });
+  })
+}

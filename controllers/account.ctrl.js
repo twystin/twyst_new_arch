@@ -36,7 +36,7 @@ module.exports.login = function(req, res) {
                 return AuthHelper.get_user(data.token.token);
             })
             .then(function(data) {
-                console.log('data', data);
+                // console.log('data', data);
                 if (data.data.role === 1 || data.data.role === 2 || data.data.role === 3 || data.data.role === 4 || data.data.role === 5) {
                     if (data.data.role === 1 || data.data.role === 2) {
                         data.data.is_admin = true;
