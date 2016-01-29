@@ -114,48 +114,28 @@ module.exports.process_refund = function(order) {
 		var amount = order.amount;
 		if(order.refund_type === 'partial_refund') {
 			console.log('prcessing partial refund');
-			var message = "'"+mid+"''"+orderId+"''"+3+"'";
+			var message = "'"+mid+"''"+orderId+"''"+amount+"'";
 			calculate_checksum(message, 'wallet').then(function(data){
-
-		 		form = {
-			        mid: mid,
-			        txid: orderId,
-			        amount: 3,//amount
-			        ispartial: 'yes',
-			        checksum: data
-
-			    }
 			    update_url = mobikwik_refund_url;
-			    console.log(update_url);
-			    console.log(form);
-			    request.post({url: update_url, form: form},function(err, httpResponse, body){
-			        console.log('should not execute')
-			        console.log(body);
-			        deferred.resolve(order);    
-			    });	
+					    
+			    request.get("https://www.mobikwik.com/walletrefund?mid="+mid+"&txid="+orderId+"&amount="+amount+"&ispartial=yes&checksum="+data, function(err, res, body){
+
+			    	console.log(body);
+			    	deferred.resolve(order);
+			    })			
 			})
 	 	}
 	 	else if(order.refund_type === 'full_refund'){
 	 		console.log('prcessing full refund');
-	 		var message = "'"+mid+"''"+orderId+"''"+1+"'";
+	 		var message = "'"+mid+"''"+orderId+"''"+amount+"'";
 			calculate_checksum(message, 'wallet').then(function(data){
-				console.log(data);
-				form = {
-			        mid: mid,
-			        txid: orderId,
-			        amount: 1,//order.actual_amount_paid,
-			        checksum: data
-
-			    }
+				
 			    update_url = mobikwik_refund_url;
-			    console.log(update_url);
-			    console.log(form);
-			    request.post({url: update_url, form: form},function(err, httpResponse, body){
-			        console.log('should not execute')
-			        console.log(body);
-			        deferred.resolve(order);    
-			    });
 			    
+			    request.get("https://www.mobikwik.com/walletrefund?mid="+mid+"&txid="+orderId+"&amount="+amount+"&checksum="+data, function(err, res, body){
+			    	console.log(body);
+			    	deferred.resolve(order);
+			    })
 			})			
 	 	}
 	 	else{

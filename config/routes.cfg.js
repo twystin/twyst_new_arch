@@ -116,6 +116,7 @@ module.exports = function(app) {
     app.put('/api/v4/cashback/offers/:offer_id', CashbackOfferCtrl.update);
     app.get('/api/v4/cashback/offers/:offer_id', CashbackOfferCtrl.get);
     app.delete('/api/v4/cashback/offers/:offer_id', CashbackOfferCtrl.delete);
+    //app.post('/api/v4/cashback/offers/use', CashbackOfferCtrl.use_offer);
 
   })();
 
@@ -133,6 +134,7 @@ module.exports = function(app) {
     var OrderCtrl = require('../controllers/order.ctrl');    
     app.get('/api/v4/orders', OrderCtrl.all);
     app.get('/api/v4/order/:order_id', OrderCtrl.get_order);
+    app.put('/api/v4/order', OrderCtrl.update_order);
     app.post('/api/v4/order/verify', OrderCtrl.verify_order);
     app.post('/api/v4/order/apply/offer', OrderCtrl.apply_offer);
     app.post('/api/v4/order/checkout', OrderCtrl.checkout);

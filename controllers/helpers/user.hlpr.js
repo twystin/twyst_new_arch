@@ -293,7 +293,7 @@ module.exports.cancel_order = function(token, order) {
     
     get_user(data)
     .then(function(data) {
-        return update_order(data);
+        return update_order_status(data);
     })
     .then(function(data) {
         return initiate_refund(data);
@@ -339,7 +339,7 @@ function get_user(data) {
     return deferred.promise;
 }
 
-function update_order(data) {
+function update_order_status(data) {
     logger.log();
     var deferred = Q.defer();
     
@@ -399,7 +399,7 @@ function initiate_refund(data){
         }
         else if(data.order.payment_info.payment_mode === 'wallet') {
             data.order.refund_mode = 'wallet';
-            data.order.refund_type = 'partial_refund';//change to full refund
+            data.order.refund_type = 'full_refund';
         }
         else{
             console.log('unknown payment mode');
@@ -428,3 +428,27 @@ function send_notifications(data) {
     return deferred.promise;
 
 }
+
+module.exports.update_order = function(token, order) {
+    logger.log();
+    var deferred = Q.defer();
+
+    console.log(order);
+    var data = {};
+    data.user_token = token;
+    data.order = order;
+    
+    get_user(data)
+    .then(function(data) {
+        return update_order(data);
+    })
+    .then(function(data) {
+        console.log('we are here');
+        deferred.resolve(data);
+    })
+    .fail(function(err) {
+        console.log(err)
+      deferred.reject(err);
+    });
+    return deferred.promise;
+};

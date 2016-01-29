@@ -1356,7 +1356,7 @@ module.exports.get_orders = function(token) {
     }, function(err) {
         deferred.reject({
             err: err || false,
-            message: 'Couldn\'t fund the user'
+            message: 'Couldn\'t find the user'
         });
     });
 
@@ -1379,7 +1379,7 @@ module.exports.confirm_order = function(token, order) {
         return get_outlet(data);
     })
     .then(function(data) {
-        return update_order(data);
+        return update_payment_mode(data);
     })
     .then(function(data) {
         return send_sms(data);
@@ -1430,7 +1430,7 @@ function process_orders(orders, deferred) {
     });
 }
 
-function update_order(data) {
+function update_payment_mode(data) {
     logger.log();
     var deferred = Q.defer();
 
@@ -1527,5 +1527,88 @@ function schedule_order_status_check(data) {
     });
     
     deferred.resolve(data); 
+    return deferred.promise;
+}
+
+module.exports.update_order = function(token, order) {
+    logger.log();
+    var deferred = Q.defer();
+    console.log(token);
+    console.log(order);
+    AuthHelper.get_user(token).then(function(data){
+        if(order.update_type === 'update_favourite')   {
+            Order.findOne({_id: order.order_id}).exec(function(err, o) {
+              if (err || !o) {
+                console.log(err);
+                deferred.reject({
+                  err: err || true,
+                  message: "Couldn\'t set as favourite order"
+                });
+              } else {
+                o.is_favourite = order.is_favourite;
+                o.save(function(err, updated_order){
+                    if(err || !order) {
+                        deferred.reject({
+                            err: err || true,
+                            message: 'Couldn\'t update this order'
+                        });   
+                    }
+                    else{
+                        deferred.resolve({
+                            data: updated_order,
+                            message: 'Updated as favourite order'
+                        });    
+                    }
+                        
+                })
+                
+              }
+            });
+        }
+        else if(order.update_type === 'feedback') {
+            Order.findOne({_id: order.order_id}, function(err, saved_order) {
+                if (err || !saved_order) {
+                  deferred.reject({
+                    err: err || true,
+                    message: 'Couldn\'t find this order'
+                  });
+                } else {
+                    saved_order.feedback = {};
+                    saved_order.feedback.is_ontime = order.is_ontime;
+                    saved_order.feedback.rating = order.order_rating;
+                    if(order.items_feedback) {
+                        saved_order.items = order.items;    
+                    }
+                    
+                    saved_order.save(function(err, order){
+                        if(err || !order){
+                            deferred.reject({
+                                err: err || true,
+                                message: 'Couldn\'t update this order'
+                            });   
+                        }
+                        else{
+                            deferred.resolve({data: order,
+                            message: 'feedback submitted successfully'});
+                        }
+                    })    
+                }
+              }
+            );   
+        }
+        else{
+            console.log('unknown order update type')
+            deferred.reject({
+                err: err || true,
+                message: 'unknown order update type'
+            });   
+        }    
+    }, function(err) {
+        deferred.reject({
+            err: err || false,
+            message: 'Couldn\'t find the user'
+        });
+    });
+    
     return deferred.promise;
 }

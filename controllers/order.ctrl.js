@@ -129,4 +129,40 @@ module.exports.all = function(req, res) {
 	});
 }
 
+module.exports.update_order = function(req, res) {
+  logger.log();
+  var token = req.query.token || null;
+  var order = {};
+   order = _.extend( order, req.body);
 
+  if (!token) {
+    HttpHelper.error(res, null, "Not authenticated");
+  }
+  else if (!order.update_type) {
+    HttpHelper.error(res, null, "please pass order update type");
+  }
+  else if (!order.order_id) {
+    HttpHelper.error(res, null, "please pass order id");
+  }
+  else if(order.update_type === 'feedback') {
+  	if (!order.order_rating) {
+	    HttpHelper.error(res, null, "please pass order rating");
+	}
+	else if (!order.is_ontime) {
+	    HttpHelper.error(res, null, "please pass order is on time feedback");
+	}
+	else if (order.items_feedback && !order.items && order.items.length) {
+	    HttpHelper.error(res, null, "please pass items");
+	}
+  }
+  else if(order.update_type === 'update_favourite' && order.is_favourite != null) {
+  	
+	 HttpHelper.error(res, null, "please pass favourite value");
+  }
+
+  OrderHelper.update_order(token, order).then(function(data) {
+    HttpHelper.success(res, data.data, data.message);
+  }, function(err) {
+    HttpHelper.error(res, err.data, err.message);
+  });
+};
