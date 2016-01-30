@@ -1080,12 +1080,14 @@ function massage_order(data){
                 massaged_item.item_photo = item.item_details.item_photo;
                 massaged_item.item_tags = item.item_details.item_tags;
                 massaged_item.item_cost = item.item_details.item_cost;
-                massaged_item.option = item.option;
-                delete massaged_item.option.addons;
-                delete massaged_item.option.sub_options;
-                massaged_item.option.sub_options = item.sub_options;
-                massaged_item.option.addons = item.addons;
-
+                if(item.option) {
+                    massaged_item.option = item.option;    
+                    delete massaged_item.option.addons;
+                    delete massaged_item.option.sub_options;
+                    massaged_item.option.sub_options = item.sub_options;
+                    massaged_item.option.addons = item.addons;
+                }
+                
                 items.push(massaged_item);
             })
 
