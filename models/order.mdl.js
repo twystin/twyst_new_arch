@@ -24,7 +24,7 @@ var Order = new Schema({
       long: {type: String}
     },
     tag: {type: String,
-      enum: ['home', 'office', 'other']}
+      enum: ['Home', 'Office', 'Other']}
   },
   outlet: {
     type: Schema.Types.ObjectId,

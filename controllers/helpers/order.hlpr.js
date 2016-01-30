@@ -1599,13 +1599,41 @@ module.exports.update_order = function(token, order) {
               }
             );   
         }
+        else if(order.update_type === 'update_delivery_status') {
+            Order.findOne({_id: order.order_id}, function(err, saved_order) {
+                if (err || !saved_order) {
+                  deferred.reject({
+                    err: err || true,
+                    message: 'Couldn\'t find this order'
+                  });
+                } else {
+                                     
+                    saved_order.order_status = order.is_delivered;    
+                    //if is delivered is false then notify AM
+                    saved_order.save(function(err, order){
+                        if(err || !order){
+                            deferred.reject({
+                                err: err || true,
+                                message: 'Couldn\'t update this order'
+                            });   
+                        }
+                        else{
+                            deferred.resolve({data: order,
+                            message: 'delivery status submitted successfully'});
+                        }
+                    })    
+                }
+              }
+            );   
+        }
         else{
             console.log('unknown order update type')
             deferred.reject({
                 err: err || true,
                 message: 'unknown order update type'
             });   
-        }    
+        }
+    
     }, function(err) {
         deferred.reject({
             err: err || false,
