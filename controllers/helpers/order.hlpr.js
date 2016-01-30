@@ -1117,7 +1117,7 @@ function massage_order(data){
                 order.save(function(err, order){
                     if(err){
                         console.log(err);
-                        deferred.reject('unable to checkout ');
+                        deferred.reject('unable to checkout');
                     }
                     else{
                         console.log('saved');

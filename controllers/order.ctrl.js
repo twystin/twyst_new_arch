@@ -113,7 +113,7 @@ module.exports.get_order = function(req, res) {
   	OrderHelper.get_order(token, order_id).then(function(data) {
 	    HttpHelper.success(res, data.data, data.message);
 	  }, function(err) {
-	    HttpHelper.error(res, err.data, err.message);
+	    HttpHelper.error(res, null, err.message);
 	  });	
   }
   
