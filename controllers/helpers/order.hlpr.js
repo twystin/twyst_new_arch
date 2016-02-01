@@ -1111,7 +1111,7 @@ function massage_order(data){
                     order.tax_paid = order.st+order.vat;
                     order.actual_amount_paid = order.order_actual_value_with_tax
                 }
-                data.order = order;
+                
                 order = new Order(order); 
     
                 order.save(function(err, order){
@@ -1120,6 +1120,7 @@ function massage_order(data){
                         deferred.reject('unable to checkout');
                     }
                     else{
+                        data.order = order;
                         console.log('saved');
                         deferred.resolve(data);   
                     }

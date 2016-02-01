@@ -116,7 +116,7 @@ module.exports = function(app) {
     app.put('/api/v4/cashback/offers/:offer_id', CashbackOfferCtrl.update);
     app.get('/api/v4/cashback/offers/:offer_id', CashbackOfferCtrl.get);
     app.delete('/api/v4/cashback/offers/:offer_id', CashbackOfferCtrl.delete);
-    //app.post('/api/v4/cashback/offers/use', CashbackOfferCtrl.use_offer);
+    app.post('/api/v4/cashback/offers/use', CashbackOfferCtrl.use_offer);
 
   })();
 

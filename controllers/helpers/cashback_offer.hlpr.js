@@ -164,3 +164,133 @@ module.exports.get_all_cashback_offers = function(token) {
     });
     return deferred.promise;
 }
+
+module.exports.use_cashback_offer = function(token, offer_id) {
+    logger.log();
+    var deferred = Q.defer();
+
+    AuthHelper.get_user(token).then(function(data) {
+        var available_twyst_bucks =  _.get(data, 'data.twyst_bucks');
+        CashbackOffer.findOne({'offers._id': offer_id }, function(err, cashback_partner){
+            if(err || !cashback_partner) {
+                console.log( 'error '+ err);
+                deferred.reject({
+                    err: err || false,
+                    message: 'This offer is no more available'
+                });
+            }
+            else if(cashback_partner && cashback_partner.offers && cashback_partner.offers.length){
+                var matching_offer = getMatchingOffer(cashback_partner.offers, offer_id);
+                if(matching_offer){
+                    var is_enough_bucks = check_enough_twyst_buck(matching_offer, available_twyst_bucks);
+
+                    if(is_enough_bucks){
+                        if(matching_offer.currently_available_voucher_count){
+                            assign_voucher(matching_offer, user).then(function(data) {
+                                send_email();
+
+                                deferred.resolve(passed_data); 
+                            })   
+                        }
+                        else{
+                            deferred.reject({
+                                err: err || false,
+                                message: 'Offer is not available right now'
+                            });                            
+                        }
+                    }
+                              
+                    else{
+                        deferred.reject({
+                            err: err || false,
+                            message: 'Not enough twyst bucks'
+                        });
+                        
+                    }
+                      
+                }
+                else {
+                    deferred.reject({
+                        err: err || false,
+                        message: 'This offer is no more available'
+                    });
+                }
+                 
+            }
+            else {
+                deferred.reject({
+                    err: err || false,
+                    message: 'This offer is no more available'
+                });
+            }
+        })     
+    }, function(err) {
+        deferred.reject({
+            err: err || false,
+            message: 'Couldn\'t find the user'
+        });
+    });
+return deferred.promise;
+    
+}
+
+
+function getMatchingOffer(offers, offer_id){
+    console.log(offers);
+    console.log(offer_id);
+    for (var i = 0; i < offers.length; i++) {
+        if(offers[i]._id.toString() === offer_id.toString()) {
+            return   offers [i];       
+        }
+    }
+    return null;
+}
+
+function check_enough_twyst_buck (offer, bucks) {
+    if(offer.offer_cost <= bucks) {
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+
+
+function assign_voucher(offer, user) {
+    logger.log();
+    var deferred = Q.defer();
+
+    var voucher = {};
+    voucher.type = 'cashback voucher';
+    voucher.offer_id = offer._id;
+
+    offer.currently_available_voucher_count = offer.currently_available_voucher_count - 1;
+    offer.save(function(err, offer) {
+        if(err || !user) {
+            console.log('offer save err', err);
+        }
+        else{
+            User.findOne({_id: user}).exec(function(err, user) {
+                if (err || !user) {
+                  console.log('user save err', err);
+                  deferred.reject('Could not update user');
+                } else {
+                    user.coupons.push(voucher);
+                    user.save(function(err) {
+                      if (err) {
+                          console.log('user save err', err);
+                      } else {
+                          deferred.resolve(user);
+                      }
+                    });
+                }
+            });      
+        }
+    })
+
+    return deferred.promise;
+}
+
+function send_email(user, data) {
+
+}

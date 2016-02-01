@@ -633,7 +633,7 @@ function dispatch_order(data) {
   logger.log();
   var deferred = Q.defer();
 
-  conole.log(data);
+  console.log(data);
   var current_action = {};
   current_action.action_type = 'dispatched';
   current_action.action_by = data.data._id;

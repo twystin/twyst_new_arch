@@ -154,15 +154,6 @@ module.exports.process_refund = function(order) {
             message: 'unkwnown refund mode'
         });
 	}
-	//rest.post(update_url, {
-	//	data: {
-	//		form: form
-	//	}
-	//}).on('complete', function(data, response) {
-		
-		//console.log(response);
-		//deferred.resolve(order);
-	//});
 	return deferred.promise;
 	
 };

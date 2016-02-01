@@ -346,9 +346,10 @@ function update_order_status(data) {
     var current_action = {};
     current_action.action_type = 'cancelled';
     current_action.action_by = data.user._id;
-    console.log(data.order)
+    console.log(data.order);
+
     Order.findOne({
-        order_number: data.order.order_number
+        _id: data.order.order_id
       }, 
       function(err, order) {
         if (err || !order) {
