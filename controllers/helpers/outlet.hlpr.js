@@ -537,7 +537,7 @@ function accept_order(data) {
           } else {
             var date = new Date();
             var time = date.getTime();
-            var nottif = {};
+            var notif = {};
             notif.header = 'Order Accepted';
             notif.message = 'Your order has been accept by merchant';
             notif.state = 'ACCEPTED';
@@ -548,7 +548,7 @@ function accept_order(data) {
             setTimeout(function() {
               var date = new Date();
               var time = date.getTime();
-              var nottif = {};
+              var notif = {};
               notif.header = 'Order Recieved';
               notif.message = 'We want to know if your order has been delivered';
               notif.state = 'ASSUMED_DELIVERED';
@@ -607,7 +607,7 @@ function reject_order(data) {
           } else {
             var date = new Date();
             var time = date.getTime();
-            var nottif = {};
+            var notif = {};
             notif.header = 'Order Rejected';
             notif.message = 'Your order has been rejected by merchant';
             notif.state = 'REJECTED';
@@ -667,7 +667,7 @@ function dispatch_order(data) {
           } else {
             var date = new Date();
             var time = date.getTime();
-            var nottif = {};
+            var notif = {};
             notif.header = 'Order Dispatched';
             notif.message = 'Your order has been dispatched by merchant';
             notif.state = 'DISPATCHED';
