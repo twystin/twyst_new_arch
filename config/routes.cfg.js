@@ -102,7 +102,7 @@ module.exports = function(app) {
     var OfferCtrl = require('../controllers/offer.ctrl');
     app.post('/api/v4/offers', OfferCtrl.new);
     app.get('/api/v4/offers', OfferCtrl.all);
-    app.get('/api/v4/offers/:outlet_id', OfferCtrl.get_offers);
+    app.get('/api/v4/offers/outlet/:outlet_id', OfferCtrl.get_offers);
     app.put('/api/v4/offers/:offer_id', mustBe.authorized('outlet.update', OfferCtrl.update));
     app.get('/api/v4/offers/:offer_id', mustBe.authorized('outlet.view', OfferCtrl.get));
     app.delete('/api/v4/offers/:offer_id', mustBe.authorized('outlet.update', OfferCtrl.delete));
@@ -116,7 +116,7 @@ module.exports = function(app) {
     app.put('/api/v4/cashback/offers/:offer_id', CashbackOfferCtrl.update);
     app.get('/api/v4/cashback/offers/:offer_id', CashbackOfferCtrl.get);
     app.delete('/api/v4/cashback/offers/:offer_id', CashbackOfferCtrl.delete);
-    //app.post('/api/v4/cashback/offers/use', CashbackOfferCtrl.use_offer);
+    app.post('/api/v4/cashback/offers/use', CashbackOfferCtrl.use_offer);
 
   })();
 

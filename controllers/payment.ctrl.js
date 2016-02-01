@@ -116,6 +116,10 @@ module.exports.initiate_refund = function(req, res) {
 	logger.log();
 
 	var token = req.query.token || null;
+	var passed_order = {};
+	passed_order.order_id = req.body.order_id;
+	passed_order.updateReason = req.body.reason;
+	passed_order.refund_type = req.body.refund_type;
 
 	if (!token) {
 		HttpHelper.error(res, null, "Not authenticated");
@@ -129,58 +133,54 @@ module.exports.initiate_refund = function(req, res) {
 	else if (!req.body.reason) {
 		HttpHelper.error(res, null, "could not process without refund reason");
 	}
-
-	var passed_order = {};
-	passed_order.order_id = req.body.order_id;
-	passed_order.updateReason = req.body.reason;
-	passed_order.refund_type = req.body.refund_type;
-
-	Order.findOne({_id: passed_order.order_id}).exec(function(err, order) {
-        if (err) {
-          console.log(err);
-        }
-        else if(!order) {
-        	HttpHelper.error(res, null, 'could not found order id' );	
-        }
-        else if(order.status != 'cancelled' && order.status != 'pending' && order.payment_info
-         && order.payment_info.is_inapp && order.payment_info.payment_mode === 'Zaakpay'){
-        	passed_order.refund_mode = 'Zaakpay';
-        	passed_order.order_number = order.order_number;
-        	if(passed_order.refund_type === 'full_refund') {
-				passed_order.updateDesired = 14;
-				passed_order.amount = order.actual_amount_paid;
-			}
-			else if(passed_order.refund_type === 'partial_refund'){
-				passed_order.updateDesired = 22;
-				passed_order.amount = req.body.amount;	
-			}
-        	PaymentHelper.process_refund(passed_order).then(function(data){
-				HttpHelper.success(res, 'refund processed');	
-			}, function(err) {
-			    HttpHelper.error(res, err, 'could not process refund');
-			});        
-        }
-        else if(order.status != 'cancelled' && order.status != 'pending' && order.payment_info
-         && order.payment_info.is_inapp && order.payment_info.payment_mode === 'wallet'){
-        	passed_order.refund_mode = 'wallet';
-        	passed_order.order_number = order.order_number;
-        	if(passed_order.refund_type === 'full_refund') {
-				passed_order.amount = order.actual_amount_paid;
-			}
-			else{
-				passed_order.amount = req.body.amount;	
-			}
-			
-        	PaymentHelper.process_refund(passed_order).then(function(data){
-				HttpHelper.success(res, 'refund processed');	
-			}, function(err) {
-			    HttpHelper.error(res, err, 'could not process refund');
-			});		        
-        }
-        else{
-        	console.log(order)
-        	HttpHelper.error(res, null, 'could not process refund against this order id' );	
-        }
-    });
-	
+	else{
+		Order.findOne({_id: passed_order.order_id}).exec(function(err, order) {
+	        if (err) {
+	          console.log(err);
+	          HttpHelper.error(res, null, 'could not process refund against this order id' );	
+	        }
+	        else if(!order) {
+	        	HttpHelper.error(res, null, 'could not found order id' );	
+	        }
+	        else if(order.status != 'cancelled' && order.status != 'pending' && order.payment_info
+	         && order.payment_info.is_inapp && order.payment_info.payment_mode === 'Zaakpay'){
+	        	passed_order.refund_mode = 'Zaakpay';
+	        	passed_order.order_number = order.order_number;
+	        	if(passed_order.refund_type === 'full_refund') {
+					passed_order.updateDesired = 14;
+					passed_order.amount = order.actual_amount_paid;
+				}
+				else if(passed_order.refund_type === 'partial_refund'){
+					passed_order.updateDesired = 22;
+					passed_order.amount = req.body.amount;	
+				}
+	        	PaymentHelper.process_refund(passed_order).then(function(data){
+					HttpHelper.success(res, 'refund processed');	
+				}, function(err) {
+				    HttpHelper.error(res, err, 'could not process refund');
+				});        
+	        }
+	        else if(order.status != 'cancelled' && order.status != 'pending' && order.payment_info
+	         && order.payment_info.is_inapp && order.payment_info.payment_mode === 'wallet'){
+	        	passed_order.refund_mode = 'wallet';
+	        	passed_order.order_number = order.order_number;
+	        	if(passed_order.refund_type === 'full_refund') {
+					passed_order.amount = order.actual_amount_paid;
+				}
+				else{
+					passed_order.amount = req.body.amount;	
+				}
+				
+	        	PaymentHelper.process_refund(passed_order).then(function(data){
+					HttpHelper.success(res, 'refund processed');	
+				}, function(err) {
+				    HttpHelper.error(res, err, 'could not process refund');
+				});		        
+	        }
+	        else{
+	        	console.log(order)
+	        	HttpHelper.error(res, null, 'could not process refund against this order id' );	
+	        }
+	    });
+	}	
 }

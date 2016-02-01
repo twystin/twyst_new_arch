@@ -9,17 +9,17 @@ module.exports.new = function(req, res) {
 	logger.log();
 	var token = req.query.token || null;
 	var new_offer = {};
-
+	new_offer = _.extend(new_offer, req.body);
 	if(!token) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
-
-	new_offer = _.extend(new_offer, req.body);
-	OfferHelper.create_offer(token, new_offer).then(function(data) {
-		HttpHelper.success(res, data.data, data.message);
-	}, function(err) {
-		HttpHelper.error(res, err.err, err.message);
-	})
+	else{
+		OfferHelper.create_offer(token, new_offer).then(function(data) {
+			HttpHelper.success(res, data.data, data.message);
+		}, function(err) {
+			HttpHelper.error(res, err.err, err.message);
+		})	
+	}	
 }
 
 module.exports.get = function(req, res) {
@@ -30,31 +30,32 @@ module.exports.get = function(req, res) {
 	if(!token) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
-
-	OfferHelper.get_offer(token, offer_id).then(function(data) {
-		HttpHelper.success(res, data.data, data.message);
-	}, function(err) {
-		HttpHelper.error(res, err.err, err.message);
-	})
+	else{
+		OfferHelper.get_offer(token, offer_id).then(function(data) {
+			HttpHelper.success(res, data.data, data.message);
+		}, function(err) {
+			HttpHelper.error(res, err.err, err.message);
+		})	
+	}	
 }
 
 module.exports.update = function(req, res) {
 	logger.log();
-	var token = req.query.token || null,
-		offer_id = req.params.offer_id;
+	var token = req.query.token || null;
+	var	offer_id = req.params.offer_id;
+	var updated_offer = {};
+	updated_offer = _.extend(updated_offer, req.body);
 
 	if(!token) {
 		HttpHelper.error(res, null, 'Not Authenticated');
 	}
-	var updated_offer = {};
-	updated_offer = _.extend(updated_offer, req.body);
-
-	OfferHelper.update_offer(token, updated_offer)
-		.then(function(data) {
+	else{
+		OfferHelper.update_offer(token, updated_offer).then(function(data) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err || true, err.message);
-		})
+		})	
+	}	
 }
 
 module.exports.delete = function(req, res) {
@@ -66,12 +67,13 @@ module.exports.delete = function(req, res) {
     if(!token) {
         HttpHelper.error(res, null, "Not Authenticated");
     }
-
-    OfferHelper.delete_offer(token, offer_id).then(function(data) {
-        HttpHelper.success(res, data.data, data.message);
-    }, function(err) {
-        HttpHelper.error(res, err.err || true, err.message);
-    });
+    else{
+    	OfferHelper.delete_offer(token, offer_id).then(function(data) {
+	        HttpHelper.success(res, data.data, data.message);
+	    }, function(err) {
+	        HttpHelper.error(res, err.err || true, err.message);
+	    });	
+    }   
 }
 
 module.exports.all = function(req, res) {
@@ -81,12 +83,14 @@ module.exports.all = function(req, res) {
 	if (!token) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
-
-	OfferHelper.get_all_offers(token).then(function(data) {
-		HttpHelper.success(res, data.data, data.message);
-	}, function(err) {
-		HttpHelper.error(res, err.err || null, err.message);
-	});
+	else{
+		OfferHelper.get_all_offers(token).then(function(data) {
+			HttpHelper.success(res, data.data, data.message);
+		}, function(err) {
+			HttpHelper.error(res, err.err || null, err.message);
+		});	
+	}
+	
 
 }
 module.exports.get_offers = function(req, res) {
@@ -99,12 +103,12 @@ module.exports.get_offers = function(req, res) {
 	else if(!outlet) {
 		HttpHelper.error(res, null, "no outlet is passed");
 	}
-
-	OfferHelper.get_offers(token, outlet).then(function(data) {
-		HttpHelper.success(res, data.data, data.message);
-	}, function(err) {
-		HttpHelper.error(res, err.err || null, err.message);
-	});
-
+	else{
+		OfferHelper.get_offers(token, outlet).then(function(data) {
+			HttpHelper.success(res, data.data, data.message);
+		}, function(err) {
+			HttpHelper.error(res, err.err || null, err.message);
+		});	
+	}
 }
 

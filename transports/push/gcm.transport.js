@@ -18,6 +18,12 @@ module.exports.send = function(payload) {
   var message = new gcm.Message();
   message.addData('message', payload.body);
   message.addData('title', payload.head);
+  if(payload.state) {
+    message.addData('state', payload.state);
+    message.addData('time', payload.time);  
+    message.addData('order_id', payload.order_id);
+  }
+
   message.addData('msgcnt', '1'); 
   message.addData('soundname', 'beep.wav'); 
   message.timeToLive = 10000; 

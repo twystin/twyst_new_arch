@@ -413,7 +413,8 @@ module.exports.get_orders = function(token, outlet_id) {
           updated_user.first_name = order.user.first_name;
           updated_user.middle_name = order.user.middle_name;
           updated_user.last_name = order.user.last_name;
-          updated_user.phone = order.user.phone; 
+          updated_user.phone = order.user.phone;
+          updated_user._id = order.user._id; 
           order.user = updated_user;
           return order;
         });
@@ -471,7 +472,10 @@ module.exports.update_order = function(token, order) {
           })
         } else{
           console.log('unknown update');
-          //unknown update
+          deferred.reject({
+            err: err.err || true,
+            message: err.message ? err.message : 'unknown update type'
+          });
         }
       }
       else{
@@ -517,16 +521,49 @@ function accept_order(data) {
         });
       } else {
         //notify user/console/am
-        send_notification(['console', data.order.outlet], {
+        //set timeout for assumed delivered state
+        send_notification_to_console(['console'], {
           message: 'Order accepted by merchant',
           order_id: data.order.order_id,
           type: 'accept'
         });
 
-        deferred.resolve({
-          data: order,
-          message: 'order accepted successfully'
+        User.findOne({_id: data.order.user._id}, {push_ids: 1}, function(err, user) {
+          if (err || !user) {
+            deferred.reject({
+              err: err || true,
+              message: 'Saved the outlet, but couldn\'t set the user.'
+            });
+          } else {
+            var date = new Date();
+            var time = date.getTime();
+            var notif = {};
+            notif.header = 'Order Accepted';
+            notif.message = 'Your order has been accept by merchant';
+            notif.state = 'ACCEPTED';
+            notif.time = time;
+            notif.order_id = data.order.order_id; 
+
+            send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif);
+            setTimeout(function() {
+              var date = new Date();
+              var time = date.getTime();
+              var notif = {};
+              notif.header = 'Order Recieved';
+              notif.message = 'We want to know if your order has been delivered';
+              notif.state = 'ASSUMED_DELIVERED';
+              notif.time = time;
+              notif.order_id = data.order.order_id;
+              send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif); 
+            }, 10000);
+
+            deferred.resolve({
+              data: order,
+              message: 'order accepted successfully'
+            });    
+          }
         });
+        
       }
     }
   );
@@ -555,16 +592,37 @@ function reject_order(data) {
         });
       } else {
         //notify user/console/am
-        send_notification(['console', data.order.outlet], {
+        send_notification_to_console(['console'], {
           message: 'Order rejected by merchant - ' + data.order.reject_reason,
           order_id: data.order.order_id,
           type: 'reject'
         });
 
-        deferred.resolve({
-          data: order,
-          message: 'order rejected successfully'
+        User.findOne({_id: data.order.user._id}, {push_ids: 1}, function(err, user) {
+          if (err || !user) {
+            deferred.reject({
+              err: err || true,
+              message: 'Saved the outlet, but couldn\'t set the user.'
+            });
+          } else {
+            var date = new Date();
+            var time = date.getTime();
+            var notif = {};
+            notif.header = 'Order Rejected';
+            notif.message = 'Your order has been rejected by merchant';
+            notif.state = 'REJECTED';
+            notif.time = time;
+            notif.order_id = data.order.order_id;
+            
+            send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif);
+            
+            deferred.resolve({
+              data: order,
+              message: 'order rejected successfully'
+            });    
+          }
         });
+        
       }
     }
   );       
@@ -575,13 +633,13 @@ function dispatch_order(data) {
   logger.log();
   var deferred = Q.defer();
 
- 
+  console.log(data);
   var current_action = {};
   current_action.action_type = 'dispatched';
   current_action.action_by = data.data._id;
 
   Order.findOneAndUpdate({
-      _id: order.order_id
+      _id: data.order.order_id
     }, {
       $set: {order_status: 'dispatched'},
       $push: {actions: current_action}
@@ -594,26 +652,63 @@ function dispatch_order(data) {
         });
       } else {
         //notify user/console/am
-        send_notification(['console', data.order.outlet], {
+        send_notification_to_console(['console'], {
           message: 'Order dispatched by merchant',
           order_id: data.order.order_id,
           type: 'dispatch'
         });
 
-        deferred.resolve({
-          data: order,
-          message: 'order updated successfully'
+        User.findOne({_id: data.order.user._id}, {push_ids: 1}, function(err, user) {
+          if (err || !user) {
+            deferred.reject({
+              err: err || true,
+              message: 'Saved the outlet, but couldn\'t set the user.'
+            });
+          } else {
+            var date = new Date();
+            var time = date.getTime();
+            var notif = {};
+            notif.header = 'Order Dispatched';
+            notif.message = 'Your order has been dispatched by merchant';
+            notif.state = 'DISPATCHED';
+            notif.time = time;
+            notif.order_id = data.order.order_id;
+            
+            send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif);
+            
+            deferred.resolve({
+              data: order,
+              message: 'order dispatched successfully'
+            });    
+          }
         });
       }
     }
-  );       
+  ); 
+  return deferred.promise;      
 }
 
-function send_notification(paths, payload) {
+function send_notification_to_console(paths, payload) {
+  logger.log();
   _.each(paths, function(path) {
     Transporter.send('faye', 'faye', {
       path: path, 
       message: payload
     });
   })
+}
+
+function send_notification_to_user (gcm_id, notif) {
+
+  var payload = {};   
+
+  payload.head = notif.header;
+  payload.body = notif.message;  
+  payload.state = notif.state;
+  payload.time = notif.time;
+  payload.gcms = gcm_id;
+  payload.order_id = notif.order_id;
+
+  Transporter.send('push', 'gcm', payload);
+       
 }

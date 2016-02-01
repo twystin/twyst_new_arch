@@ -18,11 +18,10 @@ module.exports.get_notif = function(req, res) {
   var deferred = Q.defer();
 
   if(req.params.event_id !== 'notifications') {
-    console.log('dkk')
     HttpHelper.error(res, false, "Error in getting notifications");
   } 
-
-  get_user(req.query.token)
+  else{
+    get_user(req.query.token)
     .then(function(data) {
       return get_user_events(data);
     })
@@ -33,7 +32,9 @@ module.exports.get_notif = function(req, res) {
     .fail(function(err) {
       console.log(err)
       HttpHelper.error(res, err || false, "Error in geting notifications");
-    });
+    });  
+  }
+  
 
 };
 
