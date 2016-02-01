@@ -535,21 +535,27 @@ function accept_order(data) {
               message: 'Saved the outlet, but couldn\'t set the user.'
             });
           } else {
-            
-            var header = 'Order Accepted';
-            var message = 'your order has been accept by merchant';
-            var state = 'Accepted';
             var date = new Date();
             var time = date.getTime();
-            send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, header, message, state, time);
+            var nottif = {};
+            notif.header = 'Order Accepted';
+            notif.message = 'Your order has been accept by merchant';
+            notif.state = 'ACCEPTED';
+            notif.time = time;
+            notif.order_id = data.order.order_id; 
+
+            send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif);
             setTimeout(function() {
-              var header = 'Order Recieved';
-              var message = 'We want to know if your order has been delivered';
-              var state = 'Assume_Delivered';
               var date = new Date();
               var time = date.getTime();
-              send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, header, message, state, time); 
-            }, 5000);
+              var nottif = {};
+              notif.header = 'Order Recieved';
+              notif.message = 'We want to know if your order has been delivered';
+              notif.state = 'ASSUMED_DELIVERED';
+              notif.time = time;
+              notif.order_id = data.order.order_id;
+              send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif); 
+            }, 10000);
 
             deferred.resolve({
               data: order,
@@ -591,6 +597,7 @@ function reject_order(data) {
           order_id: data.order.order_id,
           type: 'reject'
         });
+
         User.findOne({_id: data.order.user._id}, {push_ids: 1}, function(err, user) {
           if (err || !user) {
             deferred.reject({
@@ -598,13 +605,16 @@ function reject_order(data) {
               message: 'Saved the outlet, but couldn\'t set the user.'
             });
           } else {
-            
-            var header = 'Order Rejected';
-            var message = 'your order has been rejected by merchant';
-            var state = 'Rejected';
             var date = new Date();
             var time = date.getTime();
-            send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, header, message, state, time);
+            var nottif = {};
+            notif.header = 'Order Rejected';
+            notif.message = 'Your order has been rejected by merchant';
+            notif.state = 'REJECTED';
+            notif.time = time;
+            notif.order_id = data.order.order_id;
+            
+            send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif);
             
             deferred.resolve({
               data: order,
@@ -655,13 +665,16 @@ function dispatch_order(data) {
               message: 'Saved the outlet, but couldn\'t set the user.'
             });
           } else {
-            
-            var header = 'Order Dispatched';
-            var message = 'your order has been dispatched by merchant';
-            var state = 'Dispatched';
             var date = new Date();
             var time = date.getTime();
-            send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, header, message, state, time);
+            var nottif = {};
+            notif.header = 'Order Dispatched';
+            notif.message = 'Your order has been dispatched by merchant';
+            notif.state = 'DISPATCHED';
+            notif.time = time;
+            notif.order_id = data.order.order_id;
+            
+            send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif);
             
             deferred.resolve({
               data: order,
@@ -684,15 +697,16 @@ function send_notification_to_console(paths, payload) {
   })
 }
 
-function send_notification_to_user (gcm_id, header, message, state, time) {
+function send_notification_to_user (gcm_id, notif) {
 
   var payload = {};   
 
-    payload.head = header;
-    payload.body = message;  
-    payload.state = state;
-    payload.time = time;
+    payload.head = notif.header;
+    payload.body = notif.message;  
+    payload.state = notif.state;
+    payload.time = notif.time;
     payload.gcms = gcm_id;
+    payload.order_id = notif.order_id;
 
     Transporter.send('push', 'gcm', payload);
        
