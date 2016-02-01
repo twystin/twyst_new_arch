@@ -633,13 +633,13 @@ function dispatch_order(data) {
   logger.log();
   var deferred = Q.defer();
 
- 
+  conole.log(data);
   var current_action = {};
   current_action.action_type = 'dispatched';
   current_action.action_by = data.data._id;
 
   Order.findOneAndUpdate({
-      _id: order.order_id
+      _id: data.order.order_id
     }, {
       $set: {order_status: 'dispatched'},
       $push: {actions: current_action}
@@ -684,7 +684,8 @@ function dispatch_order(data) {
         });
       }
     }
-  );       
+  ); 
+  return deferred.promise;      
 }
 
 function send_notification_to_console(paths, payload) {
@@ -701,13 +702,13 @@ function send_notification_to_user (gcm_id, notif) {
 
   var payload = {};   
 
-    payload.head = notif.header;
-    payload.body = notif.message;  
-    payload.state = notif.state;
-    payload.time = notif.time;
-    payload.gcms = gcm_id;
-    payload.order_id = notif.order_id;
+  payload.head = notif.header;
+  payload.body = notif.message;  
+  payload.state = notif.state;
+  payload.time = notif.time;
+  payload.gcms = gcm_id;
+  payload.order_id = notif.order_id;
 
-    Transporter.send('push', 'gcm', payload);
+  Transporter.send('push', 'gcm', payload);
        
 }
