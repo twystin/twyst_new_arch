@@ -258,7 +258,7 @@ module.exports.contact_us = function(req, res) {
             HttpHelper.success(res, null, "Thank you for reaching out. We'll get back with you shortly.");
         }, function(err) {
             console.log('mail failed', err);
-            HttpHelper.error(res, error || null, "Something went wrong. Please try after sometime.");
+            HttpHelper.error(res, err || null, "Something went wrong. Please try after sometime.");
         });
     }
 }

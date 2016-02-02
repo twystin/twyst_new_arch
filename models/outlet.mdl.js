@@ -629,7 +629,11 @@ var OutletSchema = new Schema({
             end_date: {
               type: Date
             },
-            available_hours: hours.hours
+            available_hours: hours.hours,
+            days_of_the_week: [{
+              type: String,
+              enum: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+            }]
           },          
           option_title: {
             type: String
