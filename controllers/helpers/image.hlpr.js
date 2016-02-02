@@ -150,6 +150,47 @@ module.exports.uploadMenuImage = function(image_obj) {
     return deferred.promise;
 }
 
+module.exports.uploadOfferImage = function(image_obj) {
+	logger.log();
+	var deferred = Q.defer();
+	var content_type = getContentType(image_obj.image);
+    var buff = new Buffer(image_obj.image.replace(/^data:image\/\w+;base64,/, ""), 'base64');
+
+    if (!content_type) {
+        deferred.reject({
+            err: new Error("Invalid image type"),
+            message: 'Image upload failed'
+        });
+    } else {
+    	var upload_obj = {
+    		Bucket: 'retwyst-merchants',
+    		ACL: 'public-read',
+    		ContentType: content_type,
+    		Key: 'cashback-offers/partner/' + image_obj.id + '/' + 'logo',
+    		Body: buff
+    	};
+    	logger.error(upload_obj);
+    	AWSHelper.uploadImage(upload_obj)
+    		.then(function(res) {
+    			logger.error(res);
+    			deferred.resolve({
+    				data: {
+    					id: image_obj.id,
+    					key: 'logo'
+    				},
+    				message: 'Image uploaded successfully'
+    			});
+    		}, function(err) {
+    			deferred.reject({
+    				err: err,
+    				message: 'Image upload Failed'
+    			});
+    		});
+    }
+
+	return deferred.promise;
+}
+
 var getResizedImages = function(img_buffer) {
 	logger.log();
 	var deferred = Q.defer();
