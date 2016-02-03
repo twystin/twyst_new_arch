@@ -1420,7 +1420,7 @@ function process_orders(orders, deferred) {
         updated_order.outlet_name = order.outlet.basics.name;
         updated_order._id = order._id;
         updated_order.items = order.items;
-        updated_order.outlet_id = order.outlet._id;
+        updated_order.outlet = order.outlet._id;
         updated_order.menu_id = order.menu_id;
         updated_order.address = order.address;
         updated_order.is_favourite = order.is_favourite;
