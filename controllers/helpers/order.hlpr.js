@@ -1327,7 +1327,7 @@ module.exports.get_orders = function(token) {
 
     AuthHelper.get_user(token).then(function(data) {
         if (data.data.role === 1) {
-            Order.find({}).populate('outlet').exec(function(err, orders) {
+            Order.find({}).populate('outlet user').exec(function(err, orders) {
                 if (err || !orders) {
                     deferred.reject({
                         err: err || false,
@@ -1342,7 +1342,7 @@ module.exports.get_orders = function(token) {
                 outlet: {
                     $in: data.data.outlets
                 }
-            }).populate('outlet').exec(function(err, orders) {
+            }).populate('outlet user').exec(function(err, orders) {
                 if (err || !orders) {
                     deferred.reject({
                         err: err || false,
@@ -1353,7 +1353,7 @@ module.exports.get_orders = function(token) {
                 }
             });
         } else {
-            Order.find({user: data.data._id }).populate('outlet').exec(function(err, orders) {
+            Order.find({user: data.data._id }).populate('outlet user').exec(function(err, orders) {
                 if (err || !orders) {
                     deferred.reject({
                         err: err || false,
@@ -1416,8 +1416,10 @@ module.exports.confirm_order = function(token, order) {
 
 function process_orders(orders, deferred) {
     var processed_orders = _.map(orders, function(order){
+        order = order.toJSON();
         var updated_order = {};    
         updated_order.outlet_name = order.outlet.basics.name;
+        updated_order.order_number = order.order_number
         updated_order._id = order._id;
         updated_order.items = order.items;
         updated_order.outlet = order.outlet._id;
@@ -1430,9 +1432,22 @@ function process_orders(orders, deferred) {
         else{
             updated_order.order_cost = order.order_value_without_offer + order.tax_paid;
         }
+        updated_order.user = {
+            first_name: order.user && order.user.first_name,
+            last_name: order.user && order.user.last_name,
+            phone: order.user && order.user.phone,
+            email: order.user && order.user.email
+        }
+        updated_order.order_value_without_offer = order.order_value_without_offer;
+        updated_order.order_value_with_offer = order.order_value_with_offer;
+        updated_order.tax_paid = order.tax_paid;
         updated_order.cashback = order.cashback;
         updated_order.order_date = order.order_date;
         updated_order.order_status = order.order_status;
+        updated_order.actual_amount_paid = order.actual_amount_paid;
+        updated_order.actions = order.actions;
+        updated_order.estimeted_delivery_time = order.estimeted_delivery_time;
+
         return updated_order;
     });
     deferred.resolve({
@@ -1493,13 +1508,16 @@ function send_notification(data) {
     logger.log();
     var deferred = Q.defer();
 
-    var notif = [], payload_merchant = {}, payload_console = {};
+    var notif = [], payload_merchant = {}, payload_console = {}, payload_am = {};
     payload_merchant.path = data.outlet._id;
     payload_console.path = 'console';
+    payload_am = data.order.am_email;
     payload_merchant.message = {message: 'you have a new order', order_id: data.order_id, type: 'new'};
     payload_console.message = {message: 'you have a new order', order_id: data.order_id, type: 'new'};
+    payload_am = {message: 'you have a new order', order_id: data.order_id, type: 'new'};
     notif.push(payload_merchant);
     notif.push(payload_console);
+    notif.push(payload_am);
 
     notif.forEach(function(notif){
         Transporter.send('faye', 'faye', notif);    
