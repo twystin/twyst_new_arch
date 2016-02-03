@@ -8,10 +8,12 @@ var passport = require('passport');
 module.exports = function(app) {
 
   (function WepAppRoutes() {
+    var MiscCtrl = require('../controllers/misc.ctrl');
     app.get('', function(req, res) { res.redirect('/home'); });
     app.get('/', function(req, res) { res.redirect('/home'); });
     app.get('/api/v4/earn/more', function(req, res) { res.contentType('text/html'); res.end("<ul><li>Upload your bill every time you visit or order from a Twyst outlet.</li><li>Invlite friends to join you on Twyst - get Twyst bucks for each friends who joins.</li><li>Submit offers!</li><li>Suggest outlets you want on Twyst.</li><li>Favourite an outlet.</li><li>Like an offer</li></ul>"); });
     app.get('/api/v4/faq', function(req, res) { res.contentType('text/html'); res.end('<h3>How to Twyst</h3> <ul> <li><strong>How do I use Twyst</strong> <p>It\'s easy - scroll or search for the offer you are looking for, and tap \'Use Offer\' to use them! Most offers are available to use immediately, some can be unlocked when tou check-in. You can plan ahead as well, by tapping on your current location and choosing a different location, date or time</p></li> <li><strong>What\'s the number I sometimes see next to \'Use Offer\'?</strong> <p>That number signifies the cost of the offer in Twyst Bucks. Twyst Bucks are the points on Twyst, that you need to use some offers. You can anso use Twyst Bucsk to extend your coupons and grab your friends coupons</p> </li> <li> <strong>So, how do I earn Twyst Bucks</strong> <p>You can earn Twyst Bucks each time you check-in by upload a restaurant bill or scanning a QR Code. You can also invite friends to join you on Twyst, and get 250 Twyst Bucsk for each friend who joins Twyst on yout invitation. Also earn Twyst Bucks when you follow an outlet, like an offer, submit an offer and suggest an outlet on Twyst.</p> </li> <li> <strong>Why should I upload the bill?Can I upload from home?</strong> <p>Uploading a bill is a way of checking in at an outlet. You can upload your bills whether you went out to eat or ordered in. One bill can be uploaded only once for approval. When an uploaded bill is approved, you get a check-in at that outlet, and some Twyst Bucks!</p> </li> <li> <strong>On Twyst, what are friends for?</strong> <p>To get you more offers, thats what! Get 250 Twyst Bucks for each friend who joins Twyst on your invitation - use those Bucks to use some yummy offers! Whats more, when your friends check-in and unlock some cool coupons, you get to Grab and use those coupons as well. Remember, they too get to grab the coupons you unlock!</p> </li> <li> <strong>What are \'Grab Offer\' and \'Extend\'</strong> <p>Grab Offer is how you yse your friend\'s coupon. If a friend has checked-in and unlocked a coupon, but has not used it till the lapse date, the voucher becomes available to you ( and all his other friends on Twyst) to \'GRAB\'. Once grabbed, the coupon goes into your Wallet and is exclusively available to you until it expires.</p> <p /> <p>If you have unlocked a coupon, and the lapse date is coming up, but you do not wish your friends to be able to grab it (its\' good to be selfish sometimes!), you can extend the coupon till its expiry date. When you extend it, your friends do not get to see or grab your coupon.</p> <p /> <p>You need to use Twyst Bucks to grab as well as extend coupons.</p> </li> </ul> <br /><br /> <p>For more, write to us at <a href="mailto:support@twyst.in"><strong>support@twyst.in</strong></a></p>'); });
+    app.post('/api/v4/get_link', MiscCtrl.send_link);
   })();
 
   (function AccountRoutes() {
@@ -193,7 +195,7 @@ module.exports = function(app) {
     });
 
     app.get('/terms_of_use/', function(req, res){
-      res.redirect('../../privacy_policy.pdf');    
+      res.redirect('../../terms_of_use.pdf');    
     });
     app.get('/:url(*)', function(req, res){
       res.redirect('../../home/404.html')
