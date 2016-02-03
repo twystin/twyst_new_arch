@@ -589,7 +589,7 @@ function checkFreeItem(data, offer) {
     for(var i = 0; i < items.length; i++) {
 
         if(searchItemInOfferItems(items[i], offer)){
-            var order_value = calculate_order_value(passed_data, offer.offer_items.item_id, offer.offer_items.option_id);
+            var order_value = calculate_order_value(passed_data, items[i].item_id, items[i].option);
             console.log(order_value);
             console.log(offer.minimum_bill_value);
             if(order_value >= offer.minimum_bill_value) {
@@ -640,6 +640,7 @@ function checkOfferTypeBuyXgetY(data, offer) {
 
     for(var i = 0; i < items.length; i++) {
         if(searchItemInPaidItems(items[i], offer)){
+            console.log('setting to true is_contain_paid_item')
             is_contain_paid_item = true;
             break;
         }
@@ -648,7 +649,7 @@ function checkOfferTypeBuyXgetY(data, offer) {
     for(var i = 0; i < items.length; i++) {
         
         if(searchItemInOfferItems(items[i], offer) && is_contain_paid_item){
-            var order_value = calculate_order_value(passed_data, offer.offer_items.item_id, offer.offer_items.option_id);
+            var order_value = calculate_order_value(passed_data, items[i].item_id, items[i].option);
             console.log('yaha par nahi aata')
             console.log(order_value);
             console.log(offer.minimum_bill_value);
@@ -669,8 +670,7 @@ function checkOfferTypeBuyXgetY(data, offer) {
                 else{
                     offer.is_applicable = false;
                     return offer;
-                }
-                           
+                }                           
             }
             else{
                 var order_value_obj = calculate_tax(calculate_order_value(passed_data, null, null), passed_data.outlet);
@@ -1188,93 +1188,101 @@ function remove_order_from_cache(data) {
 
 function searchItemInPaidItems(item, offer) {
     logger.log();
+    
+    var category_id = _.findIndex(offer.actions.reward.reward_meta.paid_item.categories, function(current_category) {
+        return current_category.toString() == item.category_id;
+    });
+    
+    var sub_category_id = _.findIndex(offer.actions.reward.reward_meta.paid_item.sub_categories, function(sub_category_id) {
+        return sub_category_id.toString() == item.sub_category_id;
+    });
 
-    if(offer.actions.reward.reward_meta.paid_item.category_id === item.category_id
-    && offer.actions.reward.reward_meta.paid_item.sub_category_id === item.sub_category_id
-    && offer.actions.reward.reward_meta.paid_item.item_id === item.item_id
-    && offer.actions.reward.reward_meta.paid_item.option_id && offer.actions.reward.reward_meta.paid_item.option_id === item.option_id
-    && offer.actions.reward.reward_meta.paid_item.sub_options && item.sub_options
-    && offer.actions.reward.reward_meta.paid_item.addons && item.addons) {
+    var item_id = _.findIndex(offer.actions.reward.reward_meta.paid_item.items, function(item_id) {
+        return item_id.toString() == item.item_id;
+    });
+   
+    var option_id = _.findIndex(offer.actions.reward.reward_meta.paid_item.options, function(option_id) {
+        return option_id.toString() == item.option_id;
+    });
+
+    var sub_options = _.intersection(offer.actions.reward.reward_meta.paid_item.sub_options, item.sub_options);
+   
+    var addons = _.intersection(offer.actions.reward.reward_meta.paid_item.addons, item.addons);
+    
+    if(category_id !== -1 && sub_category_id !==1 && item_id
+     !== -1 && !item.option && !item.addons.length && !item.sub_options.length){       
+        return true; 
+    }
+    else if(category_id !== -1 && sub_category_id !==1 && item_id
+     !== -1 && option_id !== -1 && !item.addons.length && !item.sub_options.length){
+        return true; 
+    }
+    else if(category_id !== -1 && sub_category_id !==1 && item_id
+     !== -1 && option_id !== -1 && item.addons && addons && addons.length
+     && !item.sub_options.length){
+        return true;   
+    }
+    else if(category_id !== -1 && sub_category_id !==1 && item_id
+     !== -1 && option_id !== -1 && item.sub_options && sub_options && sub_options.length
+     && !item.addons.length){
+        return true;   
+    }
+    else if(category_id !== -1 && sub_category_id !==1 && item_id
+     !== -1 && option_id !== -1 && item.sub_options && sub_options && sub_options.length
+     && item.addons && addons && addons.length){
         return true;
-    }
-
-    else if(offer.actions.reward.reward_meta.paid_item.category_id === item.category_id
-    && offer.actions.reward.reward_meta.paid_item.sub_category_id === item.sub_category_id
-    && offer.actions.reward.reward_meta.paid_item.item_id === item.item_id
-    && offer.actions.reward.reward_meta.paid_item.option_id && offer.actions.reward.reward_meta.paid_item.option_id === item.option_id
-    && offer.actions.reward.reward_meta.paid_item.sub_options &&  item.sub_options
-    && !offer.actions.reward.reward_meta.paid_item.addons){
-        return true;   
-    }
-    else if(offer.actions.reward.reward_meta.paid_item.category_id === item.category_id
-    && offer.actions.reward.reward_meta.paid_item.sub_category_id === item.sub_category_id
-    && offer.actions.reward.reward_meta.paid_item.item_id === item.item_id
-    && offer.actions.reward.reward_meta.paid_item.option_id && offer.actions.reward.reward_meta.paid_item.option_id === item.option_id
-    && offer.actions.reward.reward_meta.paid_item.addons &&  item.addons
-    && !offer.actions.reward.reward_meta.paid_item.sub_options){
-        return true;   
-    }
-    else if(offer.actions.reward.reward_meta.paid_item.category_id === item.category_id
-    && offer.actions.reward.reward_meta.paid_item.sub_category_id === item.sub_category_id
-    && offer.actions.reward.reward_meta.paid_item.item_id === item.item_id
-    && offer.actions.reward.reward_meta.paid_item.option_id && offer.actions.reward.reward_meta.paid_item.option_id === item.option_id
-    && !offer.actions.reward.reward_meta.paid_item.sub_options && !offer.actions.reward.reward_meta.paid_item.addons){
-        return true; 
-    }
-    else if(offer.actions.reward.reward_meta.paid_item.category_id === item.category_id
-    && offer.actions.reward.reward_meta.paid_item.sub_category_id === item.sub_category_id
-    && offer.actions.reward.reward_meta.paid_item.item_id === item.item_id
-    && !offer.actions.reward.reward_meta.paid_item.option_id){
-       
-        return true; 
     } 
     else {
         return false;
-    }       
-    
+    }
 }
 
 function searchItemInOfferItems(item, offer) {
     logger.log();
-    console.log(item);
-    if(offer.offer_items.category_id === item.category_id
-    && offer.offer_items.sub_category_id === item.sub_category_id
-    && offer.offer_items.item_id === item.item_id
-    && offer.offer_items.option_id && offer.offer_items.option_id === item.option_id
-    && offer.offer_items.sub_options && item.sub_options 
-    && offer.offer_items.addons && item.addons) {
-        return true;
-    }
-    
-    else if(offer.offer_items.category_id === item.category_id
-    && offer.offer_items.sub_category_id === item.sub_category_id
-    && offer.offer_items.item_id === item.item_id
-    && offer.offer_items.option_id && offer.offer_items.option_id === item.option_id
-    && offer.offer_items.sub_options && item.sub_options
-    && !offer.offer_items.addons ){
-        return true;   
-    }
 
-    else if(offer.offer_items.category_id === item.category_id
-    && offer.offer_items.sub_category_id === item.sub_category_id
-    && offer.offer_items.item_id === item.item_id
-    && offer.offer_items.option_id && offer.offer_items.option_id === item.option_id
-    && offer.offer_items.addons && item.addons
-    && !offer.offer_items.sub_options ){
+    var category_id = _.findIndex(offer.offer_items.categories, function(current_category) {
+        return current_category.toString() == item.category_id;
+    });
+    
+    var sub_category_id = _.findIndex(offer.offer_items.sub_categories, function(sub_category_id) {
+        return sub_category_id.toString() == item.sub_category_id;
+    });
+
+    var item_id = _.findIndex(offer.offer_items.items, function(item_id) {
+        return item_id.toString() == item.item_id;
+    });
+   
+    var option_id = _.findIndex(offer.offer_items.options, function(option_id) {
+        return option_id.toString() == item.option_id;
+    });
+
+    var sub_options = _.intersection(offer.offer_items.sub_options, item.sub_options);
+   
+    
+    var addons = _.intersection(offer.offer_items.addons, item.addons);
+
+    if(category_id !== -1 && sub_category_id !==1 && item_id
+     !== -1 && !item.options && !item.addons.length && !item.sub_options.length){       
+        return true; 
+    }
+    else if(category_id !== -1 && sub_category_id !==1 && item_id
+     !== -1 && option_id !== -1 && !item.addons.length && !item.sub_options.length){
+        return true; 
+    }
+    else if(category_id !== -1 && sub_category_id !==1 && item_id
+     !== -1 && option_id !== -1 && item.addons && addons && addons.length
+     && !item.sub_options.length){
         return true;   
     }
-    else if(offer.offer_items.category_id === item.category_id
-    && offer.offer_items.sub_category_id === item.sub_category_id
-    && offer.offer_items.item_id === item.item_id
-    && offer.offer_items.option_id && offer.offer_items.option_id === item.option_id
-    && !offer.offer_items.sub_options && !offer.actions.offer_items.addons){
-        return true; 
+    else if(category_id !== -1 && sub_category_id !==1 && item_id
+     !== -1 && option_id !== -1 && item.sub_options && sub_options && sub_options.length
+     && !item.addons.length){
+        return true;   
     }
-    else if(offer.offer_items.category_id === item.category_id
-    && offer.offer_items.sub_category_id === item.sub_category_id
-    && offer.offer_items.item_id === item.item_id
-    && !offer.offer_items.option_id){       
-        return true; 
+    else if(category_id !== -1 && sub_category_id !==1 && item_id
+     !== -1 && option_id !== -1 && item.sub_options && sub_options && sub_options.length
+     && item.addons && addons && addons.length){
+        return true;
     } 
     else {
         return false;
@@ -1410,7 +1418,7 @@ function process_orders(orders, deferred) {
     var processed_orders = _.map(orders, function(order){
         var updated_order = {};    
         updated_order.outlet_name = order.outlet.basics.name;
-        console.log(order.menu_id)
+        updated_order._id = order._id;
         updated_order.items = order.items;
         updated_order.outlet_id = order.outlet._id;
         updated_order.menu_id = order.menu_id;
@@ -1440,7 +1448,7 @@ function update_payment_mode(data) {
     Order.findOneAndUpdate({
         order_number: data.order_number
     }, {
-        'order_status': 'pending',
+        'order_status': 'PENDING',
         'payment_info.payment_mode': data.payment_mode
     }).exec(function(err, order) {
         if (err) {
@@ -1515,8 +1523,17 @@ function schedule_order_status_check(data) {
                 console.log(err);
             } 
             else {            
-                if(order.order_status === 'pending') {
-                    console.log(order.order_status);
+                if(order.order_status === 'PENDING') {
+                    var notif = [], payload_merchant = {}, payload_console = {};
+                    payload_merchant.path = data.outlet._id;
+                    payload_console.path = 'console';
+                    
+                    payload_console.message = {message: 'Order has not been accepted yet.', order_id: data.order_id, type: 'order_not_accepted'};
+                    notif.push(payload_merchant);
+
+                    notif.forEach(function(notif){
+                        Transporter.send('faye', 'faye', notif);    
+                    })
                 }
                 console.log(order.order_status);
             }
@@ -1526,7 +1543,7 @@ function schedule_order_status_check(data) {
     });
 
     agenda.on('ready', function() {
-      agenda.schedule('in 1 minutes', 'schedule_order_status_check');
+      agenda.schedule('in 1 minutes', 'schedule_order_status_check', {order_id: data.order_id});
       agenda.start();
     });
     
@@ -1608,9 +1625,25 @@ module.exports.update_order = function(token, order) {
                     message: 'Couldn\'t find this order'
                   });
                 } else {
-                                     
-                    saved_order.order_status = order.is_delivered;    
-                    //if is delivered is false then notify AM
+                                                         
+                    if(order.is_delivered) {
+                        saved_order.order_status = 'DELIVERED';   
+                    }
+                    else{
+                        //if is delivered is false then notify AM 
+                        var notif = [], payload_merchant = {}, payload_console = {};
+                        payload_merchant.path = data.outlet._id;
+                        payload_console.path = 'console';
+                        payload_merchant.message = {message: 'Hey user said, order is not delivered please get back to user', order_id: data.order_id, type: 'NOT_DELIVERED'};
+                        
+                        notif.push(payload_console);
+
+                        notif.forEach(function(notif){
+                            Transporter.send('faye', 'faye', notif);    
+                        })
+                        saved_order.order_status = 'NOT_DELIVERED';   
+                    }
+                                        
                     saved_order.save(function(err, order){
                         if(err || !order){
                             deferred.reject({
@@ -1619,8 +1652,11 @@ module.exports.update_order = function(token, order) {
                             });   
                         }
                         else{
-                            deferred.resolve({data: order,
-                            message: 'delivery status submitted successfully'});
+                            if(order)
+                            deferred.resolve({
+                                data: order,
+                                message: 'delivery status submitted successfully'
+                            });
                         }
                     })    
                 }

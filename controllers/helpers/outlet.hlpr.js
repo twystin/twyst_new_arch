@@ -14,6 +14,8 @@ var Account = mongoose.model('Account');
 var AuthHelper = require('../../common/auth.hlpr.js');
 var logger = require('tracer').colorConsole();
 var Transporter = require('../../transports/transporter');
+var Agenda = require('agenda');
+var agenda = new Agenda({db: {address: 'localhost:27017/retwyst'}});
 
 module.exports.get_outlet = function(id) {
   var deferred = Q.defer();
@@ -210,7 +212,7 @@ module.exports.create_outlet = function(token, created_outlet) {
             });
           }
         });
-        
+        _updateAccountManager(outlet);
         User.findOne({
           _id: data.data._id
         }, function(err, user) {
@@ -308,9 +310,9 @@ var _updateAccountManager = function(outlet) {
             }
         }, {
           email: {
-            $in: ['al@twyst.in', 'rc@twyst.in'],
-            role: 2
-          }
+            $in: ['al@twyst.in', 'rc@twyst.in']
+          },
+          role: 2
         }]
     }).exec(function(err, account_managers) {
         if (err || !(account_managers && account_managers.length)) {
@@ -322,7 +324,7 @@ var _updateAccountManager = function(outlet) {
             })
             // list of all account to be checked for POP
             var remove_account_managers = _.filter(account_managers, function(account) {
-                return user.email !== outlet.basics.account_mgr_email && account.email !== 'al@twyst.in' && account.email !== 'rc@twyst.in';
+                return account.email !== outlet.basics.account_mgr_email && account.email !== 'al@twyst.in' && account.email !== 'rc@twyst.in';
             });
 
             _.each(set_account_managers, function(account_obj) {
@@ -439,6 +441,7 @@ module.exports.update_order = function(token, order) {
     logger.log();
     var deferred = Q.defer();
 
+    console.log(order);
     AuthHelper.get_user(token).then(function(data) {
       if(data.data.role < 6) {
         data.order = order;
@@ -505,11 +508,10 @@ function accept_order(data) {
   current_action.action_type = 'accepted';
   current_action.action_by = data.data._id;
   
-  console.log(data.order);
   Order.findOneAndUpdate({
       _id: data.order.order_id
     }, {
-      $set: {order_status: 'accepted'},
+      $set: {order_status: 'ACCEPTED'},
       $push: {actions: current_action}
     },
     function(err, order) {
@@ -522,7 +524,7 @@ function accept_order(data) {
       } else {
         //notify user/console/am
         //set timeout for assumed delivered state
-        send_notification_to_console(['console'], {
+        send_notification_to_console(['console', data.order.outlet.replace('.', '').replace('@', '')], {
           message: 'Order accepted by merchant',
           order_id: data.order.order_id,
           type: 'accept'
@@ -545,18 +547,65 @@ function accept_order(data) {
             notif.order_id = data.order.order_id; 
 
             send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif);
-            setTimeout(function() {
-              var date = new Date();
-              var time = date.getTime();
-              var notif = {};
-              notif.header = 'Order Recieved';
-              notif.message = 'We want to know if your order has been delivered';
-              notif.state = 'ASSUMED_DELIVERED';
-              notif.time = time;
-              notif.order_id = data.order.order_id;
-              send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif); 
-            }, 10000);
 
+            agenda.define('schedule_assumed_delivered', function(job, done) {            
+              Order.findOne({_id: data.order.order_id}).exec(function(err, order) {
+                  if (err || !order){
+                      console.log(err);
+                  } 
+                  else {                                
+                    order.order_status = 'ASSUMED_DELIVERED';
+                    order.save(function(err, order){
+                      var date = new Date();
+                      var time = date.getTime();
+                      var notif = {};
+                      notif.header = 'Order Recieved';
+                      notif.message = 'We want to know if your order has been delivered';
+                      notif.state = 'ASSUMED_DELIVERED';
+                      notif.time = time;
+                      notif.order_id = data.order.order_id;
+                      send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif); 
+                    })
+                  }
+              })
+              
+              done();
+            });
+
+            agenda.on('ready', function() {
+              agenda.schedule('in 1 minutes', 'schedule_assumed_delivered', {order_id: data.order.order_id, status: 'ASSUMED_DELIVERED', 'previous_state': 'ACCEPTED'});
+              agenda.start();
+            });
+
+            agenda.define('schedule_order_delivered', function(job, done) {            
+              Order.findOne({_id: data.order.order_id}).exec(function(err, order) {
+                if (err || !order){
+                    console.log(err);
+                } 
+                else {                                
+                  order.order_status = 'DELIVERED';
+                  order.save(function(err, order){
+                    var date = new Date();
+                    var time = date.getTime();
+                    var notif = {};
+                    notif.header = 'Order Delivered';
+                    notif.message = 'Your order has been delivered successfully';
+                    notif.state = 'DELIVERED';
+                    notif.time = time;
+                    notif.order_id = data.order.order_id;
+                    send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif); 
+                  })
+                }
+              })
+              
+              done();
+            });
+
+            agenda.on('ready', function() {
+              agenda.schedule('in 1 minutes', 'schedule_order_delivered', {order_id: data.order.order_id, status: 'DELIVERED', 'previous_state': 'ASSUMED_DELIVERED'});
+              agenda.start();
+            });
+            
             deferred.resolve({
               data: order,
               message: 'order accepted successfully'
@@ -581,7 +630,7 @@ function reject_order(data) {
   Order.findOneAndUpdate({
       _id: data.order.order_id
     }, {
-      $set: {order_status: 'rejected'},
+      $set: {order_status: 'REJECTED'},
       $push: {actions: current_action}
     },
     function(err, order) {
@@ -592,7 +641,7 @@ function reject_order(data) {
         });
       } else {
         //notify user/console/am
-        send_notification_to_console(['console'], {
+        send_notification_to_console(['console', data.order.outlet.replace('.', '').replace('@', '')], {
           message: 'Order rejected by merchant - ' + data.order.reject_reason,
           order_id: data.order.order_id,
           type: 'reject'
@@ -633,15 +682,37 @@ function dispatch_order(data) {
   logger.log();
   var deferred = Q.defer();
 
-  console.log(data);
   var current_action = {};
   current_action.action_type = 'dispatched';
   current_action.action_by = data.data._id;
+  
+  if(data.order.order_status === 'ACCEPTED' || data.order.order_status === 'NOT_DELIVERED'){
+    User.findOne({_id: data.order.user._id}, {push_ids: 1}, function(err, user) {
+      if (err || !user) {
+        deferred.reject({
+          err: err || true,
+          message: 'Saved the outlet, but couldn\'t set the user.'
+        });
+      } 
+      else {
+        var date = new Date();
+        var time = date.getTime();
+        var notif = {};
+        notif.header = 'Order Dispatched';
+        notif.message = 'Your order has been dispatched by merchant';
+        notif.state = 'DISPATCHED';
+        notif.time = time;
+        notif.order_id = data.order.order_id;
+        
+        send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif);                               
+      }
+    });        
+  }
 
   Order.findOneAndUpdate({
       _id: data.order.order_id
     }, {
-      $set: {order_status: 'dispatched'},
+      $set: {order_status: 'DISPATCHED'},
       $push: {actions: current_action}
     },
     function(err, order) {
@@ -651,37 +722,47 @@ function dispatch_order(data) {
           message: 'Couldn\'t update the order'
         });
       } else {
-        //notify user/console/am
-        send_notification_to_console(['console'], {
+        //notify user/console/am       
+
+        send_notification_to_console(['console', data.order.outlet.replace('.', '').replace('@', '')], {
           message: 'Order dispatched by merchant',
           order_id: data.order.order_id,
           type: 'dispatch'
         });
 
-        User.findOne({_id: data.order.user._id}, {push_ids: 1}, function(err, user) {
-          if (err || !user) {
-            deferred.reject({
-              err: err || true,
-              message: 'Saved the outlet, but couldn\'t set the user.'
-            });
-          } else {
-            var date = new Date();
-            var time = date.getTime();
-            var notif = {};
-            notif.header = 'Order Dispatched';
-            notif.message = 'Your order has been dispatched by merchant';
-            notif.state = 'DISPATCHED';
-            notif.time = time;
-            notif.order_id = data.order.order_id;
-            
-            send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif);
-            
-            deferred.resolve({
-              data: order,
-              message: 'order dispatched successfully'
-            });    
-          }
+        agenda.define('delivered_for_dispatched_order', function(job, done) {            
+          Order.findOne({_id: data.order.order_id}).exec(function(err, order) {
+              if (err || !order){
+                  console.log(err);
+              } 
+              else {                                
+                order.order_status = 'DELIVERED';
+                order.save(function(err, order){
+                  var date = new Date();
+                  var time = date.getTime();
+                  var notif = {};
+                  notif.header = 'Order Delivered';
+                  notif.message = 'Your order has been delivered successfully';
+                  notif.state = 'DELIVERED';
+                  notif.time = time;
+                  notif.order_id = data.order.order_id;
+                  send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif); 
+                })
+              }
+          })
+          
+          done();
         });
+
+        agenda.on('ready', function() {
+          agenda.schedule('in 1 minutes', 'delivered_for_dispatched_order', {order_id: data.order.order_id, status: 'DELIVERED', previous_state: 'DISPATCHED'});
+          agenda.start();
+        });
+
+        deferred.resolve({
+          data: order,
+          message: 'order dispatched successfully'
+        });        
       }
     }
   ); 
