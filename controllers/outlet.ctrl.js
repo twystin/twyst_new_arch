@@ -973,7 +973,6 @@ module.exports.update_order = function(req, res) {
   }
   else{
     OutletHelper.update_order(token, order).then(function(data) {
-      console.log(data)
       HttpHelper.success(res, data.data, data.message);
     }, function(err) {
       HttpHelper.error(res, err.data, err.message);
