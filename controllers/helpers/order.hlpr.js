@@ -1419,6 +1419,8 @@ function process_orders(orders, deferred) {
         order = order.toJSON();
         var updated_order = {};    
         updated_order.outlet_name = order.outlet.basics.name;
+        updated_order.location = order.outlet.contact.location;
+        updated_order.delivery_zone = order.outlet.attributes.delivery.delivery_zone;
         updated_order.order_number = order.order_number
         updated_order._id = order._id;
         updated_order.items = order.items;

@@ -344,7 +344,7 @@ function update_order_status(data) {
     var deferred = Q.defer();
     
     var current_action = {};
-    current_action.action_type = 'cancelled';
+    current_action.action_type = 'CANCELLED';
     current_action.action_by = data.user._id;
     console.log(data.order);
 
@@ -358,8 +358,8 @@ function update_order_status(data) {
             message: 'Couldn\'t find this order'
           });
         } else {
-            if(order.order_status === 'pending') {
-                order.order_status = 'cancelled';
+            if(order.order_status === 'PENDING') {
+                order.order_status = 'CANCELLED';
                 order.actions.push(current_action);
                 order.save(function(err, order){
                     if(err || !order){
