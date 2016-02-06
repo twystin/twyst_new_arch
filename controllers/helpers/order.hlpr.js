@@ -1435,6 +1435,7 @@ function process_orders(orders, deferred) {
             updated_order.order_cost = order.order_value_without_offer + order.tax_paid;
         }
         updated_order.user = {
+            _id: order.user && order.user._id,
             first_name: order.user && order.user.first_name,
             last_name: order.user && order.user.last_name,
             phone: order.user && order.user.phone,
@@ -1513,7 +1514,7 @@ function send_notification(data) {
     var notif = [], payload_merchant = {}, payload_console = {}, payload_am = {};
     payload_merchant.path = data.outlet._id;
     payload_console.path = 'console';
-    payload_am = data.order.am_email;
+    payload_am.path = data.outlet.basics.account_mgr_email.replace('.', '').replace('@', '');
     payload_merchant.message = {message: 'you have a new order', order_id: data.order_id, type: 'new'};
     payload_console.message = {message: 'you have a new order', order_id: data.order_id, type: 'new'};
     payload_am = {message: 'you have a new order', order_id: data.order_id, type: 'new'};
