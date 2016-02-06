@@ -161,7 +161,7 @@ module.exports.update_order = function(req, res) {
 	    	HttpHelper.error(res, null, "please pass items");
 		}
 	}
-	else if(order.update_type === 'update_favourite' && order.is_favourite != null) {
+	else if(order.update_type === 'update_favourite' && order.is_favourite === null) {
 		HttpHelper.error(res, null, "please pass favourite value");
 	}
 	else{
