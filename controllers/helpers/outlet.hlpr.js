@@ -409,8 +409,11 @@ module.exports.get_orders = function(token, outlet_id) {
             updated_user.email = order.user.email;
           } else if(order.user.google && order.user.google.email) {
             updated_user.email = order.user.google.email;
-          } else {
+          } else if(order.user.profile){
             updated_user.email = order.user.profile.email;
+          }
+          else{
+            updated_user.email = 'no email';
           }
           updated_user.first_name = order.user.first_name;
           updated_user.middle_name = order.user.middle_name;
