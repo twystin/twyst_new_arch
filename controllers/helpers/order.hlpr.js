@@ -1839,7 +1839,9 @@ module.exports.update_order = function(token, order) {
             );   
         }
         else if(order.update_type === 'update_delivery_status') {
-            Order.findOne({_id: order.order_id}, function(err, saved_order) {
+            Order.findOne({
+                _id: order.order_id
+            }).populate('outlet').exec(function(err, saved_order) {
                 if (err || !saved_order) {
                   deferred.reject({
                     err: err || true,
@@ -1852,11 +1854,16 @@ module.exports.update_order = function(token, order) {
                     }
                     else{
                         //if is delivered is false then notify AM 
-                        send_notification(['console', data.outlet.basics.account_mgr_email.replace('.', '').replace('@', '')], {
+                        send_notification(['console', saved_order.outlet.basics.account_mgr_email.replace('.', '').replace('@', '')], {
                             message: 'Hey user said, order is not delivered please get back to user',
                             order_id: data.order_id,
                             type: 'NOT_DELIVERED'
                         });
+                        var payload = {};
+                        payload.message = 'User said his order has not been delivered, Order Number '+ saved_order.order_number;
+                        payload.phone = saved_order.outlet.basics.account_mgr_phone;
+                        payload.phone = 8130857967//phone.num;
+                        Transporter.send('sms', 'vf', payload);
                         
                         saved_order.order_status = 'NOT_DELIVERED';   
                     }
