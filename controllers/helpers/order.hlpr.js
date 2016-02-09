@@ -91,7 +91,7 @@ module.exports.verify_order = function(token, order) {
 module.exports.apply_offer = function(token, order) {
     logger.log();
     var deferred = Q.defer();
-
+    console.log(order);
     var data = {};
     data.outlet = order.outlet;
     data.user_token = token;
@@ -131,7 +131,7 @@ module.exports.apply_offer = function(token, order) {
 module.exports.checkout = function(token, order) {
     logger.log();
     var deferred = Q.defer();
-
+    console.log(order);
     var data = {};
     data.user_token = token;
     data.outlet = order.outlet;
@@ -1117,16 +1117,16 @@ function massage_order(data){
                     order.tax_paid = order.st+order.vat;
                     order.actual_amount_paid = order.order_actual_value_with_tax
                 }
-                
+                var order_json = order
                 order = new Order(order); 
     
-                order.save(function(err, order){
+                order.save(function(err, saved_order){
                     if(err){
                         console.log(err);
                         deferred.reject('unable to checkout');
                     }
                     else{
-                        data.order = order;
+                        data.order = order_json;
                         console.log('saved');
                         deferred.resolve(data);   
                     }
@@ -1150,6 +1150,7 @@ function calculate_cashback(data) {
     
     if(!data.order.offer_used && data.outlet.twyst_meta.cashback_info
         && data.outlet.twyst_meta.cashback_info.base_cashback) {
+        console.log('cashback setup')
         var cod_cashback = 0, inapp_cashback = 0, order_amount_ratio = 1;
 
         if(data.outlet.twyst_meta.cashback_info.order_amount_slab.length) {
@@ -1180,10 +1181,13 @@ function calculate_cashback(data) {
                 
         data.order.cod_cashback = cod_cashback;
         data.order.inapp_cashback = inapp_cashback;
+        
     }
     else{
+        console.log('cashback not setup')
         data.order.cod_cashback = 0;
         data.order.inapp_cashback = 0;   
+        
     }
     deferred.resolve(data);
     return deferred.promise;
@@ -1488,7 +1492,6 @@ function update_payment_mode(data) {
             console.log(err);
             deferred.reject(err)
         } else {   
-            console.log(order)
             data.order_id = order && order._id; 
             data.order = order;
             deferred.resolve(data);
@@ -1544,7 +1547,7 @@ function send_sms(data) {
     var delivery_time = ' Delivery Time: '+ data.order.estimeted_delivery_time +' mins';
     
     var total_amount = ' Total Amount: Rs '+ data.order.actual_amount_paid ;
-    if (data.order.payment_info.payment_mode === 'COD') {
+    if (data.payment_mode === 'COD') {
         collected_amount = ' Amount to be Collected: Rs '+data.order.actual_amount_paid ;    
     }
     else{
@@ -1606,13 +1609,12 @@ function send_email(data) {
 
     var order_number = ' Order Number: ' + data.order_number;        
     var total_amount = ' Total Amount: Rs '+ data.order.actual_amount_paid ;
-    if (data.order.payment_info.payment_mode === 'COD') {
+    if (data.payment_mode === 'COD') {
         collected_amount = ' Amount to be collected: Rs '+data.order.actual_amount_paid ;    
     }
     else{
         collected_amount = ' Amount to be collected: Rs 0' ;    
     }
-    console.log(data.order)
     
     var payload = {
         Destination: { 
@@ -1629,7 +1631,7 @@ function send_email(data) {
                     + "<h4>Address</h4>" + data.order.address.line1 
                     + "<h4>Items</h4>" + items
                     + "<h4>Total Cost</h4>" + total_amount
-                    + "<h4>Payment Method</h4>" + data.order.payment_info.payment_mode
+                    + "<h4>Payment Method</h4>" + data.payment_mode
                     + "<h4>Amount to be Collected</h4>" + collected_amount
     
                 },
