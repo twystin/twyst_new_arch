@@ -1639,7 +1639,7 @@ function send_email(data) {
         Destination: { 
             BccAddresses: [],
             CcAddresses: [],
-            ToAddresses: [account_mgr_email, 'kuldeep@twyst.in'  ] //, merchant_email
+            ToAddresses: [ 'kuldeep@twyst.in'  ] //, merchant_email
         },
         Message: { /* required */
             Body: { /* required */
@@ -1664,7 +1664,7 @@ function send_email(data) {
               
             }
         },
-        Source: 'info@twyst.in' /* required */
+        Source: 'kuldeep@twyst.in' /* required */
     };
     
     Transporter.send('email', 'ses', payload).then(function(reply) {
