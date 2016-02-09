@@ -222,7 +222,7 @@ function pick_outlet_fields(params) {
         if(item.twyst_meta.cashback_info.order_amount_slab.length) {
           order_amount_cashback = _.find(item.twyst_meta.cashback_info.order_amount_slab, function(slab){
             if(slab.start && !slab.end) {
-                return ratio*base_cashback;
+                return slab.ratio*base_cashback;
             }
           });  
         }

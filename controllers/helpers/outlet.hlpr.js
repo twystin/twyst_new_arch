@@ -614,6 +614,7 @@ function reject_order(data) {
             
             send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif);
             
+
             deferred.resolve({
               data: order,
               message: 'order rejected successfully'
@@ -655,6 +656,7 @@ function dispatch_order(data) {
         notif.order_id = data.order.order_id;
         
         send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif);                                     
+        scheduled_delivered_for_dispatched_order(data, user);
       }
       Order.findOneAndUpdate({
           _id: data.order.order_id
@@ -675,9 +677,7 @@ function dispatch_order(data) {
               message: 'Order dispatched by merchant',
               order_id: data.order.order_id,
               type: 'dispatch'
-            });
-
-            scheduled_delivered_for_dispatched_order(data, user);
+            });            
 
             deferred.resolve({
               data: order,

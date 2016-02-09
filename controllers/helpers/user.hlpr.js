@@ -16,6 +16,7 @@ var async = require('async');
 var logger = require('tracer').colorConsole();
 var request = require('request');
 var PaymentHelper = require('./payment.hlpr.js');
+var Transporter = require('../../transports/transporter.js');
 
 module.exports.update_user = function(token, updated_user) {
   logger.log();
@@ -299,14 +300,20 @@ module.exports.cancel_order = function(token, order) {
         return initiate_refund(data);
     })
     .then(function(data) {
-        return send_notifications(data);
+        return send_notification_to_all(data);
+    })
+    .then(function(data) {
+        return send_sms(data);
+    })
+    .then(function(data) {
+        return send_email(data);
     })
     .then(function(data) {
         console.log('we are here');
         deferred.resolve(data);
     })
     .fail(function(err) {
-        console.log(err)
+        console.log('we are here in error');
       deferred.reject(err);
     });
     return deferred.promise;
@@ -350,8 +357,7 @@ function update_order_status(data) {
 
     Order.findOne({
         _id: data.order.order_id
-      }, 
-      function(err, order) {
+      }).populate('outlet').exec(function(err, order) {
         if (err || !order) {
           deferred.reject({
             err: err || true,
@@ -422,34 +428,201 @@ function initiate_refund(data){
     return deferred.promise;
 }
 
-function send_notifications(data) {
+function send_notification_to_all(data) {
     logger.log();
     var deferred = Q.defer();
+
+    send_notification(['console', data.order.outlet.basics.account_mgr_email.replace('.', '').replace('@', ''),
+        data.order.outlet._id], {
+        message: 'User has cancelled an order',
+        order_id: data.order_id,
+        type: 'cancelled'
+    });
+
     deferred.resolve(data);
     return deferred.promise;
 
 }
 
-module.exports.update_order = function(token, order) {
+
+function send_notification(paths, payload) {
+  logger.log();
+  _.each(paths, function(path) {
+    Transporter.send('faye', 'faye', {
+      path: path, 
+      message: payload
+    });
+  })
+}
+
+function send_sms(data) {
     logger.log();
     var deferred = Q.defer();
 
-    console.log(order);
-    var data = {};
-    data.user_token = token;
-    data.order = order;
+    var payload  = {}
+    payload.from = 'TWYSTR';
+    payload.message = '';
+    var items, collected_amount;
+    if(data.user.profile && data.user.profile.first_name) {
+        var name = 'Name: '+ data.user.profile.first_name;
+    }
+    else{
+        var name = 'Name: '+ data.user.first_name;
+    }
     
-    get_user(data)
-    .then(function(data) {
-        return update_order(data);
-    })
-    .then(function(data) {
-        console.log('we are here');
-        deferred.resolve(data);
-    })
-    .fail(function(err) {
-        console.log(err)
-      deferred.reject(err);
+    var phone = ' Phone: '+ data.user.phone;
+    var order_number = ' Order Number: ' + data.order.order_number;  
+    var total_amount = ' Total Amount: Rs '+ data.order.actual_amount_paid ;  
+
+    payload.message = 'Order Cancelled ' + order_number + name  + phone + 'Order Details: ';
+
+    for (var i = 0; i < data.order.items.length; i++) {
+        var item_price = getItemPrice(data.order.items[i]);
+        var quantity = data.order.items[i].item_quantity;
+        var final_cost = parseInt(item_price)*parseInt(quantity);
+        
+        if (data.order.items[i].option && data.order.items[i].option.option_value) {
+            items = data.order.items[i].item_quantity+' X ' +
+            data.order.items[i].item_name+ ' ('+data.order.items[i].option.option_value + ') '+' = ' + final_cost;
+            payload.message = payload.message+' '+ items;
+        }
+        else{
+            var quantity = data.order.items[i].item_quantity;
+            var item_name = data.order.items[i].item_name;
+
+            items = quantity + ' * ' + item_name + ': Rs '+ final_cost;
+            payload.message = payload.message+' '+ items;
+        }    
+    };
+    
+    payload.message = payload.message +total_amount;
+    payload.message = payload.message.toString();
+    console.log(payload.message);
+
+    data.order.outlet.contact.phones.reg_mobile.forEach(function (phone) {
+        if(phone && phone.num) {
+            payload.phone = 8130857967//phone.num;
+            Transporter.send('sms', 'vf', payload);
+        }
     });
+
+    deferred.resolve(data);
     return deferred.promise;
+}
+
+function send_email(data) {
+    logger.log();
+    var deferred = Q.defer();
+
+    var items ='', collected_amount,account_mgr_email, merchant_email;
+    if(data.user.profile && data.user.profile.first_name) {
+        var name = ' Name: '+ data.user.profile.first_name;
+    }
+    else{
+        var name = ' Name: '+ data.user.first_name;
+    }
+    var phone = 'Phone: '+ data.user.phone;
+
+    for (var i = 0; i < data.order.items.length; i++) {
+        var item_price = getItemPrice(data.order.items[i]);
+        var quantity = data.order.items[i].item_quantity;
+        var final_cost = parseInt(item_price)*parseInt(quantity);
+        
+        if (data.order.items[i].option && data.order.items[i].option.option_value) {
+            items = items + '\n'+ data.order.items[i].item_quantity+' X ' +
+            data.order.items[i].item_name+ ' ('+data.order.items[i].option.option_value + ') '+' = ' + final_cost;
+            
+        }
+        else{
+            var quantity = data.order.items[i].item_quantity;
+            var item_name = data.order.items[i].item_name;
+
+            items = items + '\n' + quantity + ' * ' + item_name + ': Rs '+ final_cost;
+            
+        }
+    
+    };
+
+    var order_number = ' Order Number: ' + data.order_number;        
+    var total_amount = ' Total Amount: Rs '+ data.order.actual_amount_paid ;
+
+    if(data.order.outlet.basics.account_mgr_email) {
+        account_mgr_email = data.order.outlet.basics.account_mgr_email
+    }
+    else{
+        account_mgr_email = 'kuldeep@twyst.in';
+    }
+
+    if(data.order.outlet.contact.emails.email) {
+        merchant_email = data.order.outlet.contact.emails.email;
+    }
+    
+    else{
+        merchant_email = 'kuldeep@twyst.in'
+    }
+    var payload = {
+        Destination: { 
+            BccAddresses: [],
+            CcAddresses: [],
+            ToAddresses: [account_mgr_email, 'kuldeep@twyst.in'  ] //, merchant_email
+        },
+        Message: { /* required */
+            Body: { /* required */
+                Html: {
+                    Data: "<h4>Order Number</h4>" + data.order.order_number +
+                    "<h4>Name</h4>" + name
+                    + "<h4>Phone</h4>" + phone 
+                    + "<h4>Items</h4>" + items
+                    + "<h4>Total Cost</h4>" + total_amount
+                    + "<h4>Payment Method</h4>" + data.payment_mode
+    
+                },
+                Text: {
+                    Data: 'Order Cancelled'
+                    
+                }
+            },
+            Subject: { /* required */
+              Data: 'Order Cancelled' + data.order.order_number, /* required */
+              
+            }
+        },
+        Source: 'info@twyst.in' /* required */
+    };
+    
+    Transporter.send('email', 'ses', payload).then(function(reply) {        
+        deferred.resolve(data);
+    }, function(err) {
+        //console.log('mail failed', err);
+        console.log('getting error here')
+        deferred.reject(data);
+    });    
+     
+    return deferred.promise;   
+}
+
+function getItemPrice(item) {
+    logger.log();
+    var total_price = 0;
+    if (!(item.option && item.option._id)) {
+        return item.item_cost;
+    } else {
+        total_price += item.option.option_cost;
+        if (item.option.option_is_addon === true) {
+            total_price += item.item_cost;
+        }
+        if (item.option.sub_options && item.option.sub_options.length) {
+            _.each(item.option.sub_options, function(sub_option) {
+                total_price += sub_option.sub_option_set[0].sub_option_cost;
+            });
+        }
+        if (item.option.addons && item.option.addons.length) {
+            _.each(item.option.addons, function(addon) {
+                _.each(addon.addon_set, function(addon_obj) {
+                    total_price += addon_obj.addon_cost;
+                });
+            });
+        }
+        return total_price;
+    }
 };

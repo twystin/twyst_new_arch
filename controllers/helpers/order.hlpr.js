@@ -1157,7 +1157,7 @@ function calculate_cashback(data) {
             order_amount_ratio = _.find(data.outlet.twyst_meta.cashback_info.order_amount_slab, function(slab){
                 if(data.order.order_value_without_tax > slab.start &&
                     data.order.order_value_without_tax < slab.end) {
-                    return ratio;
+                    return slab.ratio;
                 }
             });    
         }
@@ -1515,12 +1515,12 @@ function send_sms(data) {
         var name = 'Name: '+ data.user.first_name;
     }
     
-    var phone = 'Phone: '+ '8130857967';
-    var address_line1 = 'Address: '+data.order.address.line1;
+    var phone = ' Phone: '+ '8130857967';
+    var address_line1 = ' Address: '+data.order.address.line1;
     var address_line2 = data.order.address.line2;
-    var address_line3 = 'Landmark: '+data.order.address.landmark;
+    var address_line3 = ' Landmark: '+data.order.address.landmark;
 
-    payload.message = name + '\n' + phone + '\n'+address_line1+'\r\n' + 'Order Details: ';
+    payload.message = name  + phone + +address_line1+ ' Order Details: ';
 
     for (var i = 0; i < data.order.items.length; i++) {
         var item_price = getItemPrice(data.order.items[i]);
@@ -1573,14 +1573,14 @@ function send_email(data) {
     logger.log();
     var deferred = Q.defer();
 
-    var items ='', collected_amount;
+    var items ='', collected_amount,account_mgr_email, merchant_email;
     if(data.user.profile && data.user.profile.first_name) {
-        var name = 'Name: '+ data.user.profile.first_name;
+        var name = data.user.profile.first_name;
     }
     else{
-        var name = 'Name: '+ data.user.first_name;
+        var name = data.user.first_name;
     }
-    var phone = 'Phone: '+ data.user.phone;
+    var phone = data.user.phone;
     var address_line1 = 'Address: '+data.order.address.line1;
     var address_line2 = data.order.address.line2;
     var address_line3 = 'Landmark: '+data.order.address.landmark;
@@ -1607,20 +1607,34 @@ function send_email(data) {
     
     };
 
-    var order_number = ' Order Number: ' + data.order_number;        
-    var total_amount = ' Total Amount: Rs '+ data.order.actual_amount_paid ;
+    var order_number =  data.order_number;        
+    var total_amount = data.order.actual_amount_paid ;
     if (data.payment_mode === 'COD') {
-        collected_amount = ' Amount to be collected: Rs '+data.order.actual_amount_paid ;    
+        collected_amount = data.order.actual_amount_paid ;    
     }
     else{
-        collected_amount = ' Amount to be collected: Rs 0' ;    
+        collected_amount = 0 ;    
+    }
+
+    if(data.outlet.basics.account_mgr_email) {
+        account_mgr_email = data.outlet.basics.account_mgr_email
+    }
+    else{
+        account_mgr_email = 'kuldeep@twyst.in';
+    }
+
+    if(data.outlet.contact.emails.email) {
+        merchant_email = data.outlet.contact.emails.email;
     }
     
+    else{
+        merchant_email = 'kuldeep@twyst.in'
+    }
     var payload = {
         Destination: { 
             BccAddresses: [],
             CcAddresses: [],
-            ToAddresses: ['kuldeep@twyst.in']
+            ToAddresses: [account_mgr_email, 'kuldeep@twyst.in'  ] //, merchant_email
         },
         Message: { /* required */
             Body: { /* required */
@@ -1630,7 +1644,7 @@ function send_email(data) {
                     + "<h4>Phone</h4>" + phone 
                     + "<h4>Address</h4>" + data.order.address.line1 
                     + "<h4>Items</h4>" + items
-                    + "<h4>Total Cost</h4>" + total_amount
+                    + "<h4>Total amount</h4>" + total_amount
                     + "<h4>Payment Method</h4>" + data.payment_mode
                     + "<h4>Amount to be Collected</h4>" + collected_amount
     
@@ -1645,7 +1659,7 @@ function send_email(data) {
               
             }
         },
-        Source: 'kuldeep@twyst.in' /* required */
+        Source: 'info@twyst.in' /* required */
     };
     
     Transporter.send('email', 'ses', payload).then(function(reply) {
