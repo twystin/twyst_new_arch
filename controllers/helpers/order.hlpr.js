@@ -20,6 +20,8 @@ var Bayeux = require('../../app_server');
 var PaymentHelper = require('./payment.hlpr');
 var TaxConfig = require('../../config/taxes.cfg');
 var Transporter = require('../../transports/transporter.js');
+var Handlebars = require('handlebars');
+var fs = require('fs');
 
 
 module.exports.verify_order = function(token, order) {
@@ -332,6 +334,7 @@ function calculate_order_value(data, free_item, free_item_option) {
         var sub_category = _.findWhere(category && category.sub_categories, {_id: items[i].sub_category_id});
         
         item = _.findWhere(sub_category && sub_category.items, {_id: items[i].item_id});
+        console.log(item);
         items[i].item_details = item;
         
         if(item && item.options && items[i].option_id) {
@@ -449,7 +452,7 @@ function verify_delivery_location(coords, outlet) {
         })
 
         delivery_zone = _.compact(delivery_zone);
-        console.log(delivery_zone)
+    
         if(delivery_zone && delivery_zone.length) {
           return true;
         }
@@ -829,6 +832,7 @@ function generate_and_cache_order(data) {
     order.order_actual_value_with_tax = order_actual_value_obj.new_order_value;     
     order.available_offers = data.outlet.offers;
     order.estimeted_delivery_time = passed_data.outlet.valid_zone.delivery_estimated_time;
+    order.delivery_zone = passed_data.outlet.valid_zone.zone_name;
     order.menu_id = data.outlet.menus[0]._id;
     data.order = order;
     
@@ -1096,6 +1100,7 @@ function massage_order(data){
                 order.order_status = 'checkout';
                 order.estimeted_delivery_time = order.estimeted_delivery_time;
                 order.items = items;
+                order.address.delivery_zone = order.delivery_zone;
                 
                 if(order.offer_used) {
                     order.order_value_without_offer = order.order_actual_value_without_tax;
@@ -1142,16 +1147,16 @@ function calculate_cashback(data) {
     logger.log();
     var deferred = Q.defer();
     
-    if(!data.order.offer_used && data.outlet.outlet_meta.cashback_info) {
+    if(!data.order.offer_used && data.outlet.twyst_meta.cashback_info) {
         var cod_cashback = 0, inapp_cashback = 0, order_amount_ratio = 1;
-        order_amount_ratio = _.find(data.outlet.outlet_meta.cashback_info.order_amount_slab, function(slab){
+        order_amount_ratio = _.find(data.outlet.twyst_meta.cashback_info.order_amount_slab, function(slab){
             if(data.order.order_value_without_tax > slab.start &&
                 data.order.order_value_without_tax < slab.end) {
                 return ratio;
             }
         });
-        var in_app_ratio = data.outlet.outlet_meta.cashback_info.in_app_ratio;
-        var cod_ratio = data.outlet.outlet_meta.cashback_info.cod_ratio;
+        var in_app_ratio = data.outlet.twyst_meta.cashback_info.in_app_ratio;
+        var cod_ratio = data.outlet.twyst_meta.cashback_info.cod_ratio;
 
         if(order_amount_ratio > in_app_ratio) {
             inapp_cashback = data.order.order_value_without_tax*data.outlet.outlet_meta.cashback_info.base_cashback*order_amount_ratio/100;
@@ -1399,10 +1404,13 @@ module.exports.confirm_order = function(token, order) {
         return send_email(data);
     })
     .then(function(data) {
-        return send_notification(data);
+        return send_notification_to_all(data);
     })
     .then(function(data) {
         return schedule_order_status_check(data);
+    })
+    .then(function(data) {
+        return schedule_non_accepted_order_rejection(data);
     })
     .then(function(data) {
         deferred.resolve(data);
@@ -1419,6 +1427,7 @@ function process_orders(orders, deferred) {
         order = order.toJSON();
         var updated_order = {};    
         updated_order.outlet_name = order.outlet.basics.name;
+        updated_order.background = 'https://s3-us-west-2.amazonaws.com/retwyst-merchants/retwyst-outlets/' + order.outlet._id + '/' + order.outlet.photos.background;
         updated_order.location = order.outlet.contact.location;
         updated_order.delivery_zone = order.outlet.attributes.delivery.delivery_zone;
         updated_order.order_number = order.order_number
@@ -1472,8 +1481,10 @@ function update_payment_mode(data) {
         if (err) {
             console.log(err);
             deferred.reject(err)
-        } else {            
+        } else {   
+            console.log(order)
             data.order_id = order && order._id; 
+            data.order = order;
             deferred.resolve(data);
         }
     });
@@ -1485,13 +1496,57 @@ function send_sms(data) {
     var deferred = Q.defer();
 
     var payload  = {}
-    payload.from = 'TWYSTR'
-    payload.message = 'You have a new order';
-   
+    payload.from = 'TWYSTR';
+    payload.message = '';
+    var items, collected_amount;
+    var name = 'Name: '+ data.user.profile.first_name;
+    var phone = 'Phone: '+ '8130857967';
+    var address_line1 = 'Address: '+data.order.address.line1;
+    var address_line2 = data.order.address.line2;
+    var address_line3 = 'Landmark: '+data.order.address.landmark;
+
+    payload.message = name + '\n' + phone + '\n'+address_line1+'\r\n' + 'Order Details: ';
+
+    for (var i = 0; i < data.order.items.length; i++) {
+        var item_price = getItemPrice(data.order.items[i]);
+        var quantity = data.order.items[i].item_quantity;
+        var final_cost = parseInt(item_price)*parseInt(quantity);
+        
+        if (data.order.items[i].option && data.order.items[i].option.option_value) {
+            items = data.order.items[i].item_quantity+' X ' +
+            data.order.items[i].item_name+ ' ('+data.order.items[i].option.option_value + ') '+' = ' + final_cost;
+            payload.message = payload.message+' '+ items;
+        }
+        else{
+            var quantity = data.order.items[i].item_quantity;
+            var item_name = data.order.items[i].item_name;
+
+            items = quantity + ' * ' + item_name + ': Rs '+ final_cost;
+            payload.message = payload.message+' '+ items;
+        }
+    
+    };
+
+    var order_number = ' Order Number: ' + data.order_number;    
+    var placed_at =  ' Placed at: ' + (new Date(data.order.order_date)).getHours() + ':'+ (new Date(data.order.order_date)).getMinutes();
+    var delivery_time = ' Delivery Time: '+ data.order.estimeted_delivery_time +' mins';
+    //payload.message = payload.message+'Deliver By: '+ (new Date(data.order.order_date)).getTime();
+    var total_amount = ' Total Amount: Rs '+ data.order.actual_amount_paid ;
+    if (data.order.payment_info.payment_mode === 'COD') {
+        collected_amount = ' Amount to be Collected: Rs '+data.order.actual_amount_paid ;    
+    }
+    else{
+        collected_amount = ' Amount to be Collected: Rs '+data.order.actual_amount_paid ;    
+    }
+
+    payload.message = payload.message  +order_number+placed_at+delivery_time+total_amount+collected_amount;
+    payload.message = payload.message.toString();
+    console.log(payload.message);
+
     data.outlet.contact.phones.reg_mobile.forEach(function (phone) {
         if(phone && phone.num) {
-            payload.phone = phone.num;
-            //Transporter.send('sms', 'vf', payload);
+            payload.phone = 8130857967//phone.num;
+            Transporter.send('sms', 'vf', payload);
         }
     });
 
@@ -1502,29 +1557,99 @@ function send_sms(data) {
 function send_email(data) {
     logger.log();
     var deferred = Q.defer();
+
+    var items ='', collected_amount;
+    var name = 'Name: '+ data.user.profile.first_name;
+    var phone = 'Phone: '+ data.user.phone;
+    var address_line1 = 'Address: '+data.order.address.line1;
+    var address_line2 = data.order.address.line2;
+    var address_line3 = 'Landmark: '+data.order.address.landmark;
+
+   
+
+    for (var i = 0; i < data.order.items.length; i++) {
+        var item_price = getItemPrice(data.order.items[i]);
+        var quantity = data.order.items[i].item_quantity;
+        var final_cost = parseInt(item_price)*parseInt(quantity);
+        
+        if (data.order.items[i].option && data.order.items[i].option.option_value) {
+            items = items + '\n'+ data.order.items[i].item_quantity+' X ' +
+            data.order.items[i].item_name+ ' ('+data.order.items[i].option.option_value + ') '+' = ' + final_cost;
+            
+        }
+        else{
+            var quantity = data.order.items[i].item_quantity;
+            var item_name = data.order.items[i].item_name;
+
+            items = items + '\n' + quantity + ' * ' + item_name + ': Rs '+ final_cost;
+            
+        }
     
-    deferred.resolve(data); 
+    };
+
+    var order_number = ' Order Number: ' + data.order_number;        
+    var total_amount = ' Total Amount: Rs '+ data.order.actual_amount_paid ;
+    if (data.order.payment_info.payment_mode === 'COD') {
+        collected_amount = ' Amount to be collected: Rs '+data.order.actual_amount_paid ;    
+    }
+    else{
+        collected_amount = ' Amount to be collected: Rs 0' ;    
+    }
+    console.log(data.outlet.contact.emails.email)
+    console.log(data.outlet.basics.account_mgr_email)
+    var payload = {
+        Destination: { 
+            BccAddresses: [],
+            CcAddresses: [],
+            ToAddresses: ['kuldeep@twyst.in']
+        },
+        Message: { /* required */
+            Body: { /* required */
+                Html: {
+                    Data: "<h4>Order Number</h4>" + data.order.order_number +
+                    "<h4>Name</h4>" + name
+                    + "<h4>Phone</h4>" + phone 
+                    + "<h4>Address</h4>" + data.order.address.line1 
+                    + "<h4>Items</h4>" + items
+                    + "<h4>Total Cost</h4>" + total_amount
+                    + "<h4>Payment Method</h4>" + data.order.payment_info.payment_mode
+                    + "<h4>Amount to be Collected</h4>" + collected_amount
+    
+                },
+                Text: {
+                    Data: 'new order'
+                    
+                }
+            },
+            Subject: { /* required */
+              Data: 'New Order ' + data.order.order_number, /* required */
+              
+            }
+        },
+        Source: 'kuldeep@twyst.in' /* required */
+    };
+    
+    Transporter.send('email', 'ses', payload).then(function(reply) {
+        console.log('main reply', reply);
+        deferred.resolve(data);
+    }, function(err) {
+        console.log('mail failed', err);
+        deferred.reject(data);
+    });    
+     
     return deferred.promise;   
 }
 
-function send_notification(data) {
+function send_notification_to_all(data) {
     logger.log();
     var deferred = Q.defer();
 
-    var notif = [], payload_merchant = {}, payload_console = {}, payload_am = {};
-    payload_merchant.path = data.outlet._id;
-    payload_console.path = 'console';
-    payload_am.path = data.outlet.basics.account_mgr_email.replace('.', '').replace('@', '');
-    payload_merchant.message = {message: 'you have a new order', order_id: data.order_id, type: 'new'};
-    payload_console.message = {message: 'you have a new order', order_id: data.order_id, type: 'new'};
-    payload_am = {message: 'you have a new order', order_id: data.order_id, type: 'new'};
-    notif.push(payload_merchant);
-    notif.push(payload_console);
-    notif.push(payload_am);
-
-    notif.forEach(function(notif){
-        Transporter.send('faye', 'faye', notif);    
-    })
+    send_notification(['console', data.outlet.basics.account_mgr_email.replace('.', '').replace('@', ''),
+        data.outlet._id], {
+        message: 'you have a new order',
+        order_id: data.order_id,
+        type: 'new'
+    });
     
 
     deferred.resolve(data); 
@@ -1545,16 +1670,13 @@ function schedule_order_status_check(data) {
             } 
             else {            
                 if(order.order_status === 'PENDING') {
-                    var notif = [], payload_merchant = {}, payload_console = {};
-                    payload_merchant.path = data.outlet._id;
-                    payload_console.path = 'console';
-                    
-                    payload_console.message = {message: 'Order has not been accepted yet.', order_id: data.order_id, type: 'order_not_accepted'};
-                    notif.push(payload_merchant);
 
-                    notif.forEach(function(notif){
-                        Transporter.send('faye', 'faye', notif);    
-                    })
+                    send_notification(['console', data.outlet.basics.account_mgr_email.replace('.', '').replace('@', '')], {
+                        message: 'Order has not been accepted yet.',
+                        order_id: data.order_id,
+                        type: 'order_not_accepted'
+                    });
+                    
                 }
                 console.log(order.order_status);
             }
@@ -1570,6 +1692,51 @@ function schedule_order_status_check(data) {
     
     deferred.resolve(data); 
     return deferred.promise;
+}
+
+function schedule_non_accepted_order_rejection(data, user) {
+    logger.log();
+    var deferred = Q.defer();
+
+    var Agenda = require('agenda');
+    var agenda = new Agenda({db: {address: 'localhost:27017/retwyst'}});
+
+    agenda.define('schedule_non_accepted_order_rejection', function(job, done) {            
+      Order.findOne({_id: data.order._id}).exec(function(err, order) {
+          if (err || !order){
+              console.log(err);
+          } 
+          else {                                
+            order.order_status = 'REJECTED';
+            var current_action = {};
+            current_action.action_type = 'REJECTED';
+            current_action.action_by = 'SYSTEM';
+            order.actions.push(current_action);
+            order.save(function(err, order){
+              var date = new Date();
+              var time = date.getTime();
+              var notif = {};
+              notif.header = 'Order Rejected';
+              notif.message = 'Your order has been Rejected by merchant.';
+              notif.state = 'REJECTED';
+              notif.time = time;
+              notif.order_id = data.order.order_id;
+              //also send notif to AM
+              send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif); 
+            })
+          }
+      })
+      
+      done();
+    });
+
+    agenda.on('ready', function() {
+      agenda.schedule('in 20 minutes', 'schedule_non_accepted_order_rejection', {order_id: data.order.order_id, status: 'DELIVERED', previous_state: 'DISPATCHED'});
+      agenda.start();
+    });
+    deferred.resolve(data); 
+    return deferred.promise;
+    
 }
 
 module.exports.update_order = function(token, order) {
@@ -1618,6 +1785,7 @@ module.exports.update_order = function(token, order) {
                     saved_order.feedback = {};
                     saved_order.feedback.is_ontime = order.is_ontime;
                     saved_order.feedback.rating = order.order_rating;
+                    saved_order.order_status = 'CLOSED';
                     if(order.items_feedback) {
                         saved_order.items = order.items;    
                     }
@@ -1629,6 +1797,7 @@ module.exports.update_order = function(token, order) {
                                 message: 'Couldn\'t update this order'
                             });   
                         }
+                        //add twyst bucks to user account
                         else{
                             deferred.resolve({data: order,
                             message: 'feedback submitted successfully'});
@@ -1652,16 +1821,12 @@ module.exports.update_order = function(token, order) {
                     }
                     else{
                         //if is delivered is false then notify AM 
-                        var notif = [], payload_merchant = {}, payload_console = {};
-                        payload_merchant.path = data.outlet._id;
-                        payload_console.path = 'console';
-                        payload_merchant.message = {message: 'Hey user said, order is not delivered please get back to user', order_id: data.order_id, type: 'NOT_DELIVERED'};
+                        send_notification(['console', data.outlet.basics.account_mgr_email.replace('.', '').replace('@', '')], {
+                            message: 'Hey user said, order is not delivered please get back to user',
+                            order_id: data.order_id,
+                            type: 'NOT_DELIVERED'
+                        });
                         
-                        notif.push(payload_console);
-
-                        notif.forEach(function(notif){
-                            Transporter.send('faye', 'faye', notif);    
-                        })
                         saved_order.order_status = 'NOT_DELIVERED';   
                     }
                                         
@@ -1700,4 +1865,55 @@ module.exports.update_order = function(token, order) {
     });
     
     return deferred.promise;
+}
+
+function getItemPrice(item) {
+    logger.log();
+    var total_price = 0;
+    if (!(item.option && item.option._id)) {
+        return item.item_cost;
+    } else {
+        total_price += item.option.option_cost;
+        if (item.option.option_is_addon === true) {
+            total_price += item.item_cost;
+        }
+        if (item.option.sub_options && item.option.sub_options.length) {
+            _.each(item.option.sub_options, function(sub_option) {
+                total_price += sub_option.sub_option_set[0].sub_option_cost;
+            });
+        }
+        if (item.option.addons && item.option.addons.length) {
+            _.each(item.option.addons, function(addon) {
+                _.each(addon.addon_set, function(addon_obj) {
+                    total_price += addon_obj.addon_cost;
+                });
+            });
+        }
+        return total_price;
+    }
+};
+
+function send_notification_to_user (gcm_id, notif) {
+
+  var payload = {};   
+
+  payload.head = notif.header;
+  payload.body = notif.message;  
+  payload.state = notif.state;
+  payload.time = notif.time;
+  payload.gcms = gcm_id;
+  payload.order_id = notif.order_id;
+
+  Transporter.send('push', 'gcm', payload);
+       
+}
+
+function send_notification(paths, payload) {
+  logger.log();
+  _.each(paths, function(path) {
+    Transporter.send('faye', 'faye', {
+      path: path, 
+      message: payload
+    });
+  })
 }

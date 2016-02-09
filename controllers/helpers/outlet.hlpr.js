@@ -508,7 +508,7 @@ function accept_order(data) {
   var deferred = Q.defer();
 
   var current_action = {};
-  current_action.action_type = 'accepted';
+  current_action.action_type = 'ACCEPTED';
   current_action.action_by = data.data._id;
   
   Order.findOneAndUpdate({
@@ -527,7 +527,7 @@ function accept_order(data) {
       } else {
         //notify user/console/am
         //set timeout for assumed delivered state
-        send_notification_to_console(['console', data.order.am_email.replace('.', '').replace('@', '')], {
+        send_notification(['console', data.order.am_email.replace('.', '').replace('@', '')], {
           message: 'Order accepted by merchant',
           order_id: data.order.order_id,
           type: 'accept'
@@ -573,7 +573,7 @@ function reject_order(data) {
   var deferred = Q.defer();
 
   var current_action = {};
-  current_action.action_type = 'rejected';
+  current_action.action_type = 'REJECTED';
   current_action.action_by = data.data._id;
 
   Order.findOneAndUpdate({
@@ -590,7 +590,7 @@ function reject_order(data) {
         });
       } else {
         //notify user/console/am
-        send_notification_to_console(['console', data.order.am_email.replace('.', '').replace('@', '')], {
+        send_notification(['console', data.order.am_email.replace('.', '').replace('@', '')], {
           message: 'Order rejected by merchant - ' + data.order.reject_reason,
           order_id: data.order.order_id,
           type: 'reject'
@@ -632,7 +632,7 @@ function dispatch_order(data) {
   var deferred = Q.defer();
 
   var current_action = {};
-  current_action.action_type = 'dispatched';
+  current_action.action_type = 'DISPATCHED';
   current_action.action_by = data.data._id;
   
   
@@ -671,7 +671,7 @@ function dispatch_order(data) {
           } else {
             //notify user/console/am       
 
-            send_notification_to_console(['console', data.order.am_email.replace('.', '').replace('@', '')], {
+            send_notification(['console', data.order.am_email.replace('.', '').replace('@', '')], {
               message: 'Order dispatched by merchant',
               order_id: data.order.order_id,
               type: 'dispatch'
@@ -694,7 +694,7 @@ function dispatch_order(data) {
   return deferred.promise;      
 }
 
-function send_notification_to_console(paths, payload) {
+function send_notification(paths, payload) {
   logger.log();
   _.each(paths, function(path) {
     Transporter.send('faye', 'faye', {
@@ -735,6 +735,10 @@ function schedule_assumed_delivered(data, user) {
           else {
             console.log('scheduling assumed delivered')                           
             order.order_status = 'ASSUMED_DELIVERED';
+            var current_action = {};
+            current_action.action_type = 'ASSUMED_DELIVERED';
+            current_action.action_by = 'SYSTEM';
+            order.actions.push(current_action);
             order.save(function(err, order){
               console.log('done assumed delivered')                           
               var date = new Date();
@@ -770,8 +774,12 @@ function schedule_order_delivered(data, user) {
         if (err || !order){
             console.log(err);
         } 
-        else {                                
+        else if(order.order_status === 'ASSUMED_DELIVERED'){                                
           order.order_status = 'DELIVERED';
+          var current_action = {};
+          current_action.action_type = 'DELIVERED';
+          current_action.action_by = 'SYSTEM';
+          order.actions.push(current_action);
           order.save(function(err, order){
             var date = new Date();
             var time = date.getTime();
@@ -807,8 +815,12 @@ function scheduled_delivered_for_dispatched_order(data, user) {
           if (err || !order){
               console.log(err);
           } 
-          else {                                
+          else if(order.order_status === 'DISPATCHED'){                                
             order.order_status = 'DELIVERED';
+            var current_action = {};
+            current_action.action_type = 'DELIVERED';
+            current_action.action_by = 'SYSTEM';
+            order.actions.push(current_action);
             order.save(function(err, order){
               var date = new Date();
               var time = date.getTime();

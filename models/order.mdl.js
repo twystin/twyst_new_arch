@@ -65,6 +65,8 @@ var Order = new Schema({
     default: false
   },
   menu_id: {type: Schema.Types.ObjectId},
+  category_id: {type: Schema.Types.ObjectId},
+  sub_category_id: {type: Schema.Types.ObjectId},
   items: [{
     item_name: {
       type: String

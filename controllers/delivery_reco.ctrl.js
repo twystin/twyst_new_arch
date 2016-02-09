@@ -109,7 +109,6 @@ function map_valid_delivery_zone(params) {
           if(current_zone.coord && current_zone.coord.length &&
             geolib.isPointInside({latitude: params.query.lat, longitude: params.query.long},
             current_zone.coord)){
-            console.log('it delivers ' + val.basics.name);
             return current_zone;
           }
           else{
@@ -217,7 +216,25 @@ function pick_outlet_fields(params) {
       massaged_item.minimum_order = item.valid_zone.min_amt_for_delivery;
       massaged_item.payment_options = item.valid_zone.payment_options;
       massaged_item.delivery_conditions = item.valid_zone.delivery_conditions;
-      massaged_item.cashback = item.twyst_meta.cashback || null;
+      if(item.twyst_meta.cashback_info) {
+        var cod_cashback = 0, inapp_cashback = 0, order_amount_cashback = 0;
+        order_amount_cashback = _.find(item.twyst_meta.cashback_info.order_amount_slab, function(slab){
+            if(slab.start && !slab.end) {
+                return ratio;
+            }
+        });
+        var base_cashback = item.twyst_meta.cashback_info.base_cashback;
+        order_amount_cashback = order_amount_cashback * base_cashback;
+        inapp_cashback = item.twyst_meta.cashback_info.in_app_ratio *base_cashback;
+        cod_cashback = item.twyst_meta.cashback_info.cod_ratio * base_cashback;
+        
+        var cashback = _.max([base_cashback, order_amount_cashback, inapp_cashback, cod_cashback], function(cashback){ return cashback; });
+        massaged_item.cashback = cashback;
+      }
+      else{
+        massaged_item.cashback = 0;
+      }
+      
       massaged_item.delivery_zones = item.delivery_zones;
       massaged_item.offer_count = item.offers.length;
       if (fmap && fmap[item._id]) {
