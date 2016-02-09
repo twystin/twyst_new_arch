@@ -655,8 +655,7 @@ function dispatch_order(data) {
         notif.time = time;
         notif.order_id = data.order.order_id;
         
-        send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif);                                     
-        scheduled_delivered_for_dispatched_order(data, user);
+        send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif);
       }
       Order.findOneAndUpdate({
           _id: data.order.order_id
@@ -799,47 +798,6 @@ function schedule_order_delivered(data, user) {
 
     agenda.on('ready', function() {
       agenda.schedule('in 2 minutes', 'schedule_order_delivered', {order_id: data.order.order_id, status: 'DELIVERED', previous_state: 'ASSUMED_DELIVERED'});
-      agenda.start();
-    });
-    
-}
-
-function scheduled_delivered_for_dispatched_order(data, user) {
-    logger.log();
-
-    var Agenda = require('agenda');
-    var agenda = new Agenda({db: {address: 'localhost:27017/retwyst'}});
-
-    agenda.define('scheduled_delivered_for_dispatched_order', function(job, done) {            
-      Order.findOne({_id: data.order.order_id}).exec(function(err, order) {
-          if (err || !order){
-              console.log(err);
-          } 
-          else if(order.order_status === 'DISPATCHED'){                                
-            order.order_status = 'DELIVERED';
-            var current_action = {};
-            current_action.action_type = 'DELIVERED';
-            current_action.action_by = 'SYSTEM';
-            order.actions.push(current_action);
-            order.save(function(err, order){
-              var date = new Date();
-              var time = date.getTime();
-              var notif = {};
-              notif.header = 'Order Delivered';
-              notif.message = 'Your order has been delivered successfully';
-              notif.state = 'DELIVERED';
-              notif.time = time;
-              notif.order_id = data.order.order_id;
-              send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif); 
-            })
-          }
-      })
-      
-      done();
-    });
-
-    agenda.on('ready', function() {
-      agenda.schedule('in 1 minutes', 'scheduled_delivered_for_dispatched_order', {order_id: data.order.order_id, status: 'DELIVERED', previous_state: 'DISPATCHED'});
       agenda.start();
     });
     
