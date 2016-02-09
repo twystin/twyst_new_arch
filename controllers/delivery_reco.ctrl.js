@@ -264,7 +264,15 @@ function pick_outlet_fields(params) {
       return massaged_item;
     });
     
-    
+    params.outlets = _.filter(params.outlets, function(item) {  
+      if(item && item.outlet_meta.status === 'active') {
+        return item;
+      }
+      else{
+        return false;
+      }
+    })
+
     params.outlets = _.compact(params.outlets);
 
     deferred.resolve(params);
