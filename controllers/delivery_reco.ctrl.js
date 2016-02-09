@@ -216,20 +216,27 @@ function pick_outlet_fields(params) {
       massaged_item.minimum_order = item.valid_zone.min_amt_for_delivery;
       massaged_item.payment_options = item.valid_zone.payment_options;
       massaged_item.delivery_conditions = item.valid_zone.delivery_conditions;
-      if(item.twyst_meta.cashback_info) {
+      if(item.twyst_meta.cashback_info && item.twyst_meta.cashback_info.base_cashback) {
         var cod_cashback = 0, inapp_cashback = 0, order_amount_cashback = 0;
-        order_amount_cashback = _.find(item.twyst_meta.cashback_info.order_amount_slab, function(slab){
-            if(slab.start && !slab.end) {
-                return ratio;
-            }
-        });
         var base_cashback = item.twyst_meta.cashback_info.base_cashback;
-        order_amount_cashback = order_amount_cashback * base_cashback;
+        if(item.twyst_meta.cashback_info.order_amount_slab.length) {
+          order_amount_cashback = _.find(item.twyst_meta.cashback_info.order_amount_slab, function(slab){
+            if(slab.start && !slab.end) {
+                return ratio*base_cashback;
+            }
+          });  
+        }
+              
         inapp_cashback = item.twyst_meta.cashback_info.in_app_ratio *base_cashback;
         cod_cashback = item.twyst_meta.cashback_info.cod_ratio * base_cashback;
-        
+        console.log(order_amount_cashback);
+        console.log(inapp_cashback);
+        console.log(cod_cashback);
+        console.log(base_cashback);
+
         var cashback = _.max([base_cashback, order_amount_cashback, inapp_cashback, cod_cashback], function(cashback){ return cashback; });
         massaged_item.cashback = cashback;
+        console.log(cashback);
       }
       else{
         massaged_item.cashback = 0;
