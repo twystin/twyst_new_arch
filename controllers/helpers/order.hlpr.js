@@ -1528,20 +1528,13 @@ function send_sms(data) {
     payload.message = name  + phone + address_line1 + ' Order Details: ';
 
     for (var i = 0; i < data.order.items.length; i++) {
-        var item_price = getItemPrice(data.order.items[i]);
-        var quantity = data.order.items[i].item_quantity;
-        var final_cost = parseInt(item_price)*parseInt(quantity);
-        
         if (data.order.items[i].option && data.order.items[i].option.option_value) {
             items = data.order.items[i].item_quantity+' X ' +
-            data.order.items[i].item_name+ ' ('+data.order.items[i].option.option_value + ') '+' = ' + final_cost;
+            data.order.items[i].item_name+ ' ('+data.order.items[i].option.option_value + ') '+ ';';
             payload.message = payload.message+' '+ items;
         }
         else{
-            var quantity = data.order.items[i].item_quantity;
-            var item_name = data.order.items[i].item_name;
-
-            items = quantity + ' * ' + item_name + ': Rs '+ final_cost;
+            items = data.order.items[i].item_quantity + ' X ' + data.order.items[i].item_name + ';';
             payload.message = payload.message+' '+ items;
         }
     
@@ -1553,10 +1546,10 @@ function send_sms(data) {
     
     var total_amount = ' Total Amount: Rs '+ data.order.actual_amount_paid ;
     if (data.payment_mode === 'COD') {
-        collected_amount = ' Amount to be Collected: Rs '+data.order.actual_amount_paid ;    
+        collected_amount = ' Collect: Rs '+data.order.actual_amount_paid ;    
     }
     else{
-        collected_amount = ' Amount to be Collected: Rs 0' ;    
+        collected_amount = ', Paid in-app' ;    
     }
 
     payload.message = payload.message  +order_number+placed_at+delivery_time+total_amount+collected_amount;

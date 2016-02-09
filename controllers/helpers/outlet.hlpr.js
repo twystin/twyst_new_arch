@@ -607,14 +607,14 @@ function reject_order(data) {
             var time = date.getTime();
             var notif = {};
             notif.header = 'Order Rejected';
-            notif.message = 'Your order has been rejected by merchant';
+            notif.message = 'Your order has been rejected by merchant.';
             notif.state = 'REJECTED';
             notif.time = time;
             notif.order_id = data.order.order_id;
             
             send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif);
             
-
+            send_order_reject_sms(user, data.order.order_id);
             deferred.resolve({
               data: order,
               message: 'order rejected successfully'
@@ -842,5 +842,18 @@ function scheduled_delivered_for_dispatched_order(data, user) {
       agenda.schedule('in 1 minutes', 'scheduled_delivered_for_dispatched_order', {order_id: data.order.order_id, status: 'DELIVERED', previous_state: 'DISPATCHED'});
       agenda.start();
     });
+    
+}
+
+function send_order_reject_sms(user, order_id) {
+    logger.log();
+  
+    var payload  = {}
+    payload.from = 'TWYSTR';
+    payload.phone = user.phone;
+    payload.message = 'You order order_number('+order_number+')' +'has been rejected by merchant.'
+    
+    payload.phone = 8130857967//phone.num;
+    Transporter.send('sms', 'vf', payload);
     
 }

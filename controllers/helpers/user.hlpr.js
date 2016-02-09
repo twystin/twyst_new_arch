@@ -477,20 +477,14 @@ function send_sms(data) {
     payload.message = 'Order Cancelled ' + order_number + name  + phone + 'Order Details: ';
 
     for (var i = 0; i < data.order.items.length; i++) {
-        var item_price = getItemPrice(data.order.items[i]);
-        var quantity = data.order.items[i].item_quantity;
-        var final_cost = parseInt(item_price)*parseInt(quantity);
         
         if (data.order.items[i].option && data.order.items[i].option.option_value) {
             items = data.order.items[i].item_quantity+' X ' +
-            data.order.items[i].item_name+ ' ('+data.order.items[i].option.option_value + ') '+' = ' + final_cost;
+            data.order.items[i].item_name+ ' ('+data.order.items[i].option.option_value + ') '+ ';';
             payload.message = payload.message+' '+ items;
         }
         else{
-            var quantity = data.order.items[i].item_quantity;
-            var item_name = data.order.items[i].item_name;
-
-            items = quantity + ' * ' + item_name + ': Rs '+ final_cost;
+            items = data.order.items[i].item_quantity + ' X ' + data.order.items[i].item_name + ';';
             payload.message = payload.message+' '+ items;
         }    
     };
@@ -564,7 +558,7 @@ function send_email(data) {
         Destination: { 
             BccAddresses: [],
             CcAddresses: [],
-            ToAddresses: [account_mgr_email, 'kuldeep@twyst.in'  ] //, merchant_email
+            ToAddresses: [ 'kuldeep@twyst.in'  ] //, merchant_email
         },
         Message: { /* required */
             Body: { /* required */
@@ -587,7 +581,7 @@ function send_email(data) {
               
             }
         },
-        Source: 'info@twyst.in' /* required */
+        Source: 'kuldeep@twyst.in' /* required */
     };
     
     Transporter.send('email', 'ses', payload).then(function(reply) {        
