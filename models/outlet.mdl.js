@@ -60,6 +60,7 @@ var OutletSchema = new Schema({
     featured: Boolean,
     is_paying: {type: Boolean, required: true, default: false },
     account_mgr_email: {type: String},
+    account_mgr_phone: {type: Number},
     cod: {type: Boolean, default: false}
   },
   contact: {
@@ -214,6 +215,20 @@ var OutletSchema = new Schema({
         min_amt_for_delivery: Number,
         free_delivery_amt: Number,
         delivery_charge: Number,
+        has_packaging_charge: {
+          type: Boolean,
+          default: false,
+          required: true
+        },
+        packaging_charge: {
+          is_fixed: Boolean,
+          value: Number,
+          charges: [{
+            start: Number,
+            end: Number,
+            value: Number
+          }]
+        },
         order_accepts_till: {
           hr: {type: Number},
           min: {type: Number}
@@ -223,10 +238,6 @@ var OutletSchema = new Schema({
           enum: ['cod', 'inapp']
         }],
       }],  
-    },
-    packing_charge: {
-      type: Number,
-      default: 0
     },
     home_delivery: {
       type: Boolean
@@ -637,6 +648,10 @@ var OutletSchema = new Schema({
           },          
           option_title: {
             type: String
+          },
+          option_price_is_additive: {
+            type: Boolean,
+            default: false,
           },
           option_is_addon: {
             type: Boolean,
