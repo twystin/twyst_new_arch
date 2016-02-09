@@ -15,7 +15,7 @@ var AuthHelper = require('../../common/auth.hlpr.js');
 var logger = require('tracer').colorConsole();
 var Transporter = require('../../transports/transporter');
 var Agenda = require('agenda');
-var agenda = new Agenda({db: {address: 'localhost:27017/retwyst'}});
+var agenda = new Agenda({db: {address: 'localhost:27017/agenda'}});
 
 module.exports.get_outlet = function(id) {
   var deferred = Q.defer();
@@ -723,7 +723,7 @@ function schedule_assumed_delivered(data, user) {
     var deferred = Q.defer();
 
     var Agenda = require('agenda');
-    var agenda = new Agenda({db: {address: 'localhost:27017/retwyst'}});
+    var agenda = new Agenda({db: {address: 'localhost:27017/agenda'}});
 
     agenda.define('schedule_assumed_delivered', function(job, done) {            
       Order.findOne({_id: data.order.order_id}).exec(function(err, order) {
@@ -765,7 +765,7 @@ function schedule_assumed_delivered(data, user) {
 function schedule_order_delivered(data, user) {
     logger.log();
     var Agenda = require('agenda');
-    var agenda = new Agenda({db: {address: 'localhost:27017/retwyst'}});
+    var agenda = new Agenda({db: {address: 'localhost:27017/agenda'}});
 
     agenda.define('schedule_order_delivered', function(job, done) {            
       Order.findOne({_id: data.order.order_id}).exec(function(err, order) {

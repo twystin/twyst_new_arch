@@ -29,7 +29,7 @@ module.exports.get_zaakpay_response = function(req, res) {
 		+amount+"''"+paymentMethod+"''"+cardhashid+"'";		
   	}
   	else if(zaakpay_response.paymentMethod === 'wallet'){// for mobikwik
-  		var orderId = zaakpay_response.orderid;
+  		var orderId = zaakpay_response.orderId;
 		var responseCode = zaakpay_response.responseCode;		
 		var responseDescription = zaakpay_response.responseDescription;
 		var amount = zaakpay_response.amount;
@@ -95,7 +95,7 @@ module.exports.calculate_checksum = function(req, res) {
 		var currency = order_form.currency;
 		var mid = order_form.mid;
 		var orderId = order_form.orderid;
-		var txnDate = moment().format('YYYY-MM-DD');
+		var txnDate = moment().add(5, hours).add(30, minutes).format('YYYY-MM-DD');
 		console.log(txnDate);
 		var mode = 0;
 		message = "'"+amount+"''"+ipAddr+"''"+txnDate+"''"

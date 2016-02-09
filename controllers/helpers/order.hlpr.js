@@ -1660,7 +1660,7 @@ function send_email(data) {
             }
         },
         Source: 'kuldeep@twyst.in',
-        ReturnPath: 'kuldeep@twyst.in' 
+        ReturnPath: 'info@twyst.in' 
     };
     
     Transporter.send('email', 'ses', payload).then(function(reply) {
@@ -1695,7 +1695,7 @@ function schedule_order_status_check(data) {
     var deferred = Q.defer();
 
     var Agenda = require('agenda');
-    var agenda = new Agenda({db: {address: 'localhost:27017/retwyst'}});
+    var agenda = new Agenda({db: {address: 'localhost:27017/agenda'}});
 
     agenda.define('schedule_order_status_check', function(job, done) {
         Order.findOne({order_number: data.order_number}).exec(function(err, order) {
@@ -1733,7 +1733,7 @@ function schedule_non_accepted_order_rejection(data, user) {
     var deferred = Q.defer();
 
     var Agenda = require('agenda');
-    var agenda = new Agenda({db: {address: 'localhost:27017/retwyst'}});
+    var agenda = new Agenda({db: {address: 'localhost:27017/agenda'}});
 
     agenda.define('schedule_non_accepted_order_rejection', function(job, done) {            
       Order.findOne({order_number: data.order_number}).exec(function(err, order) {
