@@ -434,7 +434,7 @@ function calculate_order_value(data, free_item, free_item_option) {
     }
 
     console.log('order amount in calculate_order_value '+ amount);
-    return amount;
+    return Math.round(amount);
 }
 
 function verify_delivery_location(coords, outlet) {
@@ -601,12 +601,12 @@ function checkFreeItem(data, offer) {
                 console.log(order_value_obj);
                 if(order_value_obj.order_value_with_tax >= data.outlet.valid_zone.min_amt_for_delivery){
                     offer.is_applicable = true;
-                    offer.order_value_without_tax = order_value_obj.order_value;
+                    offer.order_value_without_tax = Math.round(order_value_obj.order_value);
                     offer.vat = order_value_obj.vat;
                     offer.st = order_value_obj.st;
                     offer.packing_charge = order_value_obj.packing_charge;
                     offer.delivery_charge = order_value_obj.delivery_charge;
-                    offer.order_value_with_tax = order_value_obj.new_order_value;
+                    offer.order_value_with_tax = Math.round(order_value_obj.new_order_value);
                     offer.free_item_index = i;
                     return offer; 
                 }
@@ -661,12 +661,12 @@ function checkOfferTypeBuyXgetY(data, offer) {
                 var order_value_obj = calculate_tax(order_value, passed_data.outlet);
                 if(order_value_obj.order_value_with_tax >= data.outlet.valid_zone.min_amt_for_delivery){
                     offer.is_applicable = true;
-                    offer.order_value_without_tax = order_value_obj.order_value;
+                    offer.order_value_without_tax = Math.round(order_value_obj.order_value);
                     offer.vat = order_value_obj.vat;
                     offer.st = order_value_obj.st;
                     offer.packing_charge = order_value_obj.packing_charge;
                     offer.delivery_charge = order_value_obj.delivery_charge;
-                    offer.order_value_with_tax = order_value_obj.new_order_value;
+                    offer.order_value_with_tax = Math.round(order_value_obj.new_order_value);
                     offer.free_item_index = i;
                     return offer;     
                 }
@@ -711,12 +711,12 @@ function checkOfferTypeFlatOff(data, offer) {
         var order_value_obj = calculate_tax(order_value, passed_data.outlet);
         if(order_value_obj.order_value_with_tax >= data.outlet.valid_zone.min_amt_for_delivery){
             offer.is_applicable = true;
-            offer.order_value_without_tax = order_value_obj.order_value;
+            offer.order_value_without_tax = Math.round(order_value_obj.order_value);
             offer.vat = order_value_obj.vat;
             offer.st = order_value_obj.st;
             offer.packing_charge = order_value_obj.packing_charge;
             offer.delivery_charge = order_value_obj.delivery_charge;
-            offer.order_value_with_tax = order_value_obj.new_order_value;
+            offer.order_value_with_tax = Math.round(order_value_obj.new_order_value);
             return offer;     
         }
         else{
@@ -761,12 +761,12 @@ function checkOfferTypePercentageOff(data, offer) {
             console.log('offer applicable');
             console.log(offer.actions.reward.reward_meta.percent)
             offer.is_applicable = true;
-            offer.order_value_without_tax = order_value_obj.order_value;
+            offer.order_value_without_tax = Math.round(order_value_obj.order_value);
             offer.vat = order_value_obj.vat;
             offer.st = order_value_obj.st;
             offer.packing_charge = order_value_obj.packing_charge;
             offer.delivery_charge = order_value_obj.delivery_charge;
-            offer.order_value_with_tax = order_value_obj.new_order_value;
+            offer.order_value_with_tax = Math.round(order_value_obj.new_order_value);
             return offer;     
         }
         else{
@@ -1103,18 +1103,18 @@ function massage_order(data){
                 order.address.delivery_zone = order.delivery_zone;
                 
                 if(order.offer_used) {
-                    order.order_value_without_offer = order.order_actual_value_without_tax;
-                    order.order_value_with_offer = order.offer_used.order_value_without_tax;
+                    order.order_value_without_offer = Math.round(order.order_actual_value_without_tax);
+                    order.order_value_with_offer = Math.round(order.offer_used.order_value_without_tax);
                     order.tax_paid = order.offer_used.st+order.offer_used.vat;
-                    order.actual_amount_paid = order.offer_used.order_value_with_tax;
+                    order.actual_amount_paid = Math.round(order.offer_used.order_value_with_tax);
 
                 }
                 else {
                     order.offer_used = null;
-                    order.order_value_without_offer = order.order_actual_value_without_tax;
+                    order.order_value_without_offer = Math.round(order.order_actual_value_without_tax);
                     order.order_value_with_offer = null;
                     order.tax_paid = order.st+order.vat;
-                    order.actual_amount_paid = order.order_actual_value_with_tax
+                    order.actual_amount_paid = Math.round(order.order_actual_value_with_tax);
                 }
                 var order_json = order
                 order = new Order(order); 
@@ -1659,7 +1659,8 @@ function send_email(data) {
               
             }
         },
-        Source: 'kuldeep@twyst.in' /* required */
+        Source: 'kuldeep@twyst.in',
+        ReturnPath: 'info@twyst.in' 
     };
     
     Transporter.send('email', 'ses', payload).then(function(reply) {
