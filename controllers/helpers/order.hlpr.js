@@ -1391,7 +1391,7 @@ module.exports.get_orders = function(token) {
     return deferred.promise;
 }
 
-module.exports.confirm_order = function(token, order) {
+module.exports.confirm_cod_order = function(token, order) {
     logger.log();
     var deferred = Q.defer();
     
@@ -1409,6 +1409,44 @@ module.exports.confirm_order = function(token, order) {
     .then(function(data) {
         return update_payment_mode(data);
     })
+    .then(function(data) {
+        return send_sms(data);
+    })
+    .then(function(data) {
+        return send_email(data);
+    })
+    .then(function(data) {
+        return send_notification_to_all(data);
+    })
+    .then(function(data) {
+        return schedule_order_status_check(data);
+    })
+    .then(function(data) {
+        return schedule_non_accepted_order_rejection(data);
+    })
+    .then(function(data) {
+        deferred.resolve(data);
+    })
+    .fail(function(err) {
+        console.log(err)
+        deferred.reject(err);
+    });
+    return deferred.promise;
+}
+
+
+module.exports.confirm_inapp_order = function(order) {
+    logger.log();
+    var deferred = Q.defer();
+    
+    var data = {};
+    console.log(order)
+    data.payment_mode = order.payment_mode;
+    data.order_number = order.order_number;
+    data.outlet = order.outlet;
+    data.user = order.user;
+
+    update_payment_mode(data)
     .then(function(data) {
         return send_sms(data);
     })
@@ -1488,11 +1526,15 @@ function process_orders(orders, deferred) {
 function update_payment_mode(data) {
     logger.log();
     var deferred = Q.defer();
-
+    var is_inapp = false;
+    if(data.payment_mode !== 'COD') {
+        is_inapp = true;
+    }
     Order.findOneAndUpdate({
         order_number: data.order_number
     }, {
         'order_status': 'PENDING',
+        'payment_info.is_inapp': is_inapp,
         'payment_info.payment_mode': data.payment_mode
     }).exec(function(err, order) {
         if (err) {
@@ -1560,8 +1602,7 @@ function send_sms(data) {
 
     data.outlet.contact.phones.reg_mobile.forEach(function (phone) {
         if(phone && phone.num) {
-            payload.phone = 8130857967//phone.num;
-            Transporter.send('sms', 'vf', payload);
+            //Transporter.send('sms', 'vf', payload);
         }
     });
 
@@ -1634,7 +1675,7 @@ function send_email(data) {
         Destination: { 
             BccAddresses: [],
             CcAddresses: [],
-            ToAddresses: [ 'kuldeep@twyst.in'  ] //, merchant_email
+            ToAddresses: [ account_mgr_email, merchant_email] //, merchant_email
         },
         Message: { /* required */
             Body: { /* required */
@@ -1659,17 +1700,17 @@ function send_email(data) {
               
             }
         },
-        Source: 'kuldeep@twyst.in',
+        Source: 'info@twyst.in',
         ReturnPath: 'info@twyst.in' 
     };
     
-    Transporter.send('email', 'ses', payload).then(function(reply) {
-        console.log('main reply', reply);
+    //Transporter.send('email', 'ses', payload).then(function(reply) {
+        //console.log('main reply', reply);
         deferred.resolve(data);
-    }, function(err) {
-        console.log('mail failed', err);
-        deferred.reject(data);
-    });    
+    //}, function(err) {
+        //console.log('mail failed', err);
+        //deferred.reject(data);
+    //});    
      
     return deferred.promise;   
 }

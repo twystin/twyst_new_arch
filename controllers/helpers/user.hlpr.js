@@ -495,8 +495,8 @@ function send_sms(data) {
 
     data.order.outlet.contact.phones.reg_mobile.forEach(function (phone) {
         if(phone && phone.num) {
-            payload.phone = 8130857967//phone.num;
-            Transporter.send('sms', 'vf', payload);
+            
+            //Transporter.send('sms', 'vf', payload);
         }
     });
 
@@ -558,7 +558,7 @@ function send_email(data) {
         Destination: { 
             BccAddresses: [],
             CcAddresses: [],
-            ToAddresses: [ 'kuldeep@twyst.in'  ] //, merchant_email
+            ToAddresses: [ account_mgr_email, merchant_email] //, merchant_email
         },
         Message: { /* required */
             Body: { /* required */
@@ -581,17 +581,17 @@ function send_email(data) {
               
             }
         },
-        Source: 'kuldeep@twyst.in',
+        Source: 'info@twyst.in',
         ReturnPath: 'info@twyst.in'
     };
     
-    Transporter.send('email', 'ses', payload).then(function(reply) {        
+    //Transporter.send('email', 'ses', payload).then(function(reply) {        
         deferred.resolve(data);
-    }, function(err) {
+    //}, function(err) {
         //console.log('mail failed', err);
-        console.log('getting error here')
-        deferred.reject(data);
-    });    
+        //console.log('getting error here')
+        //deferred.reject(data);
+    //});    
      
     return deferred.promise;   
 }

@@ -16,7 +16,7 @@ module.exports.get_zaakpay_response = function(req, res) {
   	zaakpay_response = _.extend(zaakpay_response, req.body);
   	console.log(zaakpay_response);
   	var message, type;
-  	if(zaakpay_response.paymentMethod === 'Zaakpay') { // for zaakpay
+  	if(zaakpay_response.paymentMethod.charAt(0) === 'N' || zaakpay_response.paymentMethod.charAt(0) === 'C') { // for zaakpay
 		var orderId = zaakpay_response.orderId;
 		var responseCode = zaakpay_response.responseCode;		
 		var responseDescription = zaakpay_response.responseDescription;
@@ -44,7 +44,9 @@ module.exports.get_zaakpay_response = function(req, res) {
   			console.log('checksum verified');
   			var data = {};
   			data.order_number = zaakpay_response.orderId;
-  			Order.findOne({order_number: data.order_number}).exec(function(err, order) {
+  			Order.findOne({
+  				order_number: data.order_number
+  			}).populate('outlet user').exec(function(err, order) {
 		        if (err || !order) {
 		          console.log(err);
 		          console.log('order not found');
@@ -52,13 +54,15 @@ module.exports.get_zaakpay_response = function(req, res) {
 		        } 
 		        else {
 		        	data.outlet = order.outlet;
+		        	data.user = order.user;
+		        	data.order = order;
 		        	data.payment_mode = zaakpay_response.paymentMethod;
 
 		        	if(zaakpay_response.paymentMethod === 'Zaakpay') {		       
 		        		data.cardhashid = zaakpay_response.cardhashid;
 		        	}
 		        	
-		        	OrderHelper.confirm_order(data).then(function(data){
+		        	OrderHelper.confirm_inapp_order(data).then(function(data){
 		  				HttpHelper.success(res, checksum, 'order confirmed');	
 		  			},	function(err) {
 						HttpHelper.error(res, err);
@@ -95,7 +99,7 @@ module.exports.calculate_checksum = function(req, res) {
 		var currency = order_form.currency;
 		var mid = order_form.mid;
 		var orderId = order_form.orderid;
-		var txnDate = moment().add(5, hours).add(30, minutes).format('YYYY-MM-DD');
+		var txnDate = moment().add(5, 'hours').add(30, 'minutes').format('YYYY-MM-DD');
 		console.log(txnDate);
 		var mode = 0;
 		message = "'"+amount+"''"+ipAddr+"''"+txnDate+"''"

@@ -52,7 +52,7 @@ var Order = new Schema({
     comments: {type: String}
   }],
   user_feedback: {
-    is_on_time: {
+    is_ontime: {
       type: Boolean,
       default: true
     },
