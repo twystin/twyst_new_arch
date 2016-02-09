@@ -1150,6 +1150,7 @@ function calculate_cashback(data) {
     if(!data.order.offer_used && data.outlet.twyst_meta.cashback_info
         && data.outlet.twyst_meta.cashback_info.base_cashback) {
         var cod_cashback = 0, inapp_cashback = 0, order_amount_ratio = 1;
+
         if(data.outlet.twyst_meta.cashback_info.order_amount_slab.length) {
             order_amount_ratio = _.find(data.outlet.twyst_meta.cashback_info.order_amount_slab, function(slab){
                 if(data.order.order_value_without_tax > slab.start &&
@@ -1163,21 +1164,21 @@ function calculate_cashback(data) {
         var cod_ratio = data.outlet.twyst_meta.cashback_info.cod_ratio;
 
         if(order_amount_ratio > in_app_ratio) {
-            inapp_cashback = data.order.order_value_without_tax*data.outlet.outlet_meta.cashback_info.base_cashback*order_amount_ratio/100;
+            inapp_cashback = data.order.order_value_without_tax*data.outlet.twyst_meta.cashback_info.base_cashback*order_amount_ratio/100;
         }
         else{
-            inapp_cashback = data.order.order_value_without_tax*data.outlet.outlet_meta.cashback_info.base_cashback*in_app_ratio/100;    
+            inapp_cashback = data.order.order_value_without_tax*data.outlet.twyst_meta.cashback_info.base_cashback*in_app_ratio/100;    
         }
 
         if(order_amount_ratio > cod_ratio) {
-            cod_cashback = data.order.order_value_without_tax*data.outlet.outlet_meta.cashback_info.base_cashback*order_amount_ratio/100;    
+            cod_cashback = data.order.order_value_without_tax*data.outlet.twyst_meta.cashback_info.base_cashback*order_amount_ratio/100;    
         }
         else{
-            cod_cashback = data.order.order_value_without_tax*data.outlet.outlet_meta.cashback_info.base_cashback*cod_ratio/100;        
+            cod_cashback = data.order.order_value_without_tax*data.outlet.twyst_meta.cashback_info.base_cashback*cod_ratio/100;        
         }
                 
         data.order.cod_cashback = cod_cashback;
-        data.order.inapp_cashback = inapp_cashback;
+        data.order.ku = inapp_cashback;
     }
     else{
         data.order.cod_cashback = 0;
