@@ -10,7 +10,6 @@ var ObjectId = mongoose.Types.ObjectId;
 var Outlet = mongoose.model('Outlet');
 var logger = require('tracer').colorConsole();
 var AuthHelper = require('../../common/auth.hlpr');
-var Cache = require('../../common/cache.hlpr.js');
 var RecoHelper = require('./reco.hlpr');
 var moment = require('moment');
 

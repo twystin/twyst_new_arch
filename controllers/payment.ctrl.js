@@ -56,6 +56,7 @@ module.exports.get_zaakpay_response = function(req, res) {
 		        	data.outlet = order.outlet;
 		        	data.user = order.user;
 		        	data.order = order;
+		        	data.card_id = cardhashid;
 		        	data.payment_mode = zaakpay_response.paymentMethod;
 
 		        	if(zaakpay_response.paymentMethod === 'Zaakpay') {		       

@@ -1527,16 +1527,28 @@ function process_orders(orders, deferred) {
 function update_payment_mode(data) {
     logger.log();
     var deferred = Q.defer();
-    var is_inapp = false;
+    var is_inapp = false, card_id;
     if(data.payment_mode !== 'COD') {
         is_inapp = true;
     }
+
+    if(data.payment_mode.charAt(0) === 'N' || data.payment_mode.charAt(0) === 'C') {
+        data.payment_method = data.payment_mode;
+        data.payment_mode = 'Zaakpay';
+    };
+
+    if(data.payment_mode.charAt(0) === 'C') {
+        card_id = data.card_id;
+    }
+
     Order.findOneAndUpdate({
         order_number: data.order_number
     }, {
         'order_status': 'PENDING',
         'payment_info.is_inapp': is_inapp,
-        'payment_info.payment_mode': data.payment_mode
+        'payment_info.payment_mode': data.payment_mode,
+        'payment_info.payment_method': data.payment_method,
+        'payment_info.card_id': data.card_id
     }).exec(function(err, order) {
         if (err) {
             console.log(err);

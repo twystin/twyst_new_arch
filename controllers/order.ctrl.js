@@ -94,7 +94,7 @@ module.exports.confirm_order = function(req, res) {
 		HttpHelper.error(res, null, "could not process without payment mode");	
 	}
 	else{
-		OrderHelper.confirm_order(token, order).then(function(data) {
+		OrderHelper.confirm_cod_order(token, order).then(function(data) {
 			HttpHelper.success(res, data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err || null, err.message);
