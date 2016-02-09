@@ -154,7 +154,7 @@ module.exports.update_order = function(req, res) {
 		if (!order.order_rating) {
 	    	HttpHelper.error(res, null, "please pass order rating");
 		}
-		else if (!order.is_ontime) {
+		else if (order.is_ontime === null) {
 	    	HttpHelper.error(res, null, "please pass order is on time feedback");
 		}
 		else if (order.items_feedback && !order.items && order.items.length) {

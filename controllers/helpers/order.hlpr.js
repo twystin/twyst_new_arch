@@ -1736,11 +1736,11 @@ function schedule_non_accepted_order_rejection(data, user) {
     var agenda = new Agenda({db: {address: 'localhost:27017/retwyst'}});
 
     agenda.define('schedule_non_accepted_order_rejection', function(job, done) {            
-      Order.findOne({_id: data.order._id}).exec(function(err, order) {
+      Order.findOne({order_number: data.order_number}).exec(function(err, order) {
           if (err || !order){
               console.log(err);
           } 
-          else {                                
+          else if(order.order_status === 'PENDING'){                                
             order.order_status = 'REJECTED';
             var current_action = {};
             current_action.action_type = 'REJECTED';
