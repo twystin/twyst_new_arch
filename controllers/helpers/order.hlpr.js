@@ -151,7 +151,8 @@ module.exports.checkout = function(token, order) {
     .then(function(data) {
         return remove_order_from_cache(data);
     })
-    .then(function(data) {        
+    .then(function(data) {  
+        console.log(data.order)      
         deferred.resolve(data.order);
     })
     .fail(function(err) {
@@ -1178,7 +1179,7 @@ function calculate_cashback(data) {
         }
                 
         data.order.cod_cashback = cod_cashback;
-        data.order.ku = inapp_cashback;
+        data.order.inapp_cashback = inapp_cashback;
     }
     else{
         data.order.cod_cashback = 0;
@@ -1504,7 +1505,13 @@ function send_sms(data) {
     payload.from = 'TWYSTR';
     payload.message = '';
     var items, collected_amount;
-    var name = 'Name: '+ data.user.profile.first_name;
+    if(data.user.profile && data.user.profile.first_name) {
+        var name = 'Name: '+ data.user.profile.first_name;
+    }
+    else{
+        var name = 'Name: '+ data.user.first_name;
+    }
+    
     var phone = 'Phone: '+ '8130857967';
     var address_line1 = 'Address: '+data.order.address.line1;
     var address_line2 = data.order.address.line2;
@@ -1535,13 +1542,13 @@ function send_sms(data) {
     var order_number = ' Order Number: ' + data.order_number;    
     var placed_at =  ' Placed at: ' + (new Date(data.order.order_date)).getHours() + ':'+ (new Date(data.order.order_date)).getMinutes();
     var delivery_time = ' Delivery Time: '+ data.order.estimeted_delivery_time +' mins';
-    //payload.message = payload.message+'Deliver By: '+ (new Date(data.order.order_date)).getTime();
+    
     var total_amount = ' Total Amount: Rs '+ data.order.actual_amount_paid ;
     if (data.order.payment_info.payment_mode === 'COD') {
         collected_amount = ' Amount to be Collected: Rs '+data.order.actual_amount_paid ;    
     }
     else{
-        collected_amount = ' Amount to be Collected: Rs '+data.order.actual_amount_paid ;    
+        collected_amount = ' Amount to be Collected: Rs 0' ;    
     }
 
     payload.message = payload.message  +order_number+placed_at+delivery_time+total_amount+collected_amount;
@@ -1564,7 +1571,12 @@ function send_email(data) {
     var deferred = Q.defer();
 
     var items ='', collected_amount;
-    var name = 'Name: '+ data.user.profile.first_name;
+    if(data.user.profile && data.user.profile.first_name) {
+        var name = 'Name: '+ data.user.profile.first_name;
+    }
+    else{
+        var name = 'Name: '+ data.user.first_name;
+    }
     var phone = 'Phone: '+ data.user.phone;
     var address_line1 = 'Address: '+data.order.address.line1;
     var address_line2 = data.order.address.line2;
@@ -1600,8 +1612,8 @@ function send_email(data) {
     else{
         collected_amount = ' Amount to be collected: Rs 0' ;    
     }
-    console.log(data.outlet.contact.emails.email)
-    console.log(data.outlet.basics.account_mgr_email)
+    console.log(data.order)
+    
     var payload = {
         Destination: { 
             BccAddresses: [],
