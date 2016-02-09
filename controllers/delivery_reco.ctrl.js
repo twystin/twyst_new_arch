@@ -160,8 +160,18 @@ function set_delivery_experiance(params) {
 
 function calculate_relevance(params) {
   logger.log();
-
   var deferred = Q.defer();
+  params.outlets = _.compact(params.outlets);
+  params.outlets = _.map(params.outlets, function(val) {
+    var relevance = 10000;
+    val.recco = val.recco || {};
+    
+    relevance = relevance - val.valid_zone.delivery_estimated_time;
+    relevance = relevance - val.valid_zone.min_amt_for_delivery*100;
+    console.log(relevance)
+    val.recco.relevance = relevance;
+    return val;
+  });
   
   deferred.resolve(params);
   return deferred.promise;
@@ -172,6 +182,9 @@ function sort_by_relevance(params) {
 
   var deferred = Q.defer();
   
+  params.outlets = _.sortBy(params.outlets, function(item) {
+    return -item.recco.relevance;
+  });
 
   deferred.resolve(params);
   return deferred.promise;
@@ -196,7 +209,10 @@ function pick_outlet_fields(params) {
       if(item.outlet_meta.status === 'archived' || item.outlet_meta.status === 'draft') {
         return false;        
       }
-      
+
+      if(!item.menus.length) {
+        return false;        
+      }
       var massaged_item = {};
       massaged_item._id = item._id;
       massaged_item.name = item.basics.name;
