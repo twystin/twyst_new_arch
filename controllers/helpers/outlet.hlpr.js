@@ -718,7 +718,6 @@ function send_notification_to_user (gcm_id, notif) {
        
 }
 
-
 function schedule_assumed_delivered(data, user) {
     logger.log();
     var deferred = Q.defer();
@@ -757,7 +756,7 @@ function schedule_assumed_delivered(data, user) {
     });
 
     agenda.on('ready', function() {
-      agenda.schedule('in 1 minutes', 'schedule_assumed_delivered', {order_id: data.order.order_id, status: 'ASSUMED_DELIVERED', previous_state: 'ACCEPTED'});
+      agenda.schedule('in' +data.order.estimeted_delivery_time + 'minutes', 'schedule_assumed_delivered', {order_id: data.order.order_id, status: 'ASSUMED_DELIVERED', previous_state: 'ACCEPTED'});
       agenda.start();
     });
     
@@ -797,7 +796,7 @@ function schedule_order_delivered(data, user) {
     });
 
     agenda.on('ready', function() {
-      agenda.schedule('in 2 minutes', 'schedule_order_delivered', {order_id: data.order.order_id, status: 'DELIVERED', previous_state: 'ASSUMED_DELIVERED'});
+      agenda.schedule('in' +estimeted_delivery_time+20+ 'minutes', 'schedule_order_delivered', {order_id: data.order.order_id, status: 'DELIVERED', previous_state: 'ASSUMED_DELIVERED'});
       agenda.start();
     });
     
