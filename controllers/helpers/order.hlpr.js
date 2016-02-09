@@ -1147,14 +1147,18 @@ function calculate_cashback(data) {
     logger.log();
     var deferred = Q.defer();
     
-    if(!data.order.offer_used && data.outlet.twyst_meta.cashback_info) {
+    if(!data.order.offer_used && data.outlet.twyst_meta.cashback_info
+        && data.outlet.twyst_meta.cashback_info.base_cashback) {
         var cod_cashback = 0, inapp_cashback = 0, order_amount_ratio = 1;
-        order_amount_ratio = _.find(data.outlet.twyst_meta.cashback_info.order_amount_slab, function(slab){
-            if(data.order.order_value_without_tax > slab.start &&
-                data.order.order_value_without_tax < slab.end) {
-                return ratio;
-            }
-        });
+        if(data.outlet.twyst_meta.cashback_info.order_amount_slab.length) {
+            order_amount_ratio = _.find(data.outlet.twyst_meta.cashback_info.order_amount_slab, function(slab){
+                if(data.order.order_value_without_tax > slab.start &&
+                    data.order.order_value_without_tax < slab.end) {
+                    return ratio;
+                }
+            });    
+        }
+        
         var in_app_ratio = data.outlet.twyst_meta.cashback_info.in_app_ratio;
         var cod_ratio = data.outlet.twyst_meta.cashback_info.cod_ratio;
 
