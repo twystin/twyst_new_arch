@@ -173,7 +173,7 @@ function basic_checks(data) {
         deferred.reject({message: 'could not process without outlet'});
     }
     
-    if(!passed_data.items && passed_data.items.length){
+    if(!passed_data.items || !passed_data.items.length){
         deferred.reject({
             
             message: 'no item passed'
