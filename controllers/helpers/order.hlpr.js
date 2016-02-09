@@ -1438,7 +1438,12 @@ function process_orders(orders, deferred) {
         var updated_order = {};    
         updated_order.outlet_name = order.outlet.basics.name;
         updated_order.background = 'https://s3-us-west-2.amazonaws.com/retwyst-merchants/retwyst-outlets/' + order.outlet._id + '/' + order.outlet.photos.background;
-        updated_order.location = order.outlet.contact.location;
+        updated_order.city = order.outlet.contact.location.city;
+        updated_order.address = order.outlet.contact.location.address;
+        updated_order.locality_1 = order.outlet.contact.location.locality_1[0];
+        updated_order.locality_2 = order.outlet.contact.location.locality_2[0];
+        updated_order.lat = order.outlet.contact.location.coords.latitude || null;
+        updated_order.long = order.outlet.contact.location.coords.longitude || null;
         updated_order.delivery_zone = order.outlet.attributes.delivery.delivery_zone;
         updated_order.order_number = order.order_number
         updated_order._id = order._id;
@@ -1515,12 +1520,12 @@ function send_sms(data) {
         var name = 'Name: '+ data.user.first_name;
     }
     
-    var phone = ' Phone: '+ '8130857967';
+    var phone = ' Phone: '+ data.user.phone;
     var address_line1 = ' Address: '+data.order.address.line1;
     var address_line2 = data.order.address.line2;
     var address_line3 = ' Landmark: '+data.order.address.landmark;
 
-    payload.message = name  + phone + +address_line1+ ' Order Details: ';
+    payload.message = name  + phone + address_line1 + ' Order Details: ';
 
     for (var i = 0; i < data.order.items.length; i++) {
         var item_price = getItemPrice(data.order.items[i]);
