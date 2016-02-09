@@ -568,7 +568,7 @@ function send_email(data) {
                     + "<h4>Phone</h4>" + phone 
                     + "<h4>Items</h4>" + items
                     + "<h4>Total Cost</h4>" + total_amount
-                    + "<h4>Payment Method</h4>" + data.payment_mode
+                    + "<h4>Payment Method </h4>" + data.order.payment_mode
     
                 },
                 Text: {
@@ -581,7 +581,8 @@ function send_email(data) {
               
             }
         },
-        Source: 'kuldeep@twyst.in' /* required */
+        Source: 'kuldeep@twyst.in',
+        ReturnPath: 'info@twyst.in'
     };
     
     Transporter.send('email', 'ses', payload).then(function(reply) {        

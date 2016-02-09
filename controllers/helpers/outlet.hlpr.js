@@ -732,7 +732,7 @@ function schedule_assumed_delivered(data, user) {
           if (err || !order){
               console.log(err);
           } 
-          else {
+          else if(order.order_status === 'ACCEPTED' || order.order_status === 'DISPATCHED'){
             console.log('scheduling assumed delivered')                           
             order.order_status = 'ASSUMED_DELIVERED';
             var current_action = {};

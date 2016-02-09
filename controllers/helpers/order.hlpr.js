@@ -151,8 +151,7 @@ module.exports.checkout = function(token, order) {
     .then(function(data) {
         return remove_order_from_cache(data);
     })
-    .then(function(data) {  
-        console.log(data.order)      
+    .then(function(data) {        
         deferred.resolve(data.order);
     })
     .fail(function(err) {
@@ -1126,6 +1125,7 @@ function massage_order(data){
                         deferred.reject('unable to checkout');
                     }
                     else{
+                        order_json._id = saved_order._id;
                         data.order = order_json;
                         console.log('saved');
                         deferred.resolve(data);   
@@ -1150,7 +1150,7 @@ function calculate_cashback(data) {
     
     if(!data.order.offer_used && data.outlet.twyst_meta.cashback_info
         && data.outlet.twyst_meta.cashback_info.base_cashback) {
-        console.log('cashback setup')
+        console.log('cashback setup');
         var cod_cashback = 0, inapp_cashback = 0, order_amount_ratio = 1;
 
         if(data.outlet.twyst_meta.cashback_info.order_amount_slab.length) {
@@ -1164,19 +1164,21 @@ function calculate_cashback(data) {
         
         var in_app_ratio = data.outlet.twyst_meta.cashback_info.in_app_ratio;
         var cod_ratio = data.outlet.twyst_meta.cashback_info.cod_ratio;
-
+        var base_cashback = data.outlet.twyst_meta.cashback_info.base_cashback;
+        console.log(order_amount_ratio);
+        console.log(order_amount_ratio);
         if(order_amount_ratio > in_app_ratio) {
-            inapp_cashback = data.order.order_value_without_tax*data.outlet.twyst_meta.cashback_info.base_cashback*order_amount_ratio/100;
+            inapp_cashback = parseInt(data.order.order_value_without_tax)*parseInt(base_cashback) * parseInt(order_amount_ratio) /100;
         }
         else{
-            inapp_cashback = data.order.order_value_without_tax*data.outlet.twyst_meta.cashback_info.base_cashback*in_app_ratio/100;    
+            inapp_cashback =  parseInt(data.order.order_value_without_tax)*parseInt(base_cashback) * parseInt(in_app_ratio) /100;
         }
 
         if(order_amount_ratio > cod_ratio) {
-            cod_cashback = data.order.order_value_without_tax*data.outlet.twyst_meta.cashback_info.base_cashback*order_amount_ratio/100;    
+            cod_cashback =  parseInt(data.order.order_value_without_tax)*parseInt(base_cashback) * parseInt(order_amount_ratio) /100;
         }
         else{
-            cod_cashback = data.order.order_value_without_tax*data.outlet.twyst_meta.cashback_info.base_cashback*cod_ratio/100;        
+            cod_cashback =  parseInt(data.order.order_value_without_tax)*parseInt(base_cashback) * parseInt(cod_ratio) /100;
         }
                 
         data.order.cod_cashback = cod_cashback;
