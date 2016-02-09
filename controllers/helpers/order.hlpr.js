@@ -1199,7 +1199,15 @@ function remove_order_from_cache(data) {
     logger.log();
     var deferred = Q.defer();
 
-    deferred.resolve(data);
+    Cache.hset(data.user._id, "order_map", '', function(err) {
+       if(err) {
+         logger.log(err);
+       }
+       else{
+         deferred.resolve(data);   
+        }
+    });
+    
     return deferred.promise;
 }
 
