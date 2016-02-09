@@ -1435,16 +1435,9 @@ module.exports.confirm_cod_order = function(token, order) {
 }
 
 
-module.exports.confirm_inapp_order = function(order) {
+module.exports.confirm_inapp_order = function(data) {
     logger.log();
     var deferred = Q.defer();
-    
-    var data = {};
-    console.log(order)
-    data.payment_mode = order.payment_mode;
-    data.order_number = order.order_number;
-    data.outlet = order.outlet;
-    data.user = order.user;
 
     update_payment_mode(data)
     .then(function(data) {
@@ -1795,7 +1788,7 @@ function schedule_non_accepted_order_rejection(data, user) {
               notif.message = 'Your order has been Rejected by merchant.';
               notif.state = 'REJECTED';
               notif.time = time;
-              notif.order_id = data.order.order_id;
+              notif.order_id = data.order_id;
               //also send notif to AM
               send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif); 
             })
@@ -1806,7 +1799,7 @@ function schedule_non_accepted_order_rejection(data, user) {
     });
 
     agenda.on('ready', function() {
-      agenda.schedule('in 20 minutes', 'schedule_non_accepted_order_rejection', {order_id: data.order.order_id, status: 'DELIVERED', previous_state: 'DISPATCHED'});
+      agenda.schedule('in 1 minutes', 'schedule_non_accepted_order_rejection', {order_id: data.orders_id, status: 'REJECTED'});
       agenda.start();
     });
     deferred.resolve(data); 
