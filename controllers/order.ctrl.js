@@ -154,11 +154,18 @@ module.exports.update_order = function(req, res) {
 		if (!order.order_rating) {
 	    	HttpHelper.error(res, null, "please pass order rating");
 		}
-		else if (order.is_ontime === null) {
+		else if (order.is_ontime === undefined) {
 	    	HttpHelper.error(res, null, "please pass order is on time feedback");
 		}
 		else if (order.items_feedback && !order.items && order.items.length) {
 	    	HttpHelper.error(res, null, "please pass items");
+		}
+		else{
+			OrderHelper.update_order(token, order).then(function(data) {
+				HttpHelper.success(res, data.data, data.message);
+				}, function(err) {
+				HttpHelper.error(res, err.data, err.message);
+			});	
 		}
 	}
 	else if(order.update_type === 'update_favourite' && order.is_favourite === null) {
