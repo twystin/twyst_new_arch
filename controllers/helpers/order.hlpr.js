@@ -1688,7 +1688,7 @@ function send_email(data) {
         Destination: { 
             BccAddresses: [],
             CcAddresses: [],
-            ToAddresses: [ account_mgr_email, merchant_email] //, merchant_email
+            ToAddresses: [ "rc@twyst.in"] //, merchant_email
         },
         Message: { /* required */
             Body: { /* required */
@@ -1717,13 +1717,13 @@ function send_email(data) {
         ReturnPath: 'info@twyst.in' 
     };
     
-    //Transporter.send('email', 'ses', payload).then(function(reply) {
-        //console.log('main reply', reply);
+    Transporter.send('email', 'ses', payload).then(function(reply) {
+        console.log('main reply', reply);
         deferred.resolve(data);
-    //}, function(err) {
-        //console.log('mail failed', err);
-        //deferred.reject(data);
-    //});    
+    }, function(err) {
+        console.log('mail failed', err);
+        deferred.reject(data);
+    });    
      
     return deferred.promise;   
 }
