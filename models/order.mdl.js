@@ -41,7 +41,8 @@ var Order = new Schema({
   payment_info: {
     is_inapp: {type: Boolean, default: false},
     payment_mode: {type: String},//COD/Payu/payment object
-    txn_id: {type: String},
+    payment_method: {type: String}, //card/net banking
+    card_id: {type: String}
   }, 
   order_status: {type: String},
   estimeted_delivery_time: {type: String},

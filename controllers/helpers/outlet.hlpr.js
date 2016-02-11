@@ -735,7 +735,7 @@ function schedule_assumed_delivered(data, user) {
             order.order_status = 'ASSUMED_DELIVERED';
             var current_action = {};
             current_action.action_type = 'ASSUMED_DELIVERED';
-            current_action.action_by = 'SYSTEM';
+            current_action.action_by = '01234567890123456789abcd';
             order.actions.push(current_action);
             order.save(function(err, order){
               console.log('done assumed delivered')                           
@@ -756,6 +756,7 @@ function schedule_assumed_delivered(data, user) {
     });
 
     agenda.on('ready', function() {
+      console.log(data.order.estimeted_delivery_time)
       agenda.schedule('in' +data.order.estimeted_delivery_time + 'minutes', 'schedule_assumed_delivered', {order_id: data.order.order_id, status: 'ASSUMED_DELIVERED', previous_state: 'ACCEPTED'});
       agenda.start();
     });
@@ -776,7 +777,7 @@ function schedule_order_delivered(data, user) {
           order.order_status = 'DELIVERED';
           var current_action = {};
           current_action.action_type = 'DELIVERED';
-          current_action.action_by = 'SYSTEM';
+          current_action.action_by = '01234567890123456789abcd';
           order.actions.push(current_action);
           order.save(function(err, order){
             var date = new Date();
@@ -796,7 +797,8 @@ function schedule_order_delivered(data, user) {
     });
 
     agenda.on('ready', function() {
-      agenda.schedule('in' +estimeted_delivery_time+20+ 'minutes', 'schedule_order_delivered', {order_id: data.order.order_id, status: 'DELIVERED', previous_state: 'ASSUMED_DELIVERED'});
+      console.log(parseInt(data.order.estimeted_delivery_time)+20);
+      agenda.schedule('in ' +data.order.estimeted_delivery_time+20+ ' minutes', 'schedule_order_delivered', {order_id: data.order.order_id, status: 'DELIVERED', previous_state: 'ASSUMED_DELIVERED'});
       agenda.start();
     });
     
@@ -809,8 +811,6 @@ function send_order_reject_sms(user, order_id) {
     payload.from = 'TWYSTR';
     payload.phone = user.phone;
     payload.message = 'You order order_number('+order_number+')' +'has been rejected by merchant.'
-    
-    payload.phone = 8130857967//phone.num;
     Transporter.send('sms', 'vf', payload);
     
 }

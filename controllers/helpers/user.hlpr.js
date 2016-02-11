@@ -495,8 +495,8 @@ function send_sms(data) {
 
     data.order.outlet.contact.phones.reg_mobile.forEach(function (phone) {
         if(phone && phone.num) {
-            
-            //Transporter.send('sms', 'vf', payload);
+            payload.phone = phone.num;
+            Transporter.send('sms', 'vf', payload);
         }
     });
 
@@ -558,12 +558,14 @@ function send_email(data) {
         Destination: { 
             BccAddresses: [],
             CcAddresses: [],
-            ToAddresses: [ account_mgr_email, merchant_email] //, merchant_email
+            ToAddresses: [ account_mgr_email] //, merchant_email
         },
         Message: { /* required */
             Body: { /* required */
                 Html: {
-                    Data: "<h4>Order Number</h4>" + data.order.order_number +
+                    Data: 
+                    "<h4>Outlet</h4>" + data.order.outlet.basics.name +
+                    "<h4>Order Number</h4>" + data.order.order_number +
                     "<h4>Name</h4>" + name
                     + "<h4>Phone</h4>" + phone 
                     + "<h4>Items</h4>" + items
@@ -585,13 +587,13 @@ function send_email(data) {
         ReturnPath: 'info@twyst.in'
     };
     
-    //Transporter.send('email', 'ses', payload).then(function(reply) {        
+    Transporter.send('email', 'ses', payload).then(function(reply) {        
         deferred.resolve(data);
-    //}, function(err) {
-        //console.log('mail failed', err);
-        //console.log('getting error here')
-        //deferred.reject(data);
-    //});    
+    }, function(err) {
+        console.log('mail failed', err);
+        console.log('getting error here')
+        deferred.reject(data);
+    });    
      
     return deferred.promise;   
 }

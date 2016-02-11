@@ -376,6 +376,7 @@ function calculate_order_value(data, free_item, free_item_option) {
         
         console.log(items[i].quantity +'quantity' + 'option' + option);
         console.log(option)
+
         if(item && item._id === free_item && option && option._id === free_item_option) {
             amount = amount+(option.option_cost*(items[i].quantity-1));
             if(sub_options.length) {
@@ -402,8 +403,9 @@ function calculate_order_value(data, free_item, free_item_option) {
                 })
             }
         }         
-        else if(option){
-            
+        else if(option && (item.option_price_is_additive || item.option_is_addon)){
+            console.log('in prices are additive option');
+            amount = amount+(item.item_cost*items[i].quantity);
             amount = amount+(option.option_cost*items[i].quantity);
             if(sub_options.length) {
                 _.each(sub_options, function(sub_option){
@@ -414,9 +416,23 @@ function calculate_order_value(data, free_item, free_item_option) {
                 _.each(addons, function(addon){
                     amount = amount + (addon.addon_cost*items[i].quantity);
                 })
-            }
+            }    
+            
         }
-        else {
+        else if(option){
+            amount = amount+(option.option_cost*items[i].quantity);
+            if(sub_options.length) {
+                _.each(sub_options, function(sub_option){
+                    amount = amount + (sub_option.sub_option_cost*items[i].quantity);
+                })
+            }
+            if(addons.length) {
+                _.each(addons, function(addon){
+                    amount = amount + (addon.addon_cost*items[i].quantity);
+                })
+            }                  
+        }
+        else{
             console.log('without option');
             console.log(item.item_cost);
             amount = amount+(item.item_cost*items[i].quantity);
@@ -429,7 +445,7 @@ function calculate_order_value(data, free_item, free_item_option) {
                 _.each(addons, function(addon){
                     amount = amount + (addon.addon_cost*items[i].quantity);
                 })
-            }               
+            }   
         }
     }
 
@@ -469,7 +485,7 @@ function verify_delivery_location(coords, outlet) {
 function isOutletClosed(outlet) {
     logger.log();
     var date = new Date();
-    var time = date.getHours() +':'+date.getMinutes();
+    var time = date.getHours()+5 +':'+date.getMinutes()+30;
     date = parseInt(date.getMonth())+1+ '-'+ date.getDate()+'-'+date.getFullYear();
     console.log(time);
     if (outlet && outlet.business_hours ) {
@@ -1424,14 +1440,15 @@ module.exports.confirm_cod_order = function(token, order) {
         return send_email(data);
     })
     .then(function(data) {
+        return schedule_non_accepted_order_rejection(data);
+    })
+    .then(function(data) {
         return send_notification_to_all(data);
     })
     .then(function(data) {
         return schedule_order_status_check(data);
     })
-    .then(function(data) {
-        return schedule_non_accepted_order_rejection(data);
-    })
+    
     .then(function(data) {
         deferred.resolve(data);
     })
@@ -1532,12 +1549,12 @@ function update_payment_mode(data) {
         is_inapp = true;
     }
 
-    if(data.payment_mode.charAt(0) === 'N' || data.payment_mode.charAt(0) === 'C') {
+    if(data.payment_mode.charAt(0) === 'N' || data.payment_mode.charAt(0) === 'C' && data.payment_mode.length > 3) {
         data.payment_method = data.payment_mode;
         data.payment_mode = 'Zaakpay';
     };
 
-    if(data.payment_mode.charAt(0) === 'C') {
+    if(data.payment_mode.charAt(0) === 'C' && data.payment_mode.length > 3) {
         card_id = data.card_id;
     }
 
@@ -1615,9 +1632,23 @@ function send_sms(data) {
 
     data.outlet.contact.phones.reg_mobile.forEach(function (phone) {
         if(phone && phone.num) {
-            //Transporter.send('sms', 'vf', payload);
+            payload.phone = phone.num;
+            Transporter.send('sms', 'vf', payload);
         }
     });
+    //if(data.payment_mode === 'COD') {
+        //payload.message = 'You order has been placed successfully at '+ data.outlet.basics.name+
+                    //', Order Details ' + items + ', Total amount ' + data.order.actual_amount_paid +
+                    //' , Payment Method: Cash on Delivery. '   
+    //}
+    //else{
+       // payload.message = 'You order has been placed successfully at '+ data.outlet.basics.name+
+                    ////', Order Details ' + items + ', Total amount ' + data.order.actual_amount_paid +
+                    //' , Payment Method: in app payment. ' +   
+    //}
+    ////payload.phone = data.user.phone;
+    //Transporter.send('sms', 'vf', payload);
+    
 
     deferred.resolve(data);
     return deferred.promise;
@@ -1655,7 +1686,7 @@ function send_email(data) {
             var quantity = data.order.items[i].item_quantity;
             var item_name = data.order.items[i].item_name;
 
-            items = items + '\n' + quantity + ' * ' + item_name + ': Rs '+ final_cost;
+            items = items + '\n' + quantity + ' X ' + item_name + ': Rs '+ final_cost;
             
         }
     
@@ -1688,12 +1719,14 @@ function send_email(data) {
         Destination: { 
             BccAddresses: [],
             CcAddresses: [],
-            ToAddresses: [ "rc@twyst.in"] //, merchant_email
+            ToAddresses: [ account_mgr_email] //, merchant_email
         },
         Message: { /* required */
             Body: { /* required */
                 Html: {
-                    Data: "<h4>Order Number</h4>" + data.order.order_number +
+                    Data: 
+                    "<h4>Outlet</h4>" + data.outlet.basics.name +
+                    "<h4>Order Number</h4>" + data.order.order_number +
                     "<h4>Name</h4>" + name
                     + "<h4>Phone</h4>" + phone 
                     + "<h4>Address</h4>" + data.order.address.line1 
@@ -1758,6 +1791,11 @@ function schedule_order_status_check(data) {
             } 
             else {            
                 if(order.order_status === 'PENDING') {
+                    var payload = {};
+                    payload.from = 'TWYSTR';
+                    payload.message = 'Order has not been accepted yet at outlet  '+ data.outlet.basics.name + ' order number '+ data.order_number;
+                    payload.phone = data.outlet.basics.account_mgr_phone;
+                    Transporter.send('sms', 'vf', payload);
 
                     send_notification(['console', data.outlet.basics.account_mgr_email.replace('.', '').replace('@', '')], {
                         message: 'Order has not been accepted yet.',
@@ -1783,45 +1821,84 @@ function schedule_order_status_check(data) {
 }
 
 function schedule_non_accepted_order_rejection(data, user) {
+
     logger.log();
     var deferred = Q.defer();
 
     var Agenda = require('agenda');
     var agenda = new Agenda({db: {address: 'localhost:27017/agenda'}});
 
-    agenda.define('schedule_non_accepted_order_rejection', function(job, done) {            
-      Order.findOne({order_number: data.order_number}).exec(function(err, order) {
-          if (err || !order){
-              console.log(err);
-          } 
-          else if(order.order_status === 'PENDING'){                                
-            order.order_status = 'REJECTED';
-            var current_action = {};
-            current_action.action_type = 'REJECTED';
-            current_action.action_by = 'SYSTEM';
-            order.actions.push(current_action);
-            order.save(function(err, order){
-              var date = new Date();
-              var time = date.getTime();
-              var notif = {};
-              notif.header = 'Order Rejected';
-              notif.message = 'Your order has been Rejected by merchant.';
-              notif.state = 'REJECTED';
-              notif.time = time;
-              notif.order_id = data.order_id;
-              //also send notif to AM
-              send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif); 
-            })
-          }
-      })
-      
-      done();
+    agenda.define('schedule_non_accepted_order_rejection', function(job, done) {
+        Order.findOne({order_number: data.order_number}).exec(function(err, order) {
+            if (err || !order){
+                console.log(err);
+            } 
+            else {         
+                if(order.order_status === 'PENDING'){  
+                    console.log('insiode if')                              
+                    order.order_status = 'REJECTED';
+                    var current_action = {};
+                    current_action.action_type = 'REJECTED';
+                    current_action.action_by = '01234567890123456789abcd';
+                    order.actions.push(current_action);
+                    order.save(function(err, updated_order){
+                        if(err || !updated_order){
+                            console.log(err)
+                            console.log(updated_order)
+                            deferred.reject({
+                                err: err || true,
+                                message: 'Couldn\'t update this order'
+                            });   
+                        }
+                        else{
+                                                        
+
+                            var payload = {};
+                            payload.from = 'TWYSTR';
+                            payload.message = 'Order has been rejected by sytstem '+ data.outlet.basics.name + ' order number '+ data.order_number;
+                            data.outlet.contact.phones.reg_mobile.forEach(function (phone) {
+                                if(phone && phone.num) {
+                                    payload.phone = phone.num;
+                                    Transporter.send('sms', 'vf', payload);
+                                }
+                            });
+                            
+
+                            var path = ['console', data.outlet.basics.account_mgr_email.replace('.', '').replace('@', ''),data.outlet._id]
+
+                            send_notification(['console', data.outlet.basics.account_mgr_email.replace('.', '').replace('@', ''),
+                                data.outlet._id], {
+                                message: 'order has been rejected by system.',
+                                order_id: data.order_id,
+                                type: 'cancelled'
+                            }); 
+                            
+                            var date = new Date();
+                            var time = date.getTime();
+                            var notif = {};
+                            notif.header = 'Order Rejected';
+                            notif.message = 'Your order has been Rejected by merchant.';
+                            notif.state = 'REJECTED';
+                            notif.time = time;
+                            notif.order_id = data.order_id;
+                            console.log(data.user.push_ids);
+                            send_notification_to_user(data.user.push_ids[data.user.push_ids.length-1].push_id, notif); 
+                        }
+                        
+                    })
+                }
+                console.log(order.order_status);
+            }
+        })
+        
+        done();
     });
 
     agenda.on('ready', function() {
-      agenda.schedule('in 1 minutes', 'schedule_non_accepted_order_rejection', {order_id: data.orders_id, status: 'REJECTED'});
+      agenda.schedule('in 2 minutes', 'schedule_non_accepted_order_rejection', {order_id: data.order_id});
       agenda.start();
     });
+    
     deferred.resolve(data); 
     return deferred.promise;
     
@@ -1917,9 +1994,9 @@ module.exports.update_order = function(token, order) {
                             type: 'NOT_DELIVERED'
                         });
                         var payload = {};
-                        payload.message = 'User said his order has not been delivered, Order Number '+ saved_order.order_number;
+                        payload.from = 'TWYSTR';
+                        payload.message = 'User said his order has not been delivered, Outlet name ' + saved_order.outlet.basics.name+ ' Order Number '+ saved_order.order_number;
                         payload.phone = saved_order.outlet.basics.account_mgr_phone;
-                        payload.phone = 8130857967//phone.num;
                         Transporter.send('sms', 'vf', payload);
                         
                         saved_order.order_status = 'NOT_DELIVERED';   
@@ -1969,7 +2046,7 @@ function getItemPrice(item) {
         return item.item_cost;
     } else {
         total_price += item.option.option_cost;
-        if (item.option.option_is_addon === true) {
+        if (item.option_is_addon === true) {
             total_price += item.item_cost;
         }
         if (item.option.sub_options && item.option.sub_options.length) {
@@ -1989,7 +2066,7 @@ function getItemPrice(item) {
 };
 
 function send_notification_to_user (gcm_id, notif) {
-
+    logger.log();
   var payload = {};   
 
   payload.head = notif.header;
