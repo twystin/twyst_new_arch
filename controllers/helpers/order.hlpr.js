@@ -1587,19 +1587,20 @@ function send_sms(data) {
     payload.from = 'TWYSTR';
     payload.message = '';
     var items, collected_amount;
+    var outlet_name = 'Outlet Name: ' + data.outlet.basics.name;
     if(data.user.profile && data.user.profile.first_name) {
         var name = 'Name: '+ data.user.profile.first_name;
     }
     else{
         var name = 'Name: '+ data.user.first_name;
     }
-    
+    var outlet_name = 'Outlet Name ' + data.outlet.basics.name;
     var phone = ' Phone: '+ data.user.phone;
     var address_line1 = ' Address: '+data.order.address.line1;
     var address_line2 = data.order.address.line2;
     var address_line3 = ' Landmark: '+data.order.address.landmark;
 
-    payload.message = name  + phone + address_line1 + ' Order Details: ';
+    payload.message = outlet_name + name  + phone + address_line1 + ' Order Details: ';
 
     for (var i = 0; i < data.order.items.length; i++) {
         if (data.order.items[i].option && data.order.items[i].option.option_value) {
@@ -1812,7 +1813,7 @@ function schedule_order_status_check(data) {
     });
 
     agenda.on('ready', function() {
-      agenda.schedule('in 1 minutes', 'schedule_order_status_check', {order_id: data.order_id});
+      agenda.schedule('in 5 minutes', 'schedule_order_status_check', {order_id: data.order_id});
       agenda.start();
     });
     
@@ -1895,7 +1896,7 @@ function schedule_non_accepted_order_rejection(data, user) {
     });
 
     agenda.on('ready', function() {
-      agenda.schedule('in 2 minutes', 'schedule_non_accepted_order_rejection', {order_id: data.order_id});
+      agenda.schedule('in 20 minutes', 'schedule_non_accepted_order_rejection', {order_id: data.order_id});
       agenda.start();
     });
     

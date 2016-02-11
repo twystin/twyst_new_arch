@@ -757,7 +757,7 @@ function schedule_assumed_delivered(data, user) {
 
     agenda.on('ready', function() {
       console.log(data.order.estimeted_delivery_time)
-      agenda.schedule('in' +data.order.estimeted_delivery_time + 'minutes', 'schedule_assumed_delivered', {order_id: data.order.order_id, status: 'ASSUMED_DELIVERED', previous_state: 'ACCEPTED'});
+      agenda.schedule('in ' +data.order.estimeted_delivery_time + ' minutes', 'schedule_assumed_delivered', {order_id: data.order.order_id, status: 'ASSUMED_DELIVERED', previous_state: 'ACCEPTED'});
       agenda.start();
     });
     
