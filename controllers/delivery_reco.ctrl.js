@@ -168,7 +168,6 @@ function calculate_relevance(params) {
     
     relevance = relevance - val.valid_zone.delivery_estimated_time;
     relevance = relevance - val.valid_zone.min_amt_for_delivery*100;
-    console.log(relevance)
     val.recco.relevance = relevance;
     return val;
   });
@@ -213,6 +212,17 @@ function pick_outlet_fields(params) {
       if(!item.menus.length) {
         return false;        
       }
+
+      if(item.twyst_meta.cashback_info && !item.twyst_meta.cashback_info.base_cashback) {
+        return false;
+      }
+
+      if(item.twyst_meta.twyst_commission && item.twyst_meta.twyst_commission.value === 0 && item.twyst_meta.twyst_commission.commission_slab.length) {
+        return false;
+      }
+
+      
+
       var massaged_item = {};
       massaged_item._id = item._id;
       massaged_item.name = item.basics.name;
@@ -245,14 +255,9 @@ function pick_outlet_fields(params) {
               
         inapp_cashback = item.twyst_meta.cashback_info.in_app_ratio *base_cashback;
         cod_cashback = item.twyst_meta.cashback_info.cod_ratio * base_cashback;
-        console.log(order_amount_cashback);
-        console.log(inapp_cashback);
-        console.log(cod_cashback);
-        console.log(base_cashback);
 
         var cashback = _.max([base_cashback, order_amount_cashback, inapp_cashback, cod_cashback], function(cashback){ return cashback; });
         massaged_item.cashback = cashback;
-        console.log(cashback);
       }
       else{
         massaged_item.cashback = 0;
