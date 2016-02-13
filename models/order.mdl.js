@@ -23,8 +23,7 @@ var Order = new Schema({
       lat: {type: String},
       long: {type: String}
     },
-    tag: {type: String,
-      enum: ['Home', 'Work', 'Other']}
+    tag: {type: String}
   },
   outlet: {
     type: Schema.Types.ObjectId,

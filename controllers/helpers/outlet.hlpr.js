@@ -533,7 +533,7 @@ function accept_order(data) {
           type: 'accept'
         });
 
-        User.findOne({_id: data.order.user._id}, {push_ids: 1}, function(err, user) {
+        User.findOne({_id: data.order.user._id}, function(err, user) {
           if (err || !user) {
             deferred.reject({
               err: err || true,
@@ -549,12 +549,10 @@ function accept_order(data) {
             notif.time = time;
             notif.order_id = data.order.order_id; 
 
-            send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif);
-            
             schedule_assumed_delivered(data, user);
 
             schedule_order_delivered(data, user);
-               
+            send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif);  
             deferred.resolve({
               data: order,
               message: 'order accepted successfully'
@@ -596,7 +594,7 @@ function reject_order(data) {
           type: 'reject'
         });
 
-        User.findOne({_id: data.order.user._id}, {push_ids: 1}, function(err, user) {
+        User.findOne({_id: data.order.user._id}, function(err, user) {
           if (err || !user) {
             deferred.reject({
               err: err || true,
@@ -636,8 +634,7 @@ function dispatch_order(data) {
   current_action.action_type = 'DISPATCHED';
   current_action.action_by = data.data._id;
   
-  
-  User.findOne({_id: data.order.user._id}, {push_ids: 1}, function(err, user) {
+  User.findOne({_id: data.order.user._id}, function(err, user) {
     if (err || !user) {
       deferred.reject({
         err: err || true,
@@ -720,8 +717,6 @@ function send_notification_to_user (gcm_id, notif) {
 
 function schedule_assumed_delivered(data, user) {
     logger.log();
-    var deferred = Q.defer();
-
     var Agenda = require('agenda');
     var agenda = new Agenda({db: {address: 'localhost:27017/agenda'}});
 
@@ -731,23 +726,29 @@ function schedule_assumed_delivered(data, user) {
               console.log(err);
           } 
           else if(order.order_status === 'ACCEPTED' || order.order_status === 'DISPATCHED'){
-            console.log('scheduling assumed delivered')                           
+            console.log('scheduling assumed delivered');                          
             order.order_status = 'ASSUMED_DELIVERED';
             var current_action = {};
             current_action.action_type = 'ASSUMED_DELIVERED';
             current_action.action_by = '01234567890123456789abcd';
             order.actions.push(current_action);
             order.save(function(err, order){
-              console.log('done assumed delivered')                           
-              var date = new Date();
-              var time = date.getTime();
-              var notif = {};
-              notif.header = 'Order Recieved';
-              notif.message = 'We want to know if your order has been delivered';
-              notif.state = 'ASSUMED_DELIVERED';
-              notif.time = time;
-              notif.order_id = data.order.order_id;
-              send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif); 
+              if(err) {
+                console.log('error ' + err);
+                console.log('error in scheduling assumed delivered');
+              } else {
+                console.log('done assumed delivered');
+                var date = new Date();
+                var time = date.getTime();
+                var notif = {};
+                notif.header = 'Order Recieved';
+                notif.message = 'We want to know if your order has been delivered';
+                notif.state = 'ASSUMED_DELIVERED';
+                notif.time = time;
+                notif.order_id = data.order.order_id;
+                send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif);  
+              }
+              
             })
           }
       })
@@ -756,7 +757,7 @@ function schedule_assumed_delivered(data, user) {
     });
 
     agenda.on('ready', function() {
-      console.log(data.order.estimeted_delivery_time)
+      console.log(data.order.estimeted_delivery_time);
       agenda.schedule('in ' +data.order.estimeted_delivery_time + ' minutes', 'schedule_assumed_delivered', {order_id: data.order.order_id, status: 'ASSUMED_DELIVERED', previous_state: 'ACCEPTED'});
       agenda.start();
     });
@@ -780,15 +781,23 @@ function schedule_order_delivered(data, user) {
           current_action.action_by = '01234567890123456789abcd';
           order.actions.push(current_action);
           order.save(function(err, order){
-            var date = new Date();
-            var time = date.getTime();
-            var notif = {};
-            notif.header = 'Order Delivered';
-            notif.message = 'Your order has been delivered successfully';
-            notif.state = 'DELIVERED';
-            notif.time = time;
-            notif.order_id = data.order.order_id;
-            send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif); 
+            if(err){
+              console.log('error '+ err);
+              console.log('error in delivered');
+            }
+            else{
+              console.log('done order delivered');
+              var date = new Date();
+              var time = date.getTime();
+              var notif = {};
+              notif.header = 'Order Delivered';
+              notif.message = 'Your order has been delivered successfully';
+              notif.state = 'DELIVERED';
+              notif.time = time;
+              notif.order_id = data.order.order_id;
+              send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif);   
+            }
+            
           })
         }
       })
@@ -806,11 +815,11 @@ function schedule_order_delivered(data, user) {
 
 function send_order_reject_sms(user, order_id) {
     logger.log();
-  
+    console.log(user);
     var payload  = {}
     payload.from = 'TWYSTR';
     payload.phone = user.phone;
-    payload.message = 'You order order_number('+order_number+')' +'has been rejected by merchant.'
+    payload.message = 'You order order_number('+order_id+')' +'has been rejected by merchant.'
     Transporter.send('sms', 'vf', payload);
     
 }

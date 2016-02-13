@@ -1532,6 +1532,7 @@ function process_orders(orders, deferred) {
         updated_order.actual_amount_paid = order.actual_amount_paid;
         updated_order.actions = order.actions;
         updated_order.estimeted_delivery_time = order.estimeted_delivery_time;
+        updated_order.payment_info = order.payment_info;
 
         return updated_order;
     });
@@ -1716,7 +1717,7 @@ function send_email(data) {
     else{
         merchant_email = 'kuldeep@twyst.in'
     }
-    var payload = {
+    var merchant_payload = {
         Destination: { 
             BccAddresses: [],
             CcAddresses: [],
@@ -1751,7 +1752,7 @@ function send_email(data) {
         ReturnPath: 'info@twyst.in' 
     };
     
-    Transporter.send('email', 'ses', payload).then(function(reply) {
+    Transporter.send('email', 'ses', merchant_payload).then(function(reply) {
         console.log('main reply', reply);
         deferred.resolve(data);
     }, function(err) {
@@ -1882,7 +1883,6 @@ function schedule_non_accepted_order_rejection(data, user) {
                             notif.state = 'REJECTED';
                             notif.time = time;
                             notif.order_id = data.order_id;
-                            console.log(data.user.push_ids);
                             send_notification_to_user(data.user.push_ids[data.user.push_ids.length-1].push_id, notif); 
                         }
                         
