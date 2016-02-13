@@ -774,7 +774,7 @@ function schedule_order_delivered(data, user) {
         if (err || !order){
             console.log(err);
         } 
-        else if(order.order_status === 'ASSUMED_DELIVERED'){                                
+        else if(order.order_status === 'ASSUMED_DELIVERED' || order.order_status === 'DISPATCHED'){                                
           order.order_status = 'DELIVERED';
           var current_action = {};
           current_action.action_type = 'DELIVERED';
@@ -815,7 +815,6 @@ function schedule_order_delivered(data, user) {
 
 function send_order_reject_sms(user, order_id) {
     logger.log();
-    console.log(user);
     var payload  = {}
     payload.from = 'TWYSTR';
     payload.phone = user.phone;

@@ -1590,12 +1590,12 @@ function send_sms(data) {
     var items, collected_amount;
     var outlet_name = 'Outlet Name: ' + data.outlet.basics.name;
     if(data.user.profile && data.user.profile.first_name) {
-        var name = 'Name: '+ data.user.profile.first_name;
+        var name = ' Name: '+ data.user.profile.first_name;
     }
     else{
-        var name = 'Name: '+ data.user.first_name;
+        var name = ' Name: '+ data.user.first_name;
     }
-    var outlet_name = 'Outlet Name ' + data.outlet.basics.name;
+    
     var phone = ' Phone: '+ data.user.phone;
     var address_line1 = ' Address: '+data.order.address.line1;
     var address_line2 = data.order.address.line2;
