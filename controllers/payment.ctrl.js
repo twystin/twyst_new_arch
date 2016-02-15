@@ -39,46 +39,50 @@ module.exports.get_zaakpay_response = function(req, res) {
 		+responseDescription+"'";			
   	}
 
-  	PaymentHelper.calculate_checksum(message, type).then(function(checksum){
-  		if(checksum === zaakpay_response.checksum) {
-  			console.log('checksum verified');
-  			var data = {};
-  			data.order_number = zaakpay_response.orderId;
-  			Order.findOne({
-  				order_number: data.order_number
-  			}).populate('outlet user').exec(function(err, order) {
-		        if (err || !order) {
-		          console.log(err);
-		          console.log('order not found');
+  	if(zaakpay_response.responseCode === 0 || zaakpay_response.responseCode === 100) {
+  		PaymentHelper.calculate_checksum(message, type).then(function(checksum){
+	  		if(checksum === zaakpay_response.checksum) {
+	  			console.log('checksum verified');
+	  			var data = {};
+	  			data.order_number = zaakpay_response.orderId;
+	  			Order.findOne({
+	  				order_number: data.order_number
+	  			}).populate('outlet user').exec(function(err, order) {
+			        if (err || !order) {
+			          console.log(err);
+			          console.log('order not found');
 
-		        } 
-		        else {
-		        	data.outlet = order.outlet;
-		        	data.user = order.user;
-		        	data.order = order;
-		        	data.card_id = cardhashid;
-		        	data.payment_mode = zaakpay_response.paymentMethod;
+			        } 
+			        else {
+			        	data.outlet = order.outlet;
+			        	data.user = order.user;
+			        	data.order = order;
+			        	data.card_id = cardhashid;
+			        	data.payment_mode = zaakpay_response.paymentMethod;
 
-		        	if(zaakpay_response.paymentMethod === 'Zaakpay') {		       
-		        		data.cardhashid = zaakpay_response.cardhashid;
-		        	}
-		        	
-		        	OrderHelper.confirm_inapp_order(data).then(function(data){
-		  				HttpHelper.success(res, checksum, 'order confirmed');	
-		  			},	function(err) {
-						HttpHelper.error(res, err);
-				  	});		        
-		        }
-		    });
-  		}
-  		else{
-  			console.log('fraud detected');
-  			HttpHelper.error(res, 'checsum not valid');
-  		}
-	},	function(err) {
-		HttpHelper.error(res, err);
-  	});
-    
+			        	if(zaakpay_response.paymentMethod === 'Zaakpay') {		       
+			        		data.cardhashid = zaakpay_response.cardhashid;
+			        	}
+			        	
+			        	OrderHelper.confirm_inapp_order(data).then(function(data){
+			  				HttpHelper.success(res, checksum, 'order confirmed');	
+			  			},	function(err) {
+							HttpHelper.error(res, err);
+					  	});		        
+			        }
+			    });
+	  		}
+	  		else{
+	  			console.log('fraud detected');
+	  			HttpHelper.error(res, 'checsum not valid');
+	  		}
+		},	function(err) {
+			HttpHelper.error(res, err);
+	  	});	
+  	}
+  	else{
+  		HttpHelper.success(res, 'order processed');	
+  	}    
 };
 
 module.exports.calculate_checksum = function(req, res) {
