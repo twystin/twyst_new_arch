@@ -803,7 +803,7 @@ function check_minimum_bill_amount(data) {
     var deferred = Q.defer();
 
     var order_actual_value_obj = calculate_tax(calculate_order_value(data, null, null), data.outlet);
-    if(order_actual_value_obj.order_value_with_tax > data.outlet.valid_zone.min_amt_for_delivery) {
+    if(order_actual_value_obj.order_value_with_tax >= data.outlet.valid_zone.min_amt_for_delivery) {
         deferred.resolve(data);    
     }
     else{
@@ -970,21 +970,23 @@ function calculate_tax(order_value, outlet) {
     order_value_obj.new_order_value = 0;
     order_value_obj.vat = 0;
     order_value_obj.st = 0;
-
-    tax_grid = _.find(TaxConfig.tax_grid, function(tax_grid) {        
-        if(tax_grid.city.trim() === outlet.contact.location.city.trim()) {
-            return tax_grid;
-        }
-    })
-
     var new_order_value = 0, vat = 0, surcharge_on_vat = 0, st = 0, sbc = 0,packing_charge = 0, delivery_charge = 0;
-   
-    vat = order_value*tax_grid.vat/100;
-    surcharge_on_vat = vat*tax_grid.surcharge_on_vat/100;
 
-    st = ((order_value*tax_grid.st_applied_on_percentage/100)*tax_grid.st)/100;   
+    if(outlet.menus[0].menu_item_type === 'type_1') {
+        tax_grid = _.find(TaxConfig.tax_grid, function(tax_grid) {        
+            if(tax_grid.city.trim() === outlet.contact.location.city.trim()) {
+                return tax_grid;
+            }
+        })
+       
+        vat = order_value*tax_grid.vat/100;
+        surcharge_on_vat = vat*tax_grid.surcharge_on_vat/100;
+
+        st = ((order_value*tax_grid.st_applied_on_percentage/100)*tax_grid.st)/100;   
+        
+        sbc = ((order_value*tax_grid.st_applied_on_percentage/100)*tax_grid.sbc)/100;     
+    }
     
-    sbc = ((order_value*tax_grid.st_applied_on_percentage/100)*tax_grid.sbc)/100; 
     
     if(outlet.attributes.packing_charge) {
         packing_charge = outlet.attributes.packing_charge || 0;
