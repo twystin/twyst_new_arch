@@ -582,8 +582,7 @@ var OutletSchema = new Schema({
     menu_item_type: {
       type: String,
       default: 'type_1',
-      required: true,
-      enum: ['type_1, type_2', 'type_3']
+      required: true
     },
     menu_type: {
       type: String// Dine-in / Takeaway / Delivery / Weekend / Dinner / All

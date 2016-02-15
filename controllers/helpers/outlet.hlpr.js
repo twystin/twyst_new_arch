@@ -57,9 +57,7 @@ module.exports.get_all_outlets = function(token) {
           var outlets = _.filter(JSON.parse(reply), function(outlet) {
             return outlet_ids.indexOf(outlet._id.toString()) !== -1;
           });
-          outlets = _.filter(outlets, function(outlet){
-            return outlet.outlet_meta.status !== 'archived';
-          });
+          
           deferred.resolve({
             data: outlets,
             message: 'Got your outlets'
