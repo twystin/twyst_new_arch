@@ -107,6 +107,7 @@ function map_valid_delivery_zone(params) {
       if(val.attributes.delivery.delivery_zone && val.attributes.delivery.delivery_zone.length) {        
         var delivery_zone = _.map(val.attributes.delivery.delivery_zone, function(current_zone) {          
           //check if coord exists for delivery zone
+
           if(current_zone.coord && current_zone.coord.length &&
             geolib.isPointInside({latitude: params.query.lat, longitude: params.query.long},
             current_zone.coord)){
@@ -151,7 +152,13 @@ function set_delivery_experiance(params) {
   
   params.outlets = _.mapObject(params.outlets, function(val, key) {
     val.recco = val.recco || {};
-    val.recco.delivery_experiance = null;
+    if(val.twyst_meta.rating && val.twyst_meta.rating.value){
+      val.recco.delivery_experiance = val.twyst_meta.rating.value;  
+    }
+    else{
+      val.recco.delivery_experiance = null;    
+    }
+    
     return val;
   });
   
@@ -261,7 +268,7 @@ function pick_outlet_fields(params) {
         cod_cashback = item.twyst_meta.cashback_info.cod_ratio * base_cashback;
 
         var cashback = _.max([base_cashback, order_amount_cashback, inapp_cashback, cod_cashback], function(cashback){ return cashback; });
-        massaged_item.cashback = cashback;
+        massaged_item.cashback = Math.round(cashback);
       }
       else{
         massaged_item.cashback = 0;

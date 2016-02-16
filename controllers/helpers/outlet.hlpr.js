@@ -710,7 +710,7 @@ function send_notification_to_user (gcm_id, notif) {
   payload.order_id = notif.order_id;
 
   Transporter.send('push', 'gcm', payload);
-       
+    
 }
 
 function schedule_assumed_delivered(data, user) {
@@ -749,9 +749,8 @@ function schedule_assumed_delivered(data, user) {
               
             })
           }
-      })
-      
-      done();
+          done();
+      })      
     });
 
     agenda.on('ready', function() {
@@ -798,17 +797,15 @@ function schedule_order_delivered(data, user) {
             
           })
         }
-      })
-      
-      done();
+        done();
+      })      
     });
 
     agenda.on('ready', function() {
       console.log(parseInt(data.order.estimeted_delivery_time)+20);
       agenda.schedule('in ' +data.order.estimeted_delivery_time+20+ ' minutes', 'schedule_order_delivered', {order_id: data.order.order_id, status: 'DELIVERED', previous_state: 'ASSUMED_DELIVERED'});
       agenda.start();
-    });
-    
+    });    
 }
 
 function send_order_reject_sms(user, order_id) {

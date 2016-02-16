@@ -38,8 +38,8 @@ module.exports.get_zaakpay_response = function(req, res) {
 		message = "'"+orderId+"''"+amount+"''"+responseCode+"''"
 		+responseDescription+"'";			
   	}
-
-  	if(zaakpay_response.responseCode === 0 || zaakpay_response.responseCode === 100) {
+  	
+  	if(zaakpay_response.responseCode === '0' || zaakpay_response.responseCode === '100') {
   		PaymentHelper.calculate_checksum(message, type).then(function(checksum){
 	  		if(checksum === zaakpay_response.checksum) {
 	  			console.log('checksum verified');

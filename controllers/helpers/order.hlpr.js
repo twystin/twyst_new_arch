@@ -1810,9 +1810,8 @@ function schedule_order_status_check(data) {
                 }
                 console.log(order.order_status);
             }
+            done();
         })
-        
-        done();
     });
 
     agenda.on('ready', function() {
@@ -1824,7 +1823,7 @@ function schedule_order_status_check(data) {
     return deferred.promise;
 }
 
-function schedule_non_accepted_order_rejection(data, user) {
+function schedule_non_accepted_order_rejection(data) {
 
     logger.log();
     var deferred = Q.defer();
@@ -1837,64 +1836,58 @@ function schedule_non_accepted_order_rejection(data, user) {
             if (err || !order){
                 console.log(err);
             } 
-            else {         
-                if(order.order_status === 'PENDING'){  
-                    console.log('insiode if')                              
-                    order.order_status = 'REJECTED';
-                    var current_action = {};
-                    current_action.action_type = 'REJECTED';
-                    current_action.action_by = '01234567890123456789abcd';
-                    order.actions.push(current_action);
-                    order.save(function(err, updated_order){
-                        if(err || !updated_order){
-                            console.log(err)
-                            console.log(updated_order)
-                            deferred.reject({
-                                err: err || true,
-                                message: 'Couldn\'t update this order'
-                            });   
-                        }
-                        else{
-                                                        
-
-                            var payload = {};
-                            payload.from = 'TWYSTR';
-                            payload.message = 'Order has been rejected by sytstem '+ data.outlet.basics.name + ' order number '+ data.order_number;
-                            data.outlet.contact.phones.reg_mobile.forEach(function (phone) {
-                                if(phone && phone.num) {
-                                    payload.phone = phone.num;
-                                    Transporter.send('sms', 'vf', payload);
-                                }
-                            });
-                            
-
-                            var path = ['console', data.outlet.basics.account_mgr_email.replace('.', '').replace('@', ''),data.outlet._id]
-
-                            send_notification(['console', data.outlet.basics.account_mgr_email.replace('.', '').replace('@', ''),
-                                data.outlet._id], {
-                                message: 'order has been rejected by system.',
-                                order_id: data.order_id,
-                                type: 'cancelled'
-                            }); 
-                            
-                            var date = new Date();
-                            var time = date.getTime();
-                            var notif = {};
-                            notif.header = 'Order Rejected';
-                            notif.message = 'Your order has been Rejected by merchant.';
-                            notif.state = 'REJECTED';
-                            notif.time = time;
-                            notif.order_id = data.order_id;
-                            send_notification_to_user(data.user.push_ids[data.user.push_ids.length-1].push_id, notif); 
-                        }
+            else if(order.order_status === 'PENDING'){  
+                console.log('inside if');
+                order.order_status = 'REJECTED';
+                var current_action = {};
+                current_action.action_type = 'REJECTED';
+                current_action.action_by = '01234567890123456789abcd';
+                order.actions.push(current_action);
+                order.save(function(err, updated_order){
+                    if(err || !updated_order){
+                        console.log(err)
+                        console.log(updated_order)
+                        deferred.reject({
+                            err: err || true,
+                            message: 'Couldn\'t update this order'
+                        });   
+                    }
+                    else{                                                    
+                        var payload = {};
+                        payload.from = 'TWYSTR';
+                        payload.message = 'Order has been rejected by sytstem '+ data.outlet.basics.name + ' order number '+ data.order_number;
+                        data.outlet.contact.phones.reg_mobile.forEach(function (phone) {
+                            if(phone && phone.num) {
+                                payload.phone = phone.num;
+                                Transporter.send('sms', 'vf', payload);
+                            }
+                        });
                         
-                    })
-                }
+
+                        var path = ['console', data.outlet.basics.account_mgr_email.replace('.', '').replace('@', ''),data.outlet._id]
+
+                        send_notification(['console', data.outlet.basics.account_mgr_email.replace('.', '').replace('@', ''),
+                            data.outlet._id], {
+                            message: 'order has been rejected by system.',
+                            order_id: data.order_id,
+                            type: 'cancelled'
+                        }); 
+                        
+                        var date = new Date();
+                        var time = date.getTime();
+                        var notif = {};
+                        notif.header = 'Order Rejected';
+                        notif.message = 'Your order has been Rejected by merchant.';
+                        notif.state = 'REJECTED';
+                        notif.time = time;
+                        notif.order_id = data.order_id;
+                        send_notification_to_user(data.user.push_ids[data.user.push_ids.length-1].push_id, notif); 
+                    }                    
+                })
                 console.log(order.order_status);
             }
+            done();
         })
-        
-        done();
     });
 
     agenda.on('ready', function() {
