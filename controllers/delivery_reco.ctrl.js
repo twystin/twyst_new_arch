@@ -106,6 +106,7 @@ function map_valid_delivery_zone(params) {
     params.outlets = _.map(params.outlets, function(val) {    
       if(val.attributes.delivery.delivery_zone && val.attributes.delivery.delivery_zone.length) {        
         var delivery_zone = _.map(val.attributes.delivery.delivery_zone, function(current_zone) {          
+          //check if coord exists for delivery zone
           if(current_zone.coord && current_zone.coord.length &&
             geolib.isPointInside({latitude: params.query.lat, longitude: params.query.long},
             current_zone.coord)){
@@ -221,6 +222,9 @@ function pick_outlet_fields(params) {
         return false;
       }
 
+      if(!item.basics.account_mgr_email || !item.basics.account_mgr_phone) {
+        return false;
+      }
       
 
       var massaged_item = {};
