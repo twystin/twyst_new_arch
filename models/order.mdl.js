@@ -35,6 +35,8 @@ var Order = new Schema({
   order_value_without_offer: {type: Number, default: 0},
   order_value_with_offer: {type: Number, default: 0},
   tax_paid: {type: Number, default: 0},
+  delivery_charge: {type: Number, default: 0},
+  packaging_charge: {type: Number, default: 0},
   actual_amount_paid: {type: Number, default: 0},
   cashback: {type: Number, default: 0},
   payment_info: {

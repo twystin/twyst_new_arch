@@ -217,7 +217,7 @@ function pick_outlet_fields(params) {
         return false;        
       }
 
-      if(!item.menus.length) {
+      if(!item.menus.length || item.menus[0].status != 'active') {
         return false;        
       }
 

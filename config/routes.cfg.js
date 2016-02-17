@@ -81,7 +81,6 @@ module.exports = function(app) {
 
     app.post('/api/v4/comments/', EventCtrl.comments);
     app.post('/api/v4/contact_us', EventCtrl.contact_us);
-    app.post('/api/v4/apply', EventCtrl.apply);
   })();
 
   (function OutletRoutes() {
@@ -184,6 +183,7 @@ module.exports = function(app) {
     app.post('/api/v4/zaakpay/response', PaymentCtrl.get_zaakpay_response);
     app.post('/api/v4/calculate/checksum', PaymentCtrl.calculate_checksum);
     app.post('/api/v4/zaakpay/refund', PaymentCtrl.initiate_refund);
+    app.post('/api/v4/paytm/response', PaymentCtrl.get_paytm_response);
   })();
 
   (function LegacyRoutes() {

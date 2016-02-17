@@ -193,3 +193,12 @@ module.exports.initiate_refund = function(req, res) {
 	    });
 	}	
 }
+
+module.exports.get_paytm_response = function(req, res) {
+	logger.log();
+  	var paytm_response = {};
+  	paytm_response = _.extend(paytm_response, req.body);
+  	console.log(paytm_response);
+
+  	HttpHelper.success(res, 'resonse recieved successfully');
+}

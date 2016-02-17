@@ -70,7 +70,7 @@ module.exports.verify_order = function(token, order) {
         updated_data.order_actual_value_without_tax = data.order.order_actual_value_without_tax;
         updated_data.vat = data.order.vat;
         updated_data.st = data.order.st;
-        updated_data.packing_charge = data.order.packing_charge;
+        updated_data.packaging_charge = data.order.packaging_charge;
         updated_data.delivery_charge = data.order.delivery_charge;
         updated_data.order_actual_value_with_tax = data.order.order_actual_value_with_tax;
         updated_data.offers = [];
@@ -328,13 +328,11 @@ function calculate_order_value(data, free_item, free_item_option) {
     var  amount = 0;
     
     for(var i = 0; i < items.length; i++) {
-        console.log(items[i].item_id);
         var sub_options = [], addons = [], category, sub_category, item, option, menu_sub_options, order_sub_options, menu_addons,order_addons;
         category = _.findWhere(menu.menu_categories, {_id: items[i].category_id});
         var sub_category = _.findWhere(category && category.sub_categories, {_id: items[i].sub_category_id});
         
         item = _.findWhere(sub_category && sub_category.items, {_id: items[i].item_id});
-        console.log(item);
         items[i].item_details = item;
         
         if(item && item.options && items[i].option_id) {
@@ -345,7 +343,6 @@ function calculate_order_value(data, free_item, free_item_option) {
             option = null;
             items[i].option = null;
         }
-        console.log(option)
         
         if(option && option.sub_options && items[i].sub_option_set_ids) {
             menu_sub_options = option.sub_options;
@@ -373,10 +370,6 @@ function calculate_order_value(data, free_item, free_item_option) {
             })
         }
         
-        
-        console.log(items[i].quantity +'quantity' + 'option' + option);
-        console.log(option)
-
         if(item && item._id === free_item && option && option._id === free_item_option) {
             amount = amount+(option.option_cost*(items[i].quantity-1));
             if(sub_options.length) {
@@ -609,18 +602,16 @@ function checkFreeItem(data, offer) {
 
         if(searchItemInOfferItems(items[i], offer)){
             var order_value = calculate_order_value(passed_data, items[i].item_id, items[i].option);
-            console.log(order_value);
-            console.log(offer.minimum_bill_value);
+            
             if(order_value >= offer.minimum_bill_value) {
                 console.log('offer applicable');
                 var order_value_obj = calculate_tax(order_value, passed_data.outlet);
-                console.log(order_value_obj);
                 if(order_value_obj.order_value_with_tax >= data.outlet.valid_zone.min_amt_for_delivery){
                     offer.is_applicable = true;
                     offer.order_value_without_tax = Math.round(order_value_obj.order_value);
                     offer.vat = order_value_obj.vat;
                     offer.st = order_value_obj.st;
-                    offer.packing_charge = order_value_obj.packing_charge;
+                    offer.packaging_charge = order_value_obj.packaging_charge;
                     offer.delivery_charge = order_value_obj.delivery_charge;
                     offer.order_value_with_tax = Math.round(order_value_obj.new_order_value);
                     offer.free_item_index = i;
@@ -659,7 +650,6 @@ function checkOfferTypeBuyXgetY(data, offer) {
 
     for(var i = 0; i < items.length; i++) {
         if(searchItemInPaidItems(items[i], offer)){
-            console.log('setting to true is_contain_paid_item')
             is_contain_paid_item = true;
             break;
         }
@@ -669,7 +659,6 @@ function checkOfferTypeBuyXgetY(data, offer) {
         
         if(searchItemInOfferItems(items[i], offer) && is_contain_paid_item){
             var order_value = calculate_order_value(passed_data, items[i].item_id, items[i].option);
-            console.log('yaha par nahi aata')
             console.log(order_value);
             console.log(offer.minimum_bill_value);
             if(order_value >= offer.minimum_bill_value) {
@@ -680,7 +669,7 @@ function checkOfferTypeBuyXgetY(data, offer) {
                     offer.order_value_without_tax = Math.round(order_value_obj.order_value);
                     offer.vat = order_value_obj.vat;
                     offer.st = order_value_obj.st;
-                    offer.packing_charge = order_value_obj.packing_charge;
+                    offer.packaging_charge = order_value_obj.packaging_charge;
                     offer.delivery_charge = order_value_obj.delivery_charge;
                     offer.order_value_with_tax = Math.round(order_value_obj.new_order_value);
                     offer.free_item_index = i;
@@ -730,7 +719,7 @@ function checkOfferTypeFlatOff(data, offer) {
             offer.order_value_without_tax = Math.round(order_value_obj.order_value);
             offer.vat = order_value_obj.vat;
             offer.st = order_value_obj.st;
-            offer.packing_charge = order_value_obj.packing_charge;
+            offer.packaging_charge = order_value_obj.packaging_charge;
             offer.delivery_charge = order_value_obj.delivery_charge;
             offer.order_value_with_tax = Math.round(order_value_obj.new_order_value);
             return offer;     
@@ -772,15 +761,13 @@ function checkOfferTypePercentageOff(data, offer) {
             order_value = order_value - offer.actions.reward.reward_meta.max;               
         }
         var order_value_obj = calculate_tax(order_value, passed_data.outlet);
-        console.log(data.outlet.valid_zone);
         if(order_value_obj.order_value_with_tax >= data.outlet.valid_zone.min_amt_for_delivery){
             console.log('offer applicable');
-            console.log(offer.actions.reward.reward_meta.percent)
             offer.is_applicable = true;
             offer.order_value_without_tax = Math.round(order_value_obj.order_value);
             offer.vat = order_value_obj.vat;
             offer.st = order_value_obj.st;
-            offer.packing_charge = order_value_obj.packing_charge;
+            offer.packaging_charge = order_value_obj.packaging_charge;
             offer.delivery_charge = order_value_obj.delivery_charge;
             offer.order_value_with_tax = Math.round(order_value_obj.new_order_value);
             return offer;     
@@ -843,7 +830,7 @@ function generate_and_cache_order(data) {
     order.order_actual_value_without_tax = order_actual_value_obj.order_value;     
     order.vat = order_actual_value_obj.vat;     
     order.st = order_actual_value_obj.st;     
-    order.packing_charge = order_actual_value_obj.packing_charge;     
+    order.packaging_charge = order_actual_value_obj.packaging_charge;     
     order.delivery_charge = order_actual_value_obj.delivery_charge;
     order.order_actual_value_with_tax = order_actual_value_obj.new_order_value;     
     order.available_offers = data.outlet.offers;
@@ -902,8 +889,6 @@ function apply_selected_offer(data) {
         }
         else{
             var order = JSON.parse(reply);
-            console.log(order);
-            console.log(data.order_number)
             if(data.order_number.toString() === order.order_number.toString()) {
                 data.order_actual_value_without_tax = order.order_actual_value_without_tax;
                 data.vat = order.vat;
@@ -924,7 +909,7 @@ function apply_selected_offer(data) {
                              logger.log(err);
                            }
                            else{
-                                console.log('order found and offer applied')
+                                console.log('order found and offer applied');
                                 data.offer_used = offer_used;                                
                                 deferred.resolve(data);
                             }
@@ -938,7 +923,7 @@ function apply_selected_offer(data) {
                              logger.log(err);
                            }
                            else{
-                                console.log('order found no offer applied')
+                                console.log('order found no offer applied');
                                 data.offer_used = offer_used;
                                 deferred.resolve(data);
                            }
@@ -948,7 +933,7 @@ function apply_selected_offer(data) {
                       
                 }
                 else{
-                    console.log('order found and no offer applied')                    
+                    console.log('order found and no offer applied');                    
                     data.offer_used = null;
                     deferred.resolve(data);
                 }
@@ -970,7 +955,7 @@ function calculate_tax(order_value, outlet) {
     order_value_obj.new_order_value = 0;
     order_value_obj.vat = 0;
     order_value_obj.st = 0;
-    var new_order_value = 0, vat = 0, surcharge_on_vat = 0, st = 0, sbc = 0,packing_charge = 0, delivery_charge = 0;
+    var new_order_value = 0, vat = 0, surcharge_on_vat = 0, st = 0, sbc = 0,packaging_charge = 0, delivery_charge = 0;
 
     if(outlet.menus[0].menu_item_type === 'type_1') {
         tax_grid = _.find(TaxConfig.tax_grid, function(tax_grid) {        
@@ -988,19 +973,20 @@ function calculate_tax(order_value, outlet) {
     }
     
     
-    if(outlet.attributes.packing_charge) {
-        packing_charge = outlet.attributes.packing_charge || 0;
+    if(outlet.attributes.has_packaging_charge && 
+        outlet.attributes.packaging_charge.is_fixed) {
+        packaging_charge = outlet.attributes.packaging_charge.value || 0;
     }
 
     if(outlet.valid_zone.delivery_charge) {
         delivery_charge = outlet.valid_zone.delivery_charge || 0;
     }
-    console.log(vat + ' ' + surcharge_on_vat + ' ' + st + ' ' + sbc + ' ' + packing_charge + ' ' + delivery_charge)
-    new_order_value = order_value+vat+surcharge_on_vat+st+sbc+packing_charge+delivery_charge;
+    console.log(vat + ' ' + surcharge_on_vat + ' ' + st + ' ' + sbc + ' ' + packaging_charge + ' ' + delivery_charge)
+    new_order_value = order_value+vat+surcharge_on_vat+st+sbc+packaging_charge+delivery_charge;
     
     order_value_obj.vat = vat+surcharge_on_vat;
     order_value_obj.st = st+sbc;
-    order_value_obj.packing_charge = packing_charge;
+    order_value_obj.packaging_charge = packaging_charge;
     order_value_obj.delivery_charge = delivery_charge;
     order_value_obj.new_order_value = new_order_value;
     order_value_obj.order_value = order_value;
@@ -1023,7 +1009,7 @@ function massage_offer(data) {
         massaged_offer.order_value_without_tax = offer.order_value_without_tax;
         massaged_offer.vat = offer.vat;
         massaged_offer.st = offer.st;
-        massaged_offer.packing_charge = offer.packing_charge;
+        massaged_offer.packaging_charge = offer.packaging_charge;
         massaged_offer.delivery_charge = offer.delivery_charge;
         massaged_offer.order_value_with_tax = offer.order_value_with_tax;
         massaged_offer.is_applicable = offer.is_applicable;
@@ -1119,7 +1105,8 @@ function massage_order(data){
                 order.estimeted_delivery_time = order.estimeted_delivery_time;
                 order.items = items;
                 order.address.delivery_zone = order.delivery_zone;
-                
+                order.packaging_charge = order.packaging_charge;
+                order.delivery_charge = order.delivery_charge;
                 if(order.offer_used) {
                     order.order_value_without_offer = Math.round(order.order_actual_value_without_tax);
                     order.order_value_with_offer = Math.round(order.offer_used.order_value_without_tax);
@@ -1173,38 +1160,28 @@ function calculate_cashback(data) {
 
         if(data.outlet.twyst_meta.cashback_info.order_amount_slab.length) {
             order_amount_ratio = _.find(data.outlet.twyst_meta.cashback_info.order_amount_slab, function(slab){
-                if(data.order.order_value_without_tax > slab.start &&
-                    data.order.order_value_without_tax < slab.end) {
+                if(data.order.order_actual_value_without_tax > slab.start &&
+                    data.order.order_actual_value_without_tax < slab.end) {
                     return slab.ratio;
                 }
             });    
         }
         
-        var in_app_ratio = data.outlet.twyst_meta.cashback_info.in_app_ratio;
+        var inapp_ratio = data.outlet.twyst_meta.cashback_info.in_app_ratio;
         var cod_ratio = data.outlet.twyst_meta.cashback_info.cod_ratio;
         var base_cashback = data.outlet.twyst_meta.cashback_info.base_cashback;
-        console.log(order_amount_ratio);
-        console.log(order_amount_ratio);
-        if(order_amount_ratio > in_app_ratio) {
-            inapp_cashback = parseInt(data.order.order_value_without_tax)*parseInt(base_cashback) * parseInt(order_amount_ratio) /100;
-        }
-        else{
-            inapp_cashback =  parseInt(data.order.order_value_without_tax)*parseInt(base_cashback) * parseInt(in_app_ratio) /100;
-        }
-
-        if(order_amount_ratio > cod_ratio) {
-            cod_cashback =  parseInt(data.order.order_value_without_tax)*parseInt(base_cashback) * parseInt(order_amount_ratio) /100;
-        }
-        else{
-            cod_cashback =  parseInt(data.order.order_value_without_tax)*parseInt(base_cashback) * parseInt(cod_ratio) /100;
-        }
-                
-        data.order.cod_cashback = cod_cashback;
-        data.order.inapp_cashback = inapp_cashback;
+        
+        var order_amount_cashback = data.order.order_actual_value_without_tax*base_cashback * order_amount_ratio /100;
+        cod_cashback = data.order.order_ctual_value_without_tax*base_cashback * cod_ratio /100;
+        inapp_cashback = data.order.order_actual_value_without_tax*base_cashback * inapp_ratio /100;
+        cod_cashback = _.max([base_cashback, order_amount_cashback, cod_cashback], function(cashback){ return cashback; });
+        inapp_cashback = _.max([base_cashback, order_amount_cashback, inapp_cashback], function(cashback){ return cashback; });
+        data.order.cod_cashback = Math.round(cod_cashback);
+        data.order.inapp_cashback = Math.round(inapp_cashback);
         
     }
     else{
-        console.log('cashback not setup')
+        console.log('cashback not setup');
         data.order.cod_cashback = 0;
         data.order.inapp_cashback = 0;   
         
@@ -1511,13 +1488,8 @@ function process_orders(orders, deferred) {
         updated_order.outlet = order.outlet._id;
         updated_order.menu_id = order.menu_id;
         updated_order.address = order.address;
-        updated_order.is_favourite = order.is_favourite;
-        if(order.offer_used) {
-            updated_order.order_cost = order.order_value_with_offer + order.tax_paid;
-        }
-        else{
-            updated_order.order_cost = order.order_value_without_offer + order.tax_paid;
-        }
+        updated_order.is_favourite = order.is_favourite;        
+        updated_order.order_cost = order.actual_amount_paid;        
         updated_order.user = {
             _id: order.user && order.user._id,
             first_name: order.user && order.user.first_name,
@@ -1527,6 +1499,8 @@ function process_orders(orders, deferred) {
         }
         updated_order.order_value_without_offer = order.order_value_without_offer;
         updated_order.order_value_with_offer = order.order_value_with_offer;
+        updated_order.packaging_charge = order.packaging_charge || 0;
+        updated_order.delivery_charge = order.delivery_charge || 0;
         updated_order.tax_paid = order.tax_paid;
         updated_order.cashback = order.cashback;
         updated_order.order_date = order.order_date;
@@ -1863,7 +1837,6 @@ function schedule_non_accepted_order_rejection(data) {
                             }
                         });
                         
-
                         var path = ['console', data.outlet.basics.account_mgr_email.replace('.', '').replace('@', ''),data.outlet._id]
 
                         send_notification(['console', data.outlet.basics.account_mgr_email.replace('.', '').replace('@', ''),
@@ -1994,8 +1967,6 @@ module.exports.update_order = function(token, order) {
                         payload.message = 'User said his order has not been delivered, Outlet name ' + saved_order.outlet.basics.name+ ' Order Number '+ saved_order.order_number;
                         payload.phone = saved_order.outlet.basics.account_mgr_phone;
                         Transporter.send('sms', 'vf', payload);
-                        
-                        saved_order.order_status = 'NOT_DELIVERED';   
                     }
                                         
                     saved_order.save(function(err, order){

@@ -12,6 +12,7 @@ var Event = mongoose.model('Event');
 var HttpHelper = require('../common/http.hlpr');
 var AuthHelper = require('../common/auth.hlpr');
 var EventHelper = require('./helpers/event.hlpr');
+var Transporter = require('../transports/transporter.js');
 
 module.exports.new = function(req, res) {
     logger.log();
@@ -239,7 +240,7 @@ module.exports.update_event = function(req, res) {
 
 module.exports.contact_us = function(req, res) {
     logger.log();
-    var Mailer = require('../transports/email/gmail.transport');
+
     if (!req.body.name) {
         HttpHelper.error(res, null, "Name required");
     } else if (!req.body.email) {
@@ -247,55 +248,44 @@ module.exports.contact_us = function(req, res) {
     } else if (!req.body.comments) {
         HttpHelper.error(res, null, "Comments cannot be left blank.");
     } else {
-        Mailer.send({
-            from: 'contactus@twyst.in',
-            to: 'hemant@twyst.in, kuldeep@twyst.in, al@twyst.in, rc@twyst.in',
-            subject: 'Contact Us Submittion',
-            text: "From: " + req.body.name + "\nE-Mail: " + req.body.email + "\nRemarks: " + req.body.comments,
-            html: "<h4>From</h4>" + req.body.name + "<h4>E-Mail</h4>" + req.body.email + "<h4>Remarks</h4>" + req.body.comments,
-        }).then(function(reply) {
+        var payload = {
+            Destination: { 
+                BccAddresses: [],
+                CcAddresses: [],
+                ToAddresses: ['kuldeep@twyst.in', 'al@twyst.in', "rc@twyst.in"]
+            },
+            Message: { /* required */
+                Body: { /* required */
+                    Html: {
+                        Data: "<h4>From</h4>" + req.body.name + "<h4>E-Mail</h4>" + req.body.email + "<h4>Remarks</h4>" + req.body.comments
+        
+                    },
+                    Text: {
+                        Data: "From: " + req.body.name + "\nE-Mail: " + req.body.email + "\nRemarks: " + req.body.comments
+                        
+                    }
+                },
+                Subject: { /* required */
+                  Data: 'Contact Us Submittion', /* required */
+                  
+                }
+            },
+            Source: 'contactus@twyst.in',
+            ReturnPath: 'info@twyst.in'  
+            
+        };
+        
+        Transporter.send('email', 'ses', payload).then(function(reply) {
             console.log('main reply', reply);
             HttpHelper.success(res, null, "Thank you for reaching out. We'll get back with you shortly.");
         }, function(err) {
             console.log('mail failed', err);
             HttpHelper.error(res, err || null, "Something went wrong. Please try after sometime.");
         });
+        
     }
 }
 
-module.exports.apply = function(req, res) {
-    logger.log();
-    var AWSHelper = require('./helpers/aws.hlpr.js');
-    var Mailer = require('../transports/email/gmail.transport');
-    var formats = require('../common/fileformats.js').file_formats;
-    if (!req.body.position) {
-        HttpHelper.error(res, null, 'Please specify the position');
-    } else if (!req.body.resume) {
-        HttpHelper.error(res, null, "Resume file required");
-    } else if (!req.body.format) {
-        HttpHelper.error(res, null, "file format required");
-    } else {
-        var buff = new Buffer(req.body.resume.replace(/^data:application\/\w+;base64,/, ''), 'base64');
-        var timestamp = Date.now();
-
-        Mailer.send({
-            from: 'apply@twyst.in',
-            to: 'hemant@twyst.in, kuldeep@twyst.in, al@twyst.in, rc@twyst.in',
-            subject: 'Candidate Application (' + req.body.position + ')',
-            text: 'New job application',
-            html: 'New job application',
-            attachments: [{
-                filename: 'resume' + formats[req.body.format],
-                content: buff
-            }]
-        }).then(function(reply) {
-            HttpHelper.success(res, null, "Application submitted. We will get back shortly");
-        }, function(err) {
-            console.log('mail failed', err);
-            HttpHelper.error(res, null, "something went wrong. Please try after sometime.");
-        });
-    }
-}
 
 function setup_event(req, type) {
     logger.log();
