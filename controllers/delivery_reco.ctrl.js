@@ -275,7 +275,16 @@ function pick_outlet_fields(params) {
       }
       
       massaged_item.delivery_zones = item.delivery_zones;
-      massaged_item.offer_count = item.offers.length;
+      var offer_count = 0;
+      for(var i=0; i<item.offers.length; i++) {
+        if(item.offers[i] && item.offers[i].offer_type === 'offer' 
+        && item.offers[i].actions.reward.applicability.delivery
+        && item.offers[i].offer_status === 'active' 
+        &&(new Date(item.offers[i].offer_end_date)) >= new Date()){
+          offer_count = offer_count+1;
+        }
+      }
+      massaged_item.offer_count = offer_count;
       if (fmap && fmap[item._id]) {
         massaged_item.following = true;
       } else {

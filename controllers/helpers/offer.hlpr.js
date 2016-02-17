@@ -304,14 +304,18 @@ module.exports.get_offers = function(token, outlet_id) {
         if(err || !outlet) {
             deferred.reject({
                 err: err,
-                message: 'Unable to load offer details'
+                message: 'Unable to load offers'
             })
         } else {
             var date = new Date();
             var time = moment().hours() +':'+moment().minutes();
             date = parseInt(date.getMonth())+1+ '-'+ date.getDate()+'-'+date.getFullYear();
             var offers = _.map(outlet.offers, function(offer) {
-                if(offer && offer.offer_type === 'offer' &&  offer.offer_status === 'archived' || offer.offer_status === 'draft') {
+                if(offer && offer.offer_type === 'checkin' 
+                    || !offer.actions.reward.applicability.delivery
+                    || offer.offer_status === 'archived' 
+                    || offer.offer_status === 'draft'
+                    || (new Date(offer.offer_end_date)) < new Date()) {
                     return false;
                 }
                 else if(offer){
@@ -376,7 +380,7 @@ module.exports.get_offers = function(token, outlet_id) {
             if(offers.length) {
                 deferred.resolve({data: offers, message: 'Offers found'});
             } else {
-                deferred.reject({ err: null, message: 'Unable to load offers'});
+                deferred.resolve({data: offers, message: 'No currently available offers'});
             } 
             
         }
