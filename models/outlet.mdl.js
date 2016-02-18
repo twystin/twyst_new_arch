@@ -584,6 +584,11 @@ var OutletSchema = new Schema({
       default: 'type_1',
       required: true
     },
+    charge_service_tax: {
+      type: Boolean,
+      default: true,
+      required: true
+    },
     menu_type: {
       type: String// Dine-in / Takeaway / Delivery / Weekend / Dinner / All
     },

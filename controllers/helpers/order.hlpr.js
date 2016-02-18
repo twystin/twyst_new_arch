@@ -266,7 +266,7 @@ function validate_outlet(data) {
     else if (!verify_delivery_location(data.coords, outlet)){
         deferred.reject({
           err:  true,
-          message: "outlet does not delivers at selected loation"
+          message: "outlet does not delivers at selected location"
         });
     }
     else{
@@ -551,7 +551,7 @@ function get_applicable_offer(data) {
     var passed_data = data;
     var user = passed_data.user;
     var date = new Date();
-    var time = moment().hours() +':'+moment().minutes();
+    var time = moment().hours()+5 +':'+moment().minutes()+30;
     date = parseInt(date.getMonth())+1+ '-'+ date.getDate()+'-'+date.getFullYear();
     var i, offer_cost = 0;
 
@@ -559,7 +559,9 @@ function get_applicable_offer(data) {
         offer_cost = offer.offer_cost || 0;
         if(offer.offer_status === 'active' && new Date(offer.offer_end_date) > new Date()
         && !(RecoHelper.isClosed(date, time, offer.actions.reward.reward_hours))
-        && data.user.twyst_bucks >= offer_cost && offer.offer_type === 'offer' || offer.offer_type === 'coupon'){
+        && data.user.twyst_bucks >= offer_cost && offer.actions.reward.applicability.delivery
+        && offer.offer_type === 'offer' 
+        || offer.offer_type === 'coupon'){
             if(offer.actions.reward.reward_meta.reward_type === 'free') {
                 return checkFreeItem(data, offer);
                 
@@ -857,7 +859,7 @@ function check_offer_applicability(data) {
         var offer = _.find(data.outlet.offers, function(offer) {
             if(offer._id === data.offer_used) {
                 var date = new Date();
-                var time = moment().hours() +':'+moment().minutes();
+                var time = moment().hours()+5 +':'+moment().minutes()+30;
                 date = date.getMonth()+1+'-'+date.getDate()+'-'+date.getFullYear();
 
                 if(!(RecoHelper.isClosed(date, time, offer.actions.reward.reward_hours))) {
@@ -965,14 +967,15 @@ function calculate_tax(order_value, outlet) {
         })
        
         vat = order_value*tax_grid.vat/100;
-        surcharge_on_vat = vat*tax_grid.surcharge_on_vat/100;
-
-        st = ((order_value*tax_grid.st_applied_on_percentage/100)*tax_grid.st)/100;   
+        surcharge_on_vat = vat*tax_grid.surcharge_on_vat/100;        
         
         sbc = ((order_value*tax_grid.st_applied_on_percentage/100)*tax_grid.sbc)/100;     
     }
-    
-    
+
+    if(outlet.menus[0].charge_service_tax) {
+        st = ((order_value*tax_grid.st_applied_on_percentage/100)*tax_grid.st)/100;
+    }
+        
     if(outlet.attributes.has_packaging_charge && 
         outlet.attributes.packaging_charge.is_fixed) {
         packaging_charge = outlet.attributes.packaging_charge.value || 0;
@@ -981,7 +984,7 @@ function calculate_tax(order_value, outlet) {
     if(outlet.valid_zone.delivery_charge) {
         delivery_charge = outlet.valid_zone.delivery_charge || 0;
     }
-    console.log(vat + ' ' + surcharge_on_vat + ' ' + st + ' ' + sbc + ' ' + packaging_charge + ' ' + delivery_charge)
+    console.log(vat + ' ' + surcharge_on_vat + ' ' + st + ' ' + sbc + ' ' + packaging_charge + ' ' + delivery_charge);
     new_order_value = order_value+vat+surcharge_on_vat+st+sbc+packaging_charge+delivery_charge;
     
     order_value_obj.vat = vat+surcharge_on_vat;
@@ -1178,6 +1181,8 @@ function calculate_cashback(data) {
         inapp_cashback = _.max([base_cashback, order_amount_cashback, inapp_cashback], function(cashback){ return cashback; });
         data.order.cod_cashback = Math.round(cod_cashback);
         data.order.inapp_cashback = Math.round(inapp_cashback);
+        data.order.cod_cashback_percenatage = Math.round(_.max([base_cashback*inapp_ratio, order_amount_cashback*order_amount_ratio], function(cashback){ return cashback; }));
+        data.order.inapp_cashback_percenatage = Math.round(_.max([base_cashback*cod_ratio, order_amount_cashback*order_amount_ratio], function(cashback){ return cashback; }));
         
     }
     else{
@@ -1479,6 +1484,7 @@ function process_orders(orders, deferred) {
         updated_order.address = order.outlet.contact.location.address;
         updated_order.locality_1 = order.outlet.contact.location.locality_1[0];
         updated_order.locality_2 = order.outlet.contact.location.locality_2[0];
+        updated_order.phone = order.outlet.contact.phones.mobile[0] && order.outlet.contact.phones.mobile[0].num;  
         updated_order.lat = order.outlet.contact.location.coords.latitude || null;
         updated_order.long = order.outlet.contact.location.coords.longitude || null;
         updated_order.delivery_zone = order.outlet.attributes.delivery.delivery_zone;

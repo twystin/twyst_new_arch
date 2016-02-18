@@ -146,17 +146,17 @@ function map_valid_delivery_zone(params) {
   return deferred.promise;  
 }
 
-function set_delivery_experiance(params) {
+function set_delivery_experience(params) {
   logger.log();
   var deferred = Q.defer();
   
   params.outlets = _.mapObject(params.outlets, function(val, key) {
     val.recco = val.recco || {};
     if(val.twyst_meta.rating && val.twyst_meta.rating.value){
-      val.recco.delivery_experiance = val.twyst_meta.rating.value;  
+      val.recco.delivery_experience = val.twyst_meta.rating.value;  
     }
     else{
-      val.recco.delivery_experiance = null;    
+      val.recco.delivery_experience = null;    
     }
     
     return val;
@@ -233,6 +233,9 @@ function pick_outlet_fields(params) {
         return false;
       }
       
+      if(item.recco.closed) {
+        return false;
+      }
 
       var massaged_item = {};
       massaged_item._id = item._id;
@@ -339,7 +342,7 @@ module.exports.get = function(req, res) {
       return set_open_closed(data);
     })
     .then(function(data) {
-      return set_delivery_experiance(data);
+      return set_delivery_experience(data);
     })
     .then(function(data) {
       return map_valid_delivery_zone(data);
