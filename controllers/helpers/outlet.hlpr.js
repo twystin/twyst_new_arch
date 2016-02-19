@@ -508,7 +508,7 @@ function accept_order(data) {
   var current_action = {};
   current_action.action_type = 'ACCEPTED';
   current_action.action_by = data.data._id;
-  
+  current_action.message = 'order has been accepted by merchant.'
   Order.findOneAndUpdate({
       _id: data.order.order_id
     }, {
@@ -571,7 +571,7 @@ function reject_order(data) {
   var current_action = {};
   current_action.action_type = 'REJECTED';
   current_action.action_by = data.data._id;
-
+  current_action.message = 'order has been rejected by merchant.'
   Order.findOneAndUpdate({
       _id: data.order.order_id
     }, {
@@ -631,6 +631,7 @@ function dispatch_order(data) {
   var current_action = {};
   current_action.action_type = 'DISPATCHED';
   current_action.action_by = data.data._id;
+  current_action.message = 'order has been dispatched by merchant.'
   
   User.findOne({_id: data.order.user._id}, function(err, user) {
     if (err || !user) {
@@ -729,6 +730,7 @@ function schedule_assumed_delivered(data, user) {
             var current_action = {};
             current_action.action_type = 'ASSUMED_DELIVERED';
             current_action.action_by = '01234567890123456789abcd';
+            current_action.message = 'we want to know if your order has been delivered.'
             order.actions.push(current_action);
             order.save(function(err, order){
               if(err) {
@@ -776,6 +778,7 @@ function schedule_order_delivered(data, user) {
           var current_action = {};
           current_action.action_type = 'DELIVERED';
           current_action.action_by = '01234567890123456789abcd';
+          current_action.message = 'order has been delivered.';
           order.actions.push(current_action);
           order.save(function(err, order){
             if(err){

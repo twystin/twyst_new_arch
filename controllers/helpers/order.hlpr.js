@@ -11,6 +11,7 @@ var moment = require('moment');
 var ObjectId = mongoose.Types.ObjectId;
 var Outlet = mongoose.model('Outlet');
 var Order = mongoose.model('Order');
+var User = mongoose.model('User');
 var logger = require('tracer').colorConsole();
 var AuthHelper = require('../../common/auth.hlpr');
 var OutletHelper = require('./outlet.hlpr');
@@ -151,6 +152,9 @@ module.exports.checkout = function(token, order) {
     .then(function(data) {
         return remove_order_from_cache(data);
     })
+    .then(function(data) {
+        return save_user_address(data);
+    })
     .then(function(data) {        
         deferred.resolve(data.order);
     })
@@ -247,7 +251,7 @@ function validate_outlet(data) {
           message: "outlet is not active"
         });
     }
-    else if(isOutletClosed(outlet)){
+    else if(!isOutletClosed(outlet)){
         deferred.reject({
           message: "outlet is currently closed"
         });
@@ -959,21 +963,22 @@ function calculate_tax(order_value, outlet) {
     order_value_obj.st = 0;
     var new_order_value = 0, vat = 0, surcharge_on_vat = 0, st = 0, sbc = 0,packaging_charge = 0, delivery_charge = 0;
 
+    tax_grid = _.find(TaxConfig.tax_grid, function(tax_grid) {        
+        if(tax_grid.city.trim() === outlet.contact.location.city.trim()) {
+            return tax_grid;
+        }
+    })
+
     if(outlet.menus[0].menu_item_type === 'type_1') {
-        tax_grid = _.find(TaxConfig.tax_grid, function(tax_grid) {        
-            if(tax_grid.city.trim() === outlet.contact.location.city.trim()) {
-                return tax_grid;
-            }
-        })
-       
+        console.log(outlet.menus[0].menu_item_type);               
         vat = order_value*tax_grid.vat/100;
         surcharge_on_vat = vat*tax_grid.surcharge_on_vat/100;        
         
-        sbc = ((order_value*tax_grid.st_applied_on_percentage/100)*tax_grid.sbc)/100;     
+        sbc = order_value*tax_grid.st_applied_on_percentage/100*tax_grid.sbc/100;     
     }
 
-    if(outlet.menus[0].charge_service_tax) {
-        st = ((order_value*tax_grid.st_applied_on_percentage/100)*tax_grid.st)/100;
+    if(outlet.menus[0].charge_service_tax) {        
+        st = order_value*tax_grid.st_applied_on_percentage/100*tax_grid.st/100;
     }
         
     if(outlet.attributes.has_packaging_charge && 
@@ -1181,8 +1186,8 @@ function calculate_cashback(data) {
         inapp_cashback = _.max([base_cashback, order_amount_cashback, inapp_cashback], function(cashback){ return cashback; });
         data.order.cod_cashback = Math.round(cod_cashback);
         data.order.inapp_cashback = Math.round(inapp_cashback);
-        data.order.cod_cashback_percenatage = Math.round(_.max([base_cashback*inapp_ratio, order_amount_cashback*order_amount_ratio], function(cashback){ return cashback; }));
-        data.order.inapp_cashback_percenatage = Math.round(_.max([base_cashback*cod_ratio, order_amount_cashback*order_amount_ratio], function(cashback){ return cashback; }));
+        data.order.cod_cashback_percenatage = Math.round(_.max([base_cashback*cod_ratio, base_cashback*order_amount_ratio], function(cashback){ return cashback; }));
+        data.order.inapp_cashback_percenatage = Math.round(_.max([base_cashback*inapp_ratio, base_cashback*order_amount_ratio], function(cashback){ return cashback; }));
         
     }
     else{
@@ -1208,6 +1213,24 @@ function remove_order_from_cache(data) {
         }
     });
     
+    return deferred.promise;
+}
+
+function save_user_address(data) {
+    logger.log();
+    var deferred = Q.defer();
+
+    var address = data.order.address;
+    User.findOneAndUpdate({_id: data.user._id},
+        {$push: {address: address}}
+    ).exec(function(err, user) {
+        if (err) {
+            console.log(err);
+            deferred.reject(err);
+        } else {   
+            deferred.resolve(data);
+        }
+    });
     return deferred.promise;
 }
 
@@ -1822,6 +1845,7 @@ function schedule_non_accepted_order_rejection(data) {
                 var current_action = {};
                 current_action.action_type = 'REJECTED';
                 current_action.action_by = '01234567890123456789abcd';
+                current_action.message = 'order rejected by merchant.'
                 order.actions.push(current_action);
                 order.save(function(err, updated_order){
                     if(err || !updated_order){

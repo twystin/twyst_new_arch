@@ -51,7 +51,7 @@ var Order = new Schema({
     action_type: {type: String}, //accept/reject/dispatch
     action_by: {type: Schema.Types.ObjectId},
     action_at: {type: Date, default: new Date()},
-    comments: {type: String}
+    message: {type: String}
   }],
   user_feedback: {
     is_ontime: {
@@ -65,6 +65,9 @@ var Order = new Schema({
   is_favourite: {
     type: Boolean,
     default: false
+  },
+  comments: {
+    type: String
   },
   menu_id: {type: Schema.Types.ObjectId},
   category_id: {type: Schema.Types.ObjectId},
