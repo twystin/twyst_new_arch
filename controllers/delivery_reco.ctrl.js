@@ -251,7 +251,7 @@ function pick_outlet_fields(params) {
       massaged_item.phone = item.contact.phones.mobile[0] && item.contact.phones.mobile[0].num;  
       massaged_item.is_paying =  item.basics.is_paying;
       massaged_item.cuisines = item.attributes.cuisines;
-      massaged_item.delivery_experiance = item.recco.delivery_experiance || null;
+      massaged_item.delivery_experience = item.recco.delivery_experience || null;
       massaged_item.delivery_time = item.valid_zone.delivery_estimated_time;
       massaged_item.minimum_order = item.valid_zone.min_amt_for_delivery;
       massaged_item.payment_options = item.valid_zone.payment_options;

@@ -251,7 +251,7 @@ function validate_outlet(data) {
           message: "outlet is not active"
         });
     }
-    else if(!isOutletClosed(outlet)){
+    else if(isOutletClosed(outlet)){
         deferred.reject({
           message: "outlet is currently closed"
         });
@@ -1115,6 +1115,7 @@ function massage_order(data){
                 order.address.delivery_zone = order.delivery_zone;
                 order.packaging_charge = order.packaging_charge;
                 order.delivery_charge = order.delivery_charge;
+                order.comments = order.comments;
                 if(order.offer_used) {
                     order.order_value_without_offer = Math.round(order.order_actual_value_without_tax);
                     order.order_value_with_offer = Math.round(order.offer_used.order_value_without_tax);
@@ -1186,8 +1187,10 @@ function calculate_cashback(data) {
         inapp_cashback = _.max([base_cashback, order_amount_cashback, inapp_cashback], function(cashback){ return cashback; });
         data.order.cod_cashback = Math.round(cod_cashback);
         data.order.inapp_cashback = Math.round(inapp_cashback);
-        data.order.cod_cashback_percenatage = Math.round(_.max([base_cashback*cod_ratio, base_cashback*order_amount_ratio], function(cashback){ return cashback; }));
-        data.order.inapp_cashback_percenatage = Math.round(_.max([base_cashback*inapp_ratio, base_cashback*order_amount_ratio], function(cashback){ return cashback; }));
+        data.order.cod_cashback_percenatage = _.max([base_cashback*cod_ratio, base_cashback*order_amount_ratio], function(cashback){ return cashback; });
+        data.order.inapp_cashback_percenatage = _.max([base_cashback*inapp_ratio, base_cashback*order_amount_ratio], function(cashback){ return cashback; });
+        data.order.cod_cashback_percenatage = data.order.cod_cashback_percenatage.toFixed(2);
+        data.order.inapp_cashback_percenatage = data.order.inapp_cashback_percenatage.toFixed(2);
         
     }
     else{
@@ -1511,6 +1514,13 @@ function process_orders(orders, deferred) {
         updated_order.lat = order.outlet.contact.location.coords.latitude || null;
         updated_order.long = order.outlet.contact.location.coords.longitude || null;
         updated_order.delivery_zone = order.outlet.attributes.delivery.delivery_zone;
+        if(order.outlet.twyst_meta.rating && order.outlet.twyst_meta.rating.value){
+            updated_order.delivery_experience = order.outlet.twyst_meta.rating.value;    
+        }
+        else{
+            updated_order.delivery_experience = null;
+        }
+        
         updated_order.order_number = order.order_number
         updated_order._id = order._id;
         updated_order.items = order.items;
@@ -1950,12 +1960,13 @@ module.exports.update_order = function(token, order) {
                     saved_order.feedback.is_ontime = order.is_ontime;
                     saved_order.feedback.rating = order.order_rating;
                     saved_order.order_status = 'CLOSED';
+
                     if(order.items_feedback) {
                         saved_order.items = order.items;    
                     }
                     
-                    saved_order.save(function(err, order){
-                        if(err || !order){
+                    saved_order.save(function(err, update_order){
+                        if(err || !update_order){
                             deferred.reject({
                                 err: err || true,
                                 message: 'Couldn\'t update this order'
@@ -1963,8 +1974,45 @@ module.exports.update_order = function(token, order) {
                         }
                         //add twyst bucks to user account
                         else{
-                            deferred.resolve({data: order,
-                            message: 'feedback submitted successfully'});
+                            Outlet.findOne({_id: order.outlet}, function(err, outlet) {
+                                if (err || !saved_order) {
+                                  deferred.reject({
+                                    err: err || true,
+                                    message: 'Couldn\'t process feedback'
+                                  });
+                                }
+                                else{
+                                    if(outlet.twyst_meta.rating && outlet.twyst_meta.rating.value) {
+                                        var count = outlet.twyst_meta.rating.count+1;
+                                        var rating = outlet.twyst_meta.rating.value;
+                                        rating = (rating+order.order_rating)/count;
+                                        outlet.twyst_meta.rating.value = rating;
+                                        outlet.twyst_meta.rating.count = count;    
+                                    }
+                                    else{
+                                        outlet.twyst_meta.rating.value = order.order_rating;
+                                        outlet.twyst_meta.rating.count = 1;     
+                                    }
+                                    
+                                    outlet.save(function(err, outlet){
+                                        if (err || !outlet) {
+                                          deferred.reject({
+                                            err: err || true,
+                                            message: 'Couldn\'t process feedback'
+                                          });
+                                        }
+                                        else{
+                                            deferred.resolve({
+                                                data: order,
+                                                message: 'feedback submitted successfully'
+                                            });   
+                                        }
+                                            
+                                    })
+
+                                }
+                            })
+                            
                         }
                     })    
                 }
