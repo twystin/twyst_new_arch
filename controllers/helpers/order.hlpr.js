@@ -1963,8 +1963,8 @@ module.exports.update_order = function(token, order) {
                         saved_order.items = order.items;    
                     }
                     
-                    saved_order.save(function(err, update_order){
-                        if(err || !update_order){
+                    saved_order.save(function(err, updated_order){
+                        if(err || !updated_order){
                             deferred.reject({
                                 err: err || true,
                                 message: 'Couldn\'t update this order'
@@ -1972,8 +1972,8 @@ module.exports.update_order = function(token, order) {
                         }
                         //add twyst bucks to user account
                         else{
-                            Outlet.findOne({_id: order.outlet}, function(err, outlet) {
-                                if (err || !saved_order) {
+                            Outlet.findOne({_id: updated_order.outlet}, function(err, outlet) {
+                                if (err || !outlet) {
                                   deferred.reject({
                                     err: err || true,
                                     message: 'Couldn\'t process feedback'
