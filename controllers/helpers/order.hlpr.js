@@ -263,13 +263,11 @@ function validate_outlet(data) {
     }
     else if (!isMenuActive(outlet)) {
         deferred.reject({
-          err:  true,
           message: "menu is not active"
         });
     }
     else if (!verify_delivery_location(data.coords, outlet)){
         deferred.reject({
-          err:  true,
           message: "outlet does not delivers at selected location"
         });
     }
