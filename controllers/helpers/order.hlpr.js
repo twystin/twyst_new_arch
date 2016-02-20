@@ -258,7 +258,7 @@ function validate_outlet(data) {
     }
     else if (!isDeliveryOutlet(outlet)) {
         deferred.reject({
-          message: "outlet does not delivers"
+          message: "outlet does not deliver"
         });
     }
     else if (!isMenuActive(outlet)) {
@@ -268,7 +268,7 @@ function validate_outlet(data) {
     }
     else if (!verify_delivery_location(data.coords, outlet)){
         deferred.reject({
-          message: "outlet does not delivers at selected location"
+          message: "outlet does not deliver at selected location"
         });
     }
     else{
@@ -299,7 +299,7 @@ function set_valid_delivery_zone(data) {
           deferred.resolve(data);
         }
         else{
-            console.log('no delivers zone set up for outlet');
+            console.log('no delivery zone set up for outlet');
             deferred.reject({
                 err: true, 
                 message: 'outlet does not deliver in this deliver zone'
@@ -308,10 +308,10 @@ function set_valid_delivery_zone(data) {
     
     }
     else{
-        console.log('no delivers zone set up for outlet');
+        console.log('no delivery zone set up for outlet');
         deferred.reject({
             err: true, 
-            message: 'no delivers zone set up for outlet'
+            message: 'no delivery zone set up for outlet'
         })
         
     }
