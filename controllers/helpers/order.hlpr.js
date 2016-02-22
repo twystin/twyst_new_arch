@@ -319,9 +319,8 @@ function set_valid_delivery_zone(data) {
 
 }
 
-function calculate_order_value(data, free_item, free_item_option) {
+function calculate_order_value(data) {
     logger.log();
-    console.log('free_item ' + free_item);
     
     var items = data.items
     var menu = {};
@@ -330,9 +329,9 @@ function calculate_order_value(data, free_item, free_item_option) {
     var  amount = 0;
     
     for(var i = 0; i < items.length; i++) {
-        var sub_options = [], addons = [], category, sub_category, item, option, menu_sub_options, order_sub_options, menu_addons,order_addons;
+        var sub_options = [], addons = [], category, sub_category, item, option, menu_sub_options = [], order_sub_options = [], menu_addons = [], order_addons = [];
         category = _.findWhere(menu.menu_categories, {_id: items[i].category_id});
-        var sub_category = _.findWhere(category && category.sub_categories, {_id: items[i].sub_category_id});
+        sub_category = _.findWhere(category && category.sub_categories, {_id: items[i].sub_category_id});
         
         item = _.findWhere(sub_category && sub_category.items, {_id: items[i].item_id});
         items[i].item_details = item;
@@ -371,76 +370,62 @@ function calculate_order_value(data, free_item, free_item_option) {
                 })
             })
         }
-        
-        if(item && item._id === free_item && option && option._id === free_item_option) {
-            amount = amount+(option.option_cost*(items[i].quantity-1));
-            if(sub_options.length) {
-                _.each(sub_options, function(sub_option){
-                    amount = amount + (sub_option.sub_option_cost*(items[i].quantity-1));
-                })               
-            }
-            if(addons.length) {
-                _.each(addons, function(addon){
-                    amount = amount + (addons.addon_cost*(items[i].quantity-1));
-                })
-            }
-        }
-        else if(item && item._id === free_item && !option) {
-            amount = amount+(item.item_cost*(items[i].quantity-1));           
-            if(sub_options.length) {
-                _.each(sub_options, function(sub_option){
-                    amount = amount + (sub_option.sub_option_cost*(items[i].quantity-1));
-                })
-            }
-            if(addons.length) {
-                _.each(addons, function(addon){
-                    amount = amount + (addons.addon_cost*(items[i].quantity-1));
-                })
-            }
-        }         
-        else if(option && (item.option_price_is_additive || item.option_is_addon)){
+         
+        if(option && (item.option_price_is_additive || item.option_is_addon)){
             console.log('in prices are additive option');
-            amount = amount+(item.item_cost*items[i].quantity);
-            amount = amount+(option.option_cost*items[i].quantity);
+            var current_item_amount = 0;
+            current_item_amount = item.item_cost*items[i].quantity;
+            current_item_amount = current_item_amount + option.option_cost*items[i].quantity;
             if(sub_options.length) {
                 _.each(sub_options, function(sub_option){
-                    amount = amount + (sub_option.sub_option_cost*items[i].quantity);
+                    current_item_amount = current_item_amount + (sub_option.sub_option_cost*items[i].quantity);
                 })
             }
             if(addons.length) {
                 _.each(addons, function(addon){
-                    amount = amount + (addon.addon_cost*items[i].quantity);
+                    current_item_amount = current_item_amount + (addon.addon_cost*items[i].quantity);
                 })
             }    
+            items[i].item_total_amount = current_item_amount;
+            amount = amount+current_item_amount;
             
         }
-        else if(option){
-            amount = amount+(option.option_cost*items[i].quantity);
+        else if(option){            
+            var current_item_amount = 0;
+            current_item_amount = option.option_cost*items[i].quantity;
+            
             if(sub_options.length) {
                 _.each(sub_options, function(sub_option){
-                    amount = amount + (sub_option.sub_option_cost*items[i].quantity);
+                    current_item_amount = current_item_amount + (sub_option.sub_option_cost*items[i].quantity);
                 })
             }
+           
+
             if(addons.length) {
                 _.each(addons, function(addon){
-                    amount = amount + (addon.addon_cost*items[i].quantity);
+                    current_item_amount = current_item_amount + (addon.addon_cost*items[i].quantity);
+                    console.log(amount);
                 })
-            }                  
+            }           
+            items[i].item_total_amount = current_item_amount;    
+            amount = amount+current_item_amount;
         }
         else{
             console.log('without option');
-            console.log(item.item_cost);
-            amount = amount+(item.item_cost*items[i].quantity);
+            var current_item_amount = 0;
+            current_item_amount = item.item_cost*items[i].quantity;
             if(sub_options.length) {
                 _.each(sub_options, function(sub_option){
-                    amount = amount + (sub_option.sub_option_cost*items[i].quantity);
+                    current_item_amount = current_item_amount + (sub_option.sub_option_cost*items[i].quantity);
                 })
             }
             if(addons.length) {
                 _.each(addons, function(addon){
-                    amount = amount + (addon.addon_cost*items[i].quantity);
+                    current_item_amount = current_item_amount + (addon.addon_cost*items[i].quantity);
                 })
-            }   
+            }
+            items[i].item_total_amount = current_item_amount;
+            amount = amount+current_item_amount;
         }
     }
 
@@ -492,7 +477,7 @@ function isOutletClosed(outlet) {
       }
     }
     else{
-    return false;
+        return false;
     }
 }
 // check outlet active
@@ -598,47 +583,41 @@ function checkFreeItem(data, offer) {
 
     console.log('checking offer type free ')
     var passed_data = data;
-    var offer_id = offer._id;
     var items = passed_data.items;
-    var offers = passed_data.outlet.offers;
+    var order_value = calculate_order_value(passed_data);
+    var free_item = searchItemInOfferItems(offer, items);
 
-    for(var i = 0; i < items.length; i++) {
-
-        if(searchItemInOfferItems(items[i], offer)){
-            var order_value = calculate_order_value(passed_data, items[i].item_id, items[i].option);
-            
-            if(order_value >= offer.minimum_bill_value) {
-                console.log('offer applicable');
-                var order_value_obj = calculate_tax(order_value, passed_data.outlet);
-                if(order_value_obj.order_value_with_tax >= data.outlet.valid_zone.min_amt_for_delivery){
-                    offer.is_applicable = true;
-                    offer.order_value_without_tax = Math.round(order_value_obj.order_value);
-                    offer.vat = order_value_obj.vat;
-                    offer.st = order_value_obj.st;
-                    offer.packaging_charge = order_value_obj.packaging_charge;
-                    offer.delivery_charge = order_value_obj.delivery_charge;
-                    offer.order_value_with_tax = Math.round(order_value_obj.new_order_value);
-                    offer.free_item_index = i;
-                    return offer; 
-                }
-                else{
-                    offer.is_applicable = false;
-                    return offer;   
-                }                                
+    if(free_item) {
+        order_value = order_value - free_item.item_total_amount/free_item.quantity;    
+        console.log(order_value);
+        if(order_value >= offer.minimum_bill_value) {
+            console.log('offer applicable');
+            var order_value_obj = calculate_tax(order_value, passed_data.outlet);
+            if(order_value_obj.order_value_with_tax >= data.outlet.valid_zone.min_amt_for_delivery){
+                offer.is_applicable = true;
+                offer.order_value_without_tax = Math.round(order_value_obj.order_value);
+                offer.vat = order_value_obj.vat;
+                offer.st = order_value_obj.st;
+                offer.packaging_charge = order_value_obj.packaging_charge;
+                offer.delivery_charge = order_value_obj.delivery_charge;
+                offer.order_value_with_tax = Math.round(order_value_obj.new_order_value);
+                offer.free_item_index = free_item.index;
+                return offer; 
             }
             else{
-                var order_value_obj = calculate_tax(calculate_order_value(passed_data, null, null), passed_data.outlet);
-                offer.is_applicable = false;                
-                return offer;
-            }          
+                offer.is_applicable = false;
+                return offer;   
+            }                                
         }
-        else if(i === items.length-1){
-            var order_value_obj = calculate_tax(calculate_order_value(passed_data, null, null), passed_data.outlet);
-            offer.is_applicable = false;
-            console.log('offer not applicable');
+        else{
+            offer.is_applicable = false;                
             return offer;
         }
-    }      
+    }
+    else{
+        offer.is_applicable = false;                
+        return offer;
+    }           
 }
 
 function checkOfferTypeBuyXgetY(data, offer) {
@@ -647,9 +626,7 @@ function checkOfferTypeBuyXgetY(data, offer) {
     
     console.log('checking offer type bogo');
     var passed_data = data;
-    var offer_id = offer._id;
     var items = passed_data.items;
-    var is_contain_free_item = false;
     var is_contain_paid_item = false;
 
     for(var i = 0; i < items.length; i++) {
@@ -659,45 +636,42 @@ function checkOfferTypeBuyXgetY(data, offer) {
         }
     }
     console.log('is_contain_paid_item ' + is_contain_paid_item);
-    for(var i = 0; i < items.length; i++) {
-        
-        if(searchItemInOfferItems(items[i], offer) && is_contain_paid_item){
-            var order_value = calculate_order_value(passed_data, items[i].item_id, items[i].option);
-            console.log(order_value);
-            console.log(offer.minimum_bill_value);
-            if(order_value >= offer.minimum_bill_value) {
-                console.log('offer applicable');
-                var order_value_obj = calculate_tax(order_value, passed_data.outlet);
-                if(order_value_obj.order_value_with_tax >= data.outlet.valid_zone.min_amt_for_delivery){
-                    offer.is_applicable = true;
-                    offer.order_value_without_tax = Math.round(order_value_obj.order_value);
-                    offer.vat = order_value_obj.vat;
-                    offer.st = order_value_obj.st;
-                    offer.packaging_charge = order_value_obj.packaging_charge;
-                    offer.delivery_charge = order_value_obj.delivery_charge;
-                    offer.order_value_with_tax = Math.round(order_value_obj.new_order_value);
-                    offer.free_item_index = i;
-                    return offer;     
-                }
-                else{
-                    offer.is_applicable = false;
-                    return offer;
-                }                           
+    
+    var order_value = calculate_order_value(passed_data);
+    var free_item  = searchItemInOfferItems(offer, items);
+    if(is_contain_paid_item && free_item) {
+        order_value = order_value - free_item.item_total_amount/free_item.quantity;
+        if(order_value >= offer.minimum_bill_value) {
+            console.log('offer applicable');
+            var order_value_obj = calculate_tax(order_value, passed_data.outlet);
+            if(order_value_obj.order_value_with_tax >= data.outlet.valid_zone.min_amt_for_delivery){
+                offer.is_applicable = true;
+                offer.order_value_without_tax = Math.round(order_value_obj.order_value);
+                offer.vat = order_value_obj.vat;
+                offer.st = order_value_obj.st;
+                offer.packaging_charge = order_value_obj.packaging_charge;
+                offer.delivery_charge = order_value_obj.delivery_charge;
+                offer.order_value_with_tax = Math.round(order_value_obj.new_order_value);
+                offer.free_item_index = free_item.index;
+                return offer;     
             }
             else{
-                var order_value_obj = calculate_tax(calculate_order_value(passed_data, null, null), passed_data.outlet);
-                offer.is_applicable = false;                
-                console.log('offer not applicable');
+                offer.is_applicable = false;
                 return offer;
-            }          
+            }                           
         }
-        else if(i === items.length-1){
-            var order_value_obj = calculate_tax(calculate_order_value(passed_data, null, null), passed_data.outlet);
-            offer.is_applicable = false;
+        else{
+            offer.is_applicable = false;                
             console.log('offer not applicable');
             return offer;
-        }    
+        }
     }
+    else{
+        offer.is_applicable = false;                
+        console.log('offer not applicable');
+        return offer;
+    }   
+                    
 }
 
 function checkOfferTypeFlatOff(data, offer) {
@@ -708,7 +682,7 @@ function checkOfferTypeFlatOff(data, offer) {
     var passed_data = data;
     var id = offer._id;
 
-    var order_value = calculate_order_value(passed_data, null, null);
+    var order_value = calculate_order_value(passed_data);
                 
     console.log('for flat off');
     console.log(order_value);
@@ -751,7 +725,7 @@ function checkOfferTypePercentageOff(data, offer) {
     var id = offer._id;
     var discount = 0;
 
-    var order_value = calculate_order_value(passed_data, null, null);
+    var order_value = calculate_order_value(passed_data);
                 
     console.log('for percentage off');
     console.log(order_value);
@@ -793,7 +767,7 @@ function check_minimum_bill_amount(data) {
     logger.log();
     var deferred = Q.defer();
 
-    var order_actual_value_obj = calculate_tax(calculate_order_value(data, null, null), data.outlet);
+    var order_actual_value_obj = calculate_tax(calculate_order_value(data), data.outlet);
     if(order_actual_value_obj.order_value_with_tax >= data.outlet.valid_zone.min_amt_for_delivery) {
         deferred.resolve(data);    
     }
@@ -825,7 +799,7 @@ function generate_and_cache_order(data) {
     });
     var order = {};
     order_number = 'TW'+data.outlet.links.short_url+month+year+code;
-    order_actual_value_obj = calculate_tax(calculate_order_value(passed_data, null, null), passed_data.outlet);
+    order_actual_value_obj = calculate_tax(calculate_order_value(passed_data), passed_data.outlet);
 
     order.user = data.user._id;
     order.outlet = data.outlet._id;
@@ -979,12 +953,12 @@ function calculate_tax(order_value, outlet) {
         st = order_value*tax_grid.st_applied_on_percentage/100*tax_grid.st/100;
     }
         
-    if(outlet.attributes.has_packaging_charge && 
-        outlet.attributes.packaging_charge.is_fixed) {
-        packaging_charge = outlet.attributes.packaging_charge.value || 0;
+    if(outlet.valid_zone.has_packaging_charge && 
+        outlet.valid_zone.packaging_charge.is_fixed) {
+        packaging_charge = outlet.valid_zone.packaging_charge.value || 0;
     }
 
-    if(outlet.valid_zone.delivery_charge) {
+    if(outlet.valid_zone.delivery_charge && order_value < outlet.valid_zone.free_delivery_amt) {
         delivery_charge = outlet.valid_zone.delivery_charge || 0;
     }
     console.log(vat + ' ' + surcharge_on_vat + ' ' + st + ' ' + sbc + ' ' + packaging_charge + ' ' + delivery_charge);
@@ -1258,25 +1232,26 @@ function searchItemInPaidItems(item, offer) {
    
     var addons = _.intersection(offer.actions.reward.reward_meta.paid_item.addons, item.addons);
     
-    if(category_id !== -1 && sub_category_id !==1 && item_id
-     !== -1 && !item.option && !item.addons.length && !item.sub_options.length){       
+    if(category_id !== -1 && sub_category_id !== -1 && item_id
+     !== -1 && !item.option && !item.addons.length && !item.sub_options.length){
+
         return true; 
     }
-    else if(category_id !== -1 && sub_category_id !==1 && item_id
+    else if(category_id !== -1 && sub_category_id !== -1 && item_id
      !== -1 && option_id !== -1 && !item.addons.length && !item.sub_options.length){
         return true; 
     }
-    else if(category_id !== -1 && sub_category_id !==1 && item_id
+    else if(category_id !== -1 && sub_category_id !== -1 && item_id
      !== -1 && option_id !== -1 && item.addons && addons && addons.length
      && !item.sub_options.length){
         return true;   
     }
-    else if(category_id !== -1 && sub_category_id !==1 && item_id
+    else if(category_id !== -1 && sub_category_id !== -1 && item_id
      !== -1 && option_id !== -1 && item.sub_options && sub_options && sub_options.length
      && !item.addons.length){
         return true;   
     }
-    else if(category_id !== -1 && sub_category_id !==1 && item_id
+    else if(category_id !== -1 && sub_category_id !== -1 && item_id
      !== -1 && option_id !== -1 && item.sub_options && sub_options && sub_options.length
      && item.addons && addons && addons.length){
         return true;
@@ -1286,57 +1261,71 @@ function searchItemInPaidItems(item, offer) {
     }
 }
 
-function searchItemInOfferItems(item, offer) {
+function searchItemInOfferItems(offer, items) {
     logger.log();
 
-    var category_id = _.findIndex(offer.offer_items.categories, function(current_category) {
-        return current_category.toString() == item.category_id;
-    });
-    
-    var sub_category_id = _.findIndex(offer.offer_items.sub_categories, function(sub_category_id) {
-        return sub_category_id.toString() == item.sub_category_id;
-    });
+    var free_items = [];
+    for(var i = 0; i < items.length; i++) {
+        var category_id = _.findIndex(offer.offer_items.categories, function(current_category) {
+            return current_category.toString() == items[i].category_id;
+        });
+        
+        var sub_category_id = _.findIndex(offer.offer_items.sub_categories, function(sub_category_id) {
+            return sub_category_id.toString() == items[i].sub_category_id;
+        });
 
-    var item_id = _.findIndex(offer.offer_items.items, function(item_id) {
-        return item_id.toString() == item.item_id;
-    });
-   
-    var option_id = _.findIndex(offer.offer_items.options, function(option_id) {
-        return option_id.toString() == item.option_id;
-    });
+        var item_id = _.findIndex(offer.offer_items.items, function(item_id) {
+            return item_id.toString() == items[i].item_id;
+        });
+       
+        var option_id = _.findIndex(offer.offer_items.options, function(option_id) {
+            return option_id.toString() == items[i].option_id;
+        });
 
-    var sub_options = _.intersection(offer.offer_items.sub_options, item.sub_options);
-   
-    
-    var addons = _.intersection(offer.offer_items.addons, item.addons);
+        var sub_options = _.intersection(offer.offer_items.sub_options, items[i].sub_options);
+       
+        
+        var addons = _.intersection(offer.offer_items.addons, items[i].addons);
 
-    if(category_id !== -1 && sub_category_id !==1 && item_id
-     !== -1 && !item.options && !item.addons.length && !item.sub_options.length){       
-        return true; 
+        if(category_id !== -1 && sub_category_id !== -1 && item_id
+        !== -1 && !items[i].options && !items[i].addons.length && !items[i].sub_options.length){
+            items[i].index = i;
+            free_items.push(items[i]);
+        }
+        else if(category_id !== -1 && sub_category_id !== -1 && item_id
+        !== -1 && option_id !== -1 && !items[i].addons.length && !items[i].sub_options.length){
+            items[i].index = i;
+            free_items.push(items[i]);
+        }
+        else if(category_id !== -1 && sub_category_id !== -1 && item_id
+        !== -1 && option_id !== -1 && items[i].addons && addons && addons.length
+        && !items[i].sub_options.length){
+            items[i].index = i;
+            free_items.push(items[i]);
+        }
+        else if(category_id !== -1 && sub_category_id !== -1 && item_id
+        !== -1 && option_id !== -1 && items[i].sub_options && sub_options && sub_options.length
+        && !items[i].addons.length){
+            items[i].index = i;
+            free_items.push(items[i]);
+        }
+        else if(category_id !== -1 && sub_category_id !== -1 && item_id
+        !== -1 && option_id !== -1 && items[i].sub_options && sub_options && sub_options.length
+        && items[i].addons && addons && addons.length){
+            items[i].index = i;
+            free_items.push(items[i]);
+        } 
     }
-    else if(category_id !== -1 && sub_category_id !==1 && item_id
-     !== -1 && option_id !== -1 && !item.addons.length && !item.sub_options.length){
-        return true; 
+    console.log(free_items)
+    var free_item;
+    if(free_items.length) {
+        free_item = _.min(free_items, function(item){return item.item_total_amount/item.quantity});
     }
-    else if(category_id !== -1 && sub_category_id !==1 && item_id
-     !== -1 && option_id !== -1 && item.addons && addons && addons.length
-     && !item.sub_options.length){
-        return true;   
+    else{
+        free_item = null;
     }
-    else if(category_id !== -1 && sub_category_id !==1 && item_id
-     !== -1 && option_id !== -1 && item.sub_options && sub_options && sub_options.length
-     && !item.addons.length){
-        return true;   
-    }
-    else if(category_id !== -1 && sub_category_id !==1 && item_id
-     !== -1 && option_id !== -1 && item.sub_options && sub_options && sub_options.length
-     && item.addons && addons && addons.length){
-        return true;
-    } 
-    else {
-        return false;
-    }       
-    
+    console.log(free_item);
+    return free_item;  
 }
 
 module.exports.get_order = function(token, order_id) {
