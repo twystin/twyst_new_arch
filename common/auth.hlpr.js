@@ -43,20 +43,25 @@ module.exports.get_user = function(token) {
             if(user.role === 6 || user.role === 7) {
               var friends = [];
               var twyst_friends = [];
-              _.each(user.friends.friends, function(friend){
+              if(user.friends) {
+                _.each(user.friends.friends, function(friend){
                   if(friend.user){
                       twyst_friends.push(friend);
                   }
                   friends.push(friend);
-              })
+                })  
+              }
+              
               if(user.facebook) {
                 user.facebook_connect = true;
               }
               if(user.google) {
                 user.google_connect = true;
               }
-              user.friends_id = user.friends._id;
-            
+              if(user.friends) {
+                user.friends_id = user.friends._id;  
+              }
+                          
               user.twyst_friends = twyst_friends;
               user.friends = friends;
             }
