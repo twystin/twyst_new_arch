@@ -65,7 +65,11 @@ module.exports.get_zaakpay_response = function(req, res) {
 			        	}
 			        	
 			        	OrderHelper.confirm_inapp_order(data).then(function(data){
-			  				HttpHelper.success(res, checksum, 'order confirmed');	
+			        		var response = [{paymentResponse: [{orderid: order.order_number}, 
+			        		{amount: order.actual_amount_paid}, {status: zaakpay_response.responseCode},
+			        		{statusMsg: zaakpay_response.responseDescription}]}];		
+			  				response = xml(response);		
+							res.send(response);
 			  			},	function(err) {
 							HttpHelper.error(res, err);
 					  	});		        
@@ -81,7 +85,11 @@ module.exports.get_zaakpay_response = function(req, res) {
 	  	});	
   	}
   	else{
-  		HttpHelper.success(res, 'order processed');	
+  		var response = [{paymentResponse: [{orderid: order.order_number}, 
+		{amount: order.actual_amount_paid}, {status: zaakpay_response.responseCode},
+		{statusMsg: zaakpay_response.responseDescription}]}];		
+		response = xml(response);		
+		res.send(response);
   	}    
 };
 

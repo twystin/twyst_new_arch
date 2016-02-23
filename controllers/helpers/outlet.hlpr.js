@@ -583,7 +583,6 @@ function reject_order(data) {
           message: 'Couldn\'t reject the order'
         });
       } else {
-        //notify user/console/am
         send_notification(['console', data.order.am_email.replace('.', '').replace('@', '')], {
           message: 'Order rejected by merchant - ' + data.order.reject_reason,
           order_id: data.order.order_id,
@@ -663,9 +662,7 @@ function dispatch_order(data) {
               err: err || true,
               message: 'Couldn\'t update the order'
             });
-          } else {
-            //notify user/console/am       
-
+          } else {          
             send_notification(['console', data.order.am_email.replace('.', '').replace('@', '')], {
               message: 'Order dispatched by merchant',
               order_id: data.order.order_id,
@@ -722,8 +719,7 @@ function schedule_assumed_delivered(data, user) {
           if (err || !order){
               console.log(err);
           } 
-          else if(order.order_status === 'ACCEPTED' || order.order_status === 'DISPATCHED'){
-            console.log('scheduling assumed delivered');                          
+          else if(order.order_status === 'ACCEPTED' || order.order_status === 'DISPATCHED'){                          
             order.order_status = 'ASSUMED_DELIVERED';
             var current_action = {};
             current_action.action_type = 'ASSUMED_DELIVERED';
@@ -733,7 +729,6 @@ function schedule_assumed_delivered(data, user) {
             order.save(function(err, order){
               if(err) {
                 console.log('error ' + err);
-                console.log('error in scheduling assumed delivered');
               } else {
                 console.log('done assumed delivered');
                 schedule_order_delivered(data, user);
@@ -783,10 +778,8 @@ function schedule_order_delivered(data, user) {
           order.save(function(err, order){
             if(err){
               console.log('error '+ err);
-              console.log('error in delivered');
             }
             else{
-              console.log('done order delivered');
               var date = new Date();
               var time = date.getTime();
               var notif = {};
@@ -805,7 +798,6 @@ function schedule_order_delivered(data, user) {
     });
 
     agenda.on('ready', function() {
-      console.log(parseInt(data.order.estimeted_delivery_time)+20);
       agenda.schedule('in 20 minutes', 'schedule_order_delivered', {order_id: data.order.order_id, status: 'DELIVERED', previous_state: 'ASSUMED_DELIVERED'});
       agenda.start();
     });    
