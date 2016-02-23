@@ -19,7 +19,8 @@ var Notification = new Schema({
   user : {type: Schema.ObjectId, ref: User},
   outlet : {type: Schema.ObjectId, ref: Outlet},
   notification_type: {type: String}, // either push or pull
-  created_at: {type: Date, default: Date.now()}
+  created_at: {type: Date, default: Date.now()},
+  image: {type: String}
 });
 
 module.exports = mongoose.model('Notification', Notification);

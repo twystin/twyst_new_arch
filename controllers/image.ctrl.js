@@ -31,13 +31,39 @@ module.exports.uploadImage = function(req, res) {
 		});	
 		
 	} 
+    else if (req.body.image_class === 'menu') {
+        var img_obj = {};
+        img_obj.id = req.body.id || new ObjectId();
+        img_obj.image = req.body.image;
+        img_obj.image_type = req.body.image_type
+        img_obj.item = req.body.item || new ObjectId();
+
+        ImageHelper.uploadMenuImage(img_obj)
+            .then(function(data) {
+                HttpHelper.success(res, data.data, data.message);
+            }, function(err) {
+                HttpHelper.error(res, err.err || null, err.message);
+            });
+    }
+    else if (req.body.image_class === 'cashback_offer') {
+    	var img_obj = {};
+    	img_obj.id = req.body.id || new ObjectId();
+    	img_obj.image = req.body.image;
+    	img_obj.image_type = req.body.image_type;
+
+    	ImageHelper.uploadOfferImage(img_obj)
+    		.then(function(data) {
+    			HttpHelper.success(res, data.data, data.message);
+    		}, function(err) {
+    			HttpHelper.error(res, err.err || null, err.message);
+    		});
+    }
 	else {
 		HttpHelper.error(res, new Error("Invalid request object"), "Invalid request object");
 	}
 }
 
 module.exports.cloneImage = function(req, res) {
-	console.log(req.body);
 	if(!_.has(req.body, 'image_type') || !_.has(req.body, 'source')) {
 		HttpHelper.error(res, new Error("Invalid request object"), "Invalid request object");
 	} else {

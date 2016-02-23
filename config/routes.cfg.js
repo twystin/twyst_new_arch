@@ -8,10 +8,14 @@ var passport = require('passport');
 module.exports = function(app) {
 
   (function WepAppRoutes() {
+    var MiscCtrl = require('../controllers/misc.ctrl');
     app.get('', function(req, res) { res.redirect('/home'); });
     app.get('/', function(req, res) { res.redirect('/home'); });
     app.get('/api/v4/earn/more', function(req, res) { res.contentType('text/html'); res.end("<ul><li>Upload your bill every time you visit or order from a Twyst outlet.</li><li>Invlite friends to join you on Twyst - get Twyst bucks for each friends who joins.</li><li>Submit offers!</li><li>Suggest outlets you want on Twyst.</li><li>Favourite an outlet.</li><li>Like an offer</li></ul>"); });
-    app.get('/api/v4/faq', function(req, res) { res.contentType('text/html'); res.end('<h3>How to Twyst</h3> <ul> <li><strong>How do I use Twyst</strong> <p>It\'s easy - scroll or search for the offer you are looking for, and tap \'Use Offer\' to use them! Most offers are available to use immediately, some can be unlocked when tou check-in. You can plan ahead as well, by tapping on your current location and choosing a different location, date or time</p></li> <li><strong>What\'s the number I sometimes see next to \'Use Offer\'?</strong> <p>That number signifies the cost of the offer in Twyst Bucks. Twyst Bucks are the points on Twyst, that you need to use some offers. You can anso use Twyst Bucsk to extend your coupons and grab your friends coupons</p> </li> <li> <strong>So, how do I earn Twyst Bucks</strong> <p>You can earn Twyst Bucks each time you check-in by upload a restaurant bill or scanning a QR Code. You can also invite friends to join you on Twyst, and get 250 Twyst Bucsk for each friend who joins Twyst on yout invitation. Also earn Twyst Bucks when you follow an outlet, like an offer, submit an offer and suggest an outlet on Twyst.</p> </li> <li> <strong>Why should I upload the bill?Can I upload from home?</strong> <p>Uploading a bill is a way of checking in at an outlet. You can upload your bills whether you went out to eat or ordered in. One bill can be uploaded only once for approval. When an uploaded bill is approved, you get a check-in at that outlet, and some Twyst Bucks!</p> </li> <li> <strong>On Twyst, what are friends for?</strong> <p>To get you more offers, thats what! Get 250 Twyst Bucks for each friend who joins Twyst on your invitation - use those Bucks to use some yummy offers! Whats more, when your friends check-in and unlock some cool coupons, you get to Grab and use those coupons as well. Remember, they too get to grab the coupons you unlock!</p> </li> <li> <strong>What are \'Grab Offer\' and \'Extend\'</strong> <p>Grab Offer is how you yse your friend\'s coupon. If a friend has checked-in and unlocked a coupon, but has not used it till the lapse date, the voucher becomes available to you ( and all his other friends on Twyst) to \'GRAB\'. Once grabbed, the coupon goes into your Wallet and is exclusively available to you until it expires.</p> <p /> <p>If you have unlocked a coupon, and the lapse date is coming up, but you do not wish your friends to be able to grab it (its\' good to be selfish sometimes!), you can extend the coupon till its expiry date. When you extend it, your friends do not get to see or grab your coupon.</p> <p /> <p>You need to use Twyst Bucks to grab as well as extend coupons.</p> </li> </ul> <br /><br /> <p>For more, write to us at <a href="mailto:support@twyst.in"><strong>support@twyst.in</strong></a></p>'); });
+    app.get('/api/v4/faq', function(req, res) { 
+      res.redirect('/home/faq.html'); 
+    });
+    app.post('/api/v4/get_link', MiscCtrl.send_link);
   })();
 
   (function AccountRoutes() {
@@ -30,7 +34,9 @@ module.exports = function(app) {
 
   (function RecoRoutes() {
     var RecoCtrl = require('../controllers/reco.ctrl');
+    var DeliveryRecoCtrl = require('../controllers/delivery_reco.ctrl');
     app.get('/api/v4/recos', RecoCtrl.get);
+    app.get('/api/v4/delivery/recos', DeliveryRecoCtrl.get);
   })();
 
   (function EventRoutes() {
@@ -71,11 +77,12 @@ module.exports = function(app) {
     app.post('/api/v4/offer/extend', EventCtrl.extend_offer);
     app.post('/api/v4/offer/report/problem', EventCtrl.report_problem);
 
+    app.post('/api/v4/menu/request_update', EventCtrl.request_menu_update);
+
     app.post('/api/v4/referral/join', EventCtrl.referral_join);
 
     app.post('/api/v4/comments/', EventCtrl.comments);
     app.post('/api/v4/contact_us', EventCtrl.contact_us);
-    app.post('/api/v4/apply', EventCtrl.apply);
   })();
 
   (function OutletRoutes() {
@@ -90,15 +97,29 @@ module.exports = function(app) {
     app.get('/api/v4/outlets/:outlet_id', OutletCtrl.get);
     app.get('/api/v4/outlets', mustBe.authorized('outlet.view', OutletCtrl.all));
     app.delete('/api/v4/outlets/:outlet_id', mustBe.authorized('outlet.remove', OutletCtrl.remove));
+    app.get('/api/v4/outlet/orders/:outlet_id', OutletCtrl.get_orders);
+    app.put('/api/v4/outlet/order/:order_id', OutletCtrl.update_order);
   })();
 
   (function OfferRoutes() {
     var OfferCtrl = require('../controllers/offer.ctrl');
     app.post('/api/v4/offers', OfferCtrl.new);
     app.get('/api/v4/offers', OfferCtrl.all);
+    app.get('/api/v4/offers/outlet/:outlet_id', OfferCtrl.get_offers);
     app.put('/api/v4/offers/:offer_id', mustBe.authorized('outlet.update', OfferCtrl.update));
     app.get('/api/v4/offers/:offer_id', mustBe.authorized('outlet.view', OfferCtrl.get));
     app.delete('/api/v4/offers/:offer_id', mustBe.authorized('outlet.update', OfferCtrl.delete));
+
+  })();
+
+  (function CashbackOfferRoutes() {
+    var CashbackOfferCtrl = require('../controllers/cashback_offer.ctrl');
+    app.post('/api/v4/cashback/offers', CashbackOfferCtrl.create);
+    app.get('/api/v4/cashback/offers', CashbackOfferCtrl.all);
+    app.put('/api/v4/cashback/offers/:offer_id', CashbackOfferCtrl.update);
+    app.get('/api/v4/cashback/offers/:offer_id', CashbackOfferCtrl.get);
+    app.delete('/api/v4/cashback/offers/:offer_id', CashbackOfferCtrl.delete);
+    app.post('/api/v4/cashback/offers/use', CashbackOfferCtrl.use_offer);
 
   })();
 
@@ -108,15 +129,20 @@ module.exports = function(app) {
     app.get('/api/v4/menu', MenuCtrl.all);
     app.post('/api/v4/menus/clone', mustBe.authorized('outlet.update', MenuCtrl.clone));
     app.put('/api/v4/menus/:menu', mustBe.authorized('outlet.update', MenuCtrl.update));
-    app.get('/api/v4/menus/:menu', mustBe.authorized('outlet.view', MenuCtrl.get));    
+    app.get('/api/v4/menus/:menu', MenuCtrl.get);    
     app.delete('/api/v4/menus/:menu', mustBe.authorized('outlet.update', MenuCtrl.delete));
   })();
 
   (function OrderRoutes() {
     var OrderCtrl = require('../controllers/order.ctrl');    
+    app.get('/api/v4/orders', OrderCtrl.all);
+    app.get('/api/v4/order/:order_id', OrderCtrl.get_order);
+    app.put('/api/v4/order', OrderCtrl.update_order);
     app.post('/api/v4/order/verify', OrderCtrl.verify_order);
     app.post('/api/v4/order/apply/offer', OrderCtrl.apply_offer);
     app.post('/api/v4/order/checkout', OrderCtrl.checkout);
+    app.post('/api/v4/order/confirm', OrderCtrl.confirm_order);
+
   })();
 
   (function ImageRoutes() {
@@ -132,12 +158,14 @@ module.exports = function(app) {
     app.put('/api/v4/friends', UserCtrl.update_friends);
     app.get('/api/v4/coupons', UserCtrl.get_coupons);
     app.post('/api/v4/user/location', UserCtrl.update_location);
+    app.post('/api/v4/user/cancel_order', UserCtrl.cancel_order);
   })();
 
   (function LocationRoutes() {
     var LocationCtrl = require('../controllers/location.ctrl');
     app.get('/api/v4/locations', LocationCtrl.get_locations);
     app.get('/api/v4/locations/outlets', LocationCtrl.get_outlet_locations);
+    app.post('/api/v4/locations/verify', LocationCtrl.verify_delivery_location);
   })();
 
   (function SearchRoutes() {
@@ -152,11 +180,38 @@ module.exports = function(app) {
       app.put('/api/v4/qr/:qr_id', QrCtrl.qr_update);
   })();
 
+  (function Payment_Routes(){
+    var PaymentCtrl = require('../controllers/payment.ctrl');
+    app.post('/api/v4/zaakpay/response', PaymentCtrl.get_zaakpay_response);
+    app.post('/api/v4/calculate/checksum', PaymentCtrl.calculate_checksum);
+    app.post('/api/v4/zaakpay/refund', PaymentCtrl.initiate_refund);
+    app.post('/api/v4/paytm/response', PaymentCtrl.get_paytm_response);
+  })();
+
+  (function Recharge_Routes(){
+    //var RechargeCtrl = require('../controllers/recharge.ctrl');
+    //app.post('/api/v4/mobikwik/recharge', RechargeCtrl.);
+    
+  })();
+
   (function LegacyRoutes() {
     app.get('/app', function(req, res) {
         res.redirect('https://play.google.com/store/apps/details?id=com.twyst.app.android&hl=en');
     });
+    app.get('/privacy_policy/', function(req, res){
+      res.redirect('../../privacy_policy.pdf');    
+    });
+
+    app.get('/terms_of_use/', function(req, res){
+      res.redirect('../../terms_of_use.pdf');    
+    });
+    app.get('/:url(*)', function(req, res){
+      res.redirect('../../home/404.html')
+    })
+    
   })();
+
+  
 };
 
 

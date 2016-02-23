@@ -11,7 +11,7 @@ var express = require('express'),
   favicon = require('serve-favicon'),
   errorhandler = require('errorhandler'),
   multer = require('multer'),
-  MongoStore = require('connect-mongo')(session),
+  MongoStore = require('connect-mongo/es5')(session),
   passport = require('passport'),
   LocalStrategy = require('passport-local').Strategy,
   logger = require('tracer').colorConsole();
@@ -53,7 +53,7 @@ module.exports = function(app) {
 
   app.use(passport.initialize());
   app.use(passport.session());
-  app.use(express.static(__dirname + '/../www/'));
+  app.use(express.static(__dirname + '/../../retwyst_web_apps/'));
 
   // app.use(favicon(__dirname + '/../../Twyst-Web-Apps/common/images/favicon/twyst.ico'));
   app.all("/api/*", function(req, res, next) {

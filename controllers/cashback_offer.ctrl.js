@@ -2,23 +2,24 @@
 /*jslint node: true */
 var logger = require('tracer').colorConsole();
 var HttpHelper = require('../common/http.hlpr');
-var OfferHelper = require('./helpers/offer.hlpr');
+var CashbackOfferHelper = require('./helpers/cashback_offer.hlpr');
 var _ = require('lodash');
 
-module.exports.new = function(req, res) {
+module.exports.create = function(req, res) {
 	logger.log();
 	var token = req.query.token || null;
 	var new_offer = {};
 	new_offer = _.extend(new_offer, req.body);
+
 	if(!token) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
 	else{
-		OfferHelper.create_offer(token, new_offer).then(function(data) {
+		CashbackOfferHelper.create_cashback_offer(token, new_offer).then(function(data) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err, err.message);
-		})	
+		})
 	}	
 }
 
@@ -31,18 +32,19 @@ module.exports.get = function(req, res) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
 	else{
-		OfferHelper.get_offer(token, offer_id).then(function(data) {
+		CashbackOfferHelper.get_cashback_offer(token, offer_id).then(function(data) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err, err.message);
 		})	
-	}	
+	}
+	
 }
 
 module.exports.update = function(req, res) {
 	logger.log();
-	var token = req.query.token || null;
-	var	offer_id = req.params.offer_id;
+	var token = req.query.token || null,
+		offer_id = req.params.offer_id;
 	var updated_offer = {};
 	updated_offer = _.extend(updated_offer, req.body);
 
@@ -50,12 +52,15 @@ module.exports.update = function(req, res) {
 		HttpHelper.error(res, null, 'Not Authenticated');
 	}
 	else{
-		OfferHelper.update_offer(token, updated_offer).then(function(data) {
+		CashbackOfferHelper.update_cashback_offer(token, updated_offer)
+		.then(function(data) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err || true, err.message);
 		})	
-	}	
+	}
+
+	
 }
 
 module.exports.delete = function(req, res) {
@@ -68,12 +73,13 @@ module.exports.delete = function(req, res) {
         HttpHelper.error(res, null, "Not Authenticated");
     }
     else{
-    	OfferHelper.delete_offer(token, offer_id).then(function(data) {
+    	CashbackOfferHelper.delete_cashback_offer(token, offer_id).then(function(data) {
 	        HttpHelper.success(res, data.data, data.message);
 	    }, function(err) {
 	        HttpHelper.error(res, err.err || true, err.message);
 	    });	
-    }   
+    }
+    
 }
 
 module.exports.all = function(req, res) {
@@ -84,7 +90,7 @@ module.exports.all = function(req, res) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
 	else{
-		OfferHelper.get_all_offers(token).then(function(data) {
+		CashbackOfferHelper.get_all_cashback_offers(token).then(function(data) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err || null, err.message);
@@ -93,22 +99,25 @@ module.exports.all = function(req, res) {
 	
 
 }
-module.exports.get_offers = function(req, res) {
+
+module.exports.use_offer = function(req, res) {
 	logger.log();
+
 	var token = req.query.token || null;
-	var outlet = req.params.outlet_id || null;
+	var offer_id = req.body.offer_id || null;
+
 	if (!token) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
-	else if(!outlet) {
-		HttpHelper.error(res, null, "no outlet is passed");
+	else if(!offer_id){
+		HttpHelper.error(res, null, "No offer is passed");	
 	}
 	else{
-		OfferHelper.get_offers(token, outlet).then(function(data) {
+		CashbackOfferHelper.use_cashback_offer(token, offer_id).then(function(data) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err || null, err.message);
 		});	
 	}
+	
 }
-

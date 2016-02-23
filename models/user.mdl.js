@@ -24,14 +24,17 @@ var User = new Schema({
     line1: {type: String},
     line2: {type: String},
     landmark: {type: String},
-    pin: {type: Number}, 
     city: {type: String},
     state: {type: String},
     coords:{
       lat: {type: String},
       long: {type: String}
     },
-    tag: {type: String}
+    tag: {type: String},
+    added_at: {
+      type: Date, 
+      default: Date.now()
+    }
   }],
   twyst_bucks: Number, //default 500
   image: {type: String, default: ''},

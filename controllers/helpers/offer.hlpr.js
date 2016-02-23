@@ -10,7 +10,8 @@ var ObjectId = mongoose.Types.ObjectId;
 var Outlet = mongoose.model('Outlet');
 var logger = require('tracer').colorConsole();
 var AuthHelper = require('../../common/auth.hlpr');
-var Cache = require('../../common/cache.hlpr.js');
+var RecoHelper = require('./reco.hlpr');
+var moment = require('moment');
 
 module.exports.create_offer = function(token, new_offer) {
     logger.log();
@@ -187,7 +188,7 @@ module.exports.delete_offer = function(token, offerId) {
             deferred.reject({err: err || true, message: 'Failed to update offer'});
         } else {
             async.each(outlets, function(outlet, callback) {
-                var index = _.findIndex(outlet.offers, function(offer) { return offer._id.toString()==offerId; });
+                var index = _.findIndex(outlet.offers, function(offer) { return offer._id.toString()===offerId; });
                 if(index!==-1) {
                     outlet.offers.splice(index, 1);
                     outlet.save(function(err) {
@@ -216,35 +217,55 @@ module.exports.delete_offer = function(token, offerId) {
 module.exports.get_all_offers = function(token) {
     logger.log();
     var deferred = Q.defer();
-    Cache.get('outlets', function(err, reply) {
-        if(err || !reply) {
+    AuthHelper.get_user(token).then(function(data) {
+        var user = data.data;
+        if (user.role > 2) {
             deferred.reject({
                 err: false,
-                message: 'Unable to load offers right now'
+                message: 'Access denied'
             });
         } else {
-            var offer_ids = [];
-            var offers = [];
-            var outlets = JSON.parse(reply);
-            _.each(outlets, function(outlet) {
-                _.each(outlet.offers, function(offer) {
-                    if(offer_ids.indexOf(offer._id.toString())===-1) {
-                        offer_ids.push(offer._id.toString());
-                        offer.outlet = {
-                            _id: outlet._id,
-                            name: outlet.basics.name,
-                            loc1: outlet.contact.location.locality_1[0],
-                            loc2: outlet.contact.location.locality_2[0]
-                        };
-                        offers.push(offer);
-                    }
-                });
+            var outlet_ids = _.map(user.outlets, function(outlet) {
+                return outlet.toString();
             });
-            deferred.resolve({
-                data: offers,
-                message: 'All offers loaded from server'
+            Cache.get('outlets', function(err, reply) {
+                if(err || !reply) {
+                    deferred.reject({
+                        err: false,
+                        message: 'Unable to load offers right now'
+                    });
+                } else {
+                    var offer_ids = [];
+                    var offers = [];
+                    var outlets = JSON.parse(reply);
+                    _.each(outlets, function(outlet) {
+                        if(user.role === 1 || outlet_ids.indexOf(outlet._id) !== -1) {
+                            _.each(outlet.offers, function(offer) {
+                                if(offer_ids.indexOf(offer._id.toString())===-1) {
+                                    offer_ids.push(offer._id.toString());
+                                    offer.outlet = {
+                                        _id: outlet._id,
+                                        name: outlet.basics.name,
+                                        loc1: outlet.contact.location.locality_1[0],
+                                        loc2: outlet.contact.location.locality_2[0]
+                                    };
+                                    offers.push(offer);
+                                }
+                            });
+                        }
+                    });
+                    deferred.resolve({
+                        data: offers,
+                        message: 'All offers loaded from server'
+                    });
+                }
             });
         }
+    }, function(err) {
+        deferred.reject({
+            err: err || false,
+            message: 'Couldn\'t find the user'
+        });
     });
     return deferred.promise;
 }
@@ -270,5 +291,99 @@ module.exports.apply_offer = function(token, order, offer) {
             });
         }
     });
+    return deferred.promise;
+}
+
+module.exports.get_offers = function(token, outlet_id) {
+    logger.log();
+    var deferred = Q.defer();
+    Outlet.findOne({
+        '_id': outlet_id
+    })
+    .exec(function(err, outlet) {
+        if(err || !outlet) {
+            deferred.reject({
+                err: err,
+                message: 'Unable to load offers'
+            })
+        } else {
+            var date = new Date();
+            var time = moment().hours() +':'+moment().minutes();
+            date = parseInt(date.getMonth())+1+ '-'+ date.getDate()+'-'+date.getFullYear();
+            var offers = _.map(outlet.offers, function(offer) {
+                if(offer && offer.offer_type === 'checkin' 
+                    || !offer.actions.reward.applicability.delivery
+                    || offer.offer_status === 'archived' 
+                    || offer.offer_status === 'draft'
+                    || (new Date(offer.offer_end_date)) < new Date()) {
+                    return false;
+                }
+                else if(offer){
+                    var massaged_offer = {};
+                    massaged_offer.order_value_without_tax = offer.order_value_without_tax;
+                    massaged_offer.vat = offer.vat;
+                    massaged_offer.st = offer.st;
+                    massaged_offer.packing_charge = offer.packing_charge;
+                    massaged_offer.delivery_charge = offer.delivery_charge;
+                    massaged_offer.order_value_with_tax = offer.order_value_with_tax;
+                    massaged_offer.is_applicable = offer.is_applicable;
+                    massaged_offer._id = offer._id;
+                    massaged_offer.header = offer.actions && offer.actions.reward && offer.actions.reward.header || offer.header;
+                    massaged_offer.line1 = offer.actions && offer.actions.reward && offer.actions.reward.line1 || offer.line1;
+                    massaged_offer.line2 = offer.actions && offer.actions.reward && offer.actions.reward.line2 || offer.line2;
+                    massaged_offer.description = offer.actions && offer.actions.reward && offer.actions.reward.description || '';
+                    massaged_offer.terms = offer.actions && offer.actions.reward && offer.actions.reward.terms || '';
+
+                    massaged_offer.type = offer.offer_type;
+                    massaged_offer.meta = offer.actions && offer.actions.reward && offer.actions.reward.reward_meta || offer.meta;
+
+                    massaged_offer.expiry = offer.offer_end_date || offer.expiry_date;
+
+                    if(offer.offer_items) {
+                        massaged_offer.offer_items = offer.offer_items;
+                    }
+                    var date = new Date();
+                    var time = moment().hours() +':'+moment().minutes();
+                    date = date.getMonth()+1+'-'+date.getDate()+'-'+date.getFullYear();
+
+                    if (offer && offer.actions && offer.actions.reward && offer.actions.reward.reward_hours) {
+                      massaged_offer.available_now = !(RecoHelper.isClosed(date, time, offer.actions.reward.reward_hours));
+                      if (!massaged_offer.available_now) {
+                        massaged_offer.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
+                      }
+
+                    }
+                    if(offer.offer_type === 'offer' || offer.offer_type === 'deal' || offer.offer_type ==='bank_deal') {
+                      massaged_offer.offer_cost =  offer.offer_cost;  
+                    }
+                    if(offer.offer_type === 'bank_deal') {
+                      massaged_offer.offer_source = offer.offer_source;
+                    }
+
+                    if(offer.actions.reward.reward_meta.reward_type == 'free' || offer.actions.reward.reward_meta.reward_type == 'buyxgety' ) {
+                        massaged_offer.free_item_index = offer.free_item_index;
+                    }
+
+                    if(massaged_offer.expiry && (new Date(massaged_offer.expiry) <= new Date())) {
+                      return massaged_offer;
+                    }
+                    else{
+                        return massaged_offer;
+                    }
+                      
+                }
+                else{
+                    return false;
+                }
+            });
+            offers = _.compact(offers);
+            if(offers.length) {
+                deferred.resolve({data: offers, message: 'Offers found'});
+            } else {
+                deferred.resolve({data: offers, message: 'No currently available offers'});
+            } 
+            
+        }
+    })
     return deferred.promise;
 }

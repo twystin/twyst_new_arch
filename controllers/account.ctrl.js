@@ -18,36 +18,41 @@ var Q = require('q');
 var logger = require('tracer').colorConsole();
 
 module.exports.login = function(req, res) {
-  logger.info();
-  var passed_data = {};
-  passed_data.account = _.get(req, 'user._id');
-  passed_data.user = _.get(req, 'user.user');
+    logger.info();
+    var passed_data = {};
+    passed_data.account = _.get(req, 'user._id');
+    passed_data.user = _.get(req, 'user.user');
 
-  AccountHelper.save_auth_token(passed_data)
-    .then(function(data) {
-      return AccountHelper.populate_cache(data);
-    })
-    .then(function(data) {
-      return AuthHelper.get_user(data.token.token);
-    })
-    .then(function(data) {
-      console.log('data', data);
-      if(data.data.role===1 || data.data.role===2 || data.data.role === 3 || data.data.role === 4 || data.data.role === 5) {
-        if (data.data.role===1 || data.data.role===2) {
-          data.data.is_admin = true;
-        }
-        console.log(data);
-        HttpHelper.success(res, data, "Logged in successfully");  
-      }
-      else{
-        HttpHelper.success(res, data.data.token, "Logged in successfully");   
-      }
-      
-    })
-    .fail(function(err) {
-      console.log(err)
-      HttpHelper.error(res, err, "Error logging in");
-    });
+    if (req.body.isMerchant && (req.user.role > 5 || req.user.role < 3)) {
+        return HttpHelper.error(res, false, "Invalid merchant credentials");
+    } else if (req.body.isAdmin && req.user.role > 2) {
+        return HttpHelper.error(res, false, "Invalid admin credentials");
+    } else {
+        AccountHelper.save_auth_token(passed_data)
+            .then(function(data) {
+                return AccountHelper.populate_cache(data);
+            })
+            .then(function(data) {
+                return AuthHelper.get_user(data.token.token);
+            })
+            .then(function(data) {
+                // console.log('data', data);
+                if (data.data.role === 1 || data.data.role === 2 || data.data.role === 3 || data.data.role === 4 || data.data.role === 5) {
+                    if (data.data.role === 1 || data.data.role === 2) {
+                        data.data.is_admin = true;
+                    }
+                    //console.log(data);
+                    HttpHelper.success(res, data, "Logged in successfully");
+                } else {
+                    HttpHelper.success(res, data.data.token, "Logged in successfully");
+                }
+
+            })
+            .fail(function(err) {
+                console.log(err)
+                HttpHelper.error(res, err, "Error logging in");
+            });
+    }
 };
 
 module.exports.logout = function(req, res) {

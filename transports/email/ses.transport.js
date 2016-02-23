@@ -17,14 +17,16 @@ module.exports.send = function(payload) {
     "region": "us-west-2"
   });
   var ses = new aws.SES({
-    apiVersion: '2010-12-01'
+    apiVersion: '2010-12-01',
+    region: 'us-west-2'
   });
 
   ses.sendEmail(payload, function(err, data) {
     if (err) {
+      console.log(err)
       deferred.reject(err);
     } else {
-      deferred.success(data);
+      deferred.resolve(data);
     }
   });
 

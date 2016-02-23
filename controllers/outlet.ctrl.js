@@ -21,16 +21,17 @@ var logger = require('tracer').colorConsole();
 module.exports.new = function(req, res) {
   var token = req.query.token || null;
   var created_outlet = {};
-
+  created_outlet = _.extend(created_outlet, req.body);
   if (!token) {
     HttpHelper.error(res, null, "Not authenticated");
   }
-  created_outlet = _.extend(created_outlet, req.body);
-  OutletHelper.create_outlet(token, created_outlet).then(function(data) {
-    HttpHelper.success(res, data.data, data.message);
-  }, function(err) {
-    HttpHelper.error(res, err.data, err.message);
-  });
+  else{
+    OutletHelper.create_outlet(token, created_outlet).then(function(data) {
+      HttpHelper.success(res, data.data, data.message);
+    }, function(err) {
+      HttpHelper.error(res, err.data, err.message);
+    });  
+  } 
 };
 
 module.exports.update = function(req, res) {
@@ -41,12 +42,14 @@ module.exports.update = function(req, res) {
   if (!token) {
     HttpHelper.error(res, null, "Not authenticated");
   }
-
-  OutletHelper.update_outlet(token, updated_outlet).then(function(data) {
-    HttpHelper.success(res, data.data, data.message);
-  }, function(err) {
-    HttpHelper.error(res, err.data, err.message);
-  });
+  else{
+    OutletHelper.update_outlet(token, updated_outlet).then(function(data) {
+      HttpHelper.success(res, data.data, data.message);
+    }, function(err) {
+      HttpHelper.error(res, err.data, err.message);
+    });  
+  }
+  
 };
 
 function get_outlet(query, params) {
@@ -562,12 +565,14 @@ module.exports.all = function(req, res) {
   if (!token) {
     HttpHelper.error(res, null, "Not authenticated");
   }
-
-  OutletHelper.get_all_outlets(token).then(function(data) {
-    HttpHelper.success(res, data.data, data.message);
-  }, function(err) {
-    HttpHelper.error(res, err.data, err.message);
-  });
+  else{
+    OutletHelper.get_all_outlets(token).then(function(data) {
+      HttpHelper.success(res, data.data, data.message);
+    }, function(err) {
+      HttpHelper.error(res, err.data, err.message);
+    });  
+  }
+  
 };
 
 module.exports.remove = function(req, res) {
@@ -575,16 +580,18 @@ module.exports.remove = function(req, res) {
   if (!token) {
     HttpHelper.error(res, null, "Not authenticated");
   }
-
-  if (!req.params.outlet_id) {
+  else if (!req.params.outlet_id) {
     HttpHelper.error(res, null, "No outlet id passed");
   }
+  else{
+    OutletHelper.remove_outlet(token, req.params.outlet_id).then(function(data) {
+      HttpHelper.success(res, data.data, data.message);
+    }, function(err) {
+      HttpHelper.error(res, err.data, err.message);
+    });  
+  }
 
-  OutletHelper.remove_outlet(token, req.params.outlet_id).then(function(data) {
-    HttpHelper.success(res, data.data, data.message);
-  }, function(err) {
-    HttpHelper.error(res, err.data, err.message);
-  });
+  
 };
 
 module.exports.get_user_coupons = function(req, res) {
@@ -596,52 +603,52 @@ module.exports.get_user_coupons = function(req, res) {
   if (!token) {
     HttpHelper.error(res, null, "Not authenticated")
   }
-
-  if(!outlet_id) {
+  else if(!outlet_id) {
     HttpHelper.error(res, null, "Outlet info required");
   }
-
-  if(!phone) {
+  else if(!phone) {
     HttpHelper.error(res, null, "Customer's phone number required");
   }
-
-  AuthHelper.get_user(token).then(function(data) {
+  else{
+    AuthHelper.get_user(token).then(function(data) {
     
-    var user = data.data;
-    if(user.role>=6) {
-      HttpHelper.error(res, null, "Unauthorized access");
-    } else {
-      var THREE_HOURS = new Date(Date.now() - 10800000);
-      User.findOne({
-        phone: phone
-      }).exec(function(err, user) {
+      var user = data.data;
+      if(user.role>=6) {
+        HttpHelper.error(res, null, "Unauthorized access");
+      } else {
+        var THREE_HOURS = new Date(Date.now() - 10800000);
+        User.findOne({
+          phone: phone
+        }).exec(function(err, user) {
 
-        if(err || !user) {
-          HttpHelper.error(res, null, "No coupons found");
-        } else {
-          user = user.toJSON();
-          var filterd_coupons = _.filter(user.coupons, function(coupon) {
-            var coupon_outlets = _.map(coupon.outlets, function(outlet) {
-              return outlet.toString();
+          if(err || !user) {
+            HttpHelper.error(res, null, "No coupons found");
+          } else {
+            user = user.toJSON();
+            var filterd_coupons = _.filter(user.coupons, function(coupon) {
+              var coupon_outlets = _.map(coupon.outlets, function(outlet) {
+                return outlet.toString();
+              });
+              coupon.phone = user.phone;
+
+              if(coupon.issued_at>THREE_HOURS) {
+                return false
+              } else if(coupon_outlets.indexOf(outlet_id)!==-1) {
+                return true;
+              } else {
+                return false;
+              }
             });
-            coupon.phone = user.phone;
-
-            if(coupon.issued_at>THREE_HOURS) {
-              return false
-            } else if(coupon_outlets.indexOf(outlet_id)!==-1) {
-              return true;
-            } else {
-              return false;
-            }
-          });
-          HttpHelper.success(res, filterd_coupons, "Coupons found!");
-        }
-      });
-    }
-  }, function(err) {
-    console.log(err);
-    HttpHelper.error(res, err, 'Couldn\'t find the user');
-  });
+            HttpHelper.success(res, filterd_coupons, "Coupons found!");
+          }
+        });
+      }
+    }, function(err) {
+      console.log(err);
+      HttpHelper.error(res, err, 'Couldn\'t find the user');
+    });  
+  }
+  
 }
 
 module.exports.get_coupon_by_code = function(req, res) {
@@ -650,24 +657,21 @@ module.exports.get_coupon_by_code = function(req, res) {
   var outlet_id = req.params.outlet_id || null;
   var code = req.params.code || null;
   var data = {};
-
-  if (!token) {
-    HttpHelper.error(res, null, "Not authenticated")
-  }
-
-  if(!outlet_id) {
-    HttpHelper.error(res, null, "Outlet info required");
-  }
-
-  if(!code) {
-    HttpHelper.error(res, null, "coupon code required");
-  }
-
   data.token = token;
   data.outlet_id = outlet_id;
   data.code = code;
 
-  check_merchant_authorization(data)
+  if (!token) {
+    HttpHelper.error(res, null, "Not authenticated")
+  }
+  else if(!outlet_id) {
+    HttpHelper.error(res, null, "Outlet info required");
+  }
+  else if(!code) {
+    HttpHelper.error(res, null, "coupon code required");
+  }
+  else{
+    check_merchant_authorization(data)
     .then(function(data) {
       return retrieve_coupon_info(data)
     })
@@ -676,9 +680,8 @@ module.exports.get_coupon_by_code = function(req, res) {
     })
     .fail(function(err) {
       HttpHelper.error(res, err.err, err.message);
-    })
-
-  return deferred.promise;
+    })  
+  }
 }
 
 
@@ -938,3 +941,42 @@ function create_event(data) {
 
   return deferred.promise;
 }
+
+module.exports.get_orders = function(req, res) {
+  var token = req.query.token || null;
+  var outlet_id = req.params.outlet_id || null;
+
+  if (!token) {
+    HttpHelper.error(res, null, "Not authenticated");
+  }
+  else if (!outlet_id) {
+    HttpHelper.error(res, null, "No outlet id passed");
+  }
+  else{
+    OutletHelper.get_orders(token, outlet_id).then(function(data) {
+      HttpHelper.success(res, data.data, data.message);
+    }, function(err) {
+      HttpHelper.error(res, err.data, err.message);
+    });  
+  }
+  
+};
+
+module.exports.update_order = function(req, res) {
+  var token = req.query.token || null;
+  var order = {};
+  order.order_id = req.params.order_id;
+  order = _.extend(order, req.body);
+
+  if (!token) {
+    HttpHelper.error(res, null, "Not authenticated");
+  }
+  else{
+    OutletHelper.update_order(token, order).then(function(data) {
+      HttpHelper.success(res, data.data, data.message);
+    }, function(err) {
+      HttpHelper.error(res, err.data, err.message);
+    });  
+  }
+  
+};

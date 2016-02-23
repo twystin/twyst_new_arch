@@ -44,6 +44,10 @@ var OutletSchema = new Schema({
       type: Date,
       default: Date.now
     },
+    modified_by: {
+      type: Schema.ObjectId,
+      ref: 'User'
+    },
     live_at: {
       type: Date,
       default: Date.now
@@ -52,9 +56,11 @@ var OutletSchema = new Schema({
       type: Date,
       default: Date.now
     },
+
     featured: Boolean,
     is_paying: {type: Boolean, required: true, default: false },
     account_mgr_email: {type: String},
+    account_mgr_phone: {type: String},
     cod: {type: Boolean, default: false}
   },
   contact: {
@@ -105,6 +111,10 @@ var OutletSchema = new Schema({
     },
     phones: {
       mobile: [{
+        num_type: {
+          type: String,
+          default: ''
+        },
         num: {
           type: String,
           default: '',
@@ -197,17 +207,36 @@ var OutletSchema = new Schema({
     delivery: {
       delivery_zone: [{
         zone_name: String,
+        zone_type: Number,
         coord: [],
-        delivery_estimated_time: String,  
+        delivery_estimated_time: Number,  
         delivery_timings: hours.hours,
         delivery_conditions: String,  
         min_amt_for_delivery: Number,
         free_delivery_amt: Number,
         delivery_charge: Number,
+        has_packaging_charge: {
+          type: Boolean,
+          default: false,
+          required: true
+        },
+        packaging_charge: {
+          is_fixed: Boolean,
+          value: Number,
+          charges: [{
+            start: Number,
+            end: Number,
+            value: Number
+          }]
+        },
         order_accepts_till: {
           hr: {type: Number},
           min: {type: Number}
-        }
+        },
+        payment_options: [{
+          type: String,
+          enum: ['cod', 'inapp']
+        }],
       }],  
     },
     home_delivery: {
@@ -316,7 +345,7 @@ var OutletSchema = new Schema({
     status: {
       type: String,
       //enum: ['active', 'archived', 'draft'],
-      default: 'active'
+      default: 'draft'
     },
     links: [{
       type: Schema.ObjectId,
@@ -341,6 +370,27 @@ var OutletSchema = new Schema({
         end: {type: Number},
         value: {type: Number}
       }]
+    },
+    cashback_info: {
+      base_cashback: {
+        type: Number
+      },
+      in_app_ratio: {
+        type: Number,
+        default: 1
+      },
+      cod_ratio: {
+        type: Number,
+        default: 1
+      },
+      order_amount_slab: [{
+        start: {type: Number},
+        end: {type: Number},
+        ratio: {type: Number}
+      }],
+      max_cashback: {
+        type: Number
+      }
     },
     rating: {
       count: {
@@ -509,11 +559,11 @@ var OutletSchema = new Schema({
     }],
     offer_items: {
       all: {type: Boolean},
-      menu_id: Schema.Types.ObjectId,
-      category_id: Schema.Types.ObjectId,
-      sub_category_id: Schema.Types.ObjectId,
-      item_id: Schema.Types.ObjectId,
-      option_id: Schema.Types.ObjectId,
+      menus: [Schema.Types.ObjectId],
+      categories: [Schema.Types.ObjectId],
+      sub_categories: [Schema.Types.ObjectId],
+      items: [Schema.Types.ObjectId],
+      options: [Schema.Types.ObjectId],
       sub_options: [Schema.Types.ObjectId],
       addons: [Schema.Types.ObjectId]
     }
@@ -529,6 +579,16 @@ var OutletSchema = new Schema({
     //name: {
       //type: String
     //},
+    menu_item_type: {
+      type: String,
+      default: 'type_1',
+      required: true
+    },
+    charge_service_tax: {
+      type: Boolean,
+      default: true,
+      required: true
+    },
     menu_type: {
       type: String// Dine-in / Takeaway / Delivery / Weekend / Dinner / All
     },
@@ -550,12 +610,21 @@ var OutletSchema = new Schema({
           item_name: {
             type: String
           },
+          item_type: {
+            type: String,
+            enum: ['type_1', 'type_2', 'type_3']
+          },
           item_description: {
             type: String
           },
           is_available: {
             type: Boolean,
             default: true
+          },
+          is_recommended: {
+            type: Boolean,
+            default: false,
+            required: true
           },
           item_photo: {
             type: String
@@ -580,21 +649,26 @@ var OutletSchema = new Schema({
             },
             end_date: {
               type: Date
-            }
-          },
-          item_available_on: [],//days 
+            },
+            available_hours: hours.hours,
+            days_of_the_week: [{
+              type: String,
+              enum: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+            }]
+          },          
           option_title: {
             type: String
           },
+          option_price_is_additive: {
+            type: Boolean,
+            default: false,
+          },
+          
           option_is_addon: {
             type: Boolean,
             default: false,
           },
           options: [{
-            _id: {
-              type: Schema.Types.ObjectId,
-              default: new mongoose.Types.ObjectId()
-            },
             is_available: {
               type: Boolean,
               default: true
@@ -610,10 +684,6 @@ var OutletSchema = new Schema({
               type: Number
             },
             sub_options: [{
-              _id: {
-                type: Schema.Types.ObjectId,
-                default: new mongoose.Types.ObjectId()
-              },
               sub_option_title: {
                 type: String,
               },
@@ -635,10 +705,6 @@ var OutletSchema = new Schema({
               }]
             }],
             addons: [{
-              _id: {
-                type: Schema.Types.ObjectId,
-                default: new mongoose.Types.ObjectId()
-              },
               addon_title: {
                 type: String,
               },

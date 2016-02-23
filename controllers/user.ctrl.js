@@ -15,120 +15,127 @@ var User = mongoose.model('User');
 var Outlet = mongoose.model('Outlet');
 
 module.exports.get_coupons = function(req, res) {
+  logger.log();
   var token = req.query.token || null;
 
   if (!token) {
     HttpHelper.error(res, null, "Not authenticated");
   }
+  else{
+    AuthHelper.get_user(req.query.token).then(function(user) {
+      var data = {};
+      data.query = req.query;
+      data.user = user;
+      
+      if (user.data.role >= 6) {
+        data.coupons = user.data.coupons;
+        data.twyst_bucks = user.data.twyst_bucks;
+        filter_out_expired_and_used_coupons(data)
+          .then(function(data) {
+            return load_outlet_info_from_cache(data)
+          }).then(function(data) {
+            var twyst_bucks;
+            if(data.coupons && data.coupons.length){ 
+                twyst_bucks = data.twyst_bucks;
+            }
+            else{
+                twyst_bucks = data.data.twyst_bucks;
+            }
+            var coupons = data.coupons;   
+            
+            var message = data.message;
+            var data = {};
+            data.coupons = coupons;
+            data.twyst_bucks = twyst_bucks;
+            HttpHelper.success(res, data, message);
+          })
+          .fail(function(err) {
+            console.log(err)
+            HttpHelper.error(res, err, 'Couldn\'t find the user coupons');
+          });
+      } else {
+        var phone_number = req.query.phone || null;
 
-  AuthHelper.get_user(req.query.token).then(function(user) {
-    var data = {};
-    data.query = req.query;
-    data.user = user;
-    
-    if (user.data.role >= 6) {
-      data.coupons = user.data.coupons;
-      data.twyst_bucks = user.data.twyst_bucks;
-      filter_out_expired_and_used_coupons(data)
-        .then(function(data) {
-          return load_outlet_info_from_cache(data)
-        }).then(function(data) {
-          var twyst_bucks;
-          if(data.coupons && data.coupons.length){ 
-              twyst_bucks = data.twyst_bucks;
-          }
-          else{
-              twyst_bucks = data.data.twyst_bucks;
-          }
-          var coupons = data.coupons;   
-          
-          var message = data.message;
-          var data = {};
-          data.coupons = coupons;
-          data.twyst_bucks = twyst_bucks;
-          HttpHelper.success(res, data, message);
-        })
-        .fail(function(err) {
-          console.log(err)
-          HttpHelper.error(res, err, 'Couldn\'t find the user coupons');
-        });
-    } else {
-      var phone_number = req.query.phone || null;
+        if(!phone_number) {
+          HttpHelper.error(res, null, "Phone number required");
+        }
 
-      if(!phone_number) {
-        HttpHelper.error(res, null, "Phone number required");
+        data.phone_number = phone_number;
+        get_coupons_for_user(data)
+          .then(function(data) {
+            return filter_out_expired_and_used_coupons(data);
+          }).then(function(data) {
+            return load_outlet_info_from_cache(data)
+          }).then(function(data) {
+            console.log(data.coupons);
+            var coupons = data.coupons;
+            var data = {};
+            data.coupons = coupons;
+            HttpHelper.success(res, data, 'message');
+          })
+          .fail(function(err) {
+            console.log(err);
+            HttpHelper.error(res, err, 'Couldn\'t find the user coupons');
+          });
       }
-
-      data.phone_number = phone_number;
-      get_coupons_for_user(data)
-        .then(function(data) {
-          return filter_out_expired_and_used_coupons(data);
-        }).then(function(data) {
-          return load_outlet_info_from_cache(data)
-        }).then(function(data) {
-          console.log(data.coupons);
-          var coupons = data.coupons;
-          var data = {};
-          data.coupons = coupons;
-          HttpHelper.success(res, data, 'message');
-        })
-        .fail(function(err) {
-          console.log(err);
-          HttpHelper.error(res, err, 'Couldn\'t find the user coupons');
-        });
-    }
-  }, function(err) {
-    HttpHelper.error(res, err, 'Couldn\'t find the user');
-  });
+    }, function(err) {
+      HttpHelper.error(res, err, 'Couldn\'t find the user');
+    });  
+  }
+  
 };
 
 module.exports.get_profile = function(req, res) {
+  logger.log();
   var token = req.query.token || null;
 
   if (!token) {
     HttpHelper.error(res, null, "Not authenticated");
   }
-
-  AuthHelper.get_user(req.query.token).then(function(data) {
-    HttpHelper.success(res, data.data, "Found user");
-  }, function(err) {
-    HttpHelper.error(res, err, "Could not find user");
-  });
+  else{
+    AuthHelper.get_user(req.query.token).then(function(data) {
+      HttpHelper.success(res, data.data, "Found user");
+    }, function(err) {
+      HttpHelper.error(res, err, "Could not find user");
+    });  
+  }
+  
 };
 
 module.exports.update_profile = function(req, res) {
-
+  logger.log();
   var token = req.query.token || null;
-
+  var updated_user = {};
+  updated_user = _.extend(updated_user, req.body);
   if (!token) {
     HttpHelper.error(res, null, "Not authenticated");
   }
-
-  var updated_user = {};
-  updated_user = _.extend(updated_user, req.body);
-
-  UserHelper.update_user(token, updated_user).then(function(data) {
-    HttpHelper.success(res, data.data, data.message);
-  }, function(err) {
-    HttpHelper.error(res, err.err, err.message);
-  });
+  else{
+      UserHelper.update_user(token, updated_user).then(function(data) {
+      HttpHelper.success(res, data.data, data.message);
+    }, function(err) {
+      HttpHelper.error(res, err.err, err.message);
+    });
+  }
+  
 };
 
 module.exports.update_friends = function(req, res) {
+  logger.log();
   var token = req.query.token || null;
-
+  var friend_list = {};
+  friend_list = _.extend(friend_list, req.body);
   if (!token) {
     HttpHelper.error(res, null, "Not authenticated");
   }
-
-  var friend_list = {};
-  friend_list = _.extend(friend_list, req.body);
-
-  UserHelper.update_friends(token, friend_list).then(function(data) {
-    HttpHelper.success(res, data.data, data.message);
-  }, function(err) {
-    HttpHelper.error(res, err.err, err.message);
-  });
+  else{
+    UserHelper.update_friends(token, friend_list).then(function(data) {
+      HttpHelper.success(res, data.data, data.message);
+    }, function(err) {
+      HttpHelper.error(res, err.err, err.message);
+    });  
+  }
+  
 };
 
 function get_coupons_for_user(data) {
@@ -316,16 +323,43 @@ function load_outlet_info_from_cache(data) {
 };
 
 module.exports.update_location = function(req, res) {
+  logger.log();
   var token = req.query.token || null;
 
   if (!token) {
     HttpHelper.error(res, null, "Not authenticated");
   }
-
-  UserHelper.update_user(req.query.token, req.body).then(function(data) {
-    HttpHelper.success(res, data.data, "user location updated");
-  }, function(err) {
-    HttpHelper.error(res, err, "Could not find user");
-  });
+  else{
+    UserHelper.update_user(req.query.token, req.body).then(function(data) {
+      HttpHelper.success(res, data.data, "user location updated");
+    }, function(err) {
+      HttpHelper.error(res, err, "Could not find user");
+    });  
+  }
+  
 };
 
+module.exports.cancel_order = function(req, res) {
+  logger.log();
+  var token = req.query.token || null;
+  var order = {};
+   order = _.extend( order, req.body);
+
+  if (!token) {
+    HttpHelper.error(res, null, "Not authenticated");
+  }
+  else if (!order.reason) {
+    HttpHelper.error(res, null, "please pass order cancel reason");
+  }
+  else if (!order.order_id) {
+    HttpHelper.error(res, null, "please pass order id");
+  }
+  else{
+    UserHelper.cancel_order(token, order).then(function(data) {
+      HttpHelper.success(res, data.data, data.message);
+    }, function(err) {
+      HttpHelper.error(res, err.data, err.message);
+    });  
+  }
+  
+};
