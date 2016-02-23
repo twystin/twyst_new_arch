@@ -189,8 +189,8 @@ module.exports = function(app) {
   })();
 
   (function Recharge_Routes(){
-    //var RechargeCtrl = require('../controllers/recharge.ctrl');
-    //app.post('/api/v4/mobikwik/recharge', RechargeCtrl.);
+    var RechargeCtrl = require('../controllers/recharge.ctrl');
+    app.post('/api/v4/mobikwik/recharge', RechargeCtrl.send_recharge_request);
     
   })();
 

@@ -945,12 +945,11 @@ function calculate_tax(order_value, outlet) {
         console.log(outlet.menus[0].menu_item_type);               
         vat = order_value*tax_grid.vat/100;
         surcharge_on_vat = vat*tax_grid.surcharge_on_vat/100;        
-        
-        sbc = order_value*tax_grid.st_applied_on_percentage/100*tax_grid.sbc/100;     
     }
 
     if(outlet.menus[0].charge_service_tax) {        
         st = order_value*tax_grid.st_applied_on_percentage/100*tax_grid.st/100;
+        sbc = order_value*tax_grid.st_applied_on_percentage/100*tax_grid.sbc/100;     
     }
         
     if(outlet.valid_zone.has_packaging_charge && 
