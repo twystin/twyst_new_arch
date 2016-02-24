@@ -37,6 +37,9 @@ var CashbackOffer = new Schema({
         offer_logo: {
             type: String
         },
+        offer_image: {
+            type: String
+        },
         offer_voucher_count: {
             type: Number
         },
@@ -48,10 +51,7 @@ var CashbackOffer = new Schema({
         },
         offer_tnc: {
             type: String
-        },
-        offer_image: {
-            type: String
-        },
+        },        
         offer_cost: {
             type: Number
         },
@@ -70,7 +70,7 @@ var CashbackOffer = new Schema({
         offer_applicability: hours.hours,
         created_at: {
             type: Date,
-            default: Date.now()
+            default: Date.now
         },
         created_by: {
           type: Schema.Types.ObjectId,
@@ -78,7 +78,7 @@ var CashbackOffer = new Schema({
         },
         last_updated_at: {
             type: Date,
-            default: Date.now()
+            default: Date.now
         },
         last_updated_by: {
             type: Schema.Types.ObjectId,

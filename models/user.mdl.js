@@ -33,7 +33,7 @@ var User = new Schema({
     tag: {type: String},
     added_at: {
       type: Date, 
-      default: Date.now()
+      default: Date.now
     }
   }],
   twyst_bucks: Number, //default 500
