@@ -135,29 +135,22 @@ module.exports.get_all_cashback_offers = function(token) {
 
     AuthHelper.get_user(token).then(function(data) {
         var user = data.data;
-        if (user.role > 2) {
-            deferred.reject({
-                err: false,
-                message: 'Access denied'
-            });
-        } else {
-            CashbackOffer.find({}).exec(function(err, cashback_offers) {
-                if (err || !cashback_offers) {
-                    deferred.reject({
-                        err: err || true,
-                        message: 'Failed to update offer'
-                    });
-                } else {
+        
+        CashbackOffer.find({}).exec(function(err, cashback_offers) {
+            if (err || !cashback_offers) {
+                deferred.reject({
+                    err: err || true,
+                    message: 'Failed to update offer'
+                });
+            } else {
 
-                    deferred.resolve({
-                        data: cashback_offers,
-                        message: 'Offer loaded successfully'
-                    });
+                deferred.resolve({
+                    data: cashback_offers,
+                    message: 'Offer loaded successfully'
+                });
 
-                }
-            });
-
-        }
+            }
+        });
     }, function(err) {
         deferred.reject({
             err: err || false,
@@ -202,7 +195,6 @@ module.exports.use_cashback_offer = function(token, offer_id) {
                             });                            
                         }
                     }
-                              
                     else{
                         deferred.reject({
                             err: err || false,
@@ -260,20 +252,16 @@ function check_enough_twyst_buck (offer, bucks) {
 function assign_voucher(partner_id, offer, user) {
     logger.log();
     var deferred = Q.defer();
-    console.log(offer)
-    console.log(user._id)
     var voucher = {};
     voucher.type = 'cashback voucher';
     var available_voucher_count = offer.currently_available_voucher_count - 1;
     voucher.offer_id = offer._id;
     var update = {
         $set:{
-            'currently_available_voucher_count': available_voucher_count
+            'currently_available_voucher_count.$': available_voucher_count
         }
     }
     
-    console.log(available_voucher_count)
-    console.log(partner_id)
     CashbackOffer.findOneAndUpdate({
         _id: partner_id,
         'offers._id': offer._id
@@ -292,8 +280,8 @@ function assign_voucher(partner_id, offer, user) {
                 } 
                 else {
                     user.coupons.push(voucher);
-                    user.save(function(err) {
-                        if (err) {
+                    user.save(function(err, user) {
+                        if (err || !user) {
                           console.log('user save err', err);
                         } 
                         else {

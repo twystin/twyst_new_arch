@@ -31,7 +31,7 @@ var Order = new Schema({
   },
   order_number: {type: String},
   offer_used: {type: Schema.Types.ObjectId, default: null},
-  order_date: {type: Date, default: new Date()},
+  order_date: {type: Date, default: Date.now()},
   order_value_without_offer: {type: Number, default: 0},
   order_value_with_offer: {type: Number, default: 0},
   tax_paid: {type: Number, default: 0},
@@ -50,7 +50,7 @@ var Order = new Schema({
   actions: [{
     action_type: {type: String}, //accept/reject/dispatch
     action_by: {type: Schema.Types.ObjectId},
-    action_at: {type: Date, default: new Date()},
+    action_at: {type: Date, default: Date.now()},
     message: {type: String}
   }],
   user_feedback: {
