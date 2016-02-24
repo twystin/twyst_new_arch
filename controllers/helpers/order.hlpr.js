@@ -1617,8 +1617,13 @@ function send_sms(data) {
     
     };
 
-    var order_number = ' Order Number: ' + data.order_number;    
-    var placed_at =  ' Placed at: ' + (new Date(data.order.order_date)).getHours()+5 + ':'+ (new Date(data.order.order_date)).getMinutes()+30;
+    var order_number = ' Order Number: ' + data.order_number;   
+    var time = new Date() ;
+    time = time.getTime();
+    time = parseInt(time)+ parseInt(330*60*1000);
+    time = new Date(time);
+    var placed_at =  ' Placed at: ' + time.getHours()+':'+time.getMinutes();
+    
     var delivery_time = ' Delivery Time: '+ data.order.estimeted_delivery_time +' mins';
     
     var total_amount = ' Total Amount: Rs '+ data.order.actual_amount_paid ;
