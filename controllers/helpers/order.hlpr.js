@@ -18,7 +18,6 @@ var OutletHelper = require('./outlet.hlpr');
 var RecoHelper = require('./reco.hlpr');
 var keygen = require('keygenerator');
 var Bayeux = require('../../app_server');
-var PaymentHelper = require('./payment.hlpr');
 var TaxConfig = require('../../config/taxes.cfg');
 var Transporter = require('../../transports/transporter.js');
 var Handlebars = require('handlebars');

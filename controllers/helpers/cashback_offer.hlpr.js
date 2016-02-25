@@ -143,36 +143,6 @@ module.exports.get_all_cashback_offers = function(token) {
                     message: 'Failed to load offers'
                 });
             } 
-            else if(user.role > 5) {
-                console.log(cashback_offers);
-                var updated_cashback_offers = [];
-                _.each(cashback_offers, function(cashback_offer){
-
-                    _.each(cashback_offer.offers, function(offer){
-                        var massaged_offer = {};
-                        massaged_offer.offer_source = offer.offer_source;
-                        massaged_offer.offer_logo = 'https://s3-us-west-2.amazonaws.com/retwyst-merchants/cashback-offers/partner/' + offer._id + '/' + 'logo';
-                        massaged_offer.offer_type = offer.offer_type;
-                        massaged_offer.offer_text = offer.offer_text;
-                        massaged_offer.offer_cost= offer.offer_cost;
-                        massaged_offer.offer_processing_fee = offer.offer_processing_fee;
-                        massaged_offer.offer_detail = offer.offer_detail;
-                        massaged_offer.offer_tnc = offer.offer_tnc;
-                        massaged_offer.offer_end_date = offer.offer_end_date;
-                         
-                        updated_cashback_offers.push(massaged_offer);
-                    })
-                    
-                    
-                })
-                updated_cashback_offers = _.groupBy(updated_cashback_offers, function(offer){return offer.offer_source});
-                var grouped_offer = [];
-                grouped_offer.push(updated_cashback_offers);
-                deferred.resolve({
-                    data: grouped_offer,
-                    message: 'Offer loaded successfully'
-                });
-            }
             else{
                 deferred.resolve({
                     data: cashback_offers,
@@ -195,43 +165,54 @@ module.exports.use_cashback_offer = function(token, offer_id) {
 
     AuthHelper.get_user(token).then(function(data) {
         var user = data.data;
-        var available_twyst_bucks =  _.get(data, 'data.twyst_bucks');
-        CashbackOffer.findOne({'offers._id': offer_id }, function(err, cashback_partner){
-            if(err || !cashback_partner) {
-                console.log( 'error '+ err);
-                deferred.reject({
-                    err: err || false,
-                    message: 'This offer is no more available'
-                });
-            }
-            else if(cashback_partner && cashback_partner.offers && cashback_partner.offers.length){
-                var matching_offer = getMatchingOffer(cashback_partner.offers, offer_id);
-                if(matching_offer){
-                    var is_enough_bucks = check_enough_twyst_buck(matching_offer, available_twyst_bucks);
+        console.log('here')
+        if(user.validation && user.validation.email){
+            var available_twyst_bucks =  _.get(user, 'user.twyst_bucks');
+            CashbackOffer.findOne({'offers._id': offer_id }, function(err, cashback_partner){
+                if(err || !cashback_partner) {
+                    console.log( 'error '+ err);
+                    deferred.reject({
+                        err: err || false,
+                        message: 'This offer is no more available'
+                    });
+                }
+                else if(cashback_partner && cashback_partner.offers && cashback_partner.offers.length){
+                    console.log('now here')
+                    var matching_offer = getMatchingOffer(cashback_partner.offers, offer_id);
+                    if(matching_offer){
+                        var is_enough_bucks = check_enough_twyst_buck(matching_offer, available_twyst_bucks);
 
-                    if(is_enough_bucks){
-                        if(matching_offer.currently_available_voucher_count){
-                            assign_voucher(cashback_partner._id, matching_offer, user).then(function(data) {
-                                send_email();
+                        if(is_enough_bucks){
+                            if(matching_offer.currently_available_voucher_count){
+                                assign_voucher(cashback_partner._id, matching_offer, user).then(function(data) {
+                                    send_email();
 
-                                deferred.resolve(data); 
-                            })   
+                                    deferred.resolve(data); 
+                                })   
+                            }
+                            else{
+                                deferred.reject({
+                                    err: err || false,
+                                    message: 'Offer is not available right now'
+                                });                            
+                            }
                         }
                         else{
                             deferred.reject({
                                 err: err || false,
-                                message: 'Offer is not available right now'
-                            });                            
+                                message: 'Not enough twyst bucks'
+                            });
+                            
                         }
+                          
                     }
-                    else{
+                    else {
                         deferred.reject({
                             err: err || false,
-                            message: 'Not enough twyst bucks'
+                            message: 'This offer is no more available'
                         });
-                        
                     }
-                      
+                     
                 }
                 else {
                     deferred.reject({
@@ -239,15 +220,15 @@ module.exports.use_cashback_offer = function(token, offer_id) {
                         message: 'This offer is no more available'
                     });
                 }
-                 
-            }
-            else {
-                deferred.reject({
-                    err: err || false,
-                    message: 'This offer is no more available'
-                });
-            }
-        })     
+            })   
+        }
+        else{
+            deferred.reject({
+                err: err || false,
+                message: 'Email id is not verified',
+                data: user.validation.sent_email_count
+            });
+        }
     }, function(err) {
         deferred.reject({
             err: err || false,
@@ -260,6 +241,7 @@ return deferred.promise;
 
 
 function getMatchingOffer(offers, offer_id){
+    logger.log();
     for (var i = 0; i < offers.length; i++) {
         if(offers[i]._id.toString() === offer_id.toString()) {
             return   offers [i];       
@@ -269,6 +251,7 @@ function getMatchingOffer(offers, offer_id){
 }
 
 function check_enough_twyst_buck (offer, bucks) {
+    logger.log();
     if(offer.offer_cost <= bucks) {
         return true;
     }

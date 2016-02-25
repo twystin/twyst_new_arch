@@ -18,10 +18,13 @@ var CashbackOffer = new Schema({
     phone: {
         type: String
     },
-    offers: [{
-        offer_source: {
-            type: String
-        },
+    source: {
+        type: String
+    },
+    logo: {
+        type: String
+    },
+    offers: [{        
         offer_type: {    ///coupon or gift_card
             type: String
         },
@@ -33,9 +36,6 @@ var CashbackOffer = new Schema({
                 type: String
             }
         }],
-        offer_logo: {
-            type: String
-        },
         offer_image: {
             type: String
         },
