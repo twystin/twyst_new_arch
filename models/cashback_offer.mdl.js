@@ -22,9 +22,8 @@ var CashbackOffer = new Schema({
         offer_source: {
             type: String
         },
-        offer_type: {
-            type: String,
-            enum: ['gift_card', 'voucher']
+        offer_type: {    ///coupon or gift_card
+            type: String
         },
         offer_detail: [{
             egv_id: {
@@ -51,7 +50,13 @@ var CashbackOffer = new Schema({
         },
         offer_tnc: {
             type: String
-        },        
+        }, 
+        offer_value: {
+            type: Number
+        },
+        min_bill_value: {
+            type: Number
+        },       
         offer_cost: {
             type: Number
         },

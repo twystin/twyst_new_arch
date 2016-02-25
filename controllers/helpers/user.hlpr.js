@@ -15,7 +15,7 @@ var AuthHelper = require('../../common/auth.hlpr.js');
 var async = require('async');
 var logger = require('tracer').colorConsole();
 var request = require('request');
-var PaymentHelper = require('./payment.hlpr.js');
+var MobikwikPaymentHelper = require('./mobikwik_payment.hlpr.js');
 var Transporter = require('../../transports/transporter.js');
 
 module.exports.update_user = function(token, updated_user) {
@@ -412,7 +412,7 @@ function initiate_refund(data){
             console.log('unknown payment mode');
             deferred.resolve(data);
         }
-        PaymentHelper.process_refund(data.order).then(function (data) {
+        MobikwikPaymentHelper.process_refund(data.order).then(function (data) {
             deferred.resolve(data);
         }, function(err) {
             deferred.reject({

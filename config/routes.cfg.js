@@ -180,12 +180,18 @@ module.exports = function(app) {
       app.put('/api/v4/qr/:qr_id', QrCtrl.qr_update);
   })();
 
-  (function Payment_Routes(){
-    var PaymentCtrl = require('../controllers/payment.ctrl');
-    app.post('/api/v4/zaakpay/response', PaymentCtrl.get_zaakpay_response);
-    app.post('/api/v4/calculate/checksum', PaymentCtrl.calculate_checksum);
-    app.post('/api/v4/zaakpay/refund', PaymentCtrl.initiate_refund);
-    app.post('/api/v4/paytm/response', PaymentCtrl.get_paytm_response);
+  (function Mobikwik_Payment_Routes(){
+    var MobikwikPaymentCtrl = require('../controllers/mobikwik_payment.ctrl');
+    app.post('/api/v4/zaakpay/response', MobikwikPaymentCtrl.get_zaakpay_response);
+    app.post('/api/v4/calculate/checksum', MobikwikPaymentCtrl.calculate_checksum);
+    app.post('/api/v4/zaakpay/refund', MobikwikPaymentCtrl.initiate_refund);
+    
+  })();
+
+  (function Paytm_Payment_Routes(){
+    var PaytmPaymentCtrl = require('../controllers/paytm_payment.ctrl');    
+    app.post('/api/v4/calculate/checksum', PaytmPaymentCtrl.calculate_checksum);
+    app.post('/api/v4/paytm/response', PaytmPaymentCtrl.get_paytm_response);
   })();
 
   (function Recharge_Routes(){

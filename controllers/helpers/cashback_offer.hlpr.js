@@ -3,7 +3,7 @@
 
 var Cache = require('../../common/cache.hlpr');
 var Q = require('q');
-var _ = require('lodash');
+var _ = require('underscore');
 var async = require('async');
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Types.ObjectId;
@@ -84,9 +84,11 @@ module.exports.update_cashback_offer = function(token, updated_offer) {
                     message: 'Failed to update offer'
                 });
             } else {
-                cashback_offer = _.merge(cashback_offer, updated_offer);
+                console.log(updated_offer)
+                cashback_offer = _.extend(cashback_offer, updated_offer);
                 cashback_offer.save(function(err) {
                     if (err) {
+                        console.log(err)
                         deferred.reject({
                             err: err || true,
                             message: 'Failed to update offer'
@@ -102,8 +104,6 @@ module.exports.update_cashback_offer = function(token, updated_offer) {
         });
     return deferred.promise;
 }
-
-
 
 module.exports.delete_cashback_offer = function(token, offerId) {
     logger.log();
@@ -140,15 +140,44 @@ module.exports.get_all_cashback_offers = function(token) {
             if (err || !cashback_offers) {
                 deferred.reject({
                     err: err || true,
-                    message: 'Failed to update offer'
+                    message: 'Failed to load offers'
                 });
-            } else {
+            } 
+            else if(user.role > 5) {
+                console.log(cashback_offers);
+                var updated_cashback_offers = [];
+                _.each(cashback_offers, function(cashback_offer){
 
+                    _.each(cashback_offer.offers, function(offer){
+                        var massaged_offer = {};
+                        massaged_offer.offer_source = offer.offer_source;
+                        massaged_offer.offer_logo = 'https://s3-us-west-2.amazonaws.com/retwyst-merchants/cashback-offers/partner/' + offer._id + '/' + 'logo';
+                        massaged_offer.offer_type = offer.offer_type;
+                        massaged_offer.offer_text = offer.offer_text;
+                        massaged_offer.offer_cost= offer.offer_cost;
+                        massaged_offer.offer_processing_fee = offer.offer_processing_fee;
+                        massaged_offer.offer_detail = offer.offer_detail;
+                        massaged_offer.offer_tnc = offer.offer_tnc;
+                        massaged_offer.offer_end_date = offer.offer_end_date;
+                         
+                        updated_cashback_offers.push(massaged_offer);
+                    })
+                    
+                    
+                })
+                updated_cashback_offers = _.groupBy(updated_cashback_offers, function(offer){return offer.offer_source});
+                var grouped_offer = [];
+                grouped_offer.push(updated_cashback_offers);
+                deferred.resolve({
+                    data: grouped_offer,
+                    message: 'Offer loaded successfully'
+                });
+            }
+            else{
                 deferred.resolve({
                     data: cashback_offers,
                     message: 'Offer loaded successfully'
-                });
-
+                });   
             }
         });
     }, function(err) {
