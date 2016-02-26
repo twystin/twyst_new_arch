@@ -956,8 +956,11 @@ function calculate_tax(order_value, outlet) {
         packaging_charge = outlet.valid_zone.packaging_charge.value || 0;
     }
 
-    if(outlet.valid_zone.delivery_charge && order_value < outlet.valid_zone.free_delivery_amt) {
+    if(outlet.valid_zone.delivery_charge && !outlet.valid_zone.free_delivery_amt) {
         delivery_charge = outlet.valid_zone.delivery_charge || 0;
+    }
+    else if(outlet.valid_zone.delivery_charge && outlet.valid_zone.free_delivery_amt && order_value < outlet.valid_zone.free_delivery_amt) {
+        delivery_charge = outlet.valid_zone.delivery_charge || 0;   
     }
     console.log(vat + ' ' + surcharge_on_vat + ' ' + st + ' ' + sbc + ' ' + packaging_charge + ' ' + delivery_charge);
     new_order_value = order_value+vat+surcharge_on_vat+st+sbc+packaging_charge+delivery_charge;
