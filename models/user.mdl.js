@@ -68,7 +68,7 @@ var User = new Schema({
   },
   validation: {
     email: Boolean,
-    sent_email_count: Number,
+    sent_email_count: { type: Number, default: 0},
     otp: Boolean
   },
   user_acquisition_source: {type: String, default: ''},

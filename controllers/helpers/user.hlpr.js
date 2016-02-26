@@ -402,7 +402,7 @@ function initiate_refund(data){
         if(data.order.payment_info.payment_mode === 'Zaakpay')  {
             data.order.refund_mode = 'Zaakpay';
             data.order.updateDesired = 14;
-            data.order.updateReason = 'user want to cancel transaction';    
+            data.order.updateReason = 'user cancelled, merchant rejected, unable to deliver';    
         }
         else if(data.order.payment_info.payment_mode === 'wallet') {
             data.order.refund_mode = 'wallet';
@@ -605,7 +605,7 @@ function getItemPrice(item) {
         return item.item_cost;
     } else {
         total_price += item.option.option_cost;
-        if (item.option.option_is_addon === true) {
+        if (item.option.option_is_addon === true || item.option_price_is_additive === true) {
             total_price += item.item_cost;
         }
         if (item.option.sub_options && item.option.sub_options.length) {

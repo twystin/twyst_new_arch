@@ -69,10 +69,11 @@ var Order = new Schema({
   comments: {
     type: String
   },
-  menu_id: {type: Schema.Types.ObjectId},
-  category_id: {type: Schema.Types.ObjectId},
-  sub_category_id: {type: Schema.Types.ObjectId},
+
   items: [{
+    menu_id: {type: Schema.Types.ObjectId},  
+    category_id: {type: Schema.Types.ObjectId},
+    sub_category_id: {type: Schema.Types.ObjectId},
     item_name: {
       type: String
     },
@@ -94,6 +95,14 @@ var Order = new Schema({
     item_rating: {
       type: Number
     },
+    option_price_is_additive: {
+      type: Boolean,
+      default: false,
+    },    
+    option_is_addon: {
+      type: Boolean,
+      default: false,
+    },
     option: {
       _id: {type: Schema.Types.ObjectId},
       option_title: {
@@ -105,11 +114,7 @@ var Order = new Schema({
       option_cost: {
         type: Number
       },
-      is_vegetarian: false,      
-      option_is_addon: {
-        type: Boolean,
-        default: false,
-      },
+      is_vegetarian: false,
       sub_options: [{
         sub_option_title: {
           type: String,

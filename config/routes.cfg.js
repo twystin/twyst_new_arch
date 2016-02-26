@@ -16,6 +16,8 @@ module.exports = function(app) {
       res.redirect('/home/faq.html'); 
     });
     app.post('/api/v4/get_link', MiscCtrl.send_link);
+    app.get('/api/v4/send/verification/email', MiscCtrl.send_verification_email);
+
   })();
 
   (function AccountRoutes() {
@@ -28,8 +30,7 @@ module.exports = function(app) {
 
     app.get('/api/v4/authcode/:phone', AccountCtrl.create_authcode);
     app.post('/api/v4/authcode', AccountCtrl.verify_authcode_and_create_account);
-    app.get('/api/v4/accounts/logout', AccountCtrl.logout);
-
+    app.get('/api/v4/accounts/logout', AccountCtrl.logout);    
   })();
 
   (function RecoRoutes() {

@@ -334,7 +334,7 @@ function calculate_order_value(data) {
         
         item = _.findWhere(sub_category && sub_category.items, {_id: items[i].item_id});
         items[i].item_details = item;
-        
+        items[i].menu_id = menu._id;
         if(item && item.options && items[i].option_id) {
             option = _.findWhere(item.options, {_id: items[i].option_id});
             items[i].option = option;
@@ -1060,15 +1060,20 @@ function massage_order(data){
             var items = [];
             _.each(order.items, function(item){
                 var massaged_item = {};
-                massaged_item.category = item.category_id;
-                massaged_item.sub_category = item.sub_category_id;
+                massaged_item.menu_id = item.menu_id; 
+                massaged_item.category_id = item.category_id;
+                massaged_item.sub_category_id = item.sub_category_id;               
                 massaged_item._id = item.item_details._id;                
                 massaged_item.item_name = item.item_details.item_name;
                 massaged_item.item_quantity = item.quantity;
-                massaged_item.item_description = item.item_details.description;
+                massaged_item.is_vegetarian = item.is_vegetarian;
+                massaged_item.item_rating = item.item_rating;
+                massaged_item.item_description = item.item_details.item_description;
                 massaged_item.item_photo = item.item_details.item_photo;
                 massaged_item.item_tags = item.item_details.item_tags;
                 massaged_item.item_cost = item.item_details.item_cost;
+                massaged_item.option_is_addon = item.item_details.option_is_addon;
+                massaged_item.option_price_is_additive = item.item_details.option_price_is_additive;
                 if(item.option) {
                     massaged_item.option = item.option;    
                     delete massaged_item.option.addons;
@@ -2084,7 +2089,7 @@ function getItemPrice(item) {
         return item.item_cost;
     } else {
         total_price += item.option.option_cost;
-        if (item.option_is_addon === true) {
+        if (item.option_is_addon === true || item.option_price_is_additive === true) {
             total_price += item.item_cost;
         }
         if (item.option.sub_options && item.option.sub_options.length) {
