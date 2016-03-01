@@ -18,13 +18,15 @@ var CashbackOffer = new Schema({
     phone: {
         type: String
     },
-    offers: [{
-        offer_source: {
+    source: {
+        type: String
+    },
+    logo: {
+        type: String
+    },
+    offers: [{        
+        offer_type: {    ///coupon or gift_card
             type: String
-        },
-        offer_type: {
-            type: String,
-            enum: ['gift_card', 'voucher']
         },
         offer_detail: [{
             egv_id: {
@@ -34,7 +36,7 @@ var CashbackOffer = new Schema({
                 type: String
             }
         }],
-        offer_logo: {
+        offer_image: {
             type: String
         },
         offer_voucher_count: {
@@ -48,10 +50,13 @@ var CashbackOffer = new Schema({
         },
         offer_tnc: {
             type: String
+        }, 
+        offer_value: {
+            type: Number
         },
-        offer_image: {
-            type: String
-        },
+        min_bill_value: {
+            type: Number
+        },       
         offer_cost: {
             type: Number
         },
@@ -70,7 +75,7 @@ var CashbackOffer = new Schema({
         offer_applicability: hours.hours,
         created_at: {
             type: Date,
-            default: Date.now()
+            default: Date.now
         },
         created_by: {
           type: Schema.Types.ObjectId,
@@ -78,7 +83,7 @@ var CashbackOffer = new Schema({
         },
         last_updated_at: {
             type: Date,
-            default: Date.now()
+            default: Date.now
         },
         last_updated_by: {
             type: Schema.Types.ObjectId,

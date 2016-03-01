@@ -33,7 +33,7 @@ var User = new Schema({
     tag: {type: String},
     added_at: {
       type: Date, 
-      default: Date.now()
+      default: Date.now
     }
   }],
   twyst_bucks: Number, //default 500
@@ -68,6 +68,7 @@ var User = new Schema({
   },
   validation: {
     email: Boolean,
+    sent_email_count: { type: Number, default: 0},
     otp: Boolean
   },
   user_acquisition_source: {type: String, default: ''},

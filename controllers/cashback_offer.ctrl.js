@@ -99,25 +99,3 @@ module.exports.all = function(req, res) {
 	
 
 }
-
-module.exports.use_offer = function(req, res) {
-	logger.log();
-
-	var token = req.query.token || null;
-	var offer_id = req.body.offer_id || null;
-
-	if (!token) {
-		HttpHelper.error(res, null, "Not Authenticated");
-	}
-	else if(!offer_id){
-		HttpHelper.error(res, null, "No offer is passed");	
-	}
-	else{
-		CashbackOfferHelper.use_cashback_offer(token, offer_id).then(function(data) {
-			HttpHelper.success(res, data.data, data.message);
-		}, function(err) {
-			HttpHelper.error(res, err.err || null, err.message);
-		});	
-	}
-	
-}

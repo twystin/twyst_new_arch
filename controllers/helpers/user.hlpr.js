@@ -15,7 +15,7 @@ var AuthHelper = require('../../common/auth.hlpr.js');
 var async = require('async');
 var logger = require('tracer').colorConsole();
 var request = require('request');
-var PaymentHelper = require('./payment.hlpr.js');
+var MobikwikPaymentHelper = require('./mobikwik_payment.hlpr.js');
 var Transporter = require('../../transports/transporter.js');
 
 module.exports.update_user = function(token, updated_user) {
@@ -402,7 +402,7 @@ function initiate_refund(data){
         if(data.order.payment_info.payment_mode === 'Zaakpay')  {
             data.order.refund_mode = 'Zaakpay';
             data.order.updateDesired = 14;
-            data.order.updateReason = 'user want to cancel transaction';    
+            data.order.updateReason = 'user cancelled, merchant rejected, unable to deliver';    
         }
         else if(data.order.payment_info.payment_mode === 'wallet') {
             data.order.refund_mode = 'wallet';
@@ -412,7 +412,7 @@ function initiate_refund(data){
             console.log('unknown payment mode');
             deferred.resolve(data);
         }
-        PaymentHelper.process_refund(data.order).then(function (data) {
+        MobikwikPaymentHelper.process_refund(data.order).then(function (data) {
             deferred.resolve(data);
         }, function(err) {
             deferred.reject({
@@ -605,7 +605,7 @@ function getItemPrice(item) {
         return item.item_cost;
     } else {
         total_price += item.option.option_cost;
-        if (item.option.option_is_addon === true) {
+        if (item.option.option_is_addon === true || item.option_price_is_additive === true) {
             total_price += item.item_cost;
         }
         if (item.option.sub_options && item.option.sub_options.length) {
@@ -622,4 +622,43 @@ function getItemPrice(item) {
         }
         return total_price;
     }
+};
+
+module.exports.get_twyst_cash_history = function(token) {
+    logger.log();
+    var deferred = Q.defer();
+
+    AuthHelper.get_user(token).then(function(data) {
+        var user = data.data;
+        Order.find({user: user._id}).populate('outlet').exec(function(err, orders) {
+            if (err || !order) {
+              deferred.reject({
+                err: err || true,
+                message: 'Couldn\'t find this order'
+              });
+            } 
+            else {
+                var order_history = [];
+                _.each(orders, function(order){
+                    if(order.order_status === 'CLOSED') {
+                        
+                        var action = {};
+                        action.type = 'order';
+                        action.twyst_cash_earn = order.cashback;
+                        action.earn_at = order.order_at;
+                        order_history.push[action];
+                        
+                    }    
+                })
+                deferred.resolve(order_history);
+                                
+            }
+        })
+    }, function(err) {
+        deferred.reject({
+            err: err || true,
+            message: "Couldn\'t find user"
+        });
+    });
+    return deferred.promise;
 };

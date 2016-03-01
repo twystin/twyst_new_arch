@@ -15,6 +15,7 @@ var express = require('express'),
   passport = require('passport'),
   LocalStrategy = require('passport-local').Strategy,
   logger = require('tracer').colorConsole();
+  var compression = require('compression');
 
 
 var redis = require('../common/cache.hlpr');
@@ -53,6 +54,7 @@ module.exports = function(app) {
 
   app.use(passport.initialize());
   app.use(passport.session());
+  app.use(compression());
   app.use(express.static(__dirname + '/../../retwyst_web_apps/'));
 
   // app.use(favicon(__dirname + '/../../Twyst-Web-Apps/common/images/favicon/twyst.ico'));

@@ -139,6 +139,11 @@ module.exports.mrl_checkin = function(req, res) {
     create_new(res, setup_event(req, 'mrl_checkin'));
 };
 
+module.exports.use_cashback_offer = function(req, res) {
+    logger.log();
+    create_new(res, setup_event(req, 'use_cashback_offer'));
+};
+
 module.exports.list_events = function(req, res) {
     logger.log();
     var token = req.query.token || null;
@@ -453,7 +458,8 @@ function process_event(data) {
         'write_to_twyst': require('./processors/comments.proc'),
         'generate_coupon': require('./processors/generate_coupon.proc'),
         'deal_log': require('./processors/deal_log.proc'),
-        'referral_join': require('./processors/referral_join.proc')
+        'referral_join': require('./processors/referral_join.proc'),
+        'use_cashback_offer': require('./processors/use_cashback_offer.proc')
 
     };
 

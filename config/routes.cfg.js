@@ -16,6 +16,8 @@ module.exports = function(app) {
       res.redirect('/home/faq.html'); 
     });
     app.post('/api/v4/get_link', MiscCtrl.send_link);
+    app.get('/api/v4/send/verification/email', MiscCtrl.send_verification_email);
+
   })();
 
   (function AccountRoutes() {
@@ -28,8 +30,7 @@ module.exports = function(app) {
 
     app.get('/api/v4/authcode/:phone', AccountCtrl.create_authcode);
     app.post('/api/v4/authcode', AccountCtrl.verify_authcode_and_create_account);
-    app.get('/api/v4/accounts/logout', AccountCtrl.logout);
-
+    app.get('/api/v4/accounts/logout', AccountCtrl.logout);    
   })();
 
   (function RecoRoutes() {
@@ -56,6 +57,7 @@ module.exports = function(app) {
     app.post('/api/v4/coupon/redeem', EventCtrl.redeem); // FOR COUPON TYPE
     app.post('/api/v4/offer/generate/coupon', EventCtrl.generate_coupon); // FOR OFFER TYPE
     app.post('/api/v4/deal/log', EventCtrl.deal_log); // FOR DEAL TYPE
+    app.post('/api/v4/cashback/offers/use', EventCtrl.use_cashback_offer);
 
     app.post('/api/v4/checkin/bill', EventCtrl.upload_bill);
     app.post('/api/v4/checkin/qr', EventCtrl.qr_checkin);
@@ -82,7 +84,7 @@ module.exports = function(app) {
     app.post('/api/v4/referral/join', EventCtrl.referral_join);
 
     app.post('/api/v4/comments/', EventCtrl.comments);
-    app.post('/api/v4/contact_us', EventCtrl.contact_us);
+    app.post('/api/v4/contact_us', EventCtrl.contact_us);    
   })();
 
   (function OutletRoutes() {
@@ -119,7 +121,6 @@ module.exports = function(app) {
     app.put('/api/v4/cashback/offers/:offer_id', CashbackOfferCtrl.update);
     app.get('/api/v4/cashback/offers/:offer_id', CashbackOfferCtrl.get);
     app.delete('/api/v4/cashback/offers/:offer_id', CashbackOfferCtrl.delete);
-    app.post('/api/v4/cashback/offers/use', CashbackOfferCtrl.use_offer);
 
   })();
 
@@ -159,6 +160,7 @@ module.exports = function(app) {
     app.get('/api/v4/coupons', UserCtrl.get_coupons);
     app.post('/api/v4/user/location', UserCtrl.update_location);
     app.post('/api/v4/user/cancel_order', UserCtrl.cancel_order);
+    app.get('/api/v4/user/twyst/cash/history', UserCtrl.twyst_cash_history);
   })();
 
   (function LocationRoutes() {
@@ -180,17 +182,23 @@ module.exports = function(app) {
       app.put('/api/v4/qr/:qr_id', QrCtrl.qr_update);
   })();
 
-  (function Payment_Routes(){
-    var PaymentCtrl = require('../controllers/payment.ctrl');
-    app.post('/api/v4/zaakpay/response', PaymentCtrl.get_zaakpay_response);
-    app.post('/api/v4/calculate/checksum', PaymentCtrl.calculate_checksum);
-    app.post('/api/v4/zaakpay/refund', PaymentCtrl.initiate_refund);
-    app.post('/api/v4/paytm/response', PaymentCtrl.get_paytm_response);
+  (function Mobikwik_Payment_Routes(){
+    var MobikwikPaymentCtrl = require('../controllers/mobikwik_payment.ctrl');
+    app.post('/api/v4/zaakpay/response', MobikwikPaymentCtrl.get_zaakpay_response);
+    app.post('/api/v4/calculate/checksum', MobikwikPaymentCtrl.calculate_checksum);
+    app.post('/api/v4/zaakpay/refund', MobikwikPaymentCtrl.initiate_refund);
+    
+  })();
+
+  (function Paytm_Payment_Routes(){
+    var PaytmPaymentCtrl = require('../controllers/paytm_payment.ctrl');    
+    app.post('/api/v4/calculate/checksum', PaytmPaymentCtrl.calculate_checksum);
+    app.post('/api/v4/paytm/response', PaytmPaymentCtrl.get_paytm_response);
   })();
 
   (function Recharge_Routes(){
-    //var RechargeCtrl = require('../controllers/recharge.ctrl');
-    //app.post('/api/v4/mobikwik/recharge', RechargeCtrl.);
+    var RechargeCtrl = require('../controllers/recharge.ctrl');
+    app.post('/api/v4/mobikwik/recharge', RechargeCtrl.send_recharge_request);
     
   })();
 

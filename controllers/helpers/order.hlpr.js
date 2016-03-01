@@ -18,7 +18,6 @@ var OutletHelper = require('./outlet.hlpr');
 var RecoHelper = require('./reco.hlpr');
 var keygen = require('keygenerator');
 var Bayeux = require('../../app_server');
-var PaymentHelper = require('./payment.hlpr');
 var TaxConfig = require('../../config/taxes.cfg');
 var Transporter = require('../../transports/transporter.js');
 var Handlebars = require('handlebars');
@@ -335,7 +334,7 @@ function calculate_order_value(data) {
         
         item = _.findWhere(sub_category && sub_category.items, {_id: items[i].item_id});
         items[i].item_details = item;
-        
+        items[i].menu_id = menu._id;
         if(item && item.options && items[i].option_id) {
             option = _.findWhere(item.options, {_id: items[i].option_id});
             items[i].option = option;
@@ -465,7 +464,7 @@ function verify_delivery_location(coords, outlet) {
 function isOutletClosed(outlet) {
     logger.log();
     var date = new Date();
-    var time = date.getHours()+5 +':'+date.getMinutes()+30;
+    var time = parseInt(date.getHours())+5 +':'+parseInt(date.getMinutes())+30;
     date = parseInt(date.getMonth())+1+ '-'+ date.getDate()+'-'+date.getFullYear();
     console.log(time);
     if (outlet && outlet.business_hours ) {
@@ -945,12 +944,11 @@ function calculate_tax(order_value, outlet) {
         console.log(outlet.menus[0].menu_item_type);               
         vat = order_value*tax_grid.vat/100;
         surcharge_on_vat = vat*tax_grid.surcharge_on_vat/100;        
-        
-        sbc = order_value*tax_grid.st_applied_on_percentage/100*tax_grid.sbc/100;     
     }
 
     if(outlet.menus[0].charge_service_tax) {        
         st = order_value*tax_grid.st_applied_on_percentage/100*tax_grid.st/100;
+        sbc = order_value*tax_grid.st_applied_on_percentage/100*tax_grid.sbc/100;     
     }
         
     if(outlet.valid_zone.has_packaging_charge && 
@@ -958,8 +956,11 @@ function calculate_tax(order_value, outlet) {
         packaging_charge = outlet.valid_zone.packaging_charge.value || 0;
     }
 
-    if(outlet.valid_zone.delivery_charge && order_value < outlet.valid_zone.free_delivery_amt) {
+    if(outlet.valid_zone.delivery_charge && !outlet.valid_zone.free_delivery_amt) {
         delivery_charge = outlet.valid_zone.delivery_charge || 0;
+    }
+    else if(outlet.valid_zone.delivery_charge && outlet.valid_zone.free_delivery_amt && order_value < outlet.valid_zone.free_delivery_amt) {
+        delivery_charge = outlet.valid_zone.delivery_charge || 0;   
     }
     console.log(vat + ' ' + surcharge_on_vat + ' ' + st + ' ' + sbc + ' ' + packaging_charge + ' ' + delivery_charge);
     new_order_value = order_value+vat+surcharge_on_vat+st+sbc+packaging_charge+delivery_charge;
@@ -1059,15 +1060,20 @@ function massage_order(data){
             var items = [];
             _.each(order.items, function(item){
                 var massaged_item = {};
-                massaged_item.category = item.category_id;
-                massaged_item.sub_category = item.sub_category_id;
+                massaged_item.menu_id = item.menu_id; 
+                massaged_item.category_id = item.category_id;
+                massaged_item.sub_category_id = item.sub_category_id;               
                 massaged_item._id = item.item_details._id;                
                 massaged_item.item_name = item.item_details.item_name;
                 massaged_item.item_quantity = item.quantity;
-                massaged_item.item_description = item.item_details.description;
+                massaged_item.is_vegetarian = item.is_vegetarian;
+                massaged_item.item_rating = item.item_rating;
+                massaged_item.item_description = item.item_details.item_description;
                 massaged_item.item_photo = item.item_details.item_photo;
                 massaged_item.item_tags = item.item_details.item_tags;
                 massaged_item.item_cost = item.item_details.item_cost;
+                massaged_item.option_is_addon = item.item_details.option_is_addon;
+                massaged_item.option_price_is_additive = item.item_details.option_price_is_additive;
                 if(item.option) {
                     massaged_item.option = item.option;    
                     delete massaged_item.option.addons;
@@ -1334,18 +1340,16 @@ module.exports.get_order = function(token, order_id) {
 
     AuthHelper.get_user(token).then(function(data) {
       
-        Order.findOne({ _id: order_id}, function(err, order) {
+        Order.findOne({ _id: order_id}).populate('outlet').exe(function(err, order) {
             if (err || !order) {
               deferred.reject({
                 err: err || true,
                 message: 'Couldn\'t find the order'
               });
             } else {
-
-              deferred.resolve({
-                data: order,
-                message: 'order found'
-              });
+                var orders = [];
+                orders.push(order);
+                process_orders(orders, deferred);                
             }
           }
         );
@@ -1502,7 +1506,7 @@ function process_orders(orders, deferred) {
         updated_order.long = order.outlet.contact.location.coords.longitude || null;
         updated_order.delivery_zone = order.outlet.attributes.delivery.delivery_zone;
         if(order.outlet.twyst_meta.rating && order.outlet.twyst_meta.rating.value){
-            updated_order.delivery_experience = order.outlet.twyst_meta.rating.value;    
+            updated_order.delivery_experience = order.outlet.twyst_meta.rating.value.toFixed(2);    
         }
         else{
             updated_order.delivery_experience = null;
@@ -1538,10 +1542,19 @@ function process_orders(orders, deferred) {
 
         return updated_order;
     });
-    deferred.resolve({
-        data: processed_orders,
-        message: 'found the orders'
-    });
+    if(processed_orders.length > 1) {
+        deferred.resolve({
+            data: processed_orders,
+            message: 'found the orders'
+        });    
+    }
+    else{
+        deferred.resolve({
+            data: processed_orders[0],
+            message: 'found the orders'
+        });    
+    }
+    
 }
 
 function update_payment_mode(data) {
@@ -1618,8 +1631,13 @@ function send_sms(data) {
     
     };
 
-    var order_number = ' Order Number: ' + data.order_number;    
-    var placed_at =  ' Placed at: ' + (new Date(data.order.order_date)).getHours() + ':'+ (new Date(data.order.order_date)).getMinutes();
+    var order_number = ' Order Number: ' + data.order_number;   
+    var time = new Date() ;
+    time = time.getTime();
+    time = parseInt(time)+ parseInt(330*60*1000);
+    time = new Date(time);
+    var placed_at =  ' Placed at: ' + time.getHours()+':'+time.getMinutes();
+    
     var delivery_time = ' Delivery Time: '+ data.order.estimeted_delivery_time +' mins';
     
     var total_amount = ' Total Amount: Rs '+ data.order.actual_amount_paid ;
@@ -2078,7 +2096,7 @@ function getItemPrice(item) {
         return item.item_cost;
     } else {
         total_price += item.option.option_cost;
-        if (item.option_is_addon === true) {
+        if (item.option_is_addon === true || item.option_price_is_additive === true) {
             total_price += item.item_cost;
         }
         if (item.option.sub_options && item.option.sub_options.length) {

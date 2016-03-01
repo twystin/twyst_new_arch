@@ -1,7 +1,7 @@
 'use strict';
 /*jslint node: true */
 var logger = require('tracer').colorConsole();
-var PaymentHelper = require('./helpers/payment.hlpr.js');
+var PaymentHelper = require('./helpers/mobikwik_payment.hlpr.js');
 var OrderHelper = require('./helpers/order.hlpr.js');
 var HttpHelper = require('../common/http.hlpr.js');
 var _ = require('underscore');
@@ -65,7 +65,11 @@ module.exports.get_zaakpay_response = function(req, res) {
 			        	}
 			        	
 			        	OrderHelper.confirm_inapp_order(data).then(function(data){
-			  				HttpHelper.success(res, checksum, 'order confirmed');	
+			        		var response = [{paymentResponse: [{orderid: order.order_number}, 
+			        		{amount: order.actual_amount_paid}, {status: 0},
+			        		{statusMsg: zaakpay_response.responseDescription}]}];		
+			  				response = xml(response);		
+							res.send(response);
 			  			},	function(err) {
 							HttpHelper.error(res, err);
 					  	});		        
@@ -81,7 +85,11 @@ module.exports.get_zaakpay_response = function(req, res) {
 	  	});	
   	}
   	else{
-  		HttpHelper.success(res, 'order processed');	
+  		var response = [{paymentResponse: [{orderid: zaakpay_response.orderId}, 
+		{amount: order.actual_amount_paid}, {status: 1},
+		{statusMsg: zaakpay_response.responseDescription}]}];		
+		response = xml(response);		
+		res.send(response);
   	}    
 };
 
@@ -192,13 +200,4 @@ module.exports.initiate_refund = function(req, res) {
 	        }
 	    });
 	}	
-}
-
-module.exports.get_paytm_response = function(req, res) {
-	logger.log();
-  	var paytm_response = {};
-  	paytm_response = _.extend(paytm_response, req.body);
-  	console.log(paytm_response);
-
-  	HttpHelper.success(res, 'resonse recieved successfully');
 }
