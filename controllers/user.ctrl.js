@@ -363,3 +363,21 @@ module.exports.cancel_order = function(req, res) {
   }
   
 };
+
+module.exports.twyst_cash_history = function(req, res) {
+  logger.log();
+  var token = req.query.token || null;
+  var order = {};
+   
+  if (!token) {
+    HttpHelper.error(res, null, "Not authenticated");
+  }
+  else{
+    UserHelper.get_twyst_bucks_history(token).then(function(data) {
+      HttpHelper.success(res, data.data, data.message);
+    }, function(err) {
+      HttpHelper.error(res, err.data, err.message);
+    });  
+  }
+  
+};

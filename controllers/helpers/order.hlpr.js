@@ -464,7 +464,7 @@ function verify_delivery_location(coords, outlet) {
 function isOutletClosed(outlet) {
     logger.log();
     var date = new Date();
-    var time = date.getHours()+5 +':'+date.getMinutes()+30;
+    var time = parseInt(date.getHours())+5 +':'+parseInt(date.getMinutes())+30;
     date = parseInt(date.getMonth())+1+ '-'+ date.getDate()+'-'+date.getFullYear();
     console.log(time);
     if (outlet && outlet.business_hours ) {
@@ -1340,18 +1340,19 @@ module.exports.get_order = function(token, order_id) {
 
     AuthHelper.get_user(token).then(function(data) {
       
-        Order.findOne({ _id: order_id}, function(err, order) {
+        Order.findOne({ _id: order_id}).populate('outlet').exec(function(err, order) {
             if (err || !order) {
               deferred.reject({
                 err: err || true,
                 message: 'Couldn\'t find the order'
               });
             } else {
-
-              deferred.resolve({
-                data: order,
-                message: 'order found'
-              });
+                order.phone = order.outlet.contact.phones.mobile[0] && order.outlet.contact.phones.mobile[0].num;
+                delete order.outlet;
+                deferred.resolve({
+                    data: order,
+                    message: 'order found'
+                });
             }
           }
         );

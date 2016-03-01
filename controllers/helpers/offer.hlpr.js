@@ -274,6 +274,7 @@ module.exports.get_all_offers = function(token) {
                                 name: outlet.basics.name,
                                 loc1: outlet.contact.location.locality_1[0],
                                 loc2: outlet.contact.location.locality_2[0],
+                                phone: outlet.contact.phones.mobile[0] && outlet.contact.phones.mobile[0].num,
                                 logo: 'https://s3-us-west-2.amazonaws.com/retwyst-merchants/retwyst-outlets/' + outlet._id + '/' + outlet.photos.logo,
                                 background: 'https://s3-us-west-2.amazonaws.com/retwyst-merchants/retwyst-outlets/' + outlet._id + '/' + outlet.photos.background,
                                 delivery_zones: outlet.attributes.delivery.delivery_zone
@@ -283,7 +284,8 @@ module.exports.get_all_offers = function(token) {
                             if(offer && offer.offer_type === 'offer' 
                             && offer.actions.reward.applicability.delivery
                             && offer.offer_status === 'active' 
-                            &&(new Date(offer.offer_end_date)) >= new Date() && outlet.menus.length) {
+                            &&(new Date(offer.offer_end_date)) >= new Date() && outlet.menus.length
+                            && massaged_offer.outlet.delivery_zones.length) {
                                 massaged_offer.menu_id = outlet.menus[0]._id;
                                 offers.push(massaged_offer); 
                             }

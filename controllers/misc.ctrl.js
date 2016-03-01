@@ -44,6 +44,7 @@ module.exports.send_verification_email = function(req, res){
 	logger.log();
 	AuthHelper.get_user(req.query.token).then(function(data) {
     	var user = data.data;
+    	console.log()
       	if(user.validation && user.validation.email) {
       		HttpHelper.success(res, null, "User already has a verified email id");	
       	}
@@ -77,6 +78,7 @@ module.exports.send_verification_email = function(req, res){
 		    };
       		Transporter.send('email', 'ses', merchant_payload).then(function(info) {
 				console.log(info);
+				//update user
 				HttpHelper.success(res, null, "An email verification link has been sent to your email id");
 			}, function(err) {
 				console.log(err);

@@ -623,3 +623,42 @@ function getItemPrice(item) {
         return total_price;
     }
 };
+
+module.exports.get_twyst_cash_history = function(token) {
+    logger.log();
+    var deferred = Q.defer();
+
+    AuthHelper.get_user(token).then(function(data) {
+        var user = data.data;
+        Order.find({user: user._id}).populate('outlet').exec(function(err, orders) {
+            if (err || !order) {
+              deferred.reject({
+                err: err || true,
+                message: 'Couldn\'t find this order'
+              });
+            } 
+            else {
+                var order_history = [];
+                _.each(orders, function(order){
+                    if(order.order_status === 'CLOSED') {
+                        
+                        var action = {};
+                        action.type = 'order';
+                        action.twyst_cash_earn = order.cashback;
+                        action.earn_at = order.order_at;
+                        order_history.push[action];
+                        
+                    }    
+                })
+                deferred.resolve(order_history);
+                                
+            }
+        })
+    }, function(err) {
+        deferred.reject({
+            err: err || true,
+            message: "Couldn\'t find user"
+        });
+    });
+    return deferred.promise;
+};
