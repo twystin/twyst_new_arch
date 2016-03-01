@@ -1340,19 +1340,16 @@ module.exports.get_order = function(token, order_id) {
 
     AuthHelper.get_user(token).then(function(data) {
       
-        Order.findOne({ _id: order_id}).populate('outlet').exec(function(err, order) {
+        Order.findOne({ _id: order_id}).populate('outlet').exe(function(err, order) {
             if (err || !order) {
               deferred.reject({
                 err: err || true,
                 message: 'Couldn\'t find the order'
               });
             } else {
-                order.phone = order.outlet.contact.phones.mobile[0] && order.outlet.contact.phones.mobile[0].num;
-                delete order.outlet;
-                deferred.resolve({
-                    data: order,
-                    message: 'order found'
-                });
+                var orders = [];
+                orders.push(order);
+                process_orders(orders, deferred);                
             }
           }
         );
@@ -1509,7 +1506,7 @@ function process_orders(orders, deferred) {
         updated_order.long = order.outlet.contact.location.coords.longitude || null;
         updated_order.delivery_zone = order.outlet.attributes.delivery.delivery_zone;
         if(order.outlet.twyst_meta.rating && order.outlet.twyst_meta.rating.value){
-            updated_order.delivery_experience = order.outlet.twyst_meta.rating.value;    
+            updated_order.delivery_experience = order.outlet.twyst_meta.rating.value.toFixed(2);    
         }
         else{
             updated_order.delivery_experience = null;
@@ -1545,10 +1542,19 @@ function process_orders(orders, deferred) {
 
         return updated_order;
     });
-    deferred.resolve({
-        data: processed_orders,
-        message: 'found the orders'
-    });
+    if(processed_orders.length > 1) {
+        deferred.resolve({
+            data: processed_orders,
+            message: 'found the orders'
+        });    
+    }
+    else{
+        deferred.resolve({
+            data: processed_orders[0],
+            message: 'found the orders'
+        });    
+    }
+    
 }
 
 function update_payment_mode(data) {
