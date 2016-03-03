@@ -11,6 +11,7 @@ var User = mongoose.model('User');
 var Friend = mongoose.model('Friend');
 var Contact = mongoose.model('Contact');
 var Order = mongoose.model('Order');
+var Event = mongoose.model('Event');
 var AuthHelper = require('../../common/auth.hlpr.js');
 var async = require('async');
 var logger = require('tracer').colorConsole();
@@ -309,7 +310,6 @@ module.exports.cancel_order = function(token, order) {
         return send_email(data);
     })
     .then(function(data) {
-        console.log('we are here');
         deferred.resolve(data);
     })
     .fail(function(err) {
@@ -630,8 +630,8 @@ module.exports.get_twyst_cash_history = function(token) {
 
     AuthHelper.get_user(token).then(function(data) {
         var user = data.data;
-        Order.find({user: user._id}).populate('outlet').exec(function(err, orders) {
-            if (err || !order) {
+        Event.find({event_user: user._id}).populate('outlet').exec(function(err, events) {
+            if (err || !events) {
               deferred.reject({
                 err: err || true,
                 message: 'Couldn\'t find this order'
@@ -639,18 +639,58 @@ module.exports.get_twyst_cash_history = function(token) {
             } 
             else {
                 var order_history = [];
-                _.each(orders, function(order){
-                    if(order.order_status === 'CLOSED') {
+                _.each(events, function(event){
+                    if(event.event_type === 'order_feedback') {
                         
                         var action = {};
                         action.type = 'order';
-                        action.twyst_cash_earn = order.cashback;
-                        action.earn_at = order.order_at;
-                        order_history.push[action];
-                        
-                    }    
+                        action.earn =  true;
+                        action.twyst_cash = event.event_meta.twyst_cash;
+                        action.earn_at = event.event_date;
+                        action.message = 'show some custom message here';
+                        order_history.push(action);    
+                    }
+                    else if(event.event_type === 'cancel_order') {
+                        var action = {};
+                        action.type = 'cancel order';
+                        action.earn =  false;
+                        action.twyst_cash = event.event_meta.twyst_cash;
+                        action.earn_at = event.event_date;
+                        action.message = 'show some custom message here';
+                        order_history.push(action);       
+                    }
+                    else if(event.event_type === 'recharge') {
+                        var action = {};
+                        action.type = 'recharge';
+                        action.earn =  false;
+                        action.twyst_cash = event.event_meta.twyst_cash;
+                        action.earn_at = event.event_date;
+                        action.message = 'show some custom message here';
+                        order_history.push(action);       
+                    }
+                    else if(event.event_type === 'use_shopping_offer') {
+                        var action = {};
+                        action.type = 'use_shopping_offer';
+                        action.earn =  false;
+                        action.twyst_cash = event.event_meta.twyst_cash;
+                        action.earn_at = event.event_date;
+                        action.message = 'show some custom message here';
+                        order_history.push(action);       
+                    }
+                    else if(event.event_type === 'use_food_offer') {
+                        var action = {};
+                        action.type = 'use_food_offer';
+                        action.earn =  false;
+                        action.twyst_cash = event.event_meta.twyst_cash;
+                        action.earn_at = event.event_date;
+                        action.message = 'show some custom message here';
+                        order_history.push(action);       
+                    }   
                 })
-                deferred.resolve(order_history);
+                deferred.resolve({
+                    message: 'returning twyst cash history',
+                    data: order_history
+                });
                                 
             }
         })

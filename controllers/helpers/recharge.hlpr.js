@@ -22,7 +22,7 @@ module.exports.process_recharge_req = function(token, recharge_req) {
             });
         }
         else{
-            if(user.twyst_bucks > recharge_req.amount) {
+            if(user.twyst_cash > recharge_req.amount) {
             	var cn = recharge_req.phone;
             	var amt = recharge_req.amount;
             	var op = 1;
@@ -32,7 +32,7 @@ module.exports.process_recharge_req = function(token, recharge_req) {
             else{
             	deferred.reject({
 		          err: err || true,
-		          message: "Not enough twyst bucks"
+		          message: "Not enough twyst cash"
 		        });	
             }
         }

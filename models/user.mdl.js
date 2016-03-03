@@ -36,7 +36,10 @@ var User = new Schema({
       default: Date.now
     }
   }],
-  twyst_bucks: Number, //default 500
+  twyst_cash: {
+    type: Number,
+    default: 0
+  }, //default 0
   image: {type: String, default: ''},
   push_ids: [{
     push_type: {type: String, default: ''}, // enum

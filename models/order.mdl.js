@@ -39,6 +39,9 @@ var Order = new Schema({
   packaging_charge: {type: Number, default: 0},
   actual_amount_paid: {type: Number, default: 0},
   cashback: {type: Number, default: 0},
+  cod_cashback: {type: Number, default: 0},
+  inapp_cashback: {type: Number, default: 0},
+  notified_am: {type: Boolean, default: false},
   payment_info: {
     is_inapp: {type: Boolean, default: false},
     payment_mode: {type: String},//COD/Payu/payment object

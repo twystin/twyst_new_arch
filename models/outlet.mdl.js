@@ -60,7 +60,7 @@ var OutletSchema = new Schema({
     featured: Boolean,
     is_paying: {type: Boolean, required: true, default: false },
     account_mgr_email: {type: String},
-    account_mgr_phone: {type: String},
+    account_mgr_phone: {type: Number},
     cod: {type: Boolean, default: false}
   },
   contact: {

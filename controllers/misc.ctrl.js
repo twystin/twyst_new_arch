@@ -86,7 +86,7 @@ module.exports.send_verification_email = function(req, res){
 			});
       	}
     }, function(err) {
-      	HttpHelper.error(res, null, "Something went wrong. Please try again after some time");
+      	HttpHelper.error(res, null, "Could not find user");
     });
 	
 }
