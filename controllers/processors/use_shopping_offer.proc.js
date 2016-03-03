@@ -17,7 +17,9 @@ module.exports.check = function(data) {
   var offer = _.get(passed_data, 'event_data.offer_id');
   
   if (!offer) {
-    deferred.reject('Use cashback offer needs offer id.');
+    deferred.reject({
+        message: 'Use cashback offer needs offer id.'
+    });
   } else {
     deferred.resolve(passed_data);
   }
@@ -36,7 +38,9 @@ module.exports.process = function(data) {
         CashbackOffer.findOne({'offers._id': offer_id }, function(err, cashback_partner){
             if(err || !cashback_partner) {
                 console.log( 'error '+ err);
-                deferred.reject('This offer is no more available');
+                deferred.reject({
+                    message: 'This offer is no more available'
+                });
             }
             else if(cashback_partner && cashback_partner.offers && cashback_partner.offers.length){
                 var matching_offer = getMatchingOffer(cashback_partner.offers, offer_id);
@@ -57,17 +61,23 @@ module.exports.process = function(data) {
                         })       
                     }
                     else{
-                        deferred.reject('Not enough twyst cash');
+                        deferred.reject({
+                            message: 'Not enough Twyst Cash'
+                        });
                     }
                       
                 }
                 else {
-                  deferred.reject('This offer is no more available');
+                    deferred.reject({
+                        message: 'This offer is no more available'
+                    });
                 }
                  
             }
             else {
-                deferred.reject('This offer is no more available');
+                deferred.reject({
+                    message: 'This offer is no more available'
+                });
             }
         })
     }
@@ -130,7 +140,9 @@ function update_offer_count(partner_id, offer, user_id, twyst_cash) {
         function(err, cashback_partner) {
         if(err || !cashback_partner) {
             console.log('offer save err', err);
-            deferred.reject('This offer is no more available');
+            deferred.reject({
+                message: 'This offer is no more available'
+            });
         }
         else{
             User.findOneAndUpdate({_id: user_id}, {
