@@ -22,6 +22,8 @@ var Transporter = require('../../transports/transporter.js');
 module.exports.update_user = function(token, updated_user) {
   logger.log();
   var deferred = Q.defer();
+  console.log(token);
+  console.log(updated_user);
   AuthHelper.get_user(token).then(function(data) {
     var user = data.data;
     user = ld.merge(user, updated_user);
@@ -308,6 +310,9 @@ module.exports.cancel_order = function(token, order) {
     })
     .then(function(data) {
         return send_email(data);
+    })
+    .then(function(data) {
+        return update_user_twyst_cash(data.order);
     })
     .then(function(data) {
         deferred.resolve(data);
@@ -702,3 +707,28 @@ module.exports.get_twyst_cash_history = function(token) {
     });
     return deferred.promise;
 };
+
+function update_user_twyst_cash(order) {
+    logger.log();
+    var deferred = Q.defer();
+    
+    User.findOne({_id: order.user}, function(err, user) {
+        if (err || !user) {
+          deferred.reject({
+            err: err || true,
+            message: 'Couldn\'t find this order'
+          });
+        }         
+        user.twyst_cash = user.twyst_cash+order.offer_cost;        
+        
+        user.save(function(err, user){
+            if(err || !user){
+                deferred.reject('Couldn\'t update user cashback');   
+            }
+            else{
+                deferred.resolve(order); 
+            }
+        })
+    })
+    return deferred.promise;
+}

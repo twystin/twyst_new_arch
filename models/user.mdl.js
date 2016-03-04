@@ -38,8 +38,9 @@ var User = new Schema({
   }],
   twyst_cash: {
     type: Number,
-    default: 0
-  }, //default 0
+    default: 0,
+    required: true
+  },
   image: {type: String, default: ''},
   push_ids: [{
     push_type: {type: String, default: ''}, // enum
@@ -186,6 +187,10 @@ var User = new Schema({
       ref: 'Outlet'
     }],
     issued_at: Date
+  }],
+  shopping_coupon: [{
+    source: String,
+    offer_id: String
   }],
   friends: {
     type: Schema.ObjectId,

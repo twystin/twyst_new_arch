@@ -153,7 +153,7 @@ function set_delivery_experience(params) {
   params.outlets = _.mapObject(params.outlets, function(val, key) {
     val.recco = val.recco || {};
     if(val.twyst_meta.rating && val.twyst_meta.rating.value){
-      val.recco.delivery_experience = val.twyst_meta.rating.value;  
+      val.recco.delivery_experience = val.twyst_meta.rating.value.toFixed(1);  
     }
     else{
       val.recco.delivery_experience = null;    

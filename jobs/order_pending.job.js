@@ -10,17 +10,18 @@ var notification = require('../notifications/order_pending.notfn');
 var mongoose = require('mongoose');
 require('../models/order.mdl')
 var Order = mongoose.model('Order');
-require('../models/outlet.mdl')
+require('../models/outlet.mdl');
 var Outlet = mongoose.model('Outlet');
 
 exports.runner = function(agenda) {
   agenda.define('order_pending', function(job, done) {
     logger.log();
     var date = new Date();
+    var time = date.getTime();
     Order.find({
       'order_status': 'PENDING',
       'order_date': {
-        $lt: new Date()
+        $lt: new Date(time - 2*60*1000)
       },
       'notified_am': false
     }).populate('outlet').lean().exec(function(err, orders) {

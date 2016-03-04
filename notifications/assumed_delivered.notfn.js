@@ -12,21 +12,25 @@ module.exports.notify = function(what, when, who, campaign) {
   logger.log();
 
   var deferred = Q.defer();
-  var notify_text = 'Order has not been accepted yet at outlet  '+ what.outlet.name + ' order number '+ what.order_number;
-  var payload = {
-    from: 'TWYSTR'
-  	phone: what.outlet.account_mgr_phone,
-  	message: notify_text
-  };
+  
+  var date = new Date();
+  var time = date.getTime();
+  var user_payload = {};
+  user_payload.head = 'Order Received';
+  user_payload.body = 'We want to know if your order has been delivered.';
+  user_payload.state = 'ASSUMED_DELIVERED';
+  user_payload.time = time;
+  user_payload.order_id = what.order_id;
+  user_payload.gcms = who;
 
   if (when) {
-    Transporter.schedule("sms", "vf", when, payload).then(function(data) {
+    Transporter.schedule("push", "gcm", when, user_payload).then(function(data) {
       deferred.resolve(data);
     }, function(err) {
       deferred.reject(err);
     })
   } else {
-    Transporter.send("sms", "vf", payload).then(function(data) {
+    Transporter.send("push", "gcm", user_payload).then(function(data) {
       deferred.resolve(data);
     }, function(err) {
       deferred.reject(err);
@@ -34,5 +38,4 @@ module.exports.notify = function(what, when, who, campaign) {
   }
 
   return deferred.promise;
-
 }

@@ -5,7 +5,7 @@ var logger = require('tracer').colorConsole();
 var _ = require('lodash');
 
 var logger = require('tracer').colorConsole();
-var notification = require('../notifications/order_delivered.notfn');
+var notification = require('../notifications/assumed_delivered.notfn');
 
 var mongoose = require('mongoose');
 require('../models/user.mdl');
@@ -16,36 +16,34 @@ var Order = mongoose.model('Order');
 var Outlet = mongoose.model('Outlet');
 
 exports.runner = function(agenda) {
-    agenda.define('order_delivered', function(job, done) {
+    agenda.define('assumed_delivered', function(job, done) {
         logger.log();
 
         Order.find({
-          'order_status': {$in: ['ASSUMED_DELIVERED', 'DISPATCHED']},
+          'order_status': {$in: ['ACCEPTED', 'DISPATCHED']},
         }).populate('outlet user').lean().exec(function(err, orders) {
           if (err || orders.length === 0) {
             done(err || false);
           } else {
-            console.log(orders.length);
             var date = new Date();
             var time = date.getTime();
-            orders = _.map(orders, function(order){                
-                var diff = parseInt(order.estimeted_delivery_time)+60;
-                console.log(diff);
-                if(order.order_date <= new Date(time - diff*60*1000)){
-                    _.each(order.actions, function(action){
-                        if(action.action_type === 'DELIVERED') {
-                            return null;
-                        }
-                    })
-                    return order;
-                }
-                else{
-                    return null;
-                }
+            orders = _.map(orders, function(order){
+                console.log(order.estimeted_delivery_time);
+              if(order.order_date <= new Date(time - order.estimeted_delivery_time*60*1000)){
+                _.each(order.actions, function(action){
+                    if(action.action_type === 'ASSUMED_DELIVERED') {
+                        return null;
+                    }
+                })
+                return order;
+              }
+              else{
+                return null;
+              }
             })
             orders = _.compact(orders);
             _.each(orders, function(item) {
-                process_order(item);
+              process_order(item);
             });
             done();
           }
@@ -60,11 +58,11 @@ function process_order(order) {
             console.log(err);
         } 
         else {  
-            current_order.order_status = 'DELIVERED';
+            current_order.order_status = 'ASSUMED_DELIVERED';
             var current_action = {};
-            current_action.action_type = 'DELIVERED';
+            current_action.action_type = 'ASSUMED_DELIVERED';
             current_action.action_by = '01234567890123456789abcd';
-            current_action.message = 'Your order has been delivered.'
+            current_action.message = 'We want to know if your order has been delivered.'
             current_order.actions.push(current_action);
 
             current_order.save(function(err, updated_order){
