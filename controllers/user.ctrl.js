@@ -7,6 +7,7 @@ var UserHelper = require('./helpers/user.hlpr.js');
 var _ = require('lodash');
 var mongoose = require('mongoose');
 var Cache = require('../common/cache.hlpr');
+
 var RecoHelper = require('./helpers/reco.hlpr.js');
 var Q = require('q');
 var async = require('async');
@@ -26,7 +27,7 @@ module.exports.get_coupons = function(req, res) {
       var data = {};
       data.query = req.query;
       data.user = user;
-      
+
       if (user.data.role >= 6) {
         data.coupons = user.data.coupons;
         data.twyst_bucks = user.data.twyst_bucks;
@@ -35,14 +36,14 @@ module.exports.get_coupons = function(req, res) {
             return load_outlet_info_from_cache(data)
           }).then(function(data) {
             var twyst_bucks;
-            if(data.coupons && data.coupons.length){ 
+            if(data.coupons && data.coupons.length){
                 twyst_bucks = data.twyst_bucks;
             }
             else{
                 twyst_bucks = data.data.twyst_bucks;
             }
-            var coupons = data.coupons;   
-            
+            var coupons = data.coupons;
+
             var message = data.message;
             var data = {};
             data.coupons = coupons;
@@ -80,9 +81,9 @@ module.exports.get_coupons = function(req, res) {
       }
     }, function(err) {
       HttpHelper.error(res, err, 'Couldn\'t find the user');
-    });  
+    });
   }
-  
+
 };
 
 module.exports.get_profile = function(req, res) {
@@ -97,9 +98,9 @@ module.exports.get_profile = function(req, res) {
       HttpHelper.success(res, data.data, "Found user");
     }, function(err) {
       HttpHelper.error(res, err, "Could not find user");
-    });  
+    });
   }
-  
+
 };
 
 module.exports.update_profile = function(req, res) {
@@ -117,7 +118,7 @@ module.exports.update_profile = function(req, res) {
       HttpHelper.error(res, err.err, err.message);
     });
   }
-  
+
 };
 
 module.exports.update_friends = function(req, res) {
@@ -133,15 +134,15 @@ module.exports.update_friends = function(req, res) {
       HttpHelper.success(res, data.data, data.message);
     }, function(err) {
       HttpHelper.error(res, err.err, err.message);
-    });  
+    });
   }
-  
+
 };
 
 function get_coupons_for_user(data) {
   logger.log();
   var deferred = Q.defer();
-  
+
   User.findOne({
     phone: data.phone_number
   }).exec(function(err, user) {
@@ -154,11 +155,11 @@ function get_coupons_for_user(data) {
     } else {
       user = user.toJSON();
       var merchant_outlets = _.map(data.user.data.outlets, function(outlet) {
-        return outlet.toString(); 
+        return outlet.toString();
       });
       var filtered_coupons = _.filter(user.coupons, function(coupon) {
-        var coupon_outlets = _.map(coupon.outlets, function(outlet) { 
-          return outlet.toString(); 
+        var coupon_outlets = _.map(coupon.outlets, function(outlet) {
+          return outlet.toString();
         });
         var outlet_match = _.find(coupon_outlets, function(outlet) {
           return merchant_outlets.indexOf(outlet)!==-1;
@@ -180,8 +181,8 @@ function filter_out_expired_and_used_coupons(data) {
   logger.log();
   var deferred = Q.defer();
   data.coupons = _.filter(data.coupons, function(coupon) {
-    if(_.has(coupon, 'status') && (coupon.status === 'active' && coupon.lapse_date && new Date(coupon.lapse_date) > new Date()) 
-        && ( coupon.coupon_source === 'QR' || coupon.coupon_source === 'PANEL' || coupon.coupon_source === 'POS' 
+    if(_.has(coupon, 'status') && (coupon.status === 'active' && coupon.lapse_date && new Date(coupon.lapse_date) > new Date())
+        && ( coupon.coupon_source === 'QR' || coupon.coupon_source === 'PANEL' || coupon.coupon_source === 'POS'
             || coupon.coupon_source === 'BATCH' || coupon.coupon_source === 'qr_checkin' || coupon.coupon_source === 'panel_checkin'
             || coupon.coupon_source === 'bulk_checkin' || coupon.coupon_source === 'mrl_checkin' || coupon.coupon_source === 'upload_bill') && new Date(coupon.issued_at) < new Date(Date.now() - 10800000)) {
       return true;
@@ -207,7 +208,7 @@ function load_outlet_info_from_cache(data) {
         var outlets = JSON.parse(reply) || [];
         var outlet;
         var fmap = null;
-    
+
         Cache.hget(data.user._id, 'favourite_map', function(err, reply) {
             if (reply) {
               fmap = JSON.parse(reply);
@@ -220,18 +221,18 @@ function load_outlet_info_from_cache(data) {
                     date = (today.getMonth() + 1) + '-' + today.getDate() + '-' + today.getFullYear(),
                     time = (today.getHours() + 5) + ':' + (today.getMinutes() + 30);
                     if(coupon.issued_by) {
-                      outlet = outlets[coupon.issued_by.toString()];                        
+                      outlet = outlets[coupon.issued_by.toString()];
                     }
-                                  
+
                     massaged_item._id = outlet._id;
                     massaged_item.name = outlet.basics.name;
                     massaged_item.city = outlet.contact.location.city;
                     massaged_item.address = outlet.contact.location.address;
                     massaged_item.locality_1 = outlet.contact.location.locality_1[0];
                     massaged_item.locality_2 = outlet.contact.location.locality_2[0];
-               
+
                     massaged_item.phone = outlet.contact.phones.mobile[0] && outlet.contact.phones.mobile[0].num;
-                    
+
                     if (fmap && fmap[outlet._id]) {
                         massaged_item.following = true;
                     } else {
@@ -249,7 +250,7 @@ function load_outlet_info_from_cache(data) {
                         massaged_item.background = 'https://s3-us-west-2.amazonaws.com/twyst-outlets/' + outlet._id + '/' + outlet.photos.background;
                     }
                     massaged_item.open_next = RecoHelper.opensAt(outlet.business_hours);
-                    
+
                     _.each(outlet.offers, function(offer) {
                         if(offer._id && coupon.issued_for && offer._id.toString() === coupon.issued_for.toString()) {
                             coupon.available_now = !(RecoHelper.isClosed(date, time, offer.actions.reward.reward_hours));
@@ -257,9 +258,9 @@ function load_outlet_info_from_cache(data) {
                               coupon.available_next = RecoHelper.opensAt(offer.actions.reward.reward_hours) || null;
                             }
                             coupon.meta = {};
-                            coupon.meta.reward_type = offer.actions.reward.reward_meta.reward_type;                                        
+                            coupon.meta.reward_type = offer.actions.reward.reward_meta.reward_type;
                         }
-                        
+
                     });
 
                     Outlet.find({'offers._id': coupon.issued_for}, function (err, all_outlets) {
@@ -279,45 +280,45 @@ function load_outlet_info_from_cache(data) {
                                         city: outlet.contact.location.city
                                     }
                                     outlets.push(obj);
-                                });                            
+                                });
                                 coupon.outlets = outlets;
                                 coupon.type = 'coupon';
                                 coupon.expiry = coupon.expiry_date;
                                 massaged_item.offers = [];
                                 massaged_item.offers.push(coupon);
-                                
+
                                 _coupons.push(massaged_item);
-                                
+
                                 callback();
-                            } 
+                            }
                             else {
                                 coupon.type = 'coupon';
                                 coupon.expiry = coupon.expiry_date;
                                 massaged_item.offers = [];
                                 massaged_item.offers.push(coupon);
                                 _coupons.push(massaged_item);
-                                
+
                                 callback();
                             }
-                        }                        
-                           
+                        }
+
                     })
-                                
+
                 }, function() {
                   data.coupons = _coupons;
                   deferred.resolve(data);
-                });           
-            
+                });
+
             }
             else {
                 deferred.resolve({
                     message: 'You do not have any coupon',
                     data: data
                 });
-            }  
+            }
         })
     }
-    
+
   });
   return deferred.promise;
 };
@@ -334,9 +335,9 @@ module.exports.update_location = function(req, res) {
       HttpHelper.success(res, data.data, "user location updated");
     }, function(err) {
       HttpHelper.error(res, err, "Could not find user");
-    });  
+    });
   }
-  
+
 };
 
 module.exports.cancel_order = function(req, res) {
@@ -359,7 +360,7 @@ module.exports.cancel_order = function(req, res) {
       HttpHelper.success(res, data.data, data.message);
     }, function(err) {
       HttpHelper.error(res, err.data, err.message);
-    });  
+    });
   }
-  
+
 };

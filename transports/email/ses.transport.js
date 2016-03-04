@@ -26,6 +26,7 @@ module.exports.send = function(payload) {
       console.log(err)
       deferred.reject(err);
     } else {
+      console.log(data);
       deferred.resolve(data);
     }
   });

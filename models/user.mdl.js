@@ -20,7 +20,7 @@ var User = new Schema({
   middle_name: {type: String, default: ''},
   last_name: {type: String, default: ''},
   email: {type: String, default: ''},
-  address: [{ 
+  address: [{
     line1: {type: String},
     line2: {type: String},
     landmark: {type: String},
@@ -32,8 +32,8 @@ var User = new Schema({
     },
     tag: {type: String},
     added_at: {
-      type: Date, 
-      default: Date.now
+      type: Date,
+      default: Date.now()
     }
   }],
   twyst_bucks: Number, //default 500
@@ -55,7 +55,7 @@ var User = new Schema({
   device_info: {
     id: {type: String, default: ''},
     model: {type: String, default: ''},
-    os: {type: String, default: ''}  
+    os: {type: String, default: ''}
   },
   locations: {
     location_type: {type: String, default: ''}, // home, office, last, most_often, favourite
@@ -68,9 +68,9 @@ var User = new Schema({
   },
   validation: {
     email: Boolean,
-    sent_email_count: { type: Number, default: 0},
     otp: Boolean
   },
+  is_verification_mail_sent: {type: Boolean, default: false},
   user_acquisition_source: {type: String, default: ''},
   app_acquisition_source: {type: String, default: ''},
   last_event: {

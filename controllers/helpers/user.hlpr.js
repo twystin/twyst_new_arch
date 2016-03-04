@@ -15,8 +15,13 @@ var AuthHelper = require('../../common/auth.hlpr.js');
 var async = require('async');
 var logger = require('tracer').colorConsole();
 var request = require('request');
-var MobikwikPaymentHelper = require('./mobikwik_payment.hlpr.js');
+var PaymentHelper = require('./payment.hlpr.js');
 var Transporter = require('../../transports/transporter.js');
+var path                 = require('path');
+var registrationMailPath = path.join(__dirname.split('/').slice(0,__dirname.split('/').length - 2).join('/'),'templates','registration_mail.hbs');
+var MailContent       = require('../../common/template.hlpr.js');
+var PayloadDescriptor = require('../../common/email.hlpr.js');
+var Email             = require('../../transports/email/ses.transport.js');
 
 module.exports.update_user = function(token, updated_user) {
   logger.log();
@@ -24,16 +29,29 @@ module.exports.update_user = function(token, updated_user) {
   AuthHelper.get_user(token).then(function(data) {
     var user = data.data;
     user = ld.merge(user, updated_user);
-    
+
+    if(!user.is_verification_mail_sent){
+      var filler = {
+        "name":user.first_name,
+        "link":"http://twyst.in"
+      };
+      MailContent.templateToStr(registrationMailPath, filler, function(mailStr){
+        var sender = "kuldeep@twyst.in";
+        var payloadDescriptor = new PayloadDescriptor('utf-8', user.email, 'Verify your account!',mailStr, sender);
+        console.log(payloadDescriptor);
+        Email.send(payloadDescriptor);
+      })
+    }
+
     if(user.gcmId) {
         var index = ld.findIndex(user.push_ids, function(push) { return push.push_id==user.gcmId; });
         if(index==-1) {
           var push_info = {
               push_type: 'gcm',
               push_id: user.gcmId,
-              push_meta: {} 
-              
-          };   
+              push_meta: {}
+
+          };
           user.push_ids.push(push_info);
         }
     }
@@ -48,12 +66,12 @@ module.exports.update_user = function(token, updated_user) {
     if(user.source) {
       user[updated_user.source.toLowerCase()] = updated_user;
     }
-    
+
     user.device_info = {
         id: user.device,
         os: user.os_version,
-        model: user.model    
-    }  
+        model: user.model
+    }
     user.friends = user.friends_id;
 
     delete user.os_version;
@@ -97,20 +115,20 @@ module.exports.update_user = function(token, updated_user) {
 module.exports.update_friends = function(token, friend_list) {
     logger.log();
     var deferred = Q.defer();
-    
+
     AuthHelper.get_user(token).then(function(data) {
         var user = data.data;
         var obj = {};
         var friend = [];
         _.each(friend_list.list, function(user_friend){
             if (friend_list.source === 'GOOGLE' || friend_list.source === 'FACEBOOK') {
-            
+
             obj.social_id = friend.id;
             obj.email = user_friend.email;
             obj.phone = user_friend.phone;
             obj.name = user_friend.name;
             obj.add_date = new Date();
-        
+
             }
             else {
 
@@ -118,21 +136,21 @@ module.exports.update_friends = function(token, friend_list) {
                 obj.name = user_friend.name;
                 obj.add_date = new Date();
 
-            }    
+            }
             friend.push(obj);
         })
         var contact = new Contact();
         contact.friends = friend;
         contact.user = user._id;
-        contact.save(function(err) { 
-            if(err) { 
-                logger.error(err); 
+        contact.save(function(err) {
+            if(err) {
+                logger.error(err);
                 deferred.reject({
                         data: err,
                         message: 'error in updating user'
                     });
-            } 
-            else { 
+            }
+            else {
                 deferred.resolve({
                     data: user,
                     message: 'Updated user'
@@ -144,31 +162,31 @@ module.exports.update_friends = function(token, friend_list) {
             var index;
             if (friend_list.source === 'GOOGLE' || friend_list.source === 'FACEBOOK') {
                 index = _.findIndex(user.friends, function(existing_friend) { return existing_friend.social_id == friend.id; });
-            } 
+            }
             else {
                 index = _.findIndex(user.friends, function(existing_friend) { return existing_friend.phone == friend.phone; });
             }
             if (index === -1) {
-                var friend_obj = { 
-                    source: friend_list.source, 
-                    add_date: new Date(), 
-                    phone: '', 
-                    social_id: '', 
-                    name: friend.name, 
-                    email: friend.email 
+                var friend_obj = {
+                    source: friend_list.source,
+                    add_date: new Date(),
+                    phone: '',
+                    social_id: '',
+                    name: friend.name,
+                    email: friend.email
                 };
 
-                var user_obj = { 
-                    source: friend_list.source, 
+                var user_obj = {
+                    source: friend_list.source,
                     add_date: new Date(),
-                    phone: user.phone, 
+                    phone: user.phone,
                     social_id: '',
-                    email: user.email, 
-                    user: user._id, 
+                    email: user.email,
+                    user: user._id,
                     name: user.first_name,
                     gcm_id: user.push_ids[user.push_ids.length - 1].push_id
                 };
-        
+
                 if (friend_list.source === 'GOOGLE' || friend_list.source === 'FACEBOOK') {
                     friend_obj.social_id = friend.id;
 
@@ -200,11 +218,11 @@ module.exports.update_friends = function(token, friend_list) {
                     })
 
                 }
-            } 
+            }
             else {
                 callback();
             }
-        }, 
+        },
         function() {
             Friend.findOneAndUpdate({'_id': user.friends_id}, update_query, function(err, u) {
                 if (err || !u) {
@@ -212,7 +230,7 @@ module.exports.update_friends = function(token, friend_list) {
                         err: err || true,
                         message: "Couldn\'t update user"
                     });
-                } 
+                }
                 else {
                     deferred.resolve({
                         data: u,
@@ -263,21 +281,21 @@ function addUserReferral(user_obj, friendObjId) {
 
         }
         else {
-            var index = _.findIndex(obj.friends, function(friend) { 
-                return friend.phone == user_obj.phone; 
+            var index = _.findIndex(obj.friends, function(friend) {
+                return friend.phone == user_obj.phone;
             });
             if(index == -1) {
                 obj.friends.push(user_obj);
-            } 
+            }
             else {
                 obj.friends[index].user = user_obj.user.toString();
             }
-            obj.save(function(err) { 
-                if(err) { 
-                    logger.error(err); 
-                } 
-                else { 
-                    logger.log('referral added successfully'); 
+            obj.save(function(err) {
+                if(err) {
+                    logger.error(err);
+                }
+                else {
+                    logger.log('referral added successfully');
                 }
             });
         }
@@ -291,7 +309,7 @@ module.exports.cancel_order = function(token, order) {
     var data = {};
     data.user_token = token;
     data.order = order;
-    
+
     get_user(data)
     .then(function(data) {
         return update_order_status(data);
@@ -349,7 +367,7 @@ function get_user(data) {
 function update_order_status(data) {
     logger.log();
     var deferred = Q.defer();
-    
+
     var current_action = {};
     current_action.action_type = 'CANCELLED';
     current_action.action_by = data.user._id;
@@ -372,21 +390,21 @@ function update_order_status(data) {
                         deferred.reject({
                             err: err || true,
                             message: 'Couldn\'t cancel this order'
-                        });   
+                        });
                     }
                     else{
                         data.order = order;
                         deferred.resolve(data);
                     }
-                })    
+                })
             }
             else{
                 deferred.reject({
                     err: err || true,
                     message: 'Couldn\'t cancel this order'
-                }); 
+                });
             }
-            
+
         }
       }
     );
@@ -402,7 +420,7 @@ function initiate_refund(data){
         if(data.order.payment_info.payment_mode === 'Zaakpay')  {
             data.order.refund_mode = 'Zaakpay';
             data.order.updateDesired = 14;
-            data.order.updateReason = 'user cancelled, merchant rejected, unable to deliver';    
+            data.order.updateReason = 'user want to cancel transaction';
         }
         else if(data.order.payment_info.payment_mode === 'wallet') {
             data.order.refund_mode = 'wallet';
@@ -412,7 +430,7 @@ function initiate_refund(data){
             console.log('unknown payment mode');
             deferred.resolve(data);
         }
-        MobikwikPaymentHelper.process_refund(data.order).then(function (data) {
+        PaymentHelper.process_refund(data.order).then(function (data) {
             deferred.resolve(data);
         }, function(err) {
             deferred.reject({
@@ -423,7 +441,7 @@ function initiate_refund(data){
     }
     else{
         console.log('cod payment no refund');
-        deferred.resolve(data);  
+        deferred.resolve(data);
     }
     return deferred.promise;
 }
@@ -449,7 +467,7 @@ function send_notification(paths, payload) {
   logger.log();
   _.each(paths, function(path) {
     Transporter.send('faye', 'faye', {
-      path: path, 
+      path: path,
       message: payload
     });
   })
@@ -469,15 +487,15 @@ function send_sms(data) {
     else{
         var name = 'Name: '+ data.user.first_name;
     }
-    
+
     var phone = ' Phone: '+ data.user.phone;
-    var order_number = ' Order Number: ' + data.order.order_number;  
-    var total_amount = ' Total Amount: Rs '+ data.order.actual_amount_paid ;  
+    var order_number = ' Order Number: ' + data.order.order_number;
+    var total_amount = ' Total Amount: Rs '+ data.order.actual_amount_paid ;
 
     payload.message = 'Order Cancelled ' + order_number + name  + phone + 'Order Details: ';
 
     for (var i = 0; i < data.order.items.length; i++) {
-        
+
         if (data.order.items[i].option && data.order.items[i].option.option_value) {
             items = data.order.items[i].item_quantity+' X ' +
             data.order.items[i].item_name+ ' ('+data.order.items[i].option.option_value + ') '+ ';';
@@ -486,9 +504,9 @@ function send_sms(data) {
         else{
             items = data.order.items[i].item_quantity + ' X ' + data.order.items[i].item_name + ';';
             payload.message = payload.message+' '+ items;
-        }    
+        }
     };
-    
+
     payload.message = payload.message +total_amount;
     payload.message = payload.message.toString();
     console.log(payload.message);
@@ -521,23 +539,23 @@ function send_email(data) {
         var item_price = getItemPrice(data.order.items[i]);
         var quantity = data.order.items[i].item_quantity;
         var final_cost = parseInt(item_price)*parseInt(quantity);
-        
+
         if (data.order.items[i].option && data.order.items[i].option.option_value) {
             items = items + '\n'+ data.order.items[i].item_quantity+' X ' +
             data.order.items[i].item_name+ ' ('+data.order.items[i].option.option_value + ') '+' = ' + final_cost;
-            
+
         }
         else{
             var quantity = data.order.items[i].item_quantity;
             var item_name = data.order.items[i].item_name;
 
             items = items + '\n' + quantity + ' * ' + item_name + ': Rs '+ final_cost;
-            
+
         }
-    
+
     };
 
-    var order_number = ' Order Number: ' + data.order_number;        
+    var order_number = ' Order Number: ' + data.order_number;
     var total_amount = ' Total Amount: Rs '+ data.order.actual_amount_paid ;
 
     if(data.order.outlet.basics.account_mgr_email) {
@@ -550,12 +568,12 @@ function send_email(data) {
     if(data.order.outlet.contact.emails.email) {
         merchant_email = data.order.outlet.contact.emails.email;
     }
-    
+
     else{
         merchant_email = 'kuldeep@twyst.in'
     }
     var payload = {
-        Destination: { 
+        Destination: {
             BccAddresses: [],
             CcAddresses: [],
             ToAddresses: [ account_mgr_email] //, merchant_email
@@ -563,39 +581,39 @@ function send_email(data) {
         Message: { /* required */
             Body: { /* required */
                 Html: {
-                    Data: 
+                    Data:
                     "<h4>Outlet</h4>" + data.order.outlet.basics.name +
                     "<h4>Order Number</h4>" + data.order.order_number +
                     "<h4>Name</h4>" + name
-                    + "<h4>Phone</h4>" + phone 
+                    + "<h4>Phone</h4>" + phone
                     + "<h4>Items</h4>" + items
                     + "<h4>Total Cost</h4>" + total_amount
                     + "<h4>Payment Method </h4>" + data.order.payment_mode
-    
+
                 },
                 Text: {
                     Data: 'Order Cancelled'
-                    
+
                 }
             },
             Subject: { /* required */
               Data: 'Order Cancelled' + data.order.order_number, /* required */
-              
+
             }
         },
         Source: 'info@twyst.in',
         ReturnPath: 'info@twyst.in'
     };
-    
-    Transporter.send('email', 'ses', payload).then(function(reply) {        
+
+    Transporter.send('email', 'ses', payload).then(function(reply) {
         deferred.resolve(data);
     }, function(err) {
         console.log('mail failed', err);
         console.log('getting error here')
         deferred.reject(data);
-    });    
-     
-    return deferred.promise;   
+    });
+
+    return deferred.promise;
 }
 
 function getItemPrice(item) {
@@ -605,7 +623,7 @@ function getItemPrice(item) {
         return item.item_cost;
     } else {
         total_price += item.option.option_cost;
-        if (item.option.option_is_addon === true || item.option_price_is_additive === true) {
+        if (item.option.option_is_addon === true) {
             total_price += item.item_cost;
         }
         if (item.option.sub_options && item.option.sub_options.length) {
