@@ -24,7 +24,7 @@ exports.runner = function(agenda) {
     Order.find({
       'order_status': 'PENDING',
       'order_date': {
-        $lt: new Date(time - 3*60*1000)
+        $lt: new Date(time - 20*60*1000)
       },
       'notified_am': true
     }).populate('outlet user').lean().exec(function(err, orders) {
