@@ -81,7 +81,8 @@ function process_order(order) {
                     var what = {
                         user: order.user.push_ids[order.user.push_ids.length-1].push_id,
                         outlet: order.outlet.basics,
-                        order_id: order._id
+                        order_id: order._id,
+                        order_number: order.order_number
                     };
                     notification.notify(what, null, user_gcm_id, null).then(function(data) {
                         logger.log(data);

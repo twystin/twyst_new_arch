@@ -315,6 +315,9 @@ module.exports.cancel_order = function(token, order) {
         return update_user_twyst_cash(data.order);
     })
     .then(function(data) {
+        return save_order_cancel_event(data);
+    })
+    .then(function(data) {
         deferred.resolve(data);
     })
     .fail(function(err) {
@@ -658,7 +661,7 @@ module.exports.get_twyst_cash_history = function(token) {
                     else if(event.event_type === 'cancel_order') {
                         var action = {};
                         action.type = 'cancel order';
-                        action.earn =  false;
+                        action.earn =  true;
                         action.twyst_cash = event.event_meta.twyst_cash;
                         action.earn_at = event.event_date;
                         action.message = 'show some custom message here';
@@ -730,5 +733,37 @@ function update_user_twyst_cash(order) {
             }
         })
     })
+    return deferred.promise;
+}
+
+function save_order_cancel_event(order) {
+    logger.log();
+    var deferred = Q.defer();
+
+    console.log(order);
+    if(order.offer_used) {
+        var event = {};                        
+        event.event_meta = {};
+        event.event_meta.order_number = order.order_number;
+        event.event_meta.twyst_cash = order.offer_cost;
+        event.event_meta.offer = order.offer_used;
+
+        event.event_user = order.user;
+        event.event_type = 'cancel_order';
+        
+        event.event_outlet = data.order.outlet;
+        event.event_date =  new Date();
+        var created_event = new Event(event);
+        created_event.save(function(err, e) {
+            if (err || !e) {
+                deferred.reject('Could not save the event - ' + JSON.stringify(err));
+            } else {
+                deferred.resolve(order);
+            }
+        });    
+    }
+    else{
+        deferred.resolve(order);
+    }
     return deferred.promise;
 }
