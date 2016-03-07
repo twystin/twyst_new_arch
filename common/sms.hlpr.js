@@ -14,6 +14,7 @@ var sms_push_url = "http://myvaluefirst.com/smpp/sendsms?username=twysthttp&pass
 - Scheduling
 - Blacklisted
 */
+
 module.exports.send_sms = function(phone, message, type, from, outlet) {
 	var sms_message = message.replace(/(\n)+/g, '').replace(/&/g,'%26');
 	sms_message = sms_message.replace(/% /g,'%25 ');
@@ -36,6 +37,7 @@ module.exports.send_sms = function(phone, message, type, from, outlet) {
 
         res.on('end', function () {
           console.log(body);
+						createSMSRecord(phone, message, sms_push_url);
             deferred.resolve({data: body, message: 'Sent SMS'});
         });
 

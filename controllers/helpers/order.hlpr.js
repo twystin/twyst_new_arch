@@ -12,6 +12,7 @@ var ObjectId = mongoose.Types.ObjectId;
 var Outlet = mongoose.model('Outlet');
 var Order = mongoose.model('Order');
 var User = mongoose.model('User');
+var Event = mongoose.model('Event');
 var logger = require('tracer').colorConsole();
 var AuthHelper = require('../../common/auth.hlpr');
 var OutletHelper = require('./outlet.hlpr');
@@ -144,10 +145,7 @@ module.exports.checkout = function(token, order) {
     })
     .then(function(data) {
         return massage_order(data);
-    })
-    .then(function(data) {
-        return calculate_cashback(data);
-    })
+    })    
     .then(function(data) {
         return remove_order_from_cache(data);
     })
@@ -545,7 +543,7 @@ function get_applicable_offer(data) {
         offer_cost = offer.offer_cost || 0;
         if(offer.offer_status === 'active' && new Date(offer.offer_end_date) > new Date()
         && !(RecoHelper.isClosed(date, time, offer.actions.reward.reward_hours))
-        && data.user.twyst_bucks >= offer_cost && offer.actions.reward.applicability.delivery
+        && data.user.twyst_cash >= offer_cost && offer.actions.reward.applicability.delivery
         && offer.offer_type === 'offer' 
         || offer.offer_type === 'coupon'){
             if(offer.actions.reward.reward_meta.reward_type === 'free') {
@@ -1095,11 +1093,12 @@ function massage_order(data){
                 order.delivery_charge = order.delivery_charge;
                 order.comments = order.comments;
                 if(order.offer_used) {
+                    console.log(order.offer_used);
                     order.order_value_without_offer = Math.round(order.order_actual_value_without_tax);
                     order.order_value_with_offer = Math.round(order.offer_used.order_value_without_tax);
                     order.tax_paid = order.offer_used.st+order.offer_used.vat;
                     order.actual_amount_paid = Math.round(order.offer_used.order_value_with_tax);
-
+                    order.offer_cost = order.offer_used.offer_cost;
                 }
                 else {
                     order.offer_used = null;
@@ -1108,7 +1107,45 @@ function massage_order(data){
                     order.tax_paid = order.st+order.vat;
                     order.actual_amount_paid = Math.round(order.order_actual_value_with_tax);
                 }
-                var order_json = order
+                //setup cashback info
+                if(!order.offer_used && data.outlet.twyst_meta.cashback_info
+                    && data.outlet.twyst_meta.cashback_info.base_cashback) {
+                    console.log('cashback setup');
+                    var cod_cashback = 0, inapp_cashback = 0, order_amount_ratio = 1;
+
+                    if(data.outlet.twyst_meta.cashback_info.order_amount_slab.length) {
+                        order_amount_ratio = _.find(data.outlet.twyst_meta.cashback_info.order_amount_slab, function(slab){
+                            if(data.order.order_actual_value_without_tax > slab.start &&
+                                data.order.order_actual_value_without_tax < slab.end) {
+                                return slab.ratio;
+                            }
+                        });    
+                    }
+                    
+                    var inapp_ratio = data.outlet.twyst_meta.cashback_info.in_app_ratio;
+                    var cod_ratio = data.outlet.twyst_meta.cashback_info.cod_ratio;
+                    var base_cashback = data.outlet.twyst_meta.cashback_info.base_cashback;
+                    
+                    var order_amount_cashback = order.order_actual_value_without_tax*base_cashback * order_amount_ratio /100;
+                    cod_cashback = order.order_ctual_value_without_tax*base_cashback * cod_ratio /100;
+                    inapp_cashback = order.order_actual_value_without_tax*base_cashback * inapp_ratio /100;
+                    cod_cashback = _.max([base_cashback, order_amount_cashback, cod_cashback], function(cashback){ return cashback; });
+                    inapp_cashback = _.max([base_cashback, order_amount_cashback, inapp_cashback], function(cashback){ return cashback; });
+                    order.cod_cashback = Math.round(cod_cashback);
+                    order.inapp_cashback = Math.round(inapp_cashback);
+                    order.cod_cashback_percenatage = _.max([base_cashback*cod_ratio, base_cashback*order_amount_ratio], function(cashback){ return cashback; });
+                    order.inapp_cashback_percenatage = _.max([base_cashback*inapp_ratio, base_cashback*order_amount_ratio], function(cashback){ return cashback; });
+                    order.cod_cashback_percenatage = order.cod_cashback_percenatage.toFixed(2);
+                    order.inapp_cashback_percenatage = order.inapp_cashback_percenatage.toFixed(2);
+                    
+                }
+                else{
+                    console.log('cashback not setup');
+                    order.cod_cashback = 0;
+                    order.inapp_cashback = 0;   
+                    
+                }
+                var order_json = order;
                 order = new Order(order); 
     
                 order.save(function(err, saved_order){
@@ -1132,52 +1169,6 @@ function massage_order(data){
             }
         }
     })
-    return deferred.promise;
-}
-
-
-function calculate_cashback(data) {
-    logger.log();
-    var deferred = Q.defer();
-    
-    if(!data.order.offer_used && data.outlet.twyst_meta.cashback_info
-        && data.outlet.twyst_meta.cashback_info.base_cashback) {
-        console.log('cashback setup');
-        var cod_cashback = 0, inapp_cashback = 0, order_amount_ratio = 1;
-
-        if(data.outlet.twyst_meta.cashback_info.order_amount_slab.length) {
-            order_amount_ratio = _.find(data.outlet.twyst_meta.cashback_info.order_amount_slab, function(slab){
-                if(data.order.order_actual_value_without_tax > slab.start &&
-                    data.order.order_actual_value_without_tax < slab.end) {
-                    return slab.ratio;
-                }
-            });    
-        }
-        
-        var inapp_ratio = data.outlet.twyst_meta.cashback_info.in_app_ratio;
-        var cod_ratio = data.outlet.twyst_meta.cashback_info.cod_ratio;
-        var base_cashback = data.outlet.twyst_meta.cashback_info.base_cashback;
-        
-        var order_amount_cashback = data.order.order_actual_value_without_tax*base_cashback * order_amount_ratio /100;
-        cod_cashback = data.order.order_ctual_value_without_tax*base_cashback * cod_ratio /100;
-        inapp_cashback = data.order.order_actual_value_without_tax*base_cashback * inapp_ratio /100;
-        cod_cashback = _.max([base_cashback, order_amount_cashback, cod_cashback], function(cashback){ return cashback; });
-        inapp_cashback = _.max([base_cashback, order_amount_cashback, inapp_cashback], function(cashback){ return cashback; });
-        data.order.cod_cashback = Math.round(cod_cashback);
-        data.order.inapp_cashback = Math.round(inapp_cashback);
-        data.order.cod_cashback_percenatage = _.max([base_cashback*cod_ratio, base_cashback*order_amount_ratio], function(cashback){ return cashback; });
-        data.order.inapp_cashback_percenatage = _.max([base_cashback*inapp_ratio, base_cashback*order_amount_ratio], function(cashback){ return cashback; });
-        data.order.cod_cashback_percenatage = data.order.cod_cashback_percenatage.toFixed(2);
-        data.order.inapp_cashback_percenatage = data.order.inapp_cashback_percenatage.toFixed(2);
-        
-    }
-    else{
-        console.log('cashback not setup');
-        data.order.cod_cashback = 0;
-        data.order.inapp_cashback = 0;   
-        
-    }
-    deferred.resolve(data);
     return deferred.promise;
 }
 
@@ -1340,7 +1331,7 @@ module.exports.get_order = function(token, order_id) {
 
     AuthHelper.get_user(token).then(function(data) {
       
-        Order.findOne({ _id: order_id}).populate('outlet').exe(function(err, order) {
+        Order.findOne({ _id: order_id}).populate('outlet').exec(function(err, order) {
             if (err || !order) {
               deferred.reject({
                 err: err || true,
@@ -1435,21 +1426,20 @@ module.exports.confirm_cod_order = function(token, order) {
         return update_payment_mode(data);
     })
     .then(function(data) {
+        return save_offer_use_event(data);
+    })    
+    .then(function(data) {
         return send_sms(data);
     })
     .then(function(data) {
         return send_email(data);
     })
     .then(function(data) {
-        return schedule_non_accepted_order_rejection(data);
-    })
-    .then(function(data) {
         return send_notification_to_all(data);
     })
     .then(function(data) {
-        return schedule_order_status_check(data);
+        return update_user_twyst_cash(data.order);
     })
-    
     .then(function(data) {
         deferred.resolve(data);
     })
@@ -1476,12 +1466,6 @@ module.exports.confirm_inapp_order = function(data) {
         return send_notification_to_all(data);
     })
     .then(function(data) {
-        return schedule_order_status_check(data);
-    })
-    .then(function(data) {
-        return schedule_non_accepted_order_rejection(data);
-    })
-    .then(function(data) {
         deferred.resolve(data);
     })
     .fail(function(err) {
@@ -1506,7 +1490,7 @@ function process_orders(orders, deferred) {
         updated_order.long = order.outlet.contact.location.coords.longitude || null;
         updated_order.delivery_zone = order.outlet.attributes.delivery.delivery_zone;
         if(order.outlet.twyst_meta.rating && order.outlet.twyst_meta.rating.value){
-            updated_order.delivery_experience = order.outlet.twyst_meta.rating.value.toFixed(2);    
+            updated_order.delivery_experience = order.outlet.twyst_meta.rating.value.toFixed(1);   
         }
         else{
             updated_order.delivery_experience = null;
@@ -1561,6 +1545,7 @@ function update_payment_mode(data) {
     logger.log();
     var deferred = Q.defer();
     var is_inapp = false, card_id;
+    var cashback = 0;
     if(data.payment_mode !== 'COD') {
         is_inapp = true;
     }
@@ -1574,24 +1559,32 @@ function update_payment_mode(data) {
         card_id = data.card_id;
     }
 
-    Order.findOneAndUpdate({
+    Order.findOne({
         order_number: data.order_number
-    }, {
-        'order_status': 'PENDING',
-        'payment_info.is_inapp': is_inapp,
-        'payment_info.payment_mode': data.payment_mode,
-        'payment_info.payment_method': data.payment_method,
-        'payment_info.card_id': data.card_id
-    }).exec(function(err, order) {
-        if (err) {
-            console.log(err);
-            deferred.reject(err)
-        } else {   
-            data.order_id = order && order._id; 
-            data.order = order;
-            deferred.resolve(data);
+    }).exec(function(err, order){
+        if(err || !order){
+            deferred.reject(err);
         }
-    });
+        else{
+            order.order_status = 'PENDING';
+            order.payment_info.is_inapp = is_inapp;
+            order.payment_info.payment_mode = data.payment_mode;
+            order.payment_info.payment_method = data.payment_method;
+            order.payment_info.card_id = data.card_id;
+            
+            order.save(function(err, order){
+                if(err || !order){
+                    console.log(err);
+                    deferred.reject(err);
+                }
+                else{
+                    data.order_id = order && order._id; 
+                    data.order = order;
+                    deferred.resolve(data);
+                }
+            })            
+        }
+    })
     return deferred.promise;
 }
 
@@ -1799,125 +1792,6 @@ function send_notification_to_all(data) {
     return deferred.promise;       
 }
 
-function schedule_order_status_check(data) {
-    logger.log();
-    var deferred = Q.defer();
-
-    var Agenda = require('agenda');
-    var agenda = new Agenda({db: {address: 'localhost:27017/agenda'}});
-
-    agenda.define('schedule_order_status_check', function(job, done) {
-        Order.findOne({order_number: data.order_number}).exec(function(err, order) {
-            if (err || !order){
-                console.log(err);
-            } 
-            else {            
-                if(order.order_status === 'PENDING') {
-                    var payload = {};
-                    payload.from = 'TWYSTR';
-                    payload.message = 'Order has not been accepted yet at outlet  '+ data.outlet.basics.name + ' order number '+ data.order_number;
-                    payload.phone = data.outlet.basics.account_mgr_phone;
-                    Transporter.send('sms', 'vf', payload);
-
-                    send_notification(['console', data.outlet.basics.account_mgr_email.replace('.', '').replace('@', '')], {
-                        message: 'Order has not been accepted yet.',
-                        order_id: data.order_id,
-                        type: 'order_not_accepted'
-                    });
-                    
-                }
-                console.log(order.order_status);
-            }
-            done();
-        })
-    });
-
-    agenda.on('ready', function() {
-      agenda.schedule('in 5 minutes', 'schedule_order_status_check', {order_id: data.order_id});
-      agenda.start();
-    });
-    
-    deferred.resolve(data); 
-    return deferred.promise;
-}
-
-function schedule_non_accepted_order_rejection(data) {
-
-    logger.log();
-    var deferred = Q.defer();
-
-    var Agenda = require('agenda');
-    var agenda = new Agenda({db: {address: 'localhost:27017/agenda'}});
-
-    agenda.define('schedule_non_accepted_order_rejection', function(job, done) {
-        Order.findOne({order_number: data.order_number}).exec(function(err, order) {
-            if (err || !order){
-                console.log(err);
-            } 
-            else if(order.order_status === 'PENDING'){  
-                console.log('inside if');
-                order.order_status = 'REJECTED';
-                var current_action = {};
-                current_action.action_type = 'REJECTED';
-                current_action.action_by = '01234567890123456789abcd';
-                current_action.message = 'order rejected by merchant.'
-                order.actions.push(current_action);
-                order.save(function(err, updated_order){
-                    if(err || !updated_order){
-                        console.log(err)
-                        console.log(updated_order)
-                        deferred.reject({
-                            err: err || true,
-                            message: 'Couldn\'t update this order'
-                        });   
-                    }
-                    else{                                                    
-                        var payload = {};
-                        payload.from = 'TWYSTR';
-                        payload.message = 'Order has been rejected by sytstem '+ data.outlet.basics.name + ' order number '+ data.order_number;
-                        data.outlet.contact.phones.reg_mobile.forEach(function (phone) {
-                            if(phone && phone.num) {
-                                payload.phone = phone.num;
-                                Transporter.send('sms', 'vf', payload);
-                            }
-                        });
-                        
-                        var path = ['console', data.outlet.basics.account_mgr_email.replace('.', '').replace('@', ''),data.outlet._id]
-
-                        send_notification(['console', data.outlet.basics.account_mgr_email.replace('.', '').replace('@', ''),
-                            data.outlet._id], {
-                            message: 'order has been rejected by system.',
-                            order_id: data.order_id,
-                            type: 'cancelled'
-                        }); 
-                        
-                        var date = new Date();
-                        var time = date.getTime();
-                        var notif = {};
-                        notif.header = 'Order Rejected';
-                        notif.message = 'Your order has been Rejected by merchant.';
-                        notif.state = 'REJECTED';
-                        notif.time = time;
-                        notif.order_id = data.order_id;
-                        send_notification_to_user(data.user.push_ids[data.user.push_ids.length-1].push_id, notif); 
-                    }                    
-                })
-                console.log(order.order_status);
-            }
-            done();
-        })
-    });
-
-    agenda.on('ready', function() {
-      agenda.schedule('in 20 minutes', 'schedule_non_accepted_order_rejection', {order_id: data.order_id});
-      agenda.start();
-    });
-    
-    deferred.resolve(data); 
-    return deferred.promise;
-    
-}
-
 module.exports.update_order = function(token, order) {
     logger.log();
     var deferred = Q.defer();
@@ -1954,75 +1828,23 @@ module.exports.update_order = function(token, order) {
             });
         }
         else if(order.update_type === 'feedback') {
-            Order.findOne({_id: order.order_id}, function(err, saved_order) {
-                if (err || !saved_order) {
-                  deferred.reject({
-                    err: err || true,
-                    message: 'Couldn\'t find this order'
-                  });
-                } else {
-                    saved_order.feedback = {};
-                    saved_order.feedback.is_ontime = order.is_ontime;
-                    saved_order.feedback.rating = order.order_rating;
-                    saved_order.order_status = 'CLOSED';
-
-                    if(order.items_feedback) {
-                        saved_order.items = order.items;    
-                    }
-                    
-                    saved_order.save(function(err, updated_order){
-                        if(err || !updated_order){
-                            deferred.reject({
-                                err: err || true,
-                                message: 'Couldn\'t update this order'
-                            });   
-                        }
-                        //add twyst bucks to user account
-                        else{
-                            Outlet.findOne({_id: updated_order.outlet}, function(err, outlet) {
-                                if (err || !outlet) {
-                                  deferred.reject({
-                                    err: err || true,
-                                    message: 'Couldn\'t process feedback'
-                                  });
-                                }
-                                else{
-                                    if(outlet.twyst_meta.rating && outlet.twyst_meta.rating.value) {
-                                        var count = outlet.twyst_meta.rating.count+1;
-                                        var rating = outlet.twyst_meta.rating.value;
-                                        rating = (rating+order.order_rating)/count;
-                                        outlet.twyst_meta.rating.value = rating;
-                                        outlet.twyst_meta.rating.count = count;    
-                                    }
-                                    else{
-                                        outlet.twyst_meta.rating.value = order.order_rating;
-                                        outlet.twyst_meta.rating.count = 1;     
-                                    }
-                                    
-                                    outlet.save(function(err, outlet){
-                                        if (err || !outlet) {
-                                          deferred.reject({
-                                            err: err || true,
-                                            message: 'Couldn\'t process feedback'
-                                          });
-                                        }
-                                        else{
-                                            deferred.resolve({
-                                                data: order,
-                                                message: 'feedback submitted successfully'
-                                            });   
-                                        }
-                                            
-                                    })
-
-                                }
-                            })
-                            
-                        }
-                    })    
-                }
-              }
-            );   
+            update_order_with_feedback(order)
+            .then(function(data) {
+                return update_outlet_rating(data);
+            })
+            .then(function(data) {
+                return update_user_twyst_cash(data);
+            })
+            .then(function(data) {
+                return save_order_feedback_event(data);
+            })
+            .then(function(data) {
+                deferred.resolve(data);
+            })
+            .fail(function(err) {
+                console.log(err);
+                deferred.reject(err);
+            });   
         }
         else if(order.update_type === 'update_delivery_status') {
             Order.findOne({
@@ -2138,4 +1960,181 @@ function send_notification(paths, payload) {
       message: payload
     });
   })
+}
+
+function save_order_feedback_event(data) {
+    logger.log();
+
+    var deferred = Q.defer();
+    var event = {};
+    var passed_data = data;
+    event.event_meta = {};
+    event.event_meta.order_number = passed_data.order_number;
+    event.event_meta.twyst_cash = passed_data.cashback;
+    event.event_meta.payment_mode = passed_data.payment_info.payment_mode;
+
+    event.event_user = passed_data.user;
+    event.event_type = 'order_feedback';
+    
+    event.event_outlet = passed_data.outlet;
+    event.event_date = event.event_date || new Date();
+    var created_event = new Event(event);
+    created_event.save(function(err, e) {
+        if (err || !e) {
+            deferred.reject('Could not save the event - ' + JSON.stringify(err));
+        } else {
+            deferred.resolve(data);
+        }
+    });
+
+    return deferred.promise;
+}
+
+function update_order_with_feedback(order) {
+    logger.log();
+    var deferred = Q.defer();
+    Order.findOne({_id: order.order_id}, function(err, saved_order) {
+        if (err || !saved_order) {
+          deferred.reject({
+            err: err || true,
+            message: 'Couldn\'t find this order'
+          });
+        } 
+        else {
+            saved_order.user_feedback = {};
+            saved_order.user_feedback.is_ontime = order.is_ontime;
+            saved_order.user_feedback.rating = order.order_rating;
+            saved_order.order_status = 'CLOSED';
+
+            if(order.items_feedback) {
+                saved_order.items = order.items;    
+            }
+            if(saved_order.payment_info.is_inapp) {
+                saved_order.cashback = saved_order.inapp_cashback;    
+            }
+            else if(saved_order.payment_info.payment_mode === 'COD'){
+                saved_order.cashback = saved_order.cod_cashback;        
+            }
+            saved_order.save(function(err, updated_order){
+                if(err || !updated_order){
+                    deferred.reject({
+                        err: err || true,
+                        message: 'Couldn\'t update this order'
+                    });   
+                }
+                else{
+                    deferred.resolve(updated_order); 
+                }
+            })
+        }
+    })
+    return deferred.promise;
+}
+
+function update_outlet_rating(order){
+    logger.log();
+    var deferred = Q.defer();
+    Outlet.findOne({_id: order.outlet}, function(err, outlet) {
+        if (err || !outlet) {
+          deferred.reject({
+            err: err || true,
+            message: 'Couldn\'t process feedback'
+          });
+        }
+        else{
+            if(outlet.twyst_meta.rating && outlet.twyst_meta.rating.value) {
+                var count = outlet.twyst_meta.rating.count+1;
+                var rating = outlet.twyst_meta.rating.value;
+                rating = ((rating*outlet.twyst_meta.rating.count)+order.user_feedback.rating)/count;
+                outlet.twyst_meta.rating.value = rating;
+                outlet.twyst_meta.rating.count = count;    
+            }
+            else{
+                outlet.twyst_meta.rating.value = order.user_feedback.rating;
+                outlet.twyst_meta.rating.count = 1;     
+            }
+            
+            outlet.save(function(err, outlet){
+                if (err || !outlet) {
+                  deferred.reject({
+                    err: err || true,
+                    message: 'Couldn\'t process feedback'
+                  });
+                }
+                else{
+                    deferred.resolve(order);   
+                }
+                    
+            })
+
+        }
+    })
+    return deferred.promise;
+}
+
+function update_user_twyst_cash(order) {
+    logger.log();
+    var deferred = Q.defer();
+    console.log(order.order_status);
+    console.log(order.offer_used);
+    User.findOne({_id: order.user}, function(err, user) {
+        if (err || !user) {
+          deferred.reject({
+            err: err || true,
+            message: 'Couldn\'t find this order'
+          });
+        } 
+        else if(order.offer_used && order.order_status === 'PENDING'){
+            user.twyst_cash = user.twyst_cash-order.offer_cost;                            
+        }
+        else {
+            if(order.payment_info.is_inapp) {
+                user.twyst_cash = user.twyst_cash+order.inapp_cashback;    
+            }
+            else if(order.payment_info.payment_mode === 'COD'){
+                user.twyst_cash = user.twyst_cash+order.cod_cashback;        
+            }    
+        }
+        user.save(function(err, user){
+            if(err || !user){
+                deferred.reject('Couldn\'t update user cashback');   
+            }
+            else{
+                deferred.resolve(order); 
+            }
+        })
+    })
+    return deferred.promise;
+}
+
+function save_offer_use_event(data) {
+    logger.log();
+    var deferred = Q.defer();
+    console.log(data.order);
+    if(data.order.offer_used) {
+        Outlet.findOne(data.order)
+        var event = {};                        
+        event.event_meta = {};
+        event.event_meta.order_number = data.order.order_number;
+        event.event_meta.twyst_cash = data.order.offer_cost;
+        event.event_meta.offer = data.order.offer_used;
+
+        event.event_user = data.order.user;
+        event.event_type = 'use_food_offer';
+        
+        event.event_outlet = data.order.outlet;
+        event.event_date =  new Date();
+        var created_event = new Event(event);
+        created_event.save(function(err, e) {
+            if (err || !e) {
+                deferred.reject('Could not save the event - ' + JSON.stringify(err));
+            } else {
+                deferred.resolve(data);
+            }
+        });    
+    }
+    else{
+        deferred.resolve(data);
+    }
+    return deferred.promise;   
 }

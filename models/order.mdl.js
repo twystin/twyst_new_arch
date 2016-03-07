@@ -31,6 +31,7 @@ var Order = new Schema({
   },
   order_number: {type: String},
   offer_used: {type: Schema.Types.ObjectId, default: null},
+  offer_cost: {type: Number, default: 0},
   order_date: {type: Date, default: Date.now},
   order_value_without_offer: {type: Number, default: 0},
   order_value_with_offer: {type: Number, default: 0},
@@ -39,6 +40,9 @@ var Order = new Schema({
   packaging_charge: {type: Number, default: 0},
   actual_amount_paid: {type: Number, default: 0},
   cashback: {type: Number, default: 0},
+  cod_cashback: {type: Number, default: 0},
+  inapp_cashback: {type: Number, default: 0},
+  notified_am: {type: Boolean, default: false},
   payment_info: {
     is_inapp: {type: Boolean, default: false},
     payment_mode: {type: String},//COD/Payu/payment object

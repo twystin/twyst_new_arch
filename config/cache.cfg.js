@@ -6,7 +6,7 @@ var mongoose = require('mongoose');
 var Event = mongoose.model('Event');
 var Outlet = mongoose.model('Outlet');
 var LocationHandler = require('./locations.cfg.js');
-var BucksHandler = require('./twyst_bucks.cfg.js');
+var TwystCashHandler = require('./twyst_cash.cfg.js');
 
 var _ = require('lodash');
 var logger = require('tracer').colorConsole();
@@ -63,10 +63,10 @@ function populateLocations() {
   });
 }
 
-function populateTwystBucks() {
-  Cache.hset('twyst_bucks', 'twyst_bucks_grid', JSON.stringify(BucksHandler.bucks_grid), function(err) {
+function populateTwystCash() {
+  Cache.hset('twyst_cash', 'twyst_cash_grid', JSON.stringify(TwystCashHandler.twyst_cash_grid), function(err) {
     if (!err) {
-      logger.info('Populated cache with twyst_bucks');
+      logger.info('Populated cache with twyst_cash');
     }
   });
 }
@@ -102,7 +102,7 @@ module.exports.populate = function() {
   logger.info('Trying to populate the cache');
   populateOutlets();
   populateLocations();
-  populateTwystBucks();
+  populateTwystCash();
   populateOutletsLocations();
   // populateCheckinMap();
 };

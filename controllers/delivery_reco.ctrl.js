@@ -39,7 +39,7 @@ function get_user(params) {
   if (params.query.token) {
     AuthHelper.get_user(params.query.token).then(function(data) {
       params.user = data.data;
-      params.twyst_bucks = data.data.twyst_bucks;
+      params.twyst_cash = data.data.twyst_cash;
       RecoHelper.cache_user_coupons(params.user).then(function(data) {
         RecoHelper.cache_user_favourites(params.user).then(function(data) {
           deferred.resolve(params);
@@ -153,7 +153,7 @@ function set_delivery_experience(params) {
   params.outlets = _.mapObject(params.outlets, function(val, key) {
     val.recco = val.recco || {};
     if(val.twyst_meta.rating && val.twyst_meta.rating.value){
-      val.recco.delivery_experience = val.twyst_meta.rating.value;  
+      val.recco.delivery_experience = val.twyst_meta.rating.value.toFixed(1);  
     }
     else{
       val.recco.delivery_experience = null;    
@@ -361,10 +361,10 @@ module.exports.get = function(req, res) {
     })
     .then(function(data) {
         var outlets = data.outlets;
-        var twyst_bucks = data.twyst_bucks;
+        var twyst_cash = data.twyst_cash;
         var data = {};
         data.outlets = outlets;
-        data.twyst_bucks = twyst_bucks;
+        data.twyst_cash = twyst_cash;
       HttpHelper.success(res, data, "Got the recos");
     })
     .fail(function(err) {
