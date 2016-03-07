@@ -6,8 +6,6 @@ var mongoose = require('mongoose');
 var Q = require('q');
 var http = require('http');
 var sms_push_url = "http://myvaluefirst.com/smpp/sendsms?username=twysthttp&password=twystht6&to=";
-var StoreSMSMessages = require('../models/store_sms_messages.mdl.js');
-
 // var SMSLog = mongoose.model('SMSLog');
 
 
@@ -16,24 +14,6 @@ var StoreSMSMessages = require('../models/store_sms_messages.mdl.js');
 - Scheduling
 - Blacklisted
 */
-/*-----------------------------------------------------------------
-
------------------------------------------------------------------*/
-var createSMSRecord = function(receiver, message, sending_entity){
-	var db = mongoose.createConnection('mongodb://localhost/retwyst_sms_logs');
-	db.on('error', console.error.bind(console, 'connection error:'));
-	db.once('open', function() {
-
-		var smsRecord = new StoreSMSMessages({
-			receiver: receiver,
-			message: message,
-			sending_entity: sending_entity})
-			.save(function(err){
-				if(err) return console.error(err);
-				console.log("Data was saved");
-			});
-	});
-};
 
 module.exports.send_sms = function(phone, message, type, from, outlet) {
 	var sms_message = message.replace(/(\n)+/g, '').replace(/&/g,'%26');
