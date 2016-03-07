@@ -35,7 +35,7 @@ module.exports.process = function(data) {
     var user = _.get(passed_data, 'user._id');
     var offer_id = _.get(passed_data, 'event_data.event_meta.offer');
     var outlet_id = _.get(passed_data, 'event_data.event_outlet');
-    var available_twyst_bucks =  _.get(passed_data, 'user.twyst_bucks');
+    var available_twyst_cash =  _.get(passed_data, 'user.twyst_cash');
 
     Outlet.findOne({_id: outlet_id }, function(err, outlet){
         if(err || !outlet) {
@@ -48,8 +48,8 @@ module.exports.process = function(data) {
         else if(outlet && outlet.offers && outlet.offers.length){
             var matching_offer = getMatchingOffer(outlet.offers, offer_id);
             if(matching_offer){
-                var is_enough_bucks = check_enough_twyst_buck(matching_offer, available_twyst_bucks);
-                if(is_enough_bucks){
+                var is_enough_twyst_cash = check_enough_twyst_cash(matching_offer, available_twyst_cash);
+                if(is_enough_twyst_cash){
                     create_coupon(matching_offer, user, outlet_id).then(function(data) {
                         
                         if(data.coupons && data.coupons.length) {
@@ -75,7 +75,7 @@ module.exports.process = function(data) {
                     })      
                 }
                 else{
-                    deferred.reject('Not enough twyst bucks');
+                    deferred.reject('Not enough twyst cash');
                 }
                   
             }
@@ -115,8 +115,8 @@ function getMatchingOffer(offers, offer_id){
     return null;
 }
 
-function check_enough_twyst_buck (offer, bucks) {
-    if(offer.offer_cost <= bucks) {
+function check_enough_twyst_cash (offer, twyst_cash) {
+    if(offer.offer_cost <= twyst_cash) {
         return true;
     }
     else{
