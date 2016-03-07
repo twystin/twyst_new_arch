@@ -2123,7 +2123,7 @@ function save_offer_use_event(data) {
         event.event_type = 'use_food_offer';
         
         event.event_outlet = data.order.outlet;
-        event.event_date = event.event_date || new Date();
+        event.event_date =  new Date();
         var created_event = new Event(event);
         created_event.save(function(err, e) {
             if (err || !e) {
