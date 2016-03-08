@@ -10,12 +10,11 @@ require('../../models/outlet.mdl');
 var Outlet = mongoose.model('Outlet');
 var User = mongoose.model('User');
 var Order = mongoose.model('Order');
+var Event = mongoose.model('Event');
 var Account = mongoose.model('Account');
 var AuthHelper = require('../../common/auth.hlpr.js');
 var logger = require('tracer').colorConsole();
 var Transporter = require('../../transports/transporter');
-var Agenda = require('agenda');
-var agenda = new Agenda({db: {address: 'localhost:27017/agenda'}});
 
 module.exports.get_outlet = function(id) {
   var deferred = Q.defer();
@@ -609,12 +608,55 @@ function reject_order(data) {
                         notif.state = 'REJECTED';
                         notif.time = time;
                         notif.order_id = data.order.order_id; 
-                        send_notification_to_user(current_order.user.push_ids[current_order.user.push_ids.length-1].push_id, notif);  
-                        deferred.resolve({
-                            data: updated_order,
-                            message: 'order rejected successfully'
-                        }); 
-                            
+                        send_notification_to_user(current_order.user.push_ids[current_order.user.push_ids.length-1].push_id, notif);
+
+                        if(current_order.offer_used) {
+                            User.findOneAndUpdate({
+                            _id: current_order.user._id
+                            }, {$inc: {'twyst_cash': current_order.offer_cost}}
+                            ).exec(function(err, user) {
+                                if(err || !user)    {
+                                    deferred.reject({
+                                        err: err || true,
+                                        message: 'Couldn\'t update this order'
+                                    });     
+                                }
+                                else{
+                                    var event = {};
+                                    event.event_meta = {};
+                                    event.event_meta.order_number = current_order.order_number;
+                                    event.event_meta.twyst_cash = current_order.offer_cost;                        
+                                    event.event_meta.offer = current_order.offer_used;
+                                    event.event_user = current_order.user._id;
+                                    event.event_type = 'reject_order';
+                                    
+                                    event.event_outlet = current_order.outlet;
+                                    event.event_date = new Date();
+                                    var created_event = new Event(event);
+                                    created_event.save(function(err, e) {
+                                        if (err || !e) {
+                                            deferred.reject({
+                                                err: err || true,
+                                                message: 'Couldn\'t update this order'
+                                            }); 
+                                        } else {
+                                            deferred.resolve({
+                                                data: updated_order,
+                                                message: 'order rejected successfully'
+                                            }); 
+                                        }
+                                    });
+                                      
+
+                                }
+                            })
+                        }
+                        else{
+                            deferred.resolve({
+                                data: updated_order,
+                                message: 'order rejected successfully'
+                            });    
+                        }
                     } 
                 })    
             }
@@ -642,8 +684,8 @@ function reject_order(data) {
 function dispatch_order(data) {
     logger.log();
     var deferred = Q.defer();
-
-    Order.findOne({ _id: data.order._id}).exec(function(err, order) {
+    console.log(data);
+    Order.findOne({ _id: data.order._id}).populate('user').exec(function(err, order) {
         if (err || !order) {
           deferred.reject({
             err: err || true,
@@ -660,14 +702,14 @@ function dispatch_order(data) {
                 notif.time = time;
                 notif.order_id = data.order.order_id;
                 
-                send_notification_to_user(data.order.user.push_ids[data.order.user.push_ids.length-1].push_id, notif);
+                send_notification_to_user(order.user.push_ids[order.user.push_ids.length-1].push_id, notif);
             }
 
             var current_action = {};
             current_action.action_type = 'DISPATCHED';
             current_action.action_by = data.data._id;
-            current_action.message = 'order has been dispatched by merchant.'
-
+            current_action.message = 'Order has been dispatched by merchant.'
+            order.actions.push(current_action);
             order.save(function(err, updated_order){
                 if(err || !updated_order){
                     console.log(err)

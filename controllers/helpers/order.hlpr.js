@@ -147,9 +147,6 @@ module.exports.checkout = function(token, order) {
         return massage_order(data);
     })    
     .then(function(data) {
-        return remove_order_from_cache(data);
-    })
-    .then(function(data) {
         return save_user_address(data);
     })
     .then(function(data) {        
@@ -174,14 +171,12 @@ function basic_checks(data) {
     }
     
     if(!passed_data.items || !passed_data.items.length){
-        deferred.reject({
-            
+        deferred.reject({            
             message: 'no item passed'
         });
     }
     if(!passed_data.coords || !passed_data.coords.lat || !passed_data.coords.long){
-        deferred.reject({
-            
+        deferred.reject({            
             message: 'user location is not passed'
         });
     }
@@ -1426,6 +1421,9 @@ module.exports.confirm_cod_order = function(token, order) {
         return update_payment_mode(data);
     })
     .then(function(data) {
+        return remove_order_from_cache(data);
+    })
+    .then(function(data) {
         return save_offer_use_event(data);
     })    
     .then(function(data) {
@@ -1456,6 +1454,9 @@ module.exports.confirm_inapp_order = function(data) {
     var deferred = Q.defer();
 
     update_payment_mode(data)
+    .then(function(data) {
+        return remove_order_from_cache(data);
+    })
     .then(function(data) {
         return send_sms(data);
     })
@@ -2000,7 +2001,7 @@ function update_order_with_feedback(order) {
             message: 'Couldn\'t find this order'
           });
         } 
-        else {
+        else if(saved_order.status != 'CLOSED'){
             saved_order.user_feedback = {};
             saved_order.user_feedback.is_ontime = order.is_ontime;
             saved_order.user_feedback.rating = order.order_rating;
@@ -2026,6 +2027,12 @@ function update_order_with_feedback(order) {
                     deferred.resolve(updated_order); 
                 }
             })
+        }
+        else{
+            deferred.reject({
+                err: err || true,
+                message: 'Order feedback already submitted'
+            });
         }
     })
     return deferred.promise;

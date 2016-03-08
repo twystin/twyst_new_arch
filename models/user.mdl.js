@@ -71,11 +71,13 @@ var User = new Schema({
     when: Date
   },
   validation: {
-    email: Boolean,
+    is_verification_mail_sent: {type: Boolean, default: false},
+    verification_mail_token: {type: String},
     sent_email_count: { type: Number, default: 0},
+    email: Boolean,    
     otp: Boolean
   },
-  is_verification_mail_sent: {type: Boolean, default: false},
+
   user_acquisition_source: {type: String, default: ''},
   app_acquisition_source: {type: String, default: ''},
   last_event: {

@@ -12,39 +12,35 @@ var Friend = mongoose.model('Friend');
 var Contact = mongoose.model('Contact');
 var Order = mongoose.model('Order');
 var Event = mongoose.model('Event');
-var AuthHelper = require('../../common/auth.hlpr.js');
+var Keygenerator      = require('keygenerator');
 var async = require('async');
-var logger = require('tracer').colorConsole();
 var request = require('request');
+var AuthHelper = require('../../common/auth.hlpr.js');
+var logger = require('tracer').colorConsole();
 var MobikwikPaymentHelper = require('./mobikwik_payment.hlpr.js');
 var Transporter = require('../../transports/transporter.js');
-var path                 = require('path');
-var TemplatePath      = require('../../config/templatePath.js');
+var VerificationEmailTemplate = require('../../templates/email_verification_mail.hbs');
 var MailContent       = require('../../common/template.hlpr.js');
 var PayloadDescriptor = require('../../common/email.hlpr.js');
-var Email             = require('../../transports/email/ses.transport.js');
-var Keygenerator      = require('keygenerator');
+var sender = "info@twyst.in";
 
 module.exports.update_user = function(token, updated_user) {
   logger.log();
   var deferred = Q.defer();
-  console.log(token);
-  console.log(updated_user);
   AuthHelper.get_user(token).then(function(data) {
     var user = data.data;
     user = ld.merge(user, updated_user);
 
-    if(!user.is_verification_mail_sent){
-      user.verification_mail_token = Keygenerator.session_id();
+    if(!user.validation.is_verification_mail_sent){
+      user.validation.verification_mail_token = Keygenerator.session_id();
       var filler = {
         "name":user.first_name,
-        "link":user.verification_mail_token
+        "link": 'www.twyst.in/verify_email/' + user.validation.verification_mail_token
       };
-      MailContent.templateToStr(TemplatePath.of('registration_mail.hbs'), filler, function(mailStr){
-        var sender = "kuldeep@twyst.in";
-        var payloadDescriptor = new PayloadDescriptor('utf-8', user.email, 'Verify your account!',mailStr, sender);
-        console.log(payloadDescriptor);
-        Email.send(payloadDescriptor);
+      var email = user.email || user.profile.email || null;
+      MailContent.templateToStr(VerificationEmailTemplate, filler, function(mailStr){        
+        var payloadDescriptor = new PayloadDescriptor('utf-8', user.email, 'Verify your account!', mailStr, sender);
+        Transporter.send('email', 'ses', payloadDescriptor);
       });
     }
 
@@ -772,7 +768,7 @@ function save_order_cancel_event(order) {
         event.event_user = order.user;
         event.event_type = 'cancel_order';
 
-        event.event_outlet = data.order.outlet;
+        event.event_outlet = order.outlet;
         event.event_date =  new Date();
         var created_event = new Event(event);
         created_event.save(function(err, e) {

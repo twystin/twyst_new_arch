@@ -14,6 +14,7 @@ require('../models/outlet.mdl');
 var User = mongoose.model('User');
 var Order = mongoose.model('Order');
 var Outlet = mongoose.model('Outlet');
+var Event = mongoose.model('Event');
 
 exports.runner = function(agenda) {
   agenda.define('order_auto_reject', function(job, done) {
@@ -69,6 +70,42 @@ function process_order(order) {
                         outlet: order.outlet.basics,
                         order_id: order._id
                     };
+                    User.findOneAndUpdate({
+                    _id: order.user._id
+                    }, {$inc: {'twyst_cash': order.offer_cost}}
+                    ).exec(function(err, user) {
+                        if(err || !user)    {
+                            deferred.reject({
+                                err: err || true,
+                                message: 'Couldn\'t update this order'
+                            });     
+                        }
+                        else{
+                            var event = {};
+                            event.event_meta = {};
+                            event.event_meta.order_id = order._id;
+                            event.event_meta.twyst_cash = order.offer_cost;                        
+                            event.event_meta.offer = order.offer_used;
+                            event.event_user = order.user._id;
+                            event.event_type = 'reject_order';                            
+                            event.event_outlet = order.outlet._id;
+                            event.event_date = new Date();
+                            var created_event = new Event(event);
+                            created_event.save(function(err, e) {
+                                if (err || !e) {
+                                    deferred.reject({
+                                        err: err || true,
+                                        message: 'Couldn\'t update this order'
+                                    }); 
+                                } else {
+                                    deferred.resolve({
+                                        data: updated_order,
+                                        message: 'order rejected successfully'
+                                    }); 
+                                }
+                            });                              
+                        }
+                    })
                     notification.notify_user(what, null, user_gcm_id, null).then(function(data) {
                         logger.log(data);
                         order.outlet.contact.phones.reg_mobile.forEach(function (phone) {

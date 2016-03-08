@@ -5,6 +5,10 @@ var HttpHelper = require('../common/http.hlpr');
 var _ = require('lodash');
 var Transporter = require('../transports/transporter.js');
 var AuthHelper = require('../common/auth.hlpr');
+var TemplatePath      = require('../config/templatePath.js');
+var MailContent       = require('../common/template.hlpr.js');
+var PayloadDescriptor = require('../common/email.hlpr.js');
+var Keygenerator      = require('keygenerator');
 
 
 module.exports.send_link = function(req, res) {
@@ -52,38 +56,26 @@ module.exports.send_verification_email = function(req, res){
       		HttpHelper.success(res, null, "User has crossed maximum number of atteptes");	
       	}
       	else{
-      		var merchant_payload = {
-		        Destination: { 
-		            BccAddresses: [],
-		            CcAddresses: [],
-		            ToAddresses: [ 'kuldeep@twyst.in'] //, merchant_email
-		        },
-		        Message: { /* required */
-		            Body: { /* required */
-		                Html: {
-		                    Data: "<h4>Click here</h4>" 
-		                },
-		                Text: {
-		                    Data: 'Click here'
-		                    
-		                }
-		            },
-		            Subject: { /* required */
-		              Data: 'Verify your Twyst email acount', /* required */
-		              
-		            }
-		        },
-		        Source: 'info@twyst.in',
-		        ReturnPath: 'info@twyst.in' 
-		    };
-      		Transporter.send('email', 'ses', merchant_payload).then(function(info) {
-				console.log(info);
-				//update user
-				HttpHelper.success(res, null, "An email verification link has been sent to your email id");
-			}, function(err) {
-				console.log(err);
-				HttpHelper.error(res, null, "Something went wrong. Please try again after some time");
+      		var filler = {
+				"name":user.first_name,
+				"link":user.verification_mail_token
+			};
+				
+			MailContent.templateToStr(TemplatePath.of('registration_mail.hbs'), filler, function(mailStr){
+				var sender = "kuldeep@twyst.in";
+				var payloadDescriptor = new PayloadDescriptor('utf-8', user.email, 'Verify your account!',mailStr, sender);
+				console.log(payloadDescriptor);
+				Transporter.send('email', 'ses', payloadDescriptor).then(function(info) {
+					console.log(info);
+					//update user
+					HttpHelper.success(res, null, "An email verification link has been sent to your email id");
+				}, function(err) {
+					console.log(err);
+					HttpHelper.error(res, null, "Something went wrong. Please try again after some time");
+				});
 			});
+      		
+      		
       	}
     }, function(err) {
       	HttpHelper.error(res, null, "Could not find user");
