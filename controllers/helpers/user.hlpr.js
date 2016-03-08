@@ -19,10 +19,11 @@ var request = require('request');
 var MobikwikPaymentHelper = require('./mobikwik_payment.hlpr.js');
 var Transporter = require('../../transports/transporter.js');
 var path                 = require('path');
-var registrationMailPath = path.join(__dirname.split('/').slice(0,__dirname.split('/').length - 2).join('/'),'templates','registration_mail.hbs');
+var TemplatePath      = require('../../config/templatePath.js');
 var MailContent       = require('../../common/template.hlpr.js');
 var PayloadDescriptor = require('../../common/email.hlpr.js');
 var Email             = require('../../transports/email/ses.transport.js');
+var Keygenerator      = require('keygenerator');
 
 module.exports.update_user = function(token, updated_user) {
   logger.log();
@@ -34,11 +35,12 @@ module.exports.update_user = function(token, updated_user) {
     user = ld.merge(user, updated_user);
 
     if(!user.is_verification_mail_sent){
+      user.verification_mail_token = Keygenerator.session_id();
       var filler = {
         "name":user.first_name,
-        "link":"http://twyst.in"
+        "link":user.verification_mail_token
       };
-      MailContent.templateToStr(registrationMailPath, filler, function(mailStr){
+      MailContent.templateToStr(TemplatePath.of('registration_mail.hbs'), filler, function(mailStr){
         var sender = "kuldeep@twyst.in";
         var payloadDescriptor = new PayloadDescriptor('utf-8', user.email, 'Verify your account!',mailStr, sender);
         console.log(payloadDescriptor);

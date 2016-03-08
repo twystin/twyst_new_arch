@@ -1,0 +1,251 @@
+<style>
+body{
+  margin: 0;
+  padding:0;
+  background: #EEE;
+  font-family: 'Roboto';
+}
+button {
+  border:none;
+  background: none;
+  color: white;
+  width: 225px;
+}
+
+.tnc {
+  margin:0;
+  padding:3%;
+}
+
+h6,h5,h4,h3,h2,h1{
+  margin:2px;
+}
+
+.btn-pad-4{
+  padding: 5px 20px;
+}
+.btn-pad-3{
+  padding: 5px 15px;
+}
+
+.btn-pad-2{
+  padding: 5px 10px;
+}
+.btn-pad-1{
+  padding: 5px;
+}
+
+.inline-btn{
+  position: relative;
+  top: 0;
+  width:15px;
+  height:14px;
+  margin-bottom: 10px;
+}
+
+.center{
+  margin-left: 50%;
+  transform: translateX(-50%);
+}
+hr{
+  width: 90%;
+  border-color: #DAD5D5;
+  border-width: 0.4px;
+  border-style: solid;
+}
+
+.container {
+  width: 580px;
+  background: white;
+  margin: 0 auto;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+}
+
+.header {
+  background: #333;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  text-align: center;
+  height: 50px;
+  line-height: 50px;
+}
+
+.logo-header {
+  height:50px;
+}
+.logo-footer {
+  height:20px;
+}
+
+.btn-orange{
+  background-color: #F89422;
+}
+
+.btn-sea-green{
+  background-color: #05E880;
+  width: 145px;
+}
+
+.footer.stanza h3{
+  text-align: left;
+  font-family: 'Cabin';
+}
+.footer.stanza hr{
+  margin:0px;
+  border-color:#333;
+}
+
+
+.size-4{
+  font-size: 20px;
+}
+.size-3{
+  font-size: 15px;
+}
+.size-2{
+  font-size: 10px;
+}
+.size-1{
+  font-size: 5px;
+}
+
+
+.img-container {
+  padding: 5px 10px;
+}
+.img-splash {
+  position: relative;
+  background-image: url('./reimageassets/banner1.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 104% 115%;
+  box-shadow: 0px 0px 2px #999;
+  width: 100%;
+  height: 150px;
+}
+
+.money{
+  position: relative;
+  bottom: 18px;
+  font-size: 25px !important;
+  color:white !important;
+}
+
+.money span{
+  position: relative;
+  top:-10px;
+  font-size: 15px;
+}
+
+.img-text{
+  position: absolute;
+  text-align: center;
+  width: 250px;
+  bottom: 10px;
+  left: 27%;
+}
+
+.img-text h2, .img-text p{
+  margin: 2px;
+}
+.img-text h2{
+  font-size: 20px;
+  color:#1156b3;
+}
+.img-text p{
+  font-size:12px;
+}
+.stanza {
+  padding: 5px 15px;
+}
+.stanza h3 {
+  text-align: center;
+}
+.stanza p {
+  font-size: 16px;
+}
+
+.italics{
+  font-style: italic;
+}
+.btn-blue{
+  background-color: #1654b0;
+}
+/*.key-val{
+  padding: 5px 15px;
+}*/
+.inline{
+  display: inline-block;
+}
+.left{
+  text-align: left;
+  padding-left: 3%;
+  width: 44%;
+}
+.right {
+  text-align: right;
+  width: 49%;
+}
+
+.btn-round{
+  border-radius: 2px;
+}
+
+.soc{
+  /*border: solid 1px #000;*/
+  text-align: center;
+}
+
+.fb {
+  text-align: left;
+}
+.footer.stanza div{
+  text-align: center;
+}
+.footer.stanza div button {
+  width: 225px;
+  font-size: 15px;
+}
+.shade{
+  /*border: solid 1px #F00;*/
+  border-radius: 2px;
+  color:white;
+}
+
+.fb{
+  width: 30px;
+  height: 30px;
+  background-color: #221bad;
+  margin-left: 0;
+  margin-right: 20%;
+}
+
+.twitter{
+  width: 30px;
+  height: 30px;
+  background-color: #1ab8cd;
+}
+.twt{
+  margin-left:22px;
+  margin-right:24px;
+}
+.insta{
+  width: 30px;
+  height: 30px;
+}
+
+.shift{
+  margin-left: 11px;
+  margin-top:2px;
+}
+.fa.fa-instagram{
+  color: #333;
+  font-size: 2.4em;
+}
+.width-fix{
+  width: 110px;
+  margin-left: 30%;
+  text-align: left;
+}
+</style>
