@@ -31,6 +31,7 @@ module.exports = function(app) {
     app.get('/api/v4/authcode/:phone', AccountCtrl.create_authcode);
     app.post('/api/v4/authcode', AccountCtrl.verify_authcode_and_create_account);
     app.get('/api/v4/accounts/logout', AccountCtrl.logout);    
+    app.get('/verify/email/:token', AccountCtrl.verify_email);    
   })();
 
   (function RecoRoutes() {

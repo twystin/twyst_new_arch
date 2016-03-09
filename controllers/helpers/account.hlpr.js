@@ -252,3 +252,46 @@ module.exports.generate_new_code = function(phone) {
 
   return deferred.promise;
 };
+
+module.exports.verify_user_email = function(token) {
+    logger.log();
+    var deferred = Q.defer();
+
+    User.findOne({
+        'validation.verification_mail_token': token
+    }).exec(function (err, user) {
+        if(err) {
+            deferred.reject({
+                err: err || true,
+                message: 'Sorry, Error verifying email.'
+            });
+        }
+        else {
+            if(user) {
+                user.validation.email = true;
+                user.save(function (err) {
+                    if(err) {                        
+                        deferred.reject({
+                            err: err || true,
+                            message: 'Sorry, Error verifying email.'
+                        });
+                    }
+                    else {                        
+                        deferred.resolve({
+                            err: err || true,
+                            message: 'Email has been verifying successfully.'
+                        });           
+                    }
+                })
+            }
+            else {
+                deferred.reject({
+                    err: err || true,
+                    message: 'Sorry, The link is invalid.'
+                });
+            }
+        }
+    });
+    
+    return deferred.promise;
+};
