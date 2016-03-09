@@ -279,7 +279,7 @@ module.exports.verify_user_email = function(token) {
                     else {                        
                         deferred.resolve({
                             err: err || true,
-                            message: 'Email has been verifying successfully.'
+                            message: 'Email has been verified successfully.'
                         });           
                     }
                 })

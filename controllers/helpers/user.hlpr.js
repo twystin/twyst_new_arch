@@ -34,7 +34,7 @@ module.exports.update_user = function(token, updated_user) {
       user.validation.verification_mail_token = Keygenerator.session_id();
       var filler = {
         "name":user.first_name,
-        "link": 'http://staging.twyst.in/verify_email/' + user.validation.verification_mail_token
+        "link": 'http://staging.twyst.in/verify/email/' + user.validation.verification_mail_token
       };
       var email = user.email || user.profile.email || null;
       MailContent.templateToStr(GetTemplatePath.byName('email_verification_mail.hbs'), filler, function(mailStr){
@@ -653,7 +653,7 @@ module.exports.get_twyst_cash_history = function(token) {
 
     AuthHelper.get_user(token).then(function(data) {
         var user = data.data;
-        Event.find({event_user: user._id}).populate('outlet').exec(function(err, events) {
+        Event.find({event_user: user._id}).populate('event_outlet').exec(function(err, events) {
             if (err || !events) {
               deferred.reject({
                 err: err || true,
@@ -671,6 +671,7 @@ module.exports.get_twyst_cash_history = function(token) {
                         action.twyst_cash = event.event_meta.twyst_cash;
                         action.earn_at = event.event_date;
                         action.message = 'show some custom message here';
+                        action.outlet = event.event_outlet.basics.name;
                         order_history.push(action);
                     }
                     else if(event.event_type === 'cancel_order') {
@@ -680,6 +681,7 @@ module.exports.get_twyst_cash_history = function(token) {
                         action.twyst_cash = event.event_meta.twyst_cash;
                         action.earn_at = event.event_date;
                         action.message = 'show some custom message here';
+                        action.outlet = event.event_outlet.basics.name;
                         order_history.push(action);
                     }
                     else if(event.event_type === 'recharge') {
@@ -689,6 +691,7 @@ module.exports.get_twyst_cash_history = function(token) {
                         action.twyst_cash = event.event_meta.twyst_cash;
                         action.earn_at = event.event_date;
                         action.message = 'show some custom message here';
+                        action.outlet = event.event_outlet.basics.name;
                         order_history.push(action);
                     }
                     else if(event.event_type === 'use_shopping_offer') {
@@ -698,6 +701,7 @@ module.exports.get_twyst_cash_history = function(token) {
                         action.twyst_cash = event.event_meta.twyst_cash;
                         action.earn_at = event.event_date;
                         action.message = 'show some custom message here';
+                        action.outlet = event.event_outlet.basics.name;
                         order_history.push(action);
                     }
                     else if(event.event_type === 'use_food_offer') {
@@ -707,6 +711,7 @@ module.exports.get_twyst_cash_history = function(token) {
                         action.twyst_cash = event.event_meta.twyst_cash;
                         action.earn_at = event.event_date;
                         action.message = 'show some custom message here';
+                        action.outlet = event.event_outlet.basics.name;
                         order_history.push(action);
                     }
                 })
