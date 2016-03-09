@@ -653,7 +653,7 @@ module.exports.get_twyst_cash_history = function(token) {
 
     AuthHelper.get_user(token).then(function(data) {
         var user = data.data;
-        Event.find({event_user: user._id}).populate('event_outlet').exec(function(err, events) {
+        Event.find({event_user: user._id}).populate('event_user event_outlet').exec(function(err, events) {
             if (err || !events) {
               deferred.reject({
                 err: err || true,
@@ -662,6 +662,7 @@ module.exports.get_twyst_cash_history = function(token) {
             }
             else {
                 var order_history = [];
+                var history = {};
                 _.each(events, function(event){
                     if(event.event_type === 'order_feedback') {
 
@@ -715,9 +716,11 @@ module.exports.get_twyst_cash_history = function(token) {
                         order_history.push(action);
                     }
                 })
+                history.twyst_cash = user.twyst_cash;
+                history.twyst_cash_history = order_history;
                 deferred.resolve({
                     message: 'returning twyst cash history',
-                    data: order_history
+                    data: history
                 });
 
             }

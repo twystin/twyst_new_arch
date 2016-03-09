@@ -1862,6 +1862,7 @@ module.exports.update_order = function(token, order) {
                         saved_order.order_status = 'DELIVERED';   
                     }
                     else{
+                        saved_order.order_status = 'NOT_DELIVERED';
                         //if is delivered is false then notify AM 
                         send_notification(['console', saved_order.outlet.basics.account_mgr_email.replace('.', '').replace('@', '')], {
                             message: 'Hey user said, order is not delivered please get back to user',
@@ -1874,7 +1875,7 @@ module.exports.update_order = function(token, order) {
                         payload.phone = saved_order.outlet.basics.account_mgr_phone;
                         Transporter.send('sms', 'vf', payload);
                     }
-                                        
+                                       
                     saved_order.save(function(err, order){
                         if(err || !order){
                             deferred.reject({

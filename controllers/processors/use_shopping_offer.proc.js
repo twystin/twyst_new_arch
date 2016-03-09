@@ -41,7 +41,7 @@ module.exports.process = function(data) {
             if(err || !cashback_partner) {
                 console.log( 'error'+ err);
                 deferred.reject({
-                    message: 'This offer is no more available 1'
+                    message: 'This offer is no more available'
                 });
             }
             else if(cashback_partner && cashback_partner.offers && cashback_partner.offers.length){
@@ -71,13 +71,13 @@ module.exports.process = function(data) {
 
                 } else {
                     deferred.reject({
-                        message: 'This offer is no more available 2'
+                        message: 'This offer is no more available'
                     });
                 }
 
             } else {
                 deferred.reject({
-                    message: 'This offer is no more available 3'
+                    message: 'This offer is no more available'
                 });
             }
         })

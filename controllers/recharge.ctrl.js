@@ -9,8 +9,10 @@ var mongoose = require('mongoose');
 
 module.exports.send_recharge_request = function(req, res) {
 	logger.log();
+	
+	var token = req.query.token || null;
 	var recharge_req = {};
-	recharge_req = _.extend(recharge, req.body);
+	recharge_req = _.extend(recharge_req, req.body);
 
 	if (!token) {
 		HttpHelper.error(res, null, "Not authenticated");
@@ -21,9 +23,14 @@ module.exports.send_recharge_request = function(req, res) {
 	else if (!req.body.amount) {
 		HttpHelper.error(res, null, "could not process without amount");
 	}
-	else{
-		
-		RechargeHelper.send_recharge_request(token, recharge_req).then(function(data) {
+	else if (!req.body.operator) {
+		HttpHelper.error(res, null, "could not process without operator");
+	}
+	else if (!req.body.circle) {
+		HttpHelper.error(res, null, "could not process without circle");
+	}
+	else{		
+		RechargeHelper.process_recharge_req(token, recharge_req).then(function(data) {
 	      HttpHelper.success(res, data.data, data.message);
 	    }, function(err) {
 	      HttpHelper.error(res, err.data, err.message);
