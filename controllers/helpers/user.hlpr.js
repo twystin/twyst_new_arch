@@ -19,7 +19,7 @@ var AuthHelper = require('../../common/auth.hlpr.js');
 var logger = require('tracer').colorConsole();
 var MobikwikPaymentHelper = require('./mobikwik_payment.hlpr.js');
 var Transporter = require('../../transports/transporter.js');
-var VerificationEmailTemplate = require('../../templates/email_verification_mail.hbs');
+var GetTemplatePath = require('../../common/getTemplatePath.cfg.js');
 var MailContent       = require('../../common/template.hlpr.js');
 var PayloadDescriptor = require('../../common/email.hlpr.js');
 var sender = "info@twyst.in";
@@ -30,20 +30,18 @@ module.exports.update_user = function(token, updated_user) {
   AuthHelper.get_user(token).then(function(data) {
     var user = data.data;
     user = ld.merge(user, updated_user);
-
     if(!user.validation.is_verification_mail_sent){
       user.validation.verification_mail_token = Keygenerator.session_id();
       var filler = {
         "name":user.first_name,
-        "link": 'www.twyst.in/verify_email/' + user.validation.verification_mail_token
+        "link": 'http://staging.twyst.in/verify_email/' + user.validation.verification_mail_token
       };
       var email = user.email || user.profile.email || null;
-      MailContent.templateToStr(VerificationEmailTemplate, filler, function(mailStr){        
+      MailContent.templateToStr(GetTemplatePath.byName('email_verification_mail.hbs'), filler, function(mailStr){
         var payloadDescriptor = new PayloadDescriptor('utf-8', user.email, 'Verify your account!', mailStr, sender);
         Transporter.send('email', 'ses', payloadDescriptor);
       });
     }
-
 
     if(user.gcmId) {
         var index = ld.findIndex(user.push_ids, function(push) { return push.push_id==user.gcmId; });
