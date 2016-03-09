@@ -11,7 +11,6 @@ module.exports.templateToStr = function(path, filler, callback){
     if(!err){
       var handlebars2Str = data.toString();
       var resultStr = stringifyTemplate(handlebars2Str,filler);
-      console.log(resultStr);
       callback(resultStr);
     } else {
       console.error(err);
