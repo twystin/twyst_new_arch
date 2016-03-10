@@ -16,7 +16,7 @@ var payloadDescriptor = function(charset, to, subject, message, sender) {
   this.Message =
   {
     Body    : {Html: {Data: message, Charset: charset}},
-    Subject : {Data: "[TWYST]: "+subject, Charset: charset}
+    Subject : {Data: subject, Charset: charset}
   };
 
   this.Source = sender;

@@ -685,14 +685,13 @@ module.exports.get_twyst_cash_history = function(token) {
                         action.outlet = event.event_outlet.basics.name;
                         order_history.push(action);
                     }
-                    else if(event.event_type === 'recharge') {
+                    else if(event.event_type === 'recharge_phone') {
                         var action = {};
-                        action.type = 'recharge';
+                        action.type = 'recharge_phone';
                         action.earn =  false;
                         action.twyst_cash = event.event_meta.twyst_cash;
                         action.earn_at = event.event_date;
                         action.message = 'show some custom message here';
-                        action.outlet = event.event_outlet.basics.name;
                         order_history.push(action);
                     }
                     else if(event.event_type === 'use_shopping_offer') {
@@ -701,8 +700,7 @@ module.exports.get_twyst_cash_history = function(token) {
                         action.earn =  false;
                         action.twyst_cash = event.event_meta.twyst_cash;
                         action.earn_at = event.event_date;
-                        action.message = 'show some custom message here';
-                        action.outlet = event.event_outlet.basics.name;
+                        action.message = 'show some custom message here';                        
                         order_history.push(action);
                     }
                     else if(event.event_type === 'use_food_offer') {

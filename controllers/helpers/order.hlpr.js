@@ -1187,18 +1187,40 @@ function save_user_address(data) {
     logger.log();
     var deferred = Q.defer();
 
-    var address = data.order.address;
-    User.findOneAndUpdate({_id: data.user._id},
-        {$push: {address: address}}
-    ).exec(function(err, user) {
-        if (err) {
-            console.log(err);
-            deferred.reject(err);
-        } else {   
-            deferred.resolve(data);
-        }
-    });
-    return deferred.promise;
+    if(data.order.address.tag){
+        var passed_address = data.order.address;
+        
+        User.findOne({_id: data.user._id}).exec(function(err, user){
+            if(err) {
+                deferred.reject(err);
+            }
+            else{
+                var index = null;
+                for(var i = 0; i < user.address.length; i++){
+                    if(user.address[i].tag === passed_address.tag){
+                        index = i;
+                    }    
+                }
+                if(index) {
+                    user.address.splice(index);    
+                }
+                
+                user.address.push(passed_address);
+                user.save(function(err, updated_user){
+                    if(err) {
+                        deferred.reject(err);
+                    }
+                    else{
+                        deferred.resolve(data);     
+                    }
+                })   
+            }
+        })
+    }
+    else{
+        deferred.resolve(data);   
+    }
+    return deferred.promise;    
 }
 
 function searchItemInPaidItems(item, offer) {
