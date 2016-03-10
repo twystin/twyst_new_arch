@@ -29,24 +29,24 @@ module.exports.get_coupons = function(req, res) {
       
       if (user.data.role >= 6) {
         data.coupons = user.data.coupons;
-        data.twyst_bucks = user.data.twyst_bucks;
+        data.twyst_cash = user.data.twyst_cash;
         filter_out_expired_and_used_coupons(data)
           .then(function(data) {
             return load_outlet_info_from_cache(data)
           }).then(function(data) {
-            var twyst_bucks;
+            var twyst_cash;
             if(data.coupons && data.coupons.length){ 
-                twyst_bucks = data.twyst_bucks;
+                twyst_cash = data.twyst_cash;
             }
             else{
-                twyst_bucks = data.data.twyst_bucks;
+                twyst_cash = data.data.twyst_cash;
             }
             var coupons = data.coupons;   
             
             var message = data.message;
             var data = {};
             data.coupons = coupons;
-            data.twyst_bucks = twyst_bucks;
+            data.twyst_cash = twyst_cash;
             HttpHelper.success(res, data, message);
           })
           .fail(function(err) {
@@ -373,7 +373,7 @@ module.exports.twyst_cash_history = function(req, res) {
     HttpHelper.error(res, null, "Not authenticated");
   }
   else{
-    UserHelper.get_twyst_bucks_history(token).then(function(data) {
+    UserHelper.get_twyst_cash_history(token).then(function(data) {
       HttpHelper.success(res, data.data, data.message);
     }, function(err) {
       HttpHelper.error(res, err.data, err.message);

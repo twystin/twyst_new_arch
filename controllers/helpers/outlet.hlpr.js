@@ -10,12 +10,11 @@ require('../../models/outlet.mdl');
 var Outlet = mongoose.model('Outlet');
 var User = mongoose.model('User');
 var Order = mongoose.model('Order');
+var Event = mongoose.model('Event');
 var Account = mongoose.model('Account');
 var AuthHelper = require('../../common/auth.hlpr.js');
 var logger = require('tracer').colorConsole();
 var Transporter = require('../../transports/transporter');
-var Agenda = require('agenda');
-var agenda = new Agenda({db: {address: 'localhost:27017/agenda'}});
 
 module.exports.get_outlet = function(id) {
   var deferred = Q.defer();
@@ -442,7 +441,6 @@ module.exports.update_order = function(token, order) {
     logger.log();
     var deferred = Q.defer();
 
-    console.log(order);
     AuthHelper.get_user(token).then(function(data) {
       if(data.data.role < 6) {
         data.order = order;
@@ -502,63 +500,71 @@ module.exports.update_order = function(token, order) {
 };
 
 function accept_order(data) {
-  logger.log();
-  var deferred = Q.defer();
+    logger.log();
+    var deferred = Q.defer();
+    Order.findOne({_id: data.order.order_id}).populate('user').exec(function(err, current_order) {
+        if (err || !current_order){
+            console.log(err);
+        } 
+        else {
+            if(current_order.order_status === 'PENDING')  {
+                current_order.order_status = 'ACCEPTED';
+                var current_action = {};
+                current_action.action_type = 'ACCEPTED';
+                current_action.action_by = data.data._id;
+                current_action.message = 'order has been accepted by merchant.';
 
-  var current_action = {};
-  current_action.action_type = 'ACCEPTED';
-  current_action.action_by = data.data._id;
-  current_action.message = 'order has been accepted by merchant.'
-  Order.findOneAndUpdate({
-      _id: data.order.order_id
-    }, {
-      $set: {order_status: 'ACCEPTED'},
-      $push: {actions: current_action}
-    },
-    function(err, order) {
-      if (err || !order) {
-        console.log(err);
-        deferred.reject({
-          err: err || true,
-          message: 'Couldn\'t accept the order'
-        });
-      } else {
-        //notify user/console/am
-        //set timeout for assumed delivered state
-        send_notification(['console', data.order.am_email.replace('.', '').replace('@', '')], {
-          message: 'Order accepted by merchant',
-          order_id: data.order.order_id,
-          type: 'accept'
-        });
-
-        User.findOne({_id: data.order.user._id}, function(err, user) {
-          if (err || !user) {
-            deferred.reject({
-              err: err || true,
-              message: 'Saved the outlet, but couldn\'t set the user.'
-            });
-          } else {
-            var date = new Date();
-            var time = date.getTime();
-            var notif = {};
-            notif.header = 'Order Accepted';
-            notif.message = 'Your order has been accepted by merchant';
-            notif.state = 'ACCEPTED';
-            notif.time = time;
-            notif.order_id = data.order.order_id; 
-
-            schedule_assumed_delivered(data, user);
-            send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif);  
-            deferred.resolve({
-              data: order,
-              message: 'order accepted successfully'
-            }); 
-          }
-        });
+                current_order.actions.push(current_action);
+                console.log(current_order.actions);
+                current_order.save(function(err, updated_order){
+                    if(err || !updated_order){
+                        console.log(err)
+                        deferred.reject({
+                            err: err || true,
+                            message: 'Couldn\'t update this order'
+                        });   
+                    }
+                    else{
+                        send_notification(['console', data.order.am_email.replace('.', '').replace('@', '')], {
+                            message: 'Order accepted by merchant',
+                            order_id: data.order.order_id,
+                            type: 'accept'
+                        });                        
+                        var date = new Date();
+                        var time = date.getTime();
+                        var notif = {};
+                        notif.header = 'Order Accepted';
+                        notif.message = 'Your order has been accepted by merchant';
+                        notif.state = 'ACCEPTED';
+                        notif.time = time;
+                        notif.order_id = data.order.order_id; 
+                        send_notification_to_user(current_order.user.push_ids[current_order.user.push_ids.length-1].push_id, notif);  
+                        deferred.resolve({
+                            data: updated_order,
+                            message: 'order accepted successfully'
+                        }); 
+                            
+                    } 
+                })    
+            }
+            else if(current_order.order_status === 'ACCEPTED'){
+                deferred.resolve({
+                    data: current_order,
+                    message: 'This order has been accepted already'
+                });
+                    
+            }
+            else{
+                deferred.resolve({
+                    data: current_order,
+                    message: 'This order has been cancelled by user'
+                });
+                  
+            }
+        }
         
-      }
-    }
-  );
+    });
+  
   return deferred.promise;      
 }
 
@@ -566,122 +572,169 @@ function reject_order(data) {
   logger.log();
   var deferred = Q.defer();
 
-  var current_action = {};
-  current_action.action_type = 'REJECTED';
-  current_action.action_by = data.data._id;
-  current_action.message = 'order has been rejected by merchant.'
-  Order.findOneAndUpdate({
-      _id: data.order.order_id
-    }, {
-      $set: {order_status: 'REJECTED'},
-      $push: {actions: current_action}
-    },
-    function(err, order) {
-      if (err || !order) {
-        deferred.reject({
-          err: err || true,
-          message: 'Couldn\'t reject the order'
-        });
-      } else {
-        send_notification(['console', data.order.am_email.replace('.', '').replace('@', '')], {
-          message: 'Order rejected by merchant - ' + data.order.reject_reason,
-          order_id: data.order.order_id,
-          type: 'reject'
-        });
+    Order.findOne({_id: data.order.order_id}).populate('user').exec(function(err, current_order) {
+        if (err || !current_order){
+            console.log(err);
+        } 
+        else {
+            if(current_order.order_status === 'PENDING')  {
+                current_order.order_status = 'REJECTED';
+                var current_action = {};
+                current_action.action_type = 'REJECTED';
+                current_action.action_by = data.data._id;
+                current_action.message = 'order has been rejected by merchant.';
 
-        User.findOne({_id: data.order.user._id}, function(err, user) {
-          if (err || !user) {
-            deferred.reject({
-              err: err || true,
-              message: 'Saved the outlet, but couldn\'t set the user.'
-            });
-          } else {
-            var date = new Date();
-            var time = date.getTime();
-            var notif = {};
-            notif.header = 'Order Rejected';
-            notif.message = 'Your order has been rejected by merchant.';
-            notif.state = 'REJECTED';
-            notif.time = time;
-            notif.order_id = data.order.order_id;
-            
-            send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif);
-            
-            send_order_reject_sms(user, data.order.order_id);
-            deferred.resolve({
-              data: order,
-              message: 'order rejected successfully'
-            });    
-          }
-        });
+                current_order.actions.push(current_action);
+                console.log(current_order.actions);
+                current_order.save(function(err, updated_order){
+                    if(err || !updated_order){
+                        console.log(err)
+                        deferred.reject({
+                            err: err || true,
+                            message: 'Couldn\'t update this order'
+                        });   
+                    }
+                    else{
+                        send_notification(['console', data.order.am_email.replace('.', '').replace('@', '')], {
+                            message: 'Order has been rejected by merchant.',
+                            order_id: data.order.order_id,
+                            type: 'reject'
+                        });                        
+                        var date = new Date();
+                        var time = date.getTime();
+                        var notif = {};
+                        notif.header = 'Order Rejected';
+                        notif.message = 'Your order has been rejected by merchant';
+                        notif.state = 'REJECTED';
+                        notif.time = time;
+                        notif.order_id = data.order.order_id; 
+                        send_notification_to_user(current_order.user.push_ids[current_order.user.push_ids.length-1].push_id, notif);
+
+                        if(current_order.offer_used) {
+                            User.findOneAndUpdate({
+                            _id: current_order.user._id
+                            }, {$inc: {'twyst_cash': current_order.offer_cost}}
+                            ).exec(function(err, user) {
+                                if(err || !user)    {
+                                    deferred.reject({
+                                        err: err || true,
+                                        message: 'Couldn\'t update this order'
+                                    });     
+                                }
+                                else{
+                                    var event = {};
+                                    event.event_meta = {};
+                                    event.event_meta.order_number = current_order.order_number;
+                                    event.event_meta.twyst_cash = current_order.offer_cost;                        
+                                    event.event_meta.offer = current_order.offer_used;
+                                    event.event_user = current_order.user._id;
+                                    event.event_type = 'reject_order';
+                                    
+                                    event.event_outlet = current_order.outlet;
+                                    event.event_date = new Date();
+                                    var created_event = new Event(event);
+                                    created_event.save(function(err, e) {
+                                        if (err || !e) {
+                                            deferred.reject({
+                                                err: err || true,
+                                                message: 'Couldn\'t update this order'
+                                            }); 
+                                        } else {
+                                            deferred.resolve({
+                                                data: updated_order,
+                                                message: 'order rejected successfully'
+                                            }); 
+                                        }
+                                    });
+                                      
+
+                                }
+                            })
+                        }
+                        else{
+                            deferred.resolve({
+                                data: updated_order,
+                                message: 'order rejected successfully'
+                            });    
+                        }
+                    } 
+                })    
+            }
+            else if(current_order.order_status === 'REJECTED'){
+                deferred.resolve({
+                    data: current_order,
+                    message: 'This order has been rejected already'
+                });
+
+            }
+            else{
+                deferred.resolve({
+                    data: current_order,
+                    message: 'This order has been cancelled by user'
+                });
+                   
+            }
+               
+        }
         
-      }
-    }
-  );       
-  return deferred.promise;  
+    });       
+    return deferred.promise;  
 }
 
 function dispatch_order(data) {
-  logger.log();
-  var deferred = Q.defer();
+    logger.log();
+    var deferred = Q.defer();
+    console.log(data);
+    Order.findOne({ _id: data.order._id}).populate('user').exec(function(err, order) {
+        if (err || !order) {
+          deferred.reject({
+            err: err || true,
+            message: 'Couldn\'t find the order'
+          });
+        } else {
+            if(order.order_status === 'ACCEPTED' || order.order_status === 'NOT_DELIVERED'){
+                var date = new Date();
+                var time = date.getTime();
+                var notif = {};
+                notif.header = 'Order Dispatched';
+                notif.message = 'Your order has been dispatched by merchant';
+                notif.state = 'DISPATCHED';
+                notif.time = time;
+                notif.order_id = data.order.order_id;
+                
+                send_notification_to_user(order.user.push_ids[order.user.push_ids.length-1].push_id, notif);
+            }
 
-  var current_action = {};
-  current_action.action_type = 'DISPATCHED';
-  current_action.action_by = data.data._id;
-  current_action.message = 'order has been dispatched by merchant.'
-  
-  User.findOne({_id: data.order.user._id}, function(err, user) {
-    if (err || !user) {
-      deferred.reject({
-        err: err || true,
-        message: 'Saved the outlet, but couldn\'t set the user.'
-      });
-    } 
-    else {
-      if(data.order.order_status === 'ACCEPTED' || data.order.order_status === 'NOT_DELIVERED'){
-        var date = new Date();
-        var time = date.getTime();
-        var notif = {};
-        notif.header = 'Order Dispatched';
-        notif.message = 'Your order has been dispatched by merchant';
-        notif.state = 'DISPATCHED';
-        notif.time = time;
-        notif.order_id = data.order.order_id;
-        
-        send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif);
-      }
-      Order.findOneAndUpdate({
-          _id: data.order.order_id
-        }, {
-          $set: {order_status: 'DISPATCHED'},
-          $push: {actions: current_action}
-        },
-        function(err, order) {
-          if (err || !order) {
-            deferred.reject({
-              err: err || true,
-              message: 'Couldn\'t update the order'
-            });
-          } else {          
-            send_notification(['console', data.order.am_email.replace('.', '').replace('@', '')], {
-              message: 'Order dispatched by merchant',
-              order_id: data.order.order_id,
-              type: 'dispatch'
-            });            
+            var current_action = {};
+            current_action.action_type = 'DISPATCHED';
+            current_action.action_by = data.data._id;
+            current_action.message = 'Order has been dispatched by merchant.'
+            order.actions.push(current_action);
+            order.save(function(err, updated_order){
+                if(err || !updated_order){
+                    console.log(err)
+                    deferred.reject({
+                        err: err || true,
+                        message: 'Couldn\'t update this order'
+                    });   
+                }
+                else{
+                    send_notification(['console', data.order.am_email.replace('.', '').replace('@', '')], {
+                      message: 'Order dispatched by merchant',
+                      order_id: data.order.order_id,
+                      type: 'dispatch'
+                    });            
 
-            deferred.resolve({
-              data: order,
-              message: 'order dispatched successfully'
-            });  
-                      
-          }
+                    deferred.resolve({
+                      data: updated_order,
+                      message: 'order dispatched successfully'
+                    });   
+                } 
+            })               
         }
-      );
-    }
-  });
+    });
 
-   
-  return deferred.promise;      
+    return deferred.promise;      
 }
 
 function send_notification(paths, payload) {
@@ -707,100 +760,6 @@ function send_notification_to_user (gcm_id, notif) {
 
   Transporter.send('push', 'gcm', payload);
     
-}
-
-function schedule_assumed_delivered(data, user) {
-    logger.log();
-    var Agenda = require('agenda');
-    var agenda = new Agenda({db: {address: 'localhost:27017/agenda'}});
-
-    agenda.define('schedule_assumed_delivered', function(job, done) {            
-      Order.findOne({_id: data.order.order_id}).exec(function(err, order) {
-          if (err || !order){
-              console.log(err);
-          } 
-          else if(order.order_status === 'ACCEPTED' || order.order_status === 'DISPATCHED'){                          
-            order.order_status = 'ASSUMED_DELIVERED';
-            var current_action = {};
-            current_action.action_type = 'ASSUMED_DELIVERED';
-            current_action.action_by = '01234567890123456789abcd';
-            current_action.message = 'we want to know if your order has been delivered.'
-            order.actions.push(current_action);
-            order.save(function(err, order){
-              if(err) {
-                console.log('error ' + err);
-              } else {
-                console.log('done assumed delivered');
-                schedule_order_delivered(data, user);
-
-                var date = new Date();
-                var time = date.getTime();
-                var notif = {};
-                notif.header = 'Order Recieved';
-                notif.message = 'We want to know if your order has been delivered';
-                notif.state = 'ASSUMED_DELIVERED';
-                notif.time = time;
-                notif.order_id = data.order.order_id;
-                send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif);  
-              }
-              
-            })
-          }
-          done();
-      })      
-    });
-
-    agenda.on('ready', function() {
-      console.log(data.order.estimeted_delivery_time);
-      agenda.schedule('in ' +data.order.estimeted_delivery_time + ' minutes', 'schedule_assumed_delivered', {order_id: data.order.order_id, status: 'ASSUMED_DELIVERED', previous_state: 'ACCEPTED'});
-      agenda.start();
-    });
-    
-}
-
-function schedule_order_delivered(data, user) {
-    logger.log();
-    var Agenda = require('agenda');
-    var agenda = new Agenda({db: {address: 'localhost:27017/agenda'}});
-
-    agenda.define('schedule_order_delivered', function(job, done) {            
-      Order.findOne({_id: data.order.order_id}).exec(function(err, order) {
-        if (err || !order){
-            console.log(err);
-        } 
-        else if(order.order_status === 'ASSUMED_DELIVERED' || order.order_status === 'DISPATCHED'){                                
-          order.order_status = 'DELIVERED';
-          var current_action = {};
-          current_action.action_type = 'DELIVERED';
-          current_action.action_by = '01234567890123456789abcd';
-          current_action.message = 'order has been delivered.';
-          order.actions.push(current_action);
-          order.save(function(err, order){
-            if(err){
-              console.log('error '+ err);
-            }
-            else{
-              var date = new Date();
-              var time = date.getTime();
-              var notif = {};
-              notif.header = 'Order Delivered';
-              notif.message = 'Your order has been delivered successfully';
-              notif.state = 'DELIVERED';
-              notif.time = time;
-              notif.order_id = data.order.order_id;
-              send_notification_to_user(user.push_ids[user.push_ids.length-1].push_id, notif);   
-            }
-            
-          })
-        }
-        done();
-      })      
-    });
-
-    agenda.on('ready', function() {
-      agenda.schedule('in 20 minutes', 'schedule_order_delivered', {order_id: data.order.order_id, status: 'DELIVERED', previous_state: 'ASSUMED_DELIVERED'});
-      agenda.start();
-    });    
 }
 
 function send_order_reject_sms(user, order_id) {

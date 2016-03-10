@@ -20,7 +20,7 @@ var User = new Schema({
   middle_name: {type: String, default: ''},
   last_name: {type: String, default: ''},
   email: {type: String, default: ''},
-  address: [{ 
+  address: [{
     line1: {type: String},
     line2: {type: String},
     landmark: {type: String},
@@ -32,11 +32,15 @@ var User = new Schema({
     },
     tag: {type: String},
     added_at: {
-      type: Date, 
+      type: Date,
       default: Date.now
     }
   }],
-  twyst_bucks: Number, //default 500
+  twyst_cash: {
+    type: Number,
+    default: 0,
+    required: true
+  },
   image: {type: String, default: ''},
   push_ids: [{
     push_type: {type: String, default: ''}, // enum
@@ -55,7 +59,7 @@ var User = new Schema({
   device_info: {
     id: {type: String, default: ''},
     model: {type: String, default: ''},
-    os: {type: String, default: ''}  
+    os: {type: String, default: ''}
   },
   locations: {
     location_type: {type: String, default: ''}, // home, office, last, most_often, favourite
@@ -67,10 +71,13 @@ var User = new Schema({
     when: Date
   },
   validation: {
-    email: Boolean,
+    is_verification_mail_sent: {type: Boolean, default: false},
+    verification_mail_token: {type: String},
     sent_email_count: { type: Number, default: 0},
+    email: Boolean,    
     otp: Boolean
   },
+
   user_acquisition_source: {type: String, default: ''},
   app_acquisition_source: {type: String, default: ''},
   last_event: {
@@ -183,6 +190,10 @@ var User = new Schema({
       ref: 'Outlet'
     }],
     issued_at: Date
+  }],
+  shopping_coupon: [{
+    source: String,
+    offer_id: String
   }],
   friends: {
     type: Schema.ObjectId,

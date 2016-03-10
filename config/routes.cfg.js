@@ -11,7 +11,7 @@ module.exports = function(app) {
     var MiscCtrl = require('../controllers/misc.ctrl');
     app.get('', function(req, res) { res.redirect('/home'); });
     app.get('/', function(req, res) { res.redirect('/home'); });
-    app.get('/api/v4/earn/more', function(req, res) { res.contentType('text/html'); res.end("<ul><li>Upload your bill every time you visit or order from a Twyst outlet.</li><li>Invlite friends to join you on Twyst - get Twyst bucks for each friends who joins.</li><li>Submit offers!</li><li>Suggest outlets you want on Twyst.</li><li>Favourite an outlet.</li><li>Like an offer</li></ul>"); });
+    app.get('/api/v4/earn/more', function(req, res) { res.contentType('text/html'); res.end("<ul><li>Upload your bill every time you visit or order from a Twyst outlet.</li><li>Invlite friends to join you on Twyst - get Twyst cash for each friends who joins.</li><li>Submit offers!</li><li>Suggest outlets you want on Twyst.</li><li>Favourite an outlet.</li><li>Like an offer</li></ul>"); });
     app.get('/api/v4/faq', function(req, res) { 
       res.redirect('/home/faq.html'); 
     });
@@ -31,6 +31,7 @@ module.exports = function(app) {
     app.get('/api/v4/authcode/:phone', AccountCtrl.create_authcode);
     app.post('/api/v4/authcode', AccountCtrl.verify_authcode_and_create_account);
     app.get('/api/v4/accounts/logout', AccountCtrl.logout);    
+    app.get('/verify/email/:token', AccountCtrl.verify_email);    
   })();
 
   (function RecoRoutes() {
@@ -57,7 +58,7 @@ module.exports = function(app) {
     app.post('/api/v4/coupon/redeem', EventCtrl.redeem); // FOR COUPON TYPE
     app.post('/api/v4/offer/generate/coupon', EventCtrl.generate_coupon); // FOR OFFER TYPE
     app.post('/api/v4/deal/log', EventCtrl.deal_log); // FOR DEAL TYPE
-    app.post('/api/v4/cashback/offers/use', EventCtrl.use_cashback_offer);
+    app.post('/api/v4/shopping/offers/use', EventCtrl.use_shopping_offer);
 
     app.post('/api/v4/checkin/bill', EventCtrl.upload_bill);
     app.post('/api/v4/checkin/qr', EventCtrl.qr_checkin);

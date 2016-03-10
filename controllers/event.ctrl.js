@@ -139,9 +139,9 @@ module.exports.mrl_checkin = function(req, res) {
     create_new(res, setup_event(req, 'mrl_checkin'));
 };
 
-module.exports.use_cashback_offer = function(req, res) {
+module.exports.use_shopping_offer = function(req, res) {
     logger.log();
-    create_new(res, setup_event(req, 'use_cashback_offer'));
+    create_new(res, setup_event(req, 'use_shopping_offer'));
 };
 
 module.exports.list_events = function(req, res) {
@@ -325,13 +325,13 @@ function create_new(res, passed_data) {
             return update_user_event_analytics(data);
         })
         .then(function(data) {
-            return update_twyst_bucks(data);
+            return update_twyst_cash(data);
         })
         .then(function(data) {
             if (data && data.event_data && data.event_data.event_type === 'referral_join') {
-                update_from_user_twyst_bucks(data.from_user);
+                update_from_user_twyst_cash(data.from_user);
             }
-            var bucks = data.user.twyst_bucks;
+            var twyst_cash = data.user.twyst_cash;
             var event_type = data.event_data.event_type;
 
             var code, header, line1, line2, outlet_id, outlet_name, checkin_left;
@@ -352,7 +352,7 @@ function create_new(res, passed_data) {
             }
 
             var data = {};
-            data.twyst_bucks = bucks;
+            data.twyst_cash = twyst_cash;
             if (event_type === 'generate_coupon' || event_type == 'checkin') {
 
                 data.code = code;
@@ -459,7 +459,7 @@ function process_event(data) {
         'generate_coupon': require('./processors/generate_coupon.proc'),
         'deal_log': require('./processors/deal_log.proc'),
         'referral_join': require('./processors/referral_join.proc'),
-        'use_cashback_offer': require('./processors/use_cashback_offer.proc')
+        'use_shopping_offer': require('./processors/use_shopping_offer.proc')
 
     };
 
@@ -480,8 +480,11 @@ function process_event(data) {
             deferred.resolve(passed_data);
         })
         .fail(function(err) {
-            console.log(err)
-            deferred.reject('Could not process the event - ' + err);
+            console.log(err);
+            deferred.reject({
+                message: err.message,
+                data:  err.data
+            });
         });
 
     return deferred.promise;
@@ -586,7 +589,7 @@ function create_event(data) {
     return deferred.promise;
 }
 
-function update_twyst_bucks(data) {
+function update_twyst_cash(data) {
     logger.log();
     var deferred = Q.defer();
 
@@ -594,35 +597,35 @@ function update_twyst_bucks(data) {
         deferred.resolve(data);
     } else {
         var event_type = data.event_data.event_type;
-        var available_twyst_bucks = data.user.twyst_bucks;
-        var update_twyst_bucks = {
+        var available_twyst_cash = data.user.twyst_cash;
+        var update_twyst_cash = {
             $set: {
 
             }
         }
 
-        Cache.hget('twyst_bucks', "twyst_bucks_grid", function(err, reply) {
+        Cache.hget('twyst_cash', "twyst_cash_grid", function(err, reply) {
             if (err || !reply) {
-                deferred.reject('Could not get bucks grid' + err);
+                deferred.reject('Could not get twyst cash grid' + err);
             } else {
 
-                var bucks_grid = JSON.parse(reply);
+                var twyst_cash_grid = JSON.parse(reply);
 
-                _.find(bucks_grid, function(current_event) {
+                _.find(twyst_cash_grid, function(current_event) {
                     if (current_event.event === event_type && current_event.update_now) {
                         if (current_event.earn) {
-                            data.user.twyst_bucks = available_twyst_bucks + current_event.bucks;
+                            data.user.twyst_cash = available_twyst_cash + current_event.twyst_cash;
                         } else {
-                            data.user.twyst_bucks = available_twyst_bucks - current_event.bucks;
+                            data.user.twyst_cash = available_twyst_cash - current_event.twyst_cash;
                         }
 
-                        update_twyst_bucks.$set.twyst_bucks = data.user.twyst_bucks;
+                        update_twyst_cash.$set.twyst_cash = data.user.twyst_cash;
 
                         User.findOneAndUpdate({
                             _id: data.user._id
-                        }, update_twyst_bucks, function(err, user) {
+                        }, update_twyst_cash, function(err, user) {
                             if (err) {
-                                deferred.reject('Could not update user bucks' + err);
+                                deferred.reject('Could not update user twyst cash' + err);
                             } else {
                                 deferred.resolve(data);
                             }
@@ -638,22 +641,22 @@ function update_twyst_bucks(data) {
 }
 
 
-function update_from_user_twyst_bucks(user) {
+function update_from_user_twyst_cash(user) {
     logger.log();
     var deferred = Q.defer();
-    var available_twyst_bucks = user.twyst_bucks;
-    user.twyst_bucks = available_twyst_bucks + 250;
-    var update_twyst_bucks = {
+    var available_twyst_cash = user.twyst_cash;
+    user.twyst_cash = available_twyst_cash + 250;
+    var update_twyst_cash = {
         $set: {
 
         }
     }
-    update_twyst_bucks.$set.twyst_bucks = user.twyst_bucks;
+    update_twyst_cash.$set.twyst_cash = user.twyst_cash;
     User.findOneAndUpdate({
         _id: user._id
-    }, update_twyst_bucks, function(err, user) {
+    }, update_twyst_cash, function(err, user) {
         if (err) {
-            deferred.reject('Could not update form user bucks' + err);
+            deferred.reject('Could not update form user twyst cash' + err);
         } else {
             deferred.resolve(user);
         }

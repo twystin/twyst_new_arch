@@ -11,7 +11,7 @@ module.exports.check = function(data) {
 
   check_for_offer_and_date(data)
   .then(function(data) {
-    return check_enough_twyst_bucks(data);
+    return check_enough_twyst_cash(data);
   })
   .then(function(data) {
     deferred.resolve(data);
@@ -43,13 +43,13 @@ function check_for_offer_and_date(passed_data) {
     return deferred.promise;  
 }
 
-function check_enough_twyst_bucks(passed_data){
+function check_enough_twyst_cash(passed_data){
     logger.log();
     var deferred = Q.defer();
-    var available_twyst_bucks =  _.get(passed_data, 'user.twyst_bucks');
+    var available_twyst_cash =  _.get(passed_data, 'user.twyst_cash');
 
-    if (available_twyst_bucks < 150) {
-        deferred.reject('Not enough twyst bucks');
+    if (available_twyst_cash < 150) {
+        deferred.reject('Not enough twyst cash');
     } 
     else {
         deferred.resolve(passed_data);

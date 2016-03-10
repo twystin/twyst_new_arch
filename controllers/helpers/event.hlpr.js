@@ -421,34 +421,34 @@ function updateEventFromConsole(event) {
                         })
                         .then(function(data) {
                             var payload = {};
-                            var twyst_bucks_earn = 0;
+                            var twyst_cash_earn = 0;
                             if (data.event_meta.status === 'twyst_approved') {
                                 console.log('twyst approved');
-                                twyst_bucks_earn = 50;
+                                twyst_cash_earn = 50;
                             } else if (data.event_meta.status === 'outlet_pending') {
                                 console.log('outlet pending');
-                                twyst_bucks_earn = 150;
+                                twyst_cash_earn = 150;
                             }
 
-                            update_twyst_bucks(data).then(function(data) {
+                            update_twyst_cash(data).then(function(data) {
                                 if (data.outlet.data.contact.location.locality_1.toString()) {
 
                                     payload.body = "Your bill for " + data.outlet.data.basics.name + ',' +
                                         data.outlet.data.contact.location.locality_1.toString() +
                                         ',dated ' + data.event_meta.bill_date +
-                                        ' has been approved! You have checked-in and earned ' + twyst_bucks_earn + ' Twyst Bucks';
+                                        ' has been approved! You have checked-in and earned ' + twyst_cash_earn + ' Twyst Cash';
 
                                 } else {
                                     if (data.is_checkin) {
                                         payload.body = "Your bill for " + data.outlet.data.basics.name + ',' +
                                             data.outlet.data.contact.location.locality_2.toString() +
                                             ',dated ' + data.event_meta.bill_date +
-                                            ' has been approved! You have checked-in and earned ' + twyst_bucks_earn + ' Twyst Bucks';
+                                            ' has been approved! You have checked-in and earned ' + twyst_cash_earn + ' Twyst Cash';
                                     } else {
                                         payload.body = "Your bill for " + data.outlet.data.basics.name + ',' +
                                             data.outlet.data.contact.location.locality_2.toString() +
                                             ',dated ' + data.event_meta.bill_date +
-                                            ' has been approved! You have earned ' + twyst_bucks_earn + ' Twyst Bucks';
+                                            ' has been approved! You have earned ' + twyst_cash_earn + ' Twyst Cash';
                                     }
 
                                 }
@@ -603,14 +603,14 @@ function getOutletInfo(passed_data) {
     return deferred.promise;
 }
 
-function update_twyst_bucks(data) {
+function update_twyst_cash(data) {
     logger.log();
     var deferred = Q.defer();
 
     var event_type = 'upload_bill';
     var offer_cost = 0;
-    var available_twyst_bucks = data.user.twyst_bucks;
-    var update_twyst_bucks = {
+    var available_twyst_cash = data.user.twyst_cash;
+    var update_twyst_cash = {
         $set: {
 
         }
@@ -619,27 +619,27 @@ function update_twyst_bucks(data) {
         offer_cost = 100; //should change this later
     }
 
-    Cache.hget('twyst_bucks', "twyst_bucks_grid", function(err, reply) {
+    Cache.hget('twyst_cash', "twyst_cash_grid", function(err, reply) {
         if (err || !reply) {
-            deferred.reject('Could not get bucks grid' + err);
+            deferred.reject('Could not get twyst cash grid' + err);
         } else {
 
-            var bucks_grid = JSON.parse(reply);
+            var twyst_cash_grid = JSON.parse(reply);
 
-            _.find(bucks_grid, function(current_event) {
+            _.find(twyst_cash_grid, function(current_event) {
                 if (current_event.event === event_type) {
 
-                    data.user.twyst_bucks = available_twyst_bucks + current_event.bucks + offer_cost;
+                    data.user.twyst_cash = available_twyst_cash + current_event.twyst_cash + offer_cost;
 
-                    update_twyst_bucks.$set.twyst_bucks = data.user.twyst_bucks;
+                    update_twyst_cash.$set.twyst_cash = data.user.twyst_cash;
 
                     User.findOneAndUpdate({
                         _id: data.user._id
-                    }, update_twyst_bucks, function(err, user) {
+                    }, update_twyst_cash, function(err, user) {
                         if (err) {
-                            deferred.reject('Could not update user bucks' + err);
+                            deferred.reject('Could not update user twyst cash' + err);
                         } else {
-                            console.log('updated bucks')
+                            console.log('updated twyst cash')
                             deferred.resolve(data);
                         }
                     });

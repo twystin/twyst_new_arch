@@ -285,7 +285,7 @@ module.exports.get_all_offers = function(token) {
                             && offer.actions.reward.applicability.delivery
                             && offer.offer_status === 'active' 
                             &&(new Date(offer.offer_end_date)) >= new Date() && outlet.menus.length
-                            && outlet.twyst_meta.status === 'active'
+                            && outlet.outlet_meta.status === 'active'
                             && massaged_offer.outlet.delivery_zones.length) {
                                 massaged_offer.menu_id = outlet.menus[0]._id;
                                 offers.push(massaged_offer); 

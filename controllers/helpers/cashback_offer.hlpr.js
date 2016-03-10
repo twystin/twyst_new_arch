@@ -62,6 +62,7 @@ module.exports.get_cashback_offer = function(token, offerId) {
                     message: 'Unable to load offer details'
                 })
             } else {
+               
                 deferred.resolve({
                     data: cashback_offers,
                     message: 'Offer found'
@@ -144,6 +145,9 @@ module.exports.get_all_cashback_offers = function(token) {
                 });
             } 
             else{
+                _.each(cashback_offers, function(offer){
+                    offer.logo = 'https://s3-us-west-2.amazonaws.com/retwyst-shopping-partner/56de9bdf0c02d66e1f2b72a0/logo';    
+                }) 
                 deferred.resolve({
                     data: cashback_offers,
                     message: 'Offer loaded successfully'

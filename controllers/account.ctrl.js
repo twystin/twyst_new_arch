@@ -189,3 +189,18 @@ function get_code_and_send(res, phone) {
     HttpHelper.error(res, err.err, err.message);
   });
 }
+
+module.exports.verify_email = function(req, res) {
+  logger.info();
+
+  var token = req.params.token;
+  if (!token) {
+    HttpHelper.error(res, null, "Please pass token to be verified");
+  }  else {
+    AccountHelper.verify_user_email(token).then(function(data) {
+      HttpHelper.success(res, data.data, data.message);
+    }, function(err) {
+      HttpHelper.error(res, err.error, err.message);
+    });
+  }
+}

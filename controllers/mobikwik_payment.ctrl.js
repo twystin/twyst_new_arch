@@ -86,7 +86,7 @@ module.exports.get_zaakpay_response = function(req, res) {
   	}
   	else{
   		var response = [{paymentResponse: [{orderid: zaakpay_response.orderId}, 
-		{amount: order.actual_amount_paid}, {status: 1},
+		{amount: zaakpay_response.amount}, {status: 1},
 		{statusMsg: zaakpay_response.responseDescription}]}];		
 		response = xml(response);		
 		res.send(response);
