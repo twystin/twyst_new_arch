@@ -1,91 +1,88 @@
 <!DOCTYPE html>
   <head>
-    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
-    <link href='https://fonts.googleapis.com/css?family=Cabin' rel='stylesheet' type='text/css'>
-    <link href='https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css' type='text/css' rel='stylesheet'>
-    <link rel='stylesheet' href='./style.css'>
-    <title>twyst</title>
   </head>
-<body>
-<div class='container'>
-  <div class='header'>
-    <img class='logo-header' src='./reimageassets/logo_2.png'>
+<body style="margin: 0;   padding:0;background-color: #EEE; font-family:'Helvetica'">
+<div class='container' style="width: 580px;   background: white;   margin: 0 auto;   border-top-left-radius: 15px;   border-top-right-radius: 15px;">
+  <div class='header' style="background: #333;   border-top-left-radius: 15px;   border-top-right-radius: 15px;   text-align: center;   height: 50px;   line-height: 50px;">
+    <img class='logo-header' src='http://s19.postimg.org/ma5qwhh1f/logo_2.png' style="width:150px; height:100%; margin:0; padding-top:12px;">
   </div>
-  <div class='img-container'>
-    <div class='img-splash'>
-      <div class='img-text'>
-        <h2 class='money'><span>&#x20B9;</span>{{amount}}<h2>
-        <h2>Dear {{name}}</h2>
-        <p>Congratulations on redeeming Rs. {{amount}}</p>
-        <p>Twyst Bucks for Amazon on Twyst.in</p>
+  <div class='img-container' style="padding: 5px 10px;">
+    <div class='img-splash' style="background-image: url('http://s19.postimg.org/6d6yzron7/banner.png');   background-position: center;   background-repeat: no-repeat;   background-size: 100% 100%;   box-shadow: 0px 0px 2px #999;   width: 100%;   height: 250px;">
+      <div class='img-text' style="text-align: center;   width: 450px; margin: 0 auto; padding-top:62px">
+        <h2 class='money' style="font-size: 30px ;   color:white ; margin:0px"><span style="font-size: 15px; ">&#x20B9;</span>{{amount}}</h2>
+        <h2 style=" font-size: 30px;   color:#1156b3; margin:35px 0 5px 0">Dear {{name}}</h2>
+        <p style="font-size: 20px; margin:0">Congratulations on redeeming Rs. {{amount}}</p>
+        <p style="font-size: 20px; margin:0">Twyst Bucks for Amazon on Twyst.in</p>
     </div>
     </div>
   </div>
-  <div class='stanza'>
-    <h3>VOUCHER DETAILS</h3>
-    <div class='key-val'>
-      <div class='left inline'>Brand</div>
-      <div class='right inline'>{{brand}}</div>
-      <div class='left inline'>Amount</div>
-      <div class='right inline'>Rs. {{amount}}</div>
-      <div class='left inline'>GV Code</div>
-      <div class='right inline'>{{gvcode}}</div>
-      <div class='left inline'>GV PIN</div>
-      <div class='right inline'>{{gvpin}}</div>
-      <div class='left inline'>Validity</div>
-      <div class='right inline'>{{date}}</div>
+  <div class='stanza' style="padding: 5px 10px;">
+    <h3 style="text-align:center; font-size:20px">VOUCHER DETAILS</h3>
+    <div class='key-val' style="font-size:18px">
+      <div class='left inline' style="text-align: left;   padding-left: 1%;   width: 49%;display: inline-block;">Brand</div>
+      <div class='right inline' style="text-align: right;     width: 49%;display: inline-block;">{{brand}}</div>
+      <div class='left inline' style="text-align: left;   padding-left: 1%;   width: 49%;display: inline-block;">Amount</div>
+      <div class='right inline' style="text-align: right;   width: 49%;display: inline-block;">Rs. {{amount}}</div>
+      <div class='left inline' style="text-align: left;   padding-left: 1%;   width: 49%;display: inline-block;">GV Code</div>
+      <div class='right inline' style="text-align: right;   width: 49%;display: inline-block;">{{gvcode}}</div>
+      <div class='left inline' style="text-align: left;   padding-left: 1%;   width: 49%;display: inline-block;">GV PIN</div>
+      <div class='right inline' style="text-align: right;   width: 49%;display: inline-block;">{{gvpin}}</div>
+      <div class='left inline' style="text-align: left;   padding-left: 1%;   width: 49%;display: inline-block;">Validity</div>
+      <div class='right inline' style="text-align: right;   width: 49%;display: inline-block;">{{date}}</div>
 
-      <p class='italics tnc'>T&C:{{tnc}}</p>
+      <p class='italics tnc' style="font-style:italic;font-size:12px">T&C: {{tnc}}</p>
     </div>
-    <button class='btn-orange btn-pad-2 btn-round center'>HOW TO REDEEM</button>
+    <div style="text-align:center">
+    <button style="   padding: 10px;border:none;   background: none;   color: white;   width: 225px; border-radius: 2px; background-color: #F89422; ">HOW TO REDEEM</button>
+    </div>
   </div>
 
-  <hr>
+  <hr style="width:98%; border:solid 1px #D9D9D9;">
 
-  <div class='stanza'>
-    <h3>Earn more on Twyst.in by :</h3>
+  <div class='stanza' style="padding: 5px 10px; font-size:18px">
+    <h3 style="font-size:20px;">Earn more on Twyst.in by:</h3>
     <div class='key-val'>
-      <div class='left inline'><p>1. Referring your friends :</p></div>
-      <div class='right inline'><button class='btn-round btn-pad-2 btn-sea-green'>Share your link</button></div>
+      <div class='left inline' style="text-align: left;   width: 49%;display: inline-block;"><p>1. Referring your friends :</p></div>
+      <div class='right inline' style="text-align: right;   width: 49%;display: inline-block;"><button style=" padding: 10px;border:none;   background: none;   color: white;   width: 145px; border-radius: 2px;background-color: #05E880; ">Share your link</button></div>
     </div>
     <div class='key-val'>
-      <div class='left inline'><p>2. Like and follow us on :</p></div>
-      <div class='right inline'>
-          <div class='soc inline size-3 btn-round'><div class='shade inline fb'><i class='shift fa fa-facebook fa-2x'></i></div></div>
-          <div class='soc inline size-3 twt btn-round'><div class='shade inline twitter'><i class='fa fa-twitter fa-2x'></i></div></div>
-          <div class='soc inline size-3 inst'><div class='shade inline insta'><i class='fa fa-instagram fa-2x'></i></div></div>
+      <div class='left inline' style="text-align: left;   width: 49%;display: inline-block;"><p>2. Like and follow us on :</p></div>
+      <div class='right inline' style="text-align: right;   width: 49%;display: inline-block;">
+          <div class='soc inline size-3 btn-round'><div class='shade inline fb'></div></div>
+          <div class='soc inline size-3 twt btn-round'><div class='shade inline twitter'></div></div>
+          <div class='soc inline size-3 inst'><div class='shade inline insta'></div></div>
       </div>
     </div>
 
   </div>
 
-  <hr>
+  <hr style="width:98%; border:solid 1px #D9D9D9;">
 
-  <div class='stanza'>
-    <h3>Some of our partners : </h3>
+  <div class='stanza' style="padding: 5px 10px;">
+    <h3 style="font-size:20px">Some of our partners : </h3>
     <div style="text-align:center">
-      <img src='https://drive.google.com/open?id=0B3TM4-mBrzZQSUZBTXhVNTN4T0k' style='width:120px;height:50px;'>
-      <img src='https://drive.google.com/open?id=0B3TM4-mBrzZQOUUxVW9UaTJpT3c/amazon-logo.jpg' style='width:120px;height:50px;margin-left:60px'>
-      <img src='https://drive.google.com/open?id=0B3TM4-mBrzZQOUUxVW9UaTJpT3c/Myntra.png' style='width:120px;height:50px;margin-left:60px'>
+      <img src='http://s19.postimg.org/sf1unjyir/flipkart.jpg' style='width:120px;height:50px;'>
+      <img src='http://s19.postimg.org/dmx4w7slf/amazon_logo.jpg' style='width:120px;height:50px;margin-left:60px'>
+      <img src='http://s19.postimg.org/ou5z4btz7/Myntra.png' style='width:120px;height:50px;margin-left:60px'>
     </div>
     <div style="text-align:center">
-      <img src='https://drive.google.com/open?id=0B3TM4-mBrzZQOUUxVW9UaTJpT3c/EBay_logo.png' style='width:100px;height:50px;'>
-      <img src='https://drive.google.com/open?id=0B3TM4-mBrzZQOUUxVW9UaTJpT3c/JABONG.jpg' style='width:100px;height:50px;margin-left:60px'>
-      <img src='https://drive.google.com/open?id=0B3TM4-mBrzZQOUUxVW9UaTJpT3c/Bookmyshow.jpg' style='width:100px;height:65px;margin-left:60px'>
+      <img src='http://s19.postimg.org/k4bg1zdkz/EBay_logo.png' style='width:100px;height:50px;'>
+      <img src='http://s19.postimg.org/4hos2cp6r/JABONG.jpg' style='width:100px;height:50px;margin-left:60px'>
+      <img src='http://s19.postimg.org/y8bwo4a6b/Bookmyshow.jpg' style='width:100px;height:65px;margin-left:60px'>
     </div>
   </div>
 
-  <div class='footer stanza'>
-    <div>
-      <button class='btn-round btn-blue btn-pad-2'>REVIEW & RATE US</button>&emsp;<button class='btn-round btn-blue btn-pad-3'>FEEDBACK</button>
+  <div class='footer stanza' style="padding: 5px 10px;">
+    <div style=" text-align:center">
+      <button style="   padding: 10px;border:none;   background: none;   color: white;   width: 225px; border-radius: 2px;background-color: #1654b0; ">REVIEW & RATE US</button>&emsp;<button style="   padding: 10px;border:none;   background: none;   color: white;   width: 225px; border-radius: 2px;background-color: #1654b0; ">FEEDBACK</button>
     </div>
     <p class='size-2'>
       Regards,<br>
       Twyst.in Team<br>
       Visit us :<a href='http://twyst.in/home/'>http://twyst.in/home/</a>
     </p>
-    <img class='logo-footer' src='./reimageassets/logo_2.png'>
-    <hr>
+    <img class='logo-footer' src='http://s19.postimg.org/ma5qwhh1f/logo_2.png' style="width:60px; height:25px;">
+    <hr style="width:100%; border:solid 1px #333;">
   </div>
 </div>
 </body>
