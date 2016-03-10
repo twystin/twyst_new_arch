@@ -3,13 +3,15 @@
 var logger = require('tracer').colorConsole();
 var HttpHelper = require('../common/http.hlpr');
 var _ = require('lodash');
+var mongoose = require('mongoose');
+var User = mongoose.model('User');
 var Transporter = require('../transports/transporter.js');
 var AuthHelper = require('../common/auth.hlpr');
-var TemplatePath      = require('../config/templatePath.js');
+var GetTemplatePath = require('../common/getTemplatePath.cfg.js');
 var MailContent       = require('../common/template.hlpr.js');
 var PayloadDescriptor = require('../common/email.hlpr.js');
 var Keygenerator      = require('keygenerator');
-
+var sender = "info@twyst.in";
 
 module.exports.send_link = function(req, res) {
 	logger.log();
@@ -48,7 +50,7 @@ module.exports.send_verification_email = function(req, res){
 	logger.log();
 	AuthHelper.get_user(req.query.token).then(function(data) {
     	var user = data.data;
-    	console.log()
+    	console.log(user._id);
       	if(user.validation && user.validation.email) {
       		HttpHelper.success(res, null, "User already has a verified email id");	
       	}
@@ -56,22 +58,31 @@ module.exports.send_verification_email = function(req, res){
       		HttpHelper.success(res, null, "User has crossed maximum number of atteptes");	
       	}
       	else{
+      		var token  = Keygenerator.session_id();
       		var filler = {
 				"name":user.first_name,
-				"link":user.verification_mail_token
+				"link":'http://staging.twyst.in/verify/email/' + token
 			};
-				
-			MailContent.templateToStr(TemplatePath.of('registration_mail.hbs'), filler, function(mailStr){
-				var sender = "kuldeep@twyst.in";
+
+			MailContent.templateToStr(GetTemplatePath.byName('email_verification_mail.hbs'), filler, function(mailStr){
 				var payloadDescriptor = new PayloadDescriptor('utf-8', user.email, 'Verify your account!',mailStr, sender);
 				console.log(payloadDescriptor);
-				Transporter.send('email', 'ses', payloadDescriptor).then(function(info) {
-					console.log(info);
-					//update user
-					HttpHelper.success(res, null, "An email verification link has been sent to your email id");
+				Transporter.send('email', 'ses', payloadDescriptor).then(function(info) {					
+					User.findOneAndUpdate({
+						_id: user._id
+					}, 
+					{$set: {'validation.verification_mail_token': token}}).exec(function(err, user){
+						if(err) {
+							HttpHelper.error(res, null, "Error in sending verification token");		
+						}
+						else{
+							HttpHelper.success(res, null, "An email verification link has been sent to your email id");		
+						}
+					})
+					
 				}, function(err) {
 					console.log(err);
-					HttpHelper.error(res, null, "Something went wrong. Please try again after some time");
+					HttpHelper.error(res, null, "Error in sending verification token");
 				});
 			});
       		
