@@ -1996,6 +1996,7 @@ function save_order_feedback_event(data) {
     event.event_meta.order_number = passed_data.order_number;
     event.event_meta.twyst_cash = passed_data.cashback;
     event.event_meta.payment_mode = passed_data.payment_info.payment_mode;
+    event.event_meta.amount = passed_data.actual_amount_paid;
 
     event.event_user = passed_data.user;
     event.event_type = 'order_feedback';
@@ -2148,7 +2149,7 @@ function save_offer_use_event(data) {
         event.event_meta.order_number = data.order.order_number;
         event.event_meta.twyst_cash = data.order.offer_cost;
         event.event_meta.offer = data.order.offer_used;
-
+        event.event_meta.amount = data.order.actual_amount_paid;
         event.event_user = data.order.user;
         event.event_type = 'use_food_offer';
         

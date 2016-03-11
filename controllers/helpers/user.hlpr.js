@@ -671,7 +671,8 @@ module.exports.get_twyst_cash_history = function(token) {
                         action.earn =  true;
                         action.twyst_cash = event.event_meta.twyst_cash;
                         action.earn_at = event.event_date;
-                        action.message = 'show some custom message here';
+                        action.message = 'Order at '+ event.event_outlet.basics.name + " Worth Rs. "
+                         + event.event_meta.amount + " 10 % Twyst Cash earned";
                         action.outlet = event.event_outlet.basics.name;
                         order_history.push(action);
                     }
@@ -681,7 +682,7 @@ module.exports.get_twyst_cash_history = function(token) {
                         action.earn =  true;
                         action.twyst_cash = event.event_meta.twyst_cash;
                         action.earn_at = event.event_date;
-                        action.message = 'show some custom message here';
+                        action.message = 'Refund against order cancellation at '+ event.event_outlet.basics.name;
                         action.outlet = event.event_outlet.basics.name;
                         order_history.push(action);
                     }
@@ -691,7 +692,7 @@ module.exports.get_twyst_cash_history = function(token) {
                         action.earn =  false;
                         action.twyst_cash = event.event_meta.twyst_cash;
                         action.earn_at = event.event_date;
-                        action.message = 'show some custom message here';
+                        action.message = 'Mobile recharge for ' + event.event_meta.phone;
                         order_history.push(action);
                     }
                     else if(event.event_type === 'use_shopping_offer') {
@@ -700,7 +701,7 @@ module.exports.get_twyst_cash_history = function(token) {
                         action.earn =  false;
                         action.twyst_cash = event.event_meta.twyst_cash;
                         action.earn_at = event.event_date;
-                        action.message = 'show some custom message here';                        
+                        action.message = event.event_meta.source + " Voucher Redeemed";                        
                         order_history.push(action);
                     }
                     else if(event.event_type === 'use_food_offer') {
@@ -709,7 +710,7 @@ module.exports.get_twyst_cash_history = function(token) {
                         action.earn =  false;
                         action.twyst_cash = event.event_meta.twyst_cash;
                         action.earn_at = event.event_date;
-                        action.message = 'show some custom message here';
+                        action.message = 'Offer used at ' + event.event_outlet.basics.name;
                         action.outlet = event.event_outlet.basics.name;
                         order_history.push(action);
                     }
@@ -766,6 +767,7 @@ function save_order_cancel_event(order) {
         var event = {};
         event.event_meta = {};
         event.event_meta.order_number = order.order_number;
+        event.event_meta.amount = order.actual_amount_paid;
         event.event_meta.twyst_cash = order.offer_cost;
         event.event_meta.offer = order.offer_used;
 
