@@ -318,7 +318,7 @@ function calculate_order_value(data) {
     var menu = {};
     menu = data.outlet && data.outlet.menus[0];
     var items = data.items;
-    var  amount = 0;
+    var  amount = 0, vated_amount = 0;
     
     for(var i = 0; i < items.length; i++) {
         var sub_options = [], addons = [], category, sub_category, item, option, menu_sub_options = [], order_sub_options = [], menu_addons = [], order_addons = [];
@@ -380,7 +380,9 @@ function calculate_order_value(data) {
             }    
             items[i].item_total_amount = current_item_amount;
             amount = amount+current_item_amount;
-            
+            if(menu.menu_item_type === 'type_3' && items[i].item_type === 'type_1'){
+                vated_amount = vated_amount+current_item_amount;
+            }
         }
         else if(option){            
             var current_item_amount = 0;
@@ -401,6 +403,9 @@ function calculate_order_value(data) {
             }           
             items[i].item_total_amount = current_item_amount;    
             amount = amount+current_item_amount;
+            if(menu.menu_item_type === 'type_3' && items[i].item_type === 'type_1'){
+                vated_amount = vated_amount+current_item_amount;
+            }
         }
         else{
             console.log('without option');
@@ -418,11 +423,17 @@ function calculate_order_value(data) {
             }
             items[i].item_total_amount = current_item_amount;
             amount = amount+current_item_amount;
+            if(menu.menu_item_type === 'type_3' && items[i].item_type === 'type_1'){
+                vated_amount = vated_amount+current_item_amount;
+            }
         }
     }
-
-    console.log('order amount in calculate_order_value '+ amount);
-    return Math.round(amount);
+    var amount_obj = {};
+    amount_obj.amount = amount;
+    amount_obj.vated_amount = vated_amount;
+    console.log('order amount in calculate_order_value '+ amount_obj);
+    
+    return amount_obj;
 }
 
 function verify_delivery_location(coords, outlet) {
@@ -580,14 +591,14 @@ function checkFreeItem(data, offer) {
     var free_item = searchItemInOfferItems(offer, items);
 
     if(free_item) {
-        order_value = order_value - free_item.item_total_amount/free_item.quantity;    
+        order_value.amount = order_value.amount - free_item.item_total_amount/free_item.quantity;    
         console.log(order_value);
-        if(order_value >= offer.minimum_bill_value) {
+        if(order_value.amount >= offer.minimum_bill_value) {
             console.log('offer applicable');
             var order_value_obj = calculate_tax(order_value, passed_data.outlet);
             if(order_value_obj.order_value_with_tax >= data.outlet.valid_zone.min_amt_for_delivery){
                 offer.is_applicable = true;
-                offer.order_value_without_tax = Math.round(order_value_obj.order_value);
+                offer.order_value_without_tax = Math.round(order_value_obj.order_value.amount);
                 offer.vat = order_value_obj.vat;
                 offer.st = order_value_obj.st;
                 offer.packaging_charge = order_value_obj.packaging_charge;
@@ -632,13 +643,13 @@ function checkOfferTypeBuyXgetY(data, offer) {
     var order_value = calculate_order_value(passed_data);
     var free_item  = searchItemInOfferItems(offer, items);
     if(is_contain_paid_item && free_item) {
-        order_value = order_value - free_item.item_total_amount/free_item.quantity;
-        if(order_value >= offer.minimum_bill_value) {
+        order_value.amount = order_value.amount - free_item.item_total_amount/free_item.quantity;
+        if(order_value.amount >= offer.minimum_bill_value) {
             console.log('offer applicable');
             var order_value_obj = calculate_tax(order_value, passed_data.outlet);
             if(order_value_obj.order_value_with_tax >= data.outlet.valid_zone.min_amt_for_delivery){
                 offer.is_applicable = true;
-                offer.order_value_without_tax = Math.round(order_value_obj.order_value);
+                offer.order_value_without_tax = Math.round(order_value_obj.order_value.amount);
                 offer.vat = order_value_obj.vat;
                 offer.st = order_value_obj.st;
                 offer.packaging_charge = order_value_obj.packaging_charge;
@@ -679,14 +690,14 @@ function checkOfferTypeFlatOff(data, offer) {
     console.log('for flat off');
     console.log(order_value);
     console.log(offer.minimum_bill_value);
-    if(order_value >= offer.minimum_bill_value) {
+    if(order_value.amount >= offer.minimum_bill_value) {
         console.log('offer applicable');
 
-        order_value = order_value - offer.actions.reward.reward_meta.off;
+        order_value.amount = order_value.amount - offer.actions.reward.reward_meta.off;
         var order_value_obj = calculate_tax(order_value, passed_data.outlet);
         if(order_value_obj.order_value_with_tax >= data.outlet.valid_zone.min_amt_for_delivery){
             offer.is_applicable = true;
-            offer.order_value_without_tax = Math.round(order_value_obj.order_value);
+            offer.order_value_without_tax = Math.round(order_value_obj.order_value.amount);
             offer.vat = order_value_obj.vat;
             offer.st = order_value_obj.st;
             offer.packaging_charge = order_value_obj.packaging_charge;
@@ -722,19 +733,19 @@ function checkOfferTypePercentageOff(data, offer) {
     console.log('for percentage off');
     console.log(order_value);
     console.log(offer.minimum_bill_value);
-    if(order_value >= offer.minimum_bill_value) {
+    if(order_value.amount >= offer.minimum_bill_value) {
         discount = (order_value * offer.actions.reward.reward_meta.percent)/100;
         if(discount <= offer.actions.reward.reward_meta.max) {
-            order_value = order_value - discount;            
+            order_value.amount = order_value.amount - discount;            
         }
         else {
-            order_value = order_value - offer.actions.reward.reward_meta.max;               
+            order_value.amount = order_value.amount - offer.actions.reward.reward_meta.max;               
         }
         var order_value_obj = calculate_tax(order_value, passed_data.outlet);
         if(order_value_obj.order_value_with_tax >= data.outlet.valid_zone.min_amt_for_delivery){
             console.log('offer applicable');
             offer.is_applicable = true;
-            offer.order_value_without_tax = Math.round(order_value_obj.order_value);
+            offer.order_value_without_tax = Math.round(order_value_obj.order_value.amount);
             offer.vat = order_value_obj.vat;
             offer.st = order_value_obj.st;
             offer.packaging_charge = order_value_obj.packaging_charge;
@@ -758,8 +769,9 @@ function checkOfferTypePercentageOff(data, offer) {
 function check_minimum_bill_amount(data) {
     logger.log();
     var deferred = Q.defer();
-
+    
     var order_actual_value_obj = calculate_tax(calculate_order_value(data), data.outlet);
+    console.log(order_actual_value_obj)
     if(order_actual_value_obj.order_value_with_tax >= data.outlet.valid_zone.min_amt_for_delivery) {
         deferred.resolve(data);    
     }
@@ -918,7 +930,7 @@ function apply_selected_offer(data) {
 
 function calculate_tax(order_value, outlet) {
     logger.log();
-    
+    console.log(order_value);
     var tax_grid = {};
     var order_value_obj = {};
     order_value_obj.order_value = 0;
@@ -935,13 +947,18 @@ function calculate_tax(order_value, outlet) {
 
     if(outlet.menus[0].menu_item_type === 'type_1') {
         console.log(outlet.menus[0].menu_item_type);               
-        vat = order_value*tax_grid.vat/100;
+        vat = order_value.amount*tax_grid.vat/100;
+        surcharge_on_vat = vat*tax_grid.surcharge_on_vat/100;        
+    }
+    else if(outlet.menus[0].menu_item_type === 'type_3'){
+        console.log(outlet.menus[0].menu_item_type);               
+        vat = order_value.vated_amount.amount*tax_grid.vat/100;
         surcharge_on_vat = vat*tax_grid.surcharge_on_vat/100;        
     }
 
     if(outlet.menus[0].charge_service_tax) {        
-        st = order_value*tax_grid.st_applied_on_percentage/100*tax_grid.st/100;
-        sbc = order_value*tax_grid.st_applied_on_percentage/100*tax_grid.sbc/100;     
+        st = order_value.amount*tax_grid.st_applied_on_percentage/100*tax_grid.st/100;
+        sbc = order_value.amount*tax_grid.st_applied_on_percentage/100*tax_grid.sbc/100;     
     }
         
     if(outlet.valid_zone.has_packaging_charge && 
@@ -956,15 +973,15 @@ function calculate_tax(order_value, outlet) {
         delivery_charge = outlet.valid_zone.delivery_charge || 0;   
     }
     console.log(vat + ' ' + surcharge_on_vat + ' ' + st + ' ' + sbc + ' ' + packaging_charge + ' ' + delivery_charge);
-    new_order_value = order_value+vat+surcharge_on_vat+st+sbc+packaging_charge+delivery_charge;
+    new_order_value = order_value.amount+vat+surcharge_on_vat+st+sbc+packaging_charge+delivery_charge;
     
     order_value_obj.vat = vat+surcharge_on_vat;
     order_value_obj.st = st+sbc;
     order_value_obj.packaging_charge = packaging_charge;
     order_value_obj.delivery_charge = delivery_charge;
     order_value_obj.new_order_value = new_order_value;
-    order_value_obj.order_value = order_value;
-    order_value_obj.order_value_with_tax = order_value+vat+surcharge_on_vat+st+sbc;
+    order_value_obj.order_value = order_value.amount;
+    order_value_obj.order_value_with_tax = order_value.amount+vat+surcharge_on_vat+st+sbc;
 
     return order_value_obj;
 }
@@ -1881,7 +1898,12 @@ module.exports.update_order = function(token, order) {
                 } else {
                                                          
                     if(order.is_delivered) {
-                        saved_order.order_status = 'DELIVERED';   
+                        saved_order.order_status = 'DELIVERED';
+                        var current_action = {};
+                        current_action.action_type = 'DELIVERED';
+                        current_action.action_by = data.data._id;
+                        current_action.message = 'Your order has been delivered.';
+                        saved_order.actions.push(current_action);  
                     }
                     else{
                         saved_order.order_status = 'NOT_DELIVERED';
@@ -2018,7 +2040,8 @@ function save_order_feedback_event(data) {
 function update_order_with_feedback(order) {
     logger.log();
     var deferred = Q.defer();
-    Order.findOne({_id: order.order_id}, function(err, saved_order) {
+    Order.findOne({_id: order.order_id
+    }).populate('user').exec( function(err, saved_order) {
         if (err || !saved_order) {
           deferred.reject({
             err: err || true,
@@ -2030,7 +2053,11 @@ function update_order_with_feedback(order) {
             saved_order.user_feedback.is_ontime = order.is_ontime;
             saved_order.user_feedback.rating = order.order_rating;
             saved_order.order_status = 'CLOSED';
-
+            var current_action = {};
+            current_action.action_type = 'CLOSED';
+            current_action.action_by = order.user._id;
+            current_action.message = 'Order feedback submitted successfully.';
+            order.actions.push(current_action);  
             if(order.items_feedback) {
                 saved_order.items = order.items;    
             }
