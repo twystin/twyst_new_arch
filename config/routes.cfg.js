@@ -24,6 +24,7 @@ module.exports = function(app) {
     var AccountCtrl = require('../controllers/account.ctrl');
     app.post('/api/v4/auth/register', AccountCtrl.register_merchant);
     app.post('/api/v4/accounts/login', function(req, res, next) {
+        console.log(req.body);
         next();
       }, passport.authenticate('account'),
       AccountCtrl.login);

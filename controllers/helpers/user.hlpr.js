@@ -34,7 +34,7 @@ module.exports.update_user = function(token, updated_user) {
       user.validation.verification_mail_token = Keygenerator.session_id();
       var filler = {
         "name":user.first_name,
-        "link": 'http://staging.twyst.in/verify/email/' + user.validation.verification_mail_token
+        "link": 'http://twyst.in/verify/email/' + user.validation.verification_mail_token
       };
       var email = user.email || user.profile.email || null;
       MailContent.templateToStr(GetTemplatePath.byName('email_verification_mail.hbs'), filler, function(mailStr){
@@ -653,7 +653,7 @@ module.exports.get_twyst_cash_history = function(token) {
 
     AuthHelper.get_user(token).then(function(data) {
         var user = data.data;
-        Event.find({event_user: user._id}).populate('event_user event_outlet').exec(function(err, events) {
+        Event.find({event_user: user._id}).populate('event_outlet').exec(function(err, events) {
             if (err || !events) {
               deferred.reject({
                 err: err || true,
@@ -664,54 +664,58 @@ module.exports.get_twyst_cash_history = function(token) {
                 var order_history = [];
                 var history = {};
                 _.each(events, function(event){
-                    if(event.event_type === 'order_feedback') {
+                    if(event.event_type === 'order_feedback'
+                    && event.event_meta && event.event_meta.twyst_cash > 0) {
 
                         var action = {};
                         action.type = 'order';
                         action.earn =  true;
                         action.twyst_cash = event.event_meta.twyst_cash;
                         action.earn_at = event.event_date;
-                        action.message = 'show some custom message here';
+                        action.message = 'Order at '+ event.event_outlet.basics.name + " Worth Rs. "
+                         + event.event_meta.amount + " 10 % Twyst Cash earned";
                         action.outlet = event.event_outlet.basics.name;
                         order_history.push(action);
                     }
-                    else if(event.event_type === 'cancel_order') {
+                    else if(event.event_type === 'cancel_order'
+                        && event.event_meta && event.event_meta.twyst_cash >0) {
                         var action = {};
                         action.type = 'cancel order';
                         action.earn =  true;
                         action.twyst_cash = event.event_meta.twyst_cash;
                         action.earn_at = event.event_date;
-                        action.message = 'show some custom message here';
+                        action.message = 'Refund against order cancellation at '+ event.event_outlet.basics.name;
                         action.outlet = event.event_outlet.basics.name;
                         order_history.push(action);
                     }
-                    else if(event.event_type === 'recharge') {
+                    else if(event.event_type === 'recharge_phone'
+                        && event.event_meta && event.event_meta.twyst_cash >0) {
                         var action = {};
-                        action.type = 'recharge';
+                        action.type = 'recharge_phone';
                         action.earn =  false;
                         action.twyst_cash = event.event_meta.twyst_cash;
                         action.earn_at = event.event_date;
-                        action.message = 'show some custom message here';
-                        action.outlet = event.event_outlet.basics.name;
+                        action.message = 'Mobile recharge for ' + event.event_meta.phone;
                         order_history.push(action);
                     }
-                    else if(event.event_type === 'use_shopping_offer') {
+                    else if(event.event_type === 'use_shopping_offer'
+                        && event.event_meta && event.event_meta.twyst_cash >0) {
                         var action = {};
                         action.type = 'use_shopping_offer';
                         action.earn =  false;
                         action.twyst_cash = event.event_meta.twyst_cash;
                         action.earn_at = event.event_date;
-                        action.message = 'show some custom message here';
-                        action.outlet = event.event_outlet.basics.name;
+                        action.message = event.event_meta.source + " Voucher Redeemed";                        
                         order_history.push(action);
                     }
-                    else if(event.event_type === 'use_food_offer') {
+                    else if(event.event_type === 'use_food_offer'
+                        && event.event_meta && event.event_meta.twyst_cash >0) {
                         var action = {};
                         action.type = 'use_food_offer';
                         action.earn =  false;
                         action.twyst_cash = event.event_meta.twyst_cash;
                         action.earn_at = event.event_date;
-                        action.message = 'show some custom message here';
+                        action.message = 'Offer used at ' + event.event_outlet.basics.name;
                         action.outlet = event.event_outlet.basics.name;
                         order_history.push(action);
                     }
@@ -763,11 +767,11 @@ function save_order_cancel_event(order) {
     logger.log();
     var deferred = Q.defer();
 
-    console.log(order);
     if(order.offer_used) {
         var event = {};
         event.event_meta = {};
         event.event_meta.order_number = order.order_number;
+        event.event_meta.amount = order.actual_amount_paid;
         event.event_meta.twyst_cash = order.offer_cost;
         event.event_meta.offer = order.offer_used;
 

@@ -102,6 +102,7 @@ module.exports.create_authcode = function(req, res) {
               // Send same authcode
               var message = 'Your Twyst verification code is ' + authcode.code;
               SMSHelper.send_sms(phone, message).then(function(sms_data) {
+                authcode.code = null;
                 HttpHelper.success(res, authcode, 'Resending your unused auth code');
               }, function(err) {
                 HttpHelper.error(res, err.err, err.message);
@@ -178,6 +179,7 @@ function get_code_and_send(res, phone) {
     if (_.get(auth_data, 'data.code')) {
       var message = 'Your Twyst verification code is ' + _.get(auth_data, 'data.code');
       SMSHelper.send_sms(phone, message).then(function(sms_data) {
+        auth_data.data.code = null;
         HttpHelper.success(res, auth_data.data, auth_data.message);
       }, function(err) {
         HttpHelper.error(res, err.err, err.message);
@@ -191,14 +193,14 @@ function get_code_and_send(res, phone) {
 }
 
 module.exports.verify_email = function(req, res) {
-  logger.info();
+  logger.log();
 
   var token = req.params.token;
   if (!token) {
     HttpHelper.error(res, null, "Please pass token to be verified");
   }  else {
     AccountHelper.verify_user_email(token).then(function(data) {
-      HttpHelper.success(res, data.data, data.message);
+      res.redirect('twyst.in');
     }, function(err) {
       HttpHelper.error(res, err.error, err.message);
     });

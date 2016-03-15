@@ -60,7 +60,8 @@
     "faye": "latest",
     "crypto": "latest",
     "xml": "latest",
-    "request": "~2.67.0"
+    "request": "~2.67.0",
+    "xml2js": "latest"
   },
   "devDependencies": {
     "chai": "latest",

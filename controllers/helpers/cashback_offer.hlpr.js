@@ -146,7 +146,16 @@ module.exports.get_all_cashback_offers = function(token) {
             } 
             else{
                 _.each(cashback_offers, function(offer){
-                    offer.logo = 'https://s3-us-west-2.amazonaws.com/retwyst-shopping-partner/56de9bdf0c02d66e1f2b72a0/logo';    
+                    if(offer.source === 'Amazon') {
+                        offer.logo = 'https://s3-us-west-2.amazonaws.com/retwyst-shopping-partner/Amazon/amazon.png';       
+                    }
+                    else if(offer.source === 'Flipkart') {
+                        offer.logo = 'https://s3-us-west-2.amazonaws.com/retwyst-shopping-partner/Flipkart/flipkart.png';       
+                    }
+                    else if(offer.source === 'Ebay') {
+                        offer.logo = 'https://s3-us-west-2.amazonaws.com/retwyst-shopping-partner/Ebay/ebay.png';       
+                    }
+                    
                 }) 
                 deferred.resolve({
                     data: cashback_offers,
