@@ -55,7 +55,8 @@ module.exports.process = function(data) {
                             var egv_details = matching_offer.offer_detail[data];
                             send_email(user, egv_details, cashback_partner, matching_offer, twyst_cash_used).then(function(data) {
                                 passed_data.event_data.event_meta = {};
-                                passed_data.event_data.event_meta = matching_offer;
+                                passed_data.event_data.event_meta.source = cashback_partner.source;
+                                passed_data.event_data.event_meta.offer = matching_offer;
                                 deferred.resolve(passed_data);
                             })
 

@@ -47,17 +47,16 @@ module.exports.process_recharge_req = function(token, recharge_req) {
                     console.log(user.twyst_cash);
 
                     var twyst_balance = response.balancecheck.balance[0];
-                    var handling_fee = recharge_req.amount*10/100;
+                    var handling_fee = Math.round(recharge_req.amount*10/100);
                     if(handling_fee < 10) {
                         handling_fee = 10;
                     }
-                    var required_twyst_cash = recharge_req.amount+parseInt(handling_fee)
+                    var required_twyst_cash = recharge_req.amount+parseInt(handling_fee);
                     console.log(required_twyst_cash);
                     if(twyst_balance < 1000) {
                         //send email to twyst
                         console.log('send email to twyst');
                     }
-
                     if(twyst_balance < recharge_req.amount) {
                         deferred.reject({
                           err: err || true,
@@ -103,7 +102,7 @@ module.exports.process_recharge_req = function(token, recharge_req) {
                                         event.event_meta.twyst_cash = required_twyst_cash;
                                         event.event_meta.amount = amt;
                                         event.event_meta.op = op;
-                                        event.event_meta.circle = circle;
+                                        event.event_meta.circle = cir;
                                         event.event_meta.conntype = conntype;
                                         event.event_meta.txId = recharge_res.recharge.txId[0];
                                         event.event_user = user._id;
@@ -115,7 +114,7 @@ module.exports.process_recharge_req = function(token, recharge_req) {
                                                 deferred.reject('Could not save the event - ' + JSON.stringify(err));
                                             } else {
                                                 deferred.resolve({
-                                                    data: user,
+                                                    data: availabe_twyst_cash,
                                                     message: 'Recharge Successfull'
                                                 });  
                                             }
@@ -136,7 +135,7 @@ module.exports.process_recharge_req = function(token, recharge_req) {
                                 });    
                             }
                             
-                        })             
+                        })            
                     }
                     else{
                         deferred.reject({
