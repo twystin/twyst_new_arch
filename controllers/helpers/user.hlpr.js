@@ -41,6 +41,7 @@ module.exports.update_user = function(token, updated_user) {
         var payloadDescriptor = new PayloadDescriptor('utf-8', user.email, 'Verify your account!', mailStr, sender);
         Transporter.send('email', 'ses', payloadDescriptor);
       });
+      user.validation.is_verification_mail_sent = true;
     }
 
     if(user.gcmId) {
