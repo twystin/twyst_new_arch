@@ -554,13 +554,19 @@ function accept_order(data) {
                 });
                     
             }
-            else{
+            else if(current_order.order_status === 'CANCELLED'){
                 deferred.resolve({
                     data: current_order,
                     message: 'This order has been cancelled by user'
-                });
-                  
+                });                
             }
+            else {
+                deferred.resolve({
+                    data: current_order,
+                    message: 'This order can not be accepted'
+                });                
+            }
+
         }
         
     });
