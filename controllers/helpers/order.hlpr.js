@@ -92,7 +92,7 @@ module.exports.verify_order = function(token, order) {
 module.exports.apply_offer = function(token, order) {
     logger.log();
     var deferred = Q.defer();
-    console.log(order);
+    
     var data = {};
     data.outlet = order.outlet;
     data.user_token = token;
@@ -380,7 +380,7 @@ function calculate_order_value(data) {
             }    
             items[i].item_total_amount = current_item_amount;
             amount = amount+current_item_amount;
-            if(menu.menu_item_type === 'type_3' && items[i].item_type === 'type_1'){
+            if(menu.menu_item_type === 'type_3' && item.item_type === 'type_1'){
                 vated_amount = vated_amount+current_item_amount;
             }
         }
@@ -403,7 +403,7 @@ function calculate_order_value(data) {
             }           
             items[i].item_total_amount = current_item_amount;    
             amount = amount+current_item_amount;
-            if(menu.menu_item_type === 'type_3' && items[i].item_type === 'type_1'){
+            if(menu.menu_item_type === 'type_3' && item.item_type === 'type_1'){
                 vated_amount = vated_amount+current_item_amount;
             }
         }
@@ -423,7 +423,7 @@ function calculate_order_value(data) {
             }
             items[i].item_total_amount = current_item_amount;
             amount = amount+current_item_amount;
-            if(menu.menu_item_type === 'type_3' && items[i].item_type === 'type_1'){
+            if(menu.menu_item_type === 'type_3' && item.item_type === 'type_1'){
                 vated_amount = vated_amount+current_item_amount;
             }
         }
@@ -598,7 +598,7 @@ function checkFreeItem(data, offer) {
             var order_value_obj = calculate_tax(order_value, passed_data.outlet);
             if(order_value_obj.order_value_with_tax >= data.outlet.valid_zone.min_amt_for_delivery){
                 offer.is_applicable = true;
-                offer.order_value_without_tax = Math.round(order_value_obj.order_value.amount);
+                offer.order_value_without_tax = Math.round(order_value_obj.order_value);
                 offer.vat = order_value_obj.vat;
                 offer.st = order_value_obj.st;
                 offer.packaging_charge = order_value_obj.packaging_charge;
@@ -649,7 +649,7 @@ function checkOfferTypeBuyXgetY(data, offer) {
             var order_value_obj = calculate_tax(order_value, passed_data.outlet);
             if(order_value_obj.order_value_with_tax >= data.outlet.valid_zone.min_amt_for_delivery){
                 offer.is_applicable = true;
-                offer.order_value_without_tax = Math.round(order_value_obj.order_value.amount);
+                offer.order_value_without_tax = Math.round(order_value_obj.order_value);
                 offer.vat = order_value_obj.vat;
                 offer.st = order_value_obj.st;
                 offer.packaging_charge = order_value_obj.packaging_charge;
@@ -697,7 +697,7 @@ function checkOfferTypeFlatOff(data, offer) {
         var order_value_obj = calculate_tax(order_value, passed_data.outlet);
         if(order_value_obj.order_value_with_tax >= data.outlet.valid_zone.min_amt_for_delivery){
             offer.is_applicable = true;
-            offer.order_value_without_tax = Math.round(order_value_obj.order_value.amount);
+            offer.order_value_without_tax = Math.round(order_value_obj.order_value);
             offer.vat = order_value_obj.vat;
             offer.st = order_value_obj.st;
             offer.packaging_charge = order_value_obj.packaging_charge;
@@ -745,7 +745,7 @@ function checkOfferTypePercentageOff(data, offer) {
         if(order_value_obj.order_value_with_tax >= data.outlet.valid_zone.min_amt_for_delivery){
             console.log('offer applicable');
             offer.is_applicable = true;
-            offer.order_value_without_tax = Math.round(order_value_obj.order_value.amount);
+            offer.order_value_without_tax = Math.round(order_value_obj.order_value);
             offer.vat = order_value_obj.vat;
             offer.st = order_value_obj.st;
             offer.packaging_charge = order_value_obj.packaging_charge;
@@ -770,8 +770,7 @@ function check_minimum_bill_amount(data) {
     logger.log();
     var deferred = Q.defer();
     
-    var order_actual_value_obj = calculate_tax(calculate_order_value(data), data.outlet);
-    console.log(order_actual_value_obj)
+    var order_actual_value_obj = calculate_tax(calculate_order_value(data), data.outlet);    
     if(order_actual_value_obj.order_value_with_tax >= data.outlet.valid_zone.min_amt_for_delivery) {
         deferred.resolve(data);    
     }
@@ -952,7 +951,7 @@ function calculate_tax(order_value, outlet) {
     }
     else if(outlet.menus[0].menu_item_type === 'type_3'){
         console.log(outlet.menus[0].menu_item_type);               
-        vat = order_value.vated_amount.amount*tax_grid.vat/100;
+        vat = order_value.vated_amount*tax_grid.vat/100;
         surcharge_on_vat = vat*tax_grid.surcharge_on_vat/100;        
     }
 
@@ -1127,8 +1126,8 @@ function massage_order(data){
 
                     if(data.outlet.twyst_meta.cashback_info.order_amount_slab.length) {
                         order_amount_ratio = _.find(data.outlet.twyst_meta.cashback_info.order_amount_slab, function(slab){
-                            if(data.order.order_actual_value_without_tax > slab.start &&
-                                data.order.order_actual_value_without_tax < slab.end) {
+                            if(order.order_actual_value_without_tax >= slab.start &&
+                                order.order_actual_value_without_tax <= slab.end) {
                                 return slab.ratio;
                             }
                         });    
@@ -1347,7 +1346,7 @@ function searchItemInOfferItems(offer, items) {
             free_items.push(items[i]);
         } 
     }
-    console.log(free_items)
+    console.log(free_items);
     var free_item;
     if(free_items.length) {
         free_item = _.min(free_items, function(item){return item.item_total_amount/item.quantity});
@@ -1497,6 +1496,9 @@ module.exports.confirm_inapp_order = function(data) {
         return remove_order_from_cache(data);
     })
     .then(function(data) {
+        return save_offer_use_event(data);
+    })
+    .then(function(data) {
         return send_sms(data);
     })
     .then(function(data) {
@@ -1504,6 +1506,9 @@ module.exports.confirm_inapp_order = function(data) {
     })
     .then(function(data) {
         return send_notification_to_all(data);
+    })
+    .then(function(data) {
+        return update_user_twyst_cash(data.order);
     })
     .then(function(data) {
         deferred.resolve(data);
@@ -1835,8 +1840,7 @@ function send_notification_to_all(data) {
 module.exports.update_order = function(token, order) {
     logger.log();
     var deferred = Q.defer();
-    console.log(token);
-    console.log(order);
+    
     AuthHelper.get_user(token).then(function(data){
         if(order.update_type === 'update_favourite')   {
             Order.findOne({_id: order.order_id}).exec(function(err, o) {
@@ -2055,9 +2059,9 @@ function update_order_with_feedback(order) {
             saved_order.order_status = 'CLOSED';
             var current_action = {};
             current_action.action_type = 'CLOSED';
-            current_action.action_by = order.user._id;
+            current_action.action_by = saved_order.user._id;
             current_action.message = 'Order feedback submitted successfully.';
-            order.actions.push(current_action);  
+            saved_order.actions.push(current_action);  
             if(order.items_feedback) {
                 saved_order.items = order.items;    
             }
@@ -2133,8 +2137,7 @@ function update_outlet_rating(order){
 function update_user_twyst_cash(order) {
     logger.log();
     var deferred = Q.defer();
-    console.log(order.order_status);
-    console.log(order.offer_used);
+    
     User.findOne({_id: order.user}, function(err, user) {
         if (err || !user) {
           deferred.reject({
@@ -2168,9 +2171,8 @@ function update_user_twyst_cash(order) {
 function save_offer_use_event(data) {
     logger.log();
     var deferred = Q.defer();
-    console.log(data.order);
+    
     if(data.order.offer_used) {
-        Outlet.findOne(data.order)
         var event = {};                        
         event.event_meta = {};
         event.event_meta.order_number = data.order.order_number;
