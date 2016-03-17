@@ -321,13 +321,25 @@ function calculate_order_value(data) {
     var  amount = 0, vated_amount = 0;
     
     for(var i = 0; i < items.length; i++) {
-        var sub_options = [], addons = [], category, sub_category, item, option, menu_sub_options = [], order_sub_options = [], menu_addons = [], order_addons = [];
+        var selected_options = [], sub_options = [], addons = [], category, sub_category, item, option, menu_sub_options = [], order_sub_options = [], menu_addons = [], order_addons = [];
         category = _.findWhere(menu.menu_categories, {_id: items[i].category_id});
         sub_category = _.findWhere(category && category.sub_categories, {_id: items[i].sub_category_id});
         
         item = _.findWhere(sub_category && sub_category.items, {_id: items[i].item_id});
         items[i].item_details = item;
         items[i].menu_id = menu._id;
+        console.log(items[i])
+        if(item.option_is_addon && items[i].options && items[i].options.length) {
+            _.each(item.options, function(menu_option){
+                _.each(items[i].options, function(selected_option){
+                    
+                    if(selected_option === menu_option._id){
+                        selected_options.push(menu_option);
+                    }
+                })
+            })    
+        }
+
         if(item && item.options && items[i].option_id) {
             option = _.findWhere(item.options, {_id: items[i].option_id});
             items[i].option = option;
@@ -363,7 +375,7 @@ function calculate_order_value(data) {
             })
         }
          
-        if(option && (item.option_price_is_additive || item.option_is_addon)){
+        if(option && (item.option_price_is_additive)){
             console.log('in prices are additive option');
             var current_item_amount = 0;
             current_item_amount = item.item_cost*items[i].quantity;
@@ -383,6 +395,21 @@ function calculate_order_value(data) {
             if(menu.menu_item_type === 'type_3' && item.item_type === 'type_1'){
                 vated_amount = vated_amount+current_item_amount;
             }
+        }
+        else if(selected_options && selected_options.length && item.option_is_addon){
+            console.log('in option is addon');
+            var current_item_amount = 0;
+            current_item_amount = item.item_cost*items[i].quantity;
+            
+            _.each(selected_options, function(selected_option){
+                current_item_amount = current_item_amount + selected_option.option_cost*items[i].quantity;
+            })
+                            
+            items[i].item_total_amount = current_item_amount;
+            amount = amount+current_item_amount;
+            if(menu.menu_item_type === 'type_3' && item.item_type === 'type_1'){
+                vated_amount = vated_amount+current_item_amount;
+            }    
         }
         else if(option){            
             var current_item_amount = 0;
@@ -817,6 +844,7 @@ function generate_and_cache_order(data) {
     order.available_offers = data.outlet.offers;
     order.estimeted_delivery_time = passed_data.outlet.valid_zone.delivery_estimated_time;
     order.delivery_zone = passed_data.outlet.valid_zone.zone_name;
+    order.payment_options = passed_data.outlet.valid_zone.payment_options;
     order.menu_id = data.outlet.menus[0]._id;
     data.order = order;
     
@@ -1083,6 +1111,10 @@ function massage_order(data){
                 massaged_item.item_cost = item.item_details.item_cost;
                 massaged_item.option_is_addon = item.item_details.option_is_addon;
                 massaged_item.option_price_is_additive = item.item_details.option_price_is_additive;
+                
+                if(item.options && item.options.length) {
+                    massaged_item.option_ids = item.options;    
+                }
                 if(item.option) {
                     massaged_item.option = item.option;    
                     delete massaged_item.option.addons;
@@ -1103,6 +1135,7 @@ function massage_order(data){
                 order.packaging_charge = order.packaging_charge;
                 order.delivery_charge = order.delivery_charge;
                 order.comments = order.comments;
+                order.payment_options = order.payment_options;
                 if(order.offer_used) {
                     console.log(order.offer_used);
                     order.order_value_without_offer = Math.round(order.order_actual_value_without_tax);
@@ -1211,16 +1244,14 @@ function save_user_address(data) {
                 deferred.reject(err);
             }
             else{
-                var index = null;
+                
                 for(var i = 0; i < user.address.length; i++){
                     if(user.address[i].tag === passed_address.tag){
-                        index = i;
+                        console.log('address exists');
+                        user.address.splice(i); 
                     }    
                 }
-                if(index) {
-                    user.address.splice(index);    
-                }
-                
+                console.log(user.address)
                 user.address.push(passed_address);
                 user.save(function(err, updated_user){
                     if(err) {
@@ -1467,9 +1498,9 @@ module.exports.confirm_cod_order = function(token, order) {
     .then(function(data) {
         return send_sms(data);
     })
-    .then(function(data) {
-        return send_email(data);
-    })
+    //.then(function(data) {
+        //return send_email(data);
+    //})
     .then(function(data) {
         return send_notification_to_all(data);
     })
@@ -1480,7 +1511,6 @@ module.exports.confirm_cod_order = function(token, order) {
         deferred.resolve(data);
     })
     .fail(function(err) {
-        console.log(err)
         deferred.reject(err);
     });
     return deferred.promise;
@@ -1501,9 +1531,9 @@ module.exports.confirm_inapp_order = function(data) {
     .then(function(data) {
         return send_sms(data);
     })
-    .then(function(data) {
-        return send_email(data);
-    })
+    //.then(function(data) {
+        //return send_email(data);
+    //})
     .then(function(data) {
         return send_notification_to_all(data);
     })
@@ -1650,11 +1680,9 @@ function send_sms(data) {
     }
     
     var phone = ' Phone: '+ data.user.phone;
-    var address_line1 = ' Address: '+data.order.address.line1;
-    var address_line2 = data.order.address.line2;
-    var address_line3 = ' Landmark: '+data.order.address.landmark;
+    var address = ' Address: '+data.order.address.line1 + ' ' + data.order.address.line2 + ' Landmark: '+data.order.address.landmark;
 
-    payload.message = outlet_name + name  + phone + address_line1 + ' Order Details: ';
+    payload.message = outlet_name + name  + phone + address + ' Order Details: ';
 
     for (var i = 0; i < data.order.items.length; i++) {
         if (data.order.items[i].option && data.order.items[i].option.option_value) {
@@ -1789,7 +1817,7 @@ function send_email(data) {
                     "<h4>Order Number</h4>" + data.order.order_number +
                     "<h4>Name</h4>" + name
                     + "<h4>Phone</h4>" + phone 
-                    + "<h4>Address</h4>" + data.order.address.line1 
+                    + "<h4>Address</h4>" + data.order.address.line1 + ' ' + data.order.address.line2 + ' Landmark: '+data.order.address.landmark
                     + "<h4>Items</h4>" + items
                     + "<h4>Total amount</h4>" + total_amount
                     + "<h4>Payment Method</h4>" + data.payment_mode
