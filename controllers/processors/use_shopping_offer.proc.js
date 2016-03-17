@@ -45,10 +45,11 @@ module.exports.process = function(data) {
             }
             else if(cashback_partner && cashback_partner.offers && cashback_partner.offers.length){              
                 var matching_offer = getMatchingOffer(cashback_partner.offers, offer_id);
-                if(matching_offer && matching_offer.currently_available_voucher_count){
-                    var is_enough_twyst_cash = check_enough_twyst_cash(matching_offer, available_twyst_cash);
-                    console.log("twyst cash: " + available_twyst_cash);
-                    if(is_enough_twyst_cash){
+                var is_enough_twyst_cash = check_enough_twyst_cash(matching_offer, available_twyst_cash);
+                if(is_enough_twyst_cash) {
+                    if(matching_offer && matching_offer.currently_available_voucher_count){                    
+                        console.log("twyst cash: " + available_twyst_cash);
+                        
                         var twyst_cash_used = matching_offer.offer_cost + matching_offer.offer_processing_fee
                         user.twyst_cash = user.twyst_cash - twyst_cash_used;
                         update_offer_count(cashback_partner._id, matching_offer, user._id, user.twyst_cash).then(function(data) {
@@ -59,20 +60,17 @@ module.exports.process = function(data) {
                                 passed_data.event_data.event_meta.offer = matching_offer;
                                 deferred.resolve(passed_data);
                             })
-
-                        })
-                    } else{
+                        })                        
+                    } else {
                         deferred.reject({
-                            message: 'Not enough Twyst Cash'
+                            message: 'This offer is no more available'
                         });
-                    }
-
-                } else {
+                    }    
+                } else{
                     deferred.reject({
-                        message: 'This offer is no more available'
+                        message: 'Not enough Twyst Cash'
                     });
-                }
-
+                }                
             } else {
                 deferred.reject({
                     message: 'This offer is no more available'

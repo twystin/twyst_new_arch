@@ -57,85 +57,88 @@ module.exports.process_recharge_req = function(token, recharge_req) {
                         //send email to twyst
                         console.log('send email to twyst');
                     }
-                    if(twyst_balance < recharge_req.amount) {
-                        deferred.reject({
-                          err: err || true,
-                          message: "Could not process your request right now"
-                        });   
-                    }
-                    else if(user.twyst_cash >= required_twyst_cash) {
-                        var cn = recharge_req.phone;
-                        var amt = recharge_req.amount;
-                        var op = recharge_req.operator;
-                        var cir  = recharge_req.circle;
-                        var reqid  = keygen._({chars: false, specials: false, length: 20});
-                        var conntype;
-                        if(recharge_req.conntype === 'postpaid') {
-                            conntype = 'postpaid';
+                    
+                    if(user.twyst_cash >= required_twyst_cash) {
+                        if(twyst_balance < recharge_req.amount) {
+                            deferred.reject({
+                              err: err || true,
+                              message: "Could not process your request right now"
+                            });   
                         }
                         else{
-                            conntype = 'prepaid';   
-                        }
-                    
-                        request.get(recharge_url+"recharge.do?"+"uid="+uid+"&pwd="+pass+"&cn="+cn+"&amt="+amt+"&op="+op+"&cir="+cir+"&reqid="+reqid+"&conntype="+conntype, function(err, res, body) {
-                            var recharge_res;
-                            parseString(body, function (err, mobikwik_response) {
-                                recharge_res = mobikwik_response;
-
-                            });
-                            console.log(body);
-                            console.log(recharge_res);
-                            if(recharge_res.recharge.status[0] === 'SUCCESS') {
-                                
-                                var availabe_twyst_cash = user.twyst_cash - required_twyst_cash;
-                                User.findOneAndUpdate({
-                                    _id: user._id
-                                }, {$set: {twyst_cash: availabe_twyst_cash}}).exec(function(err, user){
-                                    if(err) {
-                                        console.log(err);
-                                        deferred.reject(err);
-                                    }
-                                    else{
-                                        var event = {};            
-                                        event.event_meta = {};
-                                        event.event_meta.phone = cn;
-                                        event.event_meta.twyst_cash = required_twyst_cash;
-                                        event.event_meta.amount = amt;
-                                        event.event_meta.op = op;
-                                        event.event_meta.circle = cir;
-                                        event.event_meta.conntype = conntype;
-                                        event.event_meta.txId = recharge_res.recharge.txId[0];
-                                        event.event_user = user._id;
-                                        event.event_type = 'recharge_phone';                                                                
-                                        event.event_date = new Date();
-                                        var created_event = new Event(event);
-                                        created_event.save(function(err, e) {
-                                            if (err || !e) {
-                                                deferred.reject('Could not save the event - ' + JSON.stringify(err));
-                                            } else {
-                                                deferred.resolve({
-                                                    data: availabe_twyst_cash,
-                                                    message: 'Recharge Successfull'
-                                                });  
-                                            }
-                                        });                                            
-                                    }
-                                })
-                            }                    
-                            else if(recharge_res.recharge.status[0] === 'FAILURE'){
-                                deferred.reject({
-                                  err: err || true,
-                                  message: recharge_res.recharge.errorMsg[0]
-                                }); 
+                            var cn = recharge_req.phone;
+                            var amt = recharge_req.amount;
+                            var op = recharge_req.operator;
+                            var cir  = recharge_req.circle;
+                            var reqid  = keygen._({chars: false, specials: false, length: 20});
+                            var conntype;
+                            if(recharge_req.conntype === 'postpaid') {
+                                conntype = 'postpaid';
                             }
                             else{
-                                deferred.reject({
-                                  err: err || true,
-                                  message: "Could not process your request right now"
-                                });    
+                                conntype = 'prepaid';   
                             }
-                            
-                        })            
+                        
+                            request.get(recharge_url+"recharge.do?"+"uid="+uid+"&pwd="+pass+"&cn="+cn+"&amt="+amt+"&op="+op+"&cir="+cir+"&reqid="+reqid+"&conntype="+conntype, function(err, res, body) {
+                                var recharge_res;
+                                parseString(body, function (err, mobikwik_response) {
+                                    recharge_res = mobikwik_response;
+
+                                });
+                                console.log(body);
+                                console.log(recharge_res);
+                                if(recharge_res.recharge.status[0] === 'SUCCESS') {
+                                    
+                                    var availabe_twyst_cash = user.twyst_cash - required_twyst_cash;
+                                    User.findOneAndUpdate({
+                                        _id: user._id
+                                    }, {$set: {twyst_cash: availabe_twyst_cash}}).exec(function(err, user){
+                                        if(err) {
+                                            console.log(err);
+                                            deferred.reject(err);
+                                        }
+                                        else{
+                                            var event = {};            
+                                            event.event_meta = {};
+                                            event.event_meta.phone = cn;
+                                            event.event_meta.twyst_cash = required_twyst_cash;
+                                            event.event_meta.amount = amt;
+                                            event.event_meta.op = op;
+                                            event.event_meta.circle = cir;
+                                            event.event_meta.conntype = conntype;
+                                            event.event_meta.txId = recharge_res.recharge.txId[0];
+                                            event.event_user = user._id;
+                                            event.event_type = 'recharge_phone';                                                                
+                                            event.event_date = new Date();
+                                            var created_event = new Event(event);
+                                            created_event.save(function(err, e) {
+                                                if (err || !e) {
+                                                    deferred.reject('Could not save the event - ' + JSON.stringify(err));
+                                                } else {
+                                                    deferred.resolve({
+                                                        data: availabe_twyst_cash,
+                                                        message: 'Recharge Successfull'
+                                                    });  
+                                                }
+                                            });                                            
+                                        }
+                                    })
+                                }                    
+                                else if(recharge_res.recharge.status[0] === 'FAILURE'){
+                                    deferred.reject({
+                                      err: err || true,
+                                      message: recharge_res.recharge.errorMsg[0]
+                                    }); 
+                                }
+                                else{
+                                    deferred.reject({
+                                      err: err || true,
+                                      message: "Could not process your request right now"
+                                    });    
+                                }
+                                
+                            })
+                        }                                    
                     }
                     else{
                         deferred.reject({

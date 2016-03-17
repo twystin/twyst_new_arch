@@ -107,6 +107,7 @@ var Order = new Schema({
       type: Boolean,
       default: false,
     },
+    option_ids: [],
     option: {
       _id: {type: Schema.Types.ObjectId},
       option_title: {

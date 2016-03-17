@@ -30,7 +30,7 @@ module.exports.update_user = function(token, updated_user) {
   AuthHelper.get_user(token).then(function(data) {
     var user = data.data;
     user = ld.merge(user, updated_user);
-    if(!user.validation.is_verification_mail_sent){
+    /*if(!user.validation.is_verification_mail_sent){
       user.validation.verification_mail_token = Keygenerator.session_id();
       var filler = {
         "name":user.first_name,
@@ -42,7 +42,7 @@ module.exports.update_user = function(token, updated_user) {
         Transporter.send('email', 'ses', payloadDescriptor);
       });
       user.validation.is_verification_mail_sent = true;
-    }
+    }*/
 
     if(user.gcmId) {
         var index = ld.findIndex(user.push_ids, function(push) { return push.push_id==user.gcmId; });
@@ -324,9 +324,9 @@ module.exports.cancel_order = function(token, order) {
     .then(function(data) {
         return send_sms(data);
     })
-    .then(function(data) {
-        return send_email(data);
-    })
+    //.then(function(data) {
+        //return /*(data);
+    //})
     .then(function(data) {
         return update_user_twyst_cash(data.order);
     })
