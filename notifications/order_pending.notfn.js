@@ -15,7 +15,7 @@ module.exports.notify = function(what, when, who, campaign) {
   var notify_text = 'Order has not been accepted yet at outlet  '+ what.outlet.name + ' order number '+ what.order_number;
   var payload = {
     from: 'TWYSTR',
-  	phone: 8130857967,
+  	phone: who,
   	message: notify_text
   };
 
