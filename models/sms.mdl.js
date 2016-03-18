@@ -3,6 +3,7 @@
 
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var smsRecords = mongoose.createConnection('mongodb://localhost/retwyst_sms_store');
 
 var SentMessage = new Schema({
 	receiver: {type: String},
@@ -11,4 +12,4 @@ var SentMessage = new Schema({
 	sent_at: {type: Date, default: Date.now}
 });
 
-module.exports = mongoose.model('SentMessage', SentMessage);
+module.exports = smsRecords.model('SentMessage', SentMessage);
