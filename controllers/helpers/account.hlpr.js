@@ -256,7 +256,7 @@ module.exports.generate_new_code = function(phone) {
 module.exports.verify_user_email = function(token) {
     logger.log();
     var deferred = Q.defer();
-
+    console.log(token);
     User.findOne({
         'validation.verification_mail_token': token
     }).exec(function (err, user) {
@@ -278,7 +278,7 @@ module.exports.verify_user_email = function(token) {
                     }
                     else {                        
                         deferred.resolve({
-                            err: err || true,
+                            data: user,
                             message: 'Email has been verified successfully.'
                         });           
                     }
@@ -287,7 +287,7 @@ module.exports.verify_user_email = function(token) {
             else {
                 deferred.reject({
                     err: err || true,
-                    message: 'Sorry, The link is invalid.'
+                    message: 'Sorry, This link is invalid.'
                 });
             }
         }
