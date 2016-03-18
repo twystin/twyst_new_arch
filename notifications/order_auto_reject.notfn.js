@@ -48,7 +48,7 @@ module.exports.notify_merchant = function(what, when, who, campaign) {
   var notify_text = 'Order has been Rejected by system '+ what.outlet.name + ' order number '+ what.order_number;
   var payload = {
     from: 'TWYSTR',
-    phone: 8130857967,
+    phone: who,
     message: notify_text
   };
 

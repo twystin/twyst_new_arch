@@ -166,6 +166,45 @@ function set_delivery_experience(params) {
   return deferred.promise;
 }
 
+function set_cashback(params) {
+    logger.log();
+    var deferred = Q.defer();
+    params.outlets = _.compact(params.outlets);  
+    params.outlets = _.map(params.outlets, function(val) {
+    
+        if(val.twyst_meta.cashback_info && val.twyst_meta.cashback_info.base_cashback) {
+            var cod_cashback = 0, inapp_cashback = 0, order_amount_cashback = 0;
+            var base_cashback = val.twyst_meta.cashback_info.base_cashback;
+            if(val.twyst_meta.cashback_info.order_amount_slab.length) {
+                order_amount_cashback = _.find(val.twyst_meta.cashback_info.order_amount_slab, function(slab){
+                    if(val._id == '561fb1452b89130129ffb3ad') {
+                      console.log(slab);
+                    }
+                    if(slab.start && !slab.end) {
+                        if(val._id == '561fb1452b89130129ffb3ad') {
+                          console.log(slab.ratio*base_cashback);
+                        }
+                        return slab.ratio*base_cashback;
+                    }
+                });  
+            }
+               
+            inapp_cashback = val.twyst_meta.cashback_info.in_app_ratio *base_cashback;
+            cod_cashback = val.twyst_meta.cashback_info.cod_ratio * base_cashback;
+
+            var cashback = _.max([base_cashback, order_amount_cashback, inapp_cashback, cod_cashback], function(cashback){ return cashback; });
+            val.cashback = Math.round(cashback);
+        }
+        else{
+            val.cashback = 0;
+        }
+        return val;
+    });
+
+    deferred.resolve(params);
+    return deferred.promise;    
+}
+
 function calculate_relevance(params) {
   logger.log();
   var deferred = Q.defer();
@@ -173,9 +212,10 @@ function calculate_relevance(params) {
   params.outlets = _.map(params.outlets, function(val) {
     var relevance = 10000;
     val.recco = val.recco || {};
-    
+    relevance = relevance + val.cashback*100;
     relevance = relevance - val.valid_zone.delivery_estimated_time;
-    relevance = relevance - val.valid_zone.min_amt_for_delivery*100;
+    relevance = relevance - val.valid_zone.min_amt_for_delivery;
+    relevance = relevance + val.recco.delivery_experience || 0;
     val.recco.relevance = relevance;
     return val;
   });
@@ -256,27 +296,9 @@ function pick_outlet_fields(params) {
       massaged_item.minimum_order = item.valid_zone.min_amt_for_delivery;
       massaged_item.payment_options = item.valid_zone.payment_options;
       massaged_item.delivery_conditions = item.valid_zone.delivery_conditions;
-      if(item.twyst_meta.cashback_info && item.twyst_meta.cashback_info.base_cashback) {
-        var cod_cashback = 0, inapp_cashback = 0, order_amount_cashback = 0;
-        var base_cashback = item.twyst_meta.cashback_info.base_cashback;
-        if(item.twyst_meta.cashback_info.order_amount_slab.length) {
-          order_amount_cashback = _.find(item.twyst_meta.cashback_info.order_amount_slab, function(slab){
-            if(slab.start && !slab.end) {
-                return slab.ratio*base_cashback;
-            }
-          });  
-        }
-              
-        inapp_cashback = item.twyst_meta.cashback_info.in_app_ratio *base_cashback;
-        cod_cashback = item.twyst_meta.cashback_info.cod_ratio * base_cashback;
-
-        var cashback = _.max([base_cashback, order_amount_cashback, inapp_cashback, cod_cashback], function(cashback){ return cashback; });
-        massaged_item.cashback = Math.round(cashback);
-      }
-      else{
-        massaged_item.cashback = 0;
-      }
       
+      massaged_item.cashback = item.cashback;
+     
       massaged_item.delivery_zones = item.delivery_zones;
       var offer_count = 0;
       for(var i=0; i<item.offers.length; i++) {
@@ -346,6 +368,9 @@ module.exports.get = function(req, res) {
     })
     .then(function(data) {
       return map_valid_delivery_zone(data);
+    })
+    .then(function(data) {
+      return set_cashback(data);
     })
     .then(function(data) {
       return calculate_relevance(data);

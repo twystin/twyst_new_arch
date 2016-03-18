@@ -61,7 +61,7 @@ module.exports.send_verification_email = function(req, res){
       		var token  = Keygenerator.session_id();
       		var filler = {
 				"name":user.first_name,
-				"link":'http://staging.twyst.in/verify/email/' + token
+				"link":'http://twyst.in/verify/email/' + token
 			};
 
 			MailContent.templateToStr(GetTemplatePath.byName('email_verification_mail.hbs'), filler, function(mailStr){
