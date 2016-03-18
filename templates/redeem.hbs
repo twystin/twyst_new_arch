@@ -25,8 +25,12 @@
       <div class='right inline' style="text-align: right;   width: 49%;display: inline-block;">Rs. {{amount}}</div>
       <div class='left inline' style="text-align: left;   padding-left: 1%;   width: 49%;display: inline-block;">EGV Code</div>
       <div class='right inline' style="text-align: right;   width: 49%;display: inline-block;">{{egvcode}}</div>
-      <div class='left inline' style="text-align: left;   padding-left: 1%;   width: 49%;display: inline-block;">EGV PIN</div>
-      <div class='right inline' style="text-align: right;   width: 49%;display: inline-block;">{{egvpin}}</div>
+
+      {{#if egvpin }}
+        <div class='left inline' style="text-align: left;   padding-left: 1%;   width: 49%;display: inline-block;">EGV PIN</div>
+        <div class='right inline' style="text-align: right;   width: 49%;display: inline-block;">{{egvpin}}</div>
+      {{/if}}
+
       <div class='left inline' style="text-align: left;   padding-left: 1%;   width: 49%;display: inline-block;">Validity</div>
       <div class='right inline' style="text-align: right;   width: 49%;display: inline-block;">{{date}}</div>
 
