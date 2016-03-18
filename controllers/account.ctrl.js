@@ -200,9 +200,9 @@ module.exports.verify_email = function(req, res) {
     HttpHelper.error(res, null, "Please pass token to be verified");
   }  else {
     AccountHelper.verify_user_email(token).then(function(data) {
-      res.redirect('twyst.in');
+      res.redirect('http://twyst.in');
     }, function(err) {
-      HttpHelper.error(res, err.error, err.message);
+      res.redirect('http://twyst.in');
     });
   }
 }

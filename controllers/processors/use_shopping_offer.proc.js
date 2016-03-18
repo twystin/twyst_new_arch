@@ -43,7 +43,7 @@ module.exports.process = function(data) {
                     message: 'This offer is no more available'
                 });
             }
-            else if(cashback_partner && cashback_partner.offers && cashback_partner.offers.length){              
+            else if(cashback_partner && cashback_partner.offers && cashback_partner.offers.length){
                 var matching_offer = getMatchingOffer(cashback_partner.offers, offer_id);
                 var is_enough_twyst_cash = check_enough_twyst_cash(matching_offer, available_twyst_cash);
                 if(is_enough_twyst_cash) {
@@ -53,7 +53,7 @@ module.exports.process = function(data) {
                         var twyst_cash_used = matching_offer.offer_cost + matching_offer.offer_processing_fee
                         user.twyst_cash = user.twyst_cash - twyst_cash_used;
                         update_offer_count(cashback_partner._id, matching_offer, user._id, user.twyst_cash).then(function(data) {
-                            var egv_details = matching_offer.offer_detail[data];
+                            var egv_details = matching_offer.offer_detail[data.data];
                             send_email(user, egv_details, cashback_partner, matching_offer, twyst_cash_used).then(function(data) {
                                 passed_data.event_data.event_meta = {};
                                 passed_data.event_data.event_meta.source = cashback_partner.source;
@@ -120,7 +120,7 @@ function check_enough_twyst_cash (offer, twyst_cash) {
 function update_offer_count(partner_id, offer, user_id, twyst_cash) {
     logger.log();
     var deferred = Q.defer();
-    
+
     var available_voucher_count = offer.currently_available_voucher_count - 1;
     var update = {
         $set: {
@@ -165,21 +165,18 @@ function update_offer_count(partner_id, offer, user_id, twyst_cash) {
 function send_email(user, egv_details, partner, offer, twyst_cash_used) {
     logger.log();
     var deferred = Q.defer();
-    
     var filler = {
       name       : user.first_name,
       amount     : offer.offer_value,
       twyst_cash_used: twyst_cash_used,
       brand      : partner.source,
       egvcode     : egv_details.egv_code,
-      egvpin      : egv_details.egv_pin,
+      egvpin      : egv_details.egv_id,
       valid_till : offer.offer_end_date,
       tnc        : offer.offer_tnc
     };
-    
     MailContent.templateToStr(TemplatePath.of('redeem.hbs'), filler, function(message){
       var payload = new PayloadDescriptor('utf-8', user.email, 'Online Shopping Voucher from Twyst.in!', message, 'info@twyst.in');
-      
         Transporter.send('email', 'ses', payload).then(function(reply) {
             deferred.resolve(reply);
         }, function(err) {

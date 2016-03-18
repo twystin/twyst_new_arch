@@ -50,7 +50,6 @@ module.exports.send_verification_email = function(req, res){
 	logger.log();
 	AuthHelper.get_user(req.query.token).then(function(data) {
     	var user = data.data;
-    	console.log(user._id);
       	if(user.validation && user.validation.email) {
       		HttpHelper.success(res, null, "User already has a verified email id");	
       	}
@@ -66,7 +65,6 @@ module.exports.send_verification_email = function(req, res){
 
 			MailContent.templateToStr(GetTemplatePath.byName('email_verification_mail.hbs'), filler, function(mailStr){
 				var payloadDescriptor = new PayloadDescriptor('utf-8', user.email, 'Verify your account!',mailStr, sender);
-				console.log(payloadDescriptor);
 				Transporter.send('email', 'ses', payloadDescriptor).then(function(info) {					
 					User.findOneAndUpdate({
 						_id: user._id

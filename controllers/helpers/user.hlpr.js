@@ -30,7 +30,7 @@ module.exports.update_user = function(token, updated_user) {
   AuthHelper.get_user(token).then(function(data) {
     var user = data.data;
     user = ld.merge(user, updated_user);
-    /*if(!user.validation.is_verification_mail_sent){
+    if(!user.validation.is_verification_mail_sent){
       user.validation.verification_mail_token = Keygenerator.session_id();
       var filler = {
         "name":user.first_name,
@@ -42,7 +42,7 @@ module.exports.update_user = function(token, updated_user) {
         Transporter.send('email', 'ses', payloadDescriptor);
       });
       user.validation.is_verification_mail_sent = true;
-    }*/
+    }
 
     if(user.gcmId) {
         var index = ld.findIndex(user.push_ids, function(push) { return push.push_id==user.gcmId; });
@@ -673,8 +673,9 @@ module.exports.get_twyst_cash_history = function(token) {
                         action.earn =  true;
                         action.twyst_cash = event.event_meta.twyst_cash;
                         action.earn_at = event.event_date;
+                        var percentage = (100*event.event_meta.twyst_cash/event.event_meta.amount).toFixed(2);
                         action.message = 'Order at '+ event.event_outlet.basics.name + " Worth Rs. "
-                         + event.event_meta.amount + " 10 % Twyst Cash earned";
+                         + event.event_meta.amount + ", " + percentage +" % Twyst Cash earned";
                         action.outlet = event.event_outlet.basics.name;
                         order_history.push(action);
                     }
