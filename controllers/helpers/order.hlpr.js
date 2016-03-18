@@ -1181,7 +1181,6 @@ function massage_order(data){
                     order.inapp_cashback_percenatage = _.max([base_cashback*inapp_ratio, base_cashback*order_amount_ratio], function(cashback){ return cashback; });
                     order.cod_cashback_percenatage = order.cod_cashback_percenatage.toFixed(2);
                     order.inapp_cashback_percenatage = order.inapp_cashback_percenatage.toFixed(2);
-                    
                 }
                 else{
                     console.log('cashback not setup');
@@ -1189,6 +1188,7 @@ function massage_order(data){
                     order.inapp_cashback = 0;   
                     
                 }
+
                 var order_json = order;
                 order = new Order(order); 
     
@@ -1498,9 +1498,9 @@ module.exports.confirm_cod_order = function(token, order) {
     .then(function(data) {
         return send_sms(data);
     })
-    //.then(function(data) {
-        //return send_email(data);
-    //})
+    .then(function(data) {
+        return send_email(data);
+    })
     .then(function(data) {
         return send_notification_to_all(data);
     })
@@ -1531,9 +1531,9 @@ module.exports.confirm_inapp_order = function(data) {
     .then(function(data) {
         return send_sms(data);
     })
-    //.then(function(data) {
-        //return send_email(data);
-    //})
+    .then(function(data) {
+        return send_email(data);
+    })
     .then(function(data) {
         return send_notification_to_all(data);
     })
@@ -2176,7 +2176,9 @@ function update_user_twyst_cash(order) {
         else if(order.offer_used && order.order_status === 'PENDING'){
             user.twyst_cash = user.twyst_cash-order.offer_cost;                            
         }
-        else {
+        else if(order.order_status === 'DISPATCHED' ||
+            order.order_status === 'ASSUMED_DELIVERED' ||
+            order.order_status === 'DELIVERED'){
             if(order.payment_info.is_inapp) {
                 user.twyst_cash = user.twyst_cash+order.inapp_cashback;    
             }

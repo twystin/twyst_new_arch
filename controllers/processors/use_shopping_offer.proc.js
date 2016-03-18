@@ -169,7 +169,7 @@ function send_email(user, egv_details, partner, offer, twyst_cash_used) {
       name       : user.first_name,
       amount     : offer.offer_value,
       twyst_cash_used: twyst_cash_used,
-      brand      : partner.offer_source,
+      brand      : partner.source,
       egvcode     : egv_details.egv_code,
       egvpin      : egv_details.egv_id,
       valid_till : offer.offer_end_date,
