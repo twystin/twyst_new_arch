@@ -11,6 +11,7 @@ var mongoose = require('mongoose');
 require('../models/user.mdl');
 require('../models/order.mdl');
 require('../models/outlet.mdl');
+require('../models/event.mdl');
 var User = mongoose.model('User');
 var Order = mongoose.model('Order');
 var Outlet = mongoose.model('Outlet');
@@ -68,7 +69,8 @@ function process_order(order) {
                     
                     var what = {
                         outlet: order.outlet.basics,
-                        order_id: order._id
+                        order_id: order._id,
+                        order_number: order.order_number
                     };
                     User.findOneAndUpdate({
                     _id: order.user._id
