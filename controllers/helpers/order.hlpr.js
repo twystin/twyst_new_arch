@@ -761,7 +761,7 @@ function checkOfferTypePercentageOff(data, offer) {
     console.log(order_value);
     console.log(offer.minimum_bill_value);
     if(order_value.amount >= offer.minimum_bill_value) {
-        discount = (order_value * offer.actions.reward.reward_meta.percent)/100;
+        discount = (order_value.amount * offer.actions.reward.reward_meta.percent)/100;
         if(discount <= offer.actions.reward.reward_meta.max) {
             order_value.amount = order_value.amount - discount;            
         }
@@ -1625,13 +1625,15 @@ function update_payment_mode(data) {
         is_inapp = true;
     }
 
-    if(data.payment_mode.charAt(0) === 'N' || data.payment_mode.charAt(0) === 'C' && data.payment_mode.length > 3) {
+    if(data.payment_mode.charAt(0) === 'N') {
         data.payment_method = data.payment_mode;
         data.payment_mode = 'Zaakpay';
     };
 
-    if(data.payment_mode.charAt(0) === 'C' && data.payment_mode.length > 3) {
+    if(data.card_id) {
         card_id = data.card_id;
+        data.payment_method = data.payment_mode;
+        data.payment_mode = 'Zaakpay';
     }
 
     Order.findOne({
@@ -2050,7 +2052,13 @@ function save_order_feedback_event(data) {
     event.event_meta.order_number = passed_data.order_number;
     event.event_meta.twyst_cash = passed_data.cashback;
     event.event_meta.payment_mode = passed_data.payment_info.payment_mode;
-    event.event_meta.amount = passed_data.actual_amount_paid;
+    if(passed_data.offer_used) {
+        event.event_meta.amount = passed_data.order_value_with_offer;    
+    }
+    else{
+        event.event_meta.amount = passed_data.order_value_without_offer;
+    }
+    
 
     event.event_user = passed_data.user;
     event.event_type = 'order_feedback';
