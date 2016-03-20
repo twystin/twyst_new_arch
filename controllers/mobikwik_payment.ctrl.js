@@ -16,7 +16,7 @@ module.exports.get_zaakpay_response = function(req, res) {
   	zaakpay_response = _.extend(zaakpay_response, req.body);
   	console.log(zaakpay_response);
   	var message, type;
-  	if(zaakpay_response.paymentMethod.charAt(0) === 'N' || zaakpay_response.paymentMethod.charAt(0) === 'C') { // for zaakpay
+  	if(zaakpay_response.paymentMethod.charAt(0) === 'N' || zaakpay_response.cardhashid) { // for zaakpay
 		var orderId = zaakpay_response.orderId;
 		var responseCode = zaakpay_response.responseCode;		
 		var responseDescription = zaakpay_response.responseDescription;
