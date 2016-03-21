@@ -1630,7 +1630,7 @@ function update_payment_mode(data) {
         data.payment_mode = 'Zaakpay';
     };
 
-    if(data.card_id) {
+    if(data.card_id != 'NA') {
         card_id = data.card_id;
         data.payment_method = data.payment_mode;
         data.payment_mode = 'Zaakpay';
@@ -2184,9 +2184,7 @@ function update_user_twyst_cash(order) {
         else if(order.offer_used && order.order_status === 'PENDING'){
             user.twyst_cash = user.twyst_cash-order.offer_cost;                            
         }
-        else if(order.order_status === 'DISPATCHED' ||
-            order.order_status === 'ASSUMED_DELIVERED' ||
-            order.order_status === 'DELIVERED'){
+        else if(order.order_status != 'PENDING'){
             if(order.payment_info.is_inapp) {
                 user.twyst_cash = user.twyst_cash+order.inapp_cashback;    
             }

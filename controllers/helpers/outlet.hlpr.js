@@ -712,6 +712,7 @@ function dispatch_order(data) {
             }
 
             var current_action = {};
+            order.order_status = 'DISPATCHED';
             current_action.action_type = 'DISPATCHED';
             current_action.action_by = data.data._id;
             current_action.message = 'Order has been dispatched by merchant.'
