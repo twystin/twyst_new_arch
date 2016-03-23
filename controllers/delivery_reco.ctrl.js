@@ -176,14 +176,8 @@ function set_cashback(params) {
             var cod_cashback = 0, inapp_cashback = 0, order_amount_cashback = 0;
             var base_cashback = val.twyst_meta.cashback_info.base_cashback;
             if(val.twyst_meta.cashback_info.order_amount_slab.length) {
-                order_amount_cashback = _.find(val.twyst_meta.cashback_info.order_amount_slab, function(slab){
-                    if(val._id == '561fb1452b89130129ffb3ad') {
-                      console.log(slab);
-                    }
+                order_amount_cashback = _.find(val.twyst_meta.cashback_info.order_amount_slab, function(slab){                    
                     if(slab.start && !slab.end) {
-                        if(val._id == '561fb1452b89130129ffb3ad') {
-                          console.log(slab.ratio*base_cashback);
-                        }
                         return slab.ratio*base_cashback;
                     }
                 });  
@@ -191,7 +185,9 @@ function set_cashback(params) {
                
             inapp_cashback = val.twyst_meta.cashback_info.in_app_ratio *base_cashback;
             cod_cashback = val.twyst_meta.cashback_info.cod_ratio * base_cashback;
-
+            if(order_amount_cashback && order_amount_cashback.ratio) {
+              order_amount_cashback = order_amount_cashback.ratio*base_cashback;  
+            }
             var cashback = _.max([base_cashback, order_amount_cashback, inapp_cashback, cod_cashback], function(cashback){ return cashback; });
             val.cashback = Math.round(cashback);
         }

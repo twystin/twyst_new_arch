@@ -761,7 +761,7 @@ function checkOfferTypePercentageOff(data, offer) {
     console.log(order_value);
     console.log(offer.minimum_bill_value);
     if(order_value.amount >= offer.minimum_bill_value) {
-        discount = (order_value * offer.actions.reward.reward_meta.percent)/100;
+        discount = (order_value.amount * offer.actions.reward.reward_meta.percent)/100;
         if(discount <= offer.actions.reward.reward_meta.max) {
             order_value.amount = order_value.amount - discount;            
         }
@@ -996,7 +996,7 @@ function calculate_tax(order_value, outlet) {
     if(outlet.valid_zone.delivery_charge && !outlet.valid_zone.free_delivery_amt) {
         delivery_charge = outlet.valid_zone.delivery_charge || 0;
     }
-    else if(outlet.valid_zone.delivery_charge && outlet.valid_zone.free_delivery_amt && order_value < outlet.valid_zone.free_delivery_amt) {
+    else if(outlet.valid_zone.delivery_charge && outlet.valid_zone.free_delivery_amt && order_value.amount < outlet.valid_zone.free_delivery_amt) {
         delivery_charge = outlet.valid_zone.delivery_charge || 0;   
     }
     console.log(vat + ' ' + surcharge_on_vat + ' ' + st + ' ' + sbc + ' ' + packaging_charge + ' ' + delivery_charge);
@@ -1181,7 +1181,6 @@ function massage_order(data){
                     order.inapp_cashback_percenatage = _.max([base_cashback*inapp_ratio, base_cashback*order_amount_ratio], function(cashback){ return cashback; });
                     order.cod_cashback_percenatage = order.cod_cashback_percenatage.toFixed(2);
                     order.inapp_cashback_percenatage = order.inapp_cashback_percenatage.toFixed(2);
-                    
                 }
                 else{
                     console.log('cashback not setup');
@@ -1189,6 +1188,7 @@ function massage_order(data){
                     order.inapp_cashback = 0;   
                     
                 }
+
                 var order_json = order;
                 order = new Order(order); 
     
@@ -1498,9 +1498,9 @@ module.exports.confirm_cod_order = function(token, order) {
     .then(function(data) {
         return send_sms(data);
     })
-    //.then(function(data) {
-        //return send_email(data);
-    //})
+    .then(function(data) {
+        return send_email(data);
+    })
     .then(function(data) {
         return send_notification_to_all(data);
     })
@@ -1531,9 +1531,9 @@ module.exports.confirm_inapp_order = function(data) {
     .then(function(data) {
         return send_sms(data);
     })
-    //.then(function(data) {
-        //return send_email(data);
-    //})
+    .then(function(data) {
+        return send_email(data);
+    })
     .then(function(data) {
         return send_notification_to_all(data);
     })
@@ -1625,13 +1625,15 @@ function update_payment_mode(data) {
         is_inapp = true;
     }
 
-    if(data.payment_mode.charAt(0) === 'N' || data.payment_mode.charAt(0) === 'C' && data.payment_mode.length > 3) {
+    if(data.payment_mode.charAt(0) === 'N') {
         data.payment_method = data.payment_mode;
         data.payment_mode = 'Zaakpay';
     };
 
-    if(data.payment_mode.charAt(0) === 'C' && data.payment_mode.length > 3) {
+    if(data.card_id != 'NA') {
         card_id = data.card_id;
+        data.payment_method = data.payment_mode;
+        data.payment_mode = 'Zaakpay';
     }
 
     Order.findOne({
@@ -2050,7 +2052,13 @@ function save_order_feedback_event(data) {
     event.event_meta.order_number = passed_data.order_number;
     event.event_meta.twyst_cash = passed_data.cashback;
     event.event_meta.payment_mode = passed_data.payment_info.payment_mode;
-    event.event_meta.amount = passed_data.actual_amount_paid;
+    if(passed_data.offer_used) {
+        event.event_meta.amount = passed_data.order_value_with_offer;    
+    }
+    else{
+        event.event_meta.amount = passed_data.order_value_without_offer;
+    }
+    
 
     event.event_user = passed_data.user;
     event.event_type = 'order_feedback';
@@ -2176,7 +2184,7 @@ function update_user_twyst_cash(order) {
         else if(order.offer_used && order.order_status === 'PENDING'){
             user.twyst_cash = user.twyst_cash-order.offer_cost;                            
         }
-        else {
+        else if(order.order_status != 'PENDING'){
             if(order.payment_info.is_inapp) {
                 user.twyst_cash = user.twyst_cash+order.inapp_cashback;    
             }

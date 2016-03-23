@@ -426,7 +426,7 @@ function initiate_refund(data){
         if(data.order.payment_info.payment_mode === 'Zaakpay')  {
             data.order.refund_mode = 'Zaakpay';
             data.order.updateDesired = 14;
-            data.order.updateReason = 'user cancelled, merchant rejected, unable to deliver';
+            data.order.updateReason = 'user has cancelled order';
         }
         else if(data.order.payment_info.payment_mode === 'wallet') {
             data.order.refund_mode = 'wallet';
@@ -673,8 +673,9 @@ module.exports.get_twyst_cash_history = function(token) {
                         action.earn =  true;
                         action.twyst_cash = event.event_meta.twyst_cash;
                         action.earn_at = event.event_date;
+                        var percentage = (100*event.event_meta.twyst_cash/event.event_meta.amount).toFixed(2);
                         action.message = 'Order at '+ event.event_outlet.basics.name + " Worth Rs. "
-                         + event.event_meta.amount + " 10 % Twyst Cash earned";
+                         + event.event_meta.amount + "+tax, earned " + percentage +" % Twyst Cash";
                         action.outlet = event.event_outlet.basics.name;
                         order_history.push(action);
                     }
