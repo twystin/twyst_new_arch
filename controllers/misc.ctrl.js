@@ -88,6 +88,51 @@ module.exports.send_verification_email = function(req, res){
       	}
     }, function(err) {
       	HttpHelper.error(res, null, "Could not find user");
-    });
-	
+    });	
+}
+
+module.exports.optout_user = function(req, res){
+	logger.log();
+	var phone = req.body.phone;
+	var outlet_id = req.body.outlet_id;
+	var block_all = req.body.block_all;
+	console.log(block_all)
+	User.findOne({
+		phone: phone
+	}, function (err, user) {
+		if(err || !user) {
+			// Do nothing
+		}
+		else if(block_all){
+			user.messaging_preferences.block_all.sms.promo = true;
+		}
+		else if(outlet_id && !block_all) {
+			var obj = {};
+			obj.outlet_id = outlet_id;
+			obj.handle = 'TWYSTR';
+			obj.sms = {};
+			console.log(obj);
+			obj.sms.promo = true;
+			user.messaging_preferences.block_outlets.push(obj);
+		}
+		else{
+			user.messaging_preferences.block_all.sms.promo = true;
+			var obj = {};
+			obj.outlet_id = outlet_id;
+			obj.handle = 'TWYSTR';
+			obj.sms = {};
+			obj.sms.promo = true;
+			console.log(obj);
+			user.messaging_preferences.block_outlets.push(obj);
+		}
+		user.save(function(err, user){
+			if(err){
+				HttpHelper.error(res, null, "Could not submit your response");	
+			}
+			else{
+				HttpHelper.success(res, null, "Your request has been submitted successfully");
+			}
+		})
+		
+	})
 }
