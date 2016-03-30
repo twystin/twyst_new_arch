@@ -225,10 +225,10 @@ module.exports = function(app) {
         obj.outlet = outlet;
         //res.status(200).send({
           //'response': true,
-          //'message': 'success',
+          //'messkuldeepp89age': 'success',
           //'data': obj
         //});
-        res.redirect('/home/optout_sms.html?'+'&channel='+channel+'_id='+outlet);
+        res.redirect('/home/optout_sms.html?'+'&channel='+channel+'&_id='+outlet);
     });
 
     app.post('/optout/:channel/', MiscCtrl.optout_user);
