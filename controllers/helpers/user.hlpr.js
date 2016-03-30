@@ -675,7 +675,7 @@ module.exports.get_twyst_cash_history = function(token) {
                         action.earn_at = event.event_date;
                         var percentage = (100*event.event_meta.twyst_cash/event.event_meta.amount).toFixed(2);
                         action.message = 'Order at '+ event.event_outlet.basics.name + " Worth Rs. "
-                         + event.event_meta.amount + "+tax, earned " + percentage +" % Twyst Cash";
+                         + event.event_meta.amount + "+tax, earned " + percentage +"% Twyst Cash";
                         action.outlet = event.event_outlet.basics.name;
                         order_history.push(action);
                     }

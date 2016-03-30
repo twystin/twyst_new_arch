@@ -126,6 +126,16 @@ module.exports = function(app) {
 
   })();
 
+  (function BannerRoutes() {
+    var BannerCtrl = require('../controllers/banner.ctrl');
+    app.post('/api/v4/banners', BannerCtrl.create);
+    app.get('/api/v4/banners', BannerCtrl.all);
+    app.put('/api/v4/banners/:banner_id', BannerCtrl.update);
+    app.get('/api/v4/banners/:banner_id', BannerCtrl.get);
+    app.delete('/api/v4/banners/:banner_id', BannerCtrl.delete);
+
+  })();
+
   (function MenuRoutes() {
     var MenuCtrl = require('../controllers/menu.ctrl');
     app.post('/api/v4/menu', MenuCtrl.new);
@@ -215,6 +225,24 @@ module.exports = function(app) {
     app.get('/terms_of_use/', function(req, res){
       res.redirect('../../terms_of_use.pdf');    
     });
+
+    var MiscCtrl = require('../controllers/misc.ctrl');
+    app.get('/optout/:channel/:outlet', function(req, res){
+        var channel = req.params.channel;
+        var outlet = req.params.outlet;
+        var obj = {};
+        obj.channel = channel;
+        obj.outlet = outlet;
+        //res.status(200).send({
+          //'response': true,
+          //'messkuldeepp89age': 'success',
+          //'data': obj
+        //});
+        res.redirect('/home/optout_sms.html?'+'&channel='+channel+'&_id='+outlet);
+    });
+
+    app.post('/optout/:channel/', MiscCtrl.optout_user);
+        
     app.get('/:url(*)', function(req, res){
       res.redirect('../../home/404.html')
     })

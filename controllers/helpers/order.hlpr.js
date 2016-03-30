@@ -1404,7 +1404,7 @@ module.exports.get_order = function(token, order_id) {
             } else {
                 var orders = [];
                 orders.push(order);
-                process_orders(orders, deferred);                
+                process_orders(orders, deferred, 'one');                
             }
           }
         );
@@ -1431,7 +1431,7 @@ module.exports.get_orders = function(token) {
                         message: 'Unable to load orders'
                     });
                 } else {
-                    process_orders(orders, deferred);
+                    process_orders(orders, deferred, 'all');
                 }
             });
         } else if (data.data.role >= 2 && data.data.role < 6) {
@@ -1446,7 +1446,7 @@ module.exports.get_orders = function(token) {
                         message: 'Unable to load orders'
                     });
                 } else {
-                    process_orders(orders, deferred);
+                    process_orders(orders, deferred, 'all');
                 }
             });
         } else {
@@ -1457,7 +1457,7 @@ module.exports.get_orders = function(token) {
                         message: 'Unable to load orders'
                     });
                 } else {
-                    process_orders(orders, deferred);
+                    process_orders(orders, deferred, 'all');
                 }
             });
         }
@@ -1550,7 +1550,7 @@ module.exports.confirm_inapp_order = function(data) {
     return deferred.promise;
 }
 
-function process_orders(orders, deferred) {
+function process_orders(orders, deferred, check) {
     var processed_orders = _.map(orders, function(order){
         order = order.toJSON();
         var updated_order = {};    
@@ -1601,7 +1601,7 @@ function process_orders(orders, deferred) {
 
         return updated_order;
     });
-    if(processed_orders.length > 1) {
+    if(check === 'all') {
         deferred.resolve({
             data: processed_orders,
             message: 'found the orders'
@@ -1630,7 +1630,7 @@ function update_payment_mode(data) {
         data.payment_mode = 'Zaakpay';
     };
 
-    if(data.card_id != 'NA') {
+    if(data.card_id != 'NA' && data.payment_mode !== 'COD') {
         card_id = data.card_id;
         data.payment_method = data.payment_mode;
         data.payment_mode = 'Zaakpay';
