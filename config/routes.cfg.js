@@ -126,6 +126,16 @@ module.exports = function(app) {
 
   })();
 
+  (function BannerRoutes() {
+    var BannerCtrl = require('../controllers/banner.ctrl');
+    app.post('/api/v4/banners', BannerCtrl.create);
+    app.get('/api/v4/banners', BannerCtrl.all);
+    app.put('/api/v4/banners/:banner_id', BannerCtrl.update);
+    app.get('/api/v4/banners/:banner_id', BannerCtrl.get);
+    app.delete('/api/v4/banners/:banner_id', BannerCtrl.delete);
+
+  })();
+
   (function MenuRoutes() {
     var MenuCtrl = require('../controllers/menu.ctrl');
     app.post('/api/v4/menu', MenuCtrl.new);
