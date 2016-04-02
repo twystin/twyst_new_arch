@@ -243,6 +243,10 @@ module.exports = function(app) {
         //});
         res.redirect('/home/optout_sms.html?'+'&channel='+channel+'&_id='+outlet_id+'&name='+outlet_name);
     });
+    app.get('/optout/:channel', function(req, res){
+        var channel = req.params.channel;
+        res.redirect('/home/optout_sms.html?'+'&channel='+channel);
+    });
 
     app.post('/optout/:channel/', MiscCtrl.optout_user);
         
