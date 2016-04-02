@@ -1727,7 +1727,9 @@ function send_sms(data) {
         }
     });
     var am_payload = {};
-    am_payload.message = payload.message  +order_number+placed_at+delivery_time+total_amount+collected_amount + 'outlet number ' + data.outlet.contact.phones.reg_mobile[0];
+    payload.from = 'TWYSTR';
+    var outlet_phone =  data.outlet.contact.phones.reg_mobile[0];
+    am_payload.message = payload.message  +order_number+placed_at+delivery_time+total_amount+collected_amount + ' Outlet number ' + outlet_phone;
     am_payload.phone = data.outlet.basics.account_mgr_phone;
     Transporter.send('sms', 'vf', am_payload);
     //if(data.payment_mode === 'COD') {
