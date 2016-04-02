@@ -40,7 +40,6 @@ module.exports.process_refund = function(order) {
 	var deferred = Q.defer();
 	
 	var form = {}, update_url;
-	console.log(order)
 	if(order.refund_mode === 'Zaakpay') {
 		console.log('prcessing refund for zaakpay');
 		var merchantIdentifier = '4884e5a14ab742578df520b5203b91e6';
