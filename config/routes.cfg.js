@@ -154,6 +154,7 @@ module.exports = function(app) {
     app.put('/api/v4/order', OrderCtrl.update_order);
     app.post('/api/v4/order/verify', OrderCtrl.verify_order);
     app.post('/api/v4/order/apply/offer', OrderCtrl.apply_offer);
+    app.post('/api/v4/order/apply/coupon', OrderCtrl.apply_coupon);
     app.post('/api/v4/order/checkout', OrderCtrl.checkout);
     app.post('/api/v4/order/confirm', OrderCtrl.confirm_order);
 

@@ -459,7 +459,7 @@ function send_notification_to_all(data) {
     send_notification(['console', data.order.outlet.basics.account_mgr_email.replace('.', '').replace('@', ''),
         data.order.outlet._id], {
         message: 'User has cancelled an order',
-        order_id: data.order_id,
+        order_id: data.order._id,
         type: 'cancelled'
     });
 

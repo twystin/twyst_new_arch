@@ -13,6 +13,7 @@ var Outlet = mongoose.model('Outlet');
 var Order = mongoose.model('Order');
 var User = mongoose.model('User');
 var Event = mongoose.model('Event');
+var Coupon = mongoose.model('Coupon');
 var logger = require('tracer').colorConsole();
 var AuthHelper = require('../../common/auth.hlpr');
 var OutletHelper = require('./outlet.hlpr');
@@ -119,6 +120,36 @@ module.exports.apply_offer = function(token, order) {
         updated_data.order_actual_value_with_tax = data.order_actual_value_with_tax;
         updated_data.offer_used = data.offer_used || null;
        
+        deferred.resolve(updated_data);
+    })
+    .fail(function(err) {
+        console.log(err)
+      deferred.reject(err);
+    });
+    
+    return deferred.promise;
+}
+
+module.exports.apply_coupon = function(token, order) {
+    logger.log();
+    var deferred = Q.defer();
+    
+    var data = {};
+    data.outlet = order.outlet;
+    data.user_token = token;
+    data.coupon_code = order.coupon_code;
+    data.order_number = order.order_number;
+
+    get_user(data)
+    .then(function(data){
+        return check_coupon_applicability(data);
+    })
+    .then(function(data){
+        return apply_selected_coupon(data);
+    })
+    .then(function(data) {
+        var updated_data = {};
+        updated_data.cashback = data.cashback;
         deferred.resolve(updated_data);
     })
     .fail(function(err) {
@@ -887,6 +918,178 @@ function check_offer_applicability(data) {
     
     return deferred.promise;
 }
+
+
+function check_coupon_applicability (data) {
+    logger.log();
+    var deferred = Q.defer();
+
+    Coupon.findOne({
+        'code': data.coupon_code
+    }).exec(function(err, coupon){
+        if(err || !coupon){
+            //no such coupon code exists
+            deferred.reject('Invalid coupon code');
+        }
+        else{
+            data.coupon = coupon;
+            if (isExpired(data.coupon)) {
+                deferred.reject('Coupon has expired');
+            }
+
+            if (isUsedTooMany(data.coupon)) {
+                deferred.reject('Coupon has been used too many times');
+            }
+
+            if(!isApplicableAtOutlet(data)){
+                deferred.reject('Coupon is not applicable at this outlet');   
+            }
+
+            if(isOnFirstOrder(data)){
+                deferred.reject('Coupon is available only on first order');   
+            }
+
+            if(isAlreadyUsed(data)){
+                deferred.reject('Coupon has already been used by you');   
+            }
+
+            deferred.resolve(data);
+        }
+    })
+    return deferred.promise;   
+}
+
+
+function isExpired(coupon) {
+  if (new Date(coupon.validity.start) < new Date() && new Date(coupon.validity.end) > new Date()) {
+    return false;
+  }
+  return true;
+}
+
+function isUsedTooMany(coupon) {
+  if (coupon.times_used <= coupon.max_use_limit) {
+    return false;
+  }
+  return true;
+}
+
+function isApplicableAtOutlet(data) {
+    if(data.coupon.outlets && data.coupon.outlets.length){
+        var index = _.findIndex(data.coupon.outlets, function(outlet) { return outlet.toString() == data.outlet.toString(); });
+        if(index === -1) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+    else{
+        return true;
+    }
+}
+
+function isOnFirstOrder(data) {
+    console.log(data.coupon.only_on_first_order);
+    console.log(data.user.orders);
+    if(data.coupon.only_on_first_order && data.user.orders && data.user.orders.length) {
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+
+function isAlreadyUsed(data) {
+    var per_user_limit = data.coupon.per_user_limit;
+    if(data.user.coupons && data.user.coupons.length) {
+        var used_coupons = [];
+        _.each(data.user.coupons, function(coupon){
+            if(coupon === data.coupon._id) {
+                used_coupons.push(coupon);
+            }
+        })
+        if(used_coupons.length >= per_user_limit) {
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    else{
+        return false;
+    }   
+}
+
+
+function apply_selected_coupon(data) {
+    logger.log();
+    var deferred = Q.defer();
+
+    Cache.hget(data.user._id, 'order_map', function(err, reply) {
+        if(!reply) {
+            deferred.reject('no coupon available for user')
+        }
+        else{
+            var order = JSON.parse(reply);
+            console.log(data.order_number);
+            console.log(order.order_number)
+            if(data.order_number.toString() === order.order_number.toString()) {
+                
+                if(data.coupon.actions.reward.reward_meta.reward_type === 'percentageoff') {
+                    if(!order.offer_used){
+                        if(order.order_actual_value_without_tax >= data.coupon.actions.reward.reward_meta.minimum_bill_value) {
+                            var cashback = (order.order_actual_value_without_tax * data.coupon.actions.reward.reward_meta.percent)/100;
+                            if(cashback > data.coupon.actions.reward.reward_meta.max) {
+                                cashback = data.coupon.actions.reward.reward_meta.max;     
+                            }
+                            order.coupon_used = data.coupon._id;
+                            order.cashback = cashback;
+                            order.cashback_percentage = data.coupon.actions.reward.reward_meta.percent;
+                            Cache.hset(data.user._id, "order_map", JSON.stringify(order), function(err) {
+                               if(err) {
+                                 logger.log(err);
+                               }
+                               else{
+                                    console.log('order found coupon applied');
+                
+                                    deferred.resolve(order);
+                               }
+                                
+                            }); 
+                        }             
+                    }
+                    else{
+                        if(order.offer_used.order_value_without_tax >= data.coupon.actions.reward.reward_meta.minimum_bill_value) {
+                            var cashback = (order.offer_used.order_value_without_tax * data.coupon.actions.reward.reward_meta.percent)/100;
+                            if(cashback > data.coupon.actions.reward.reward_meta.max) {
+                                cashback = data.coupon.actions.reward.reward_meta.max;    
+                            }
+                            order.coupon_used = data.coupon._id;
+                            order.cashback = cashback;
+                            order.cashback_percentage = data.coupon.actions.reward.reward_meta.percent;
+                            Cache.hset(data.user._id, "order_map", JSON.stringify(order), function(err) {
+                               if(err) {
+                                 logger.log(err);
+                               }
+                               else{
+                                    console.log('order found coupon applied');
+                
+                                    deferred.resolve(order);
+                               }
+                            });    
+                        }   
+                    }
+                }
+            }
+            else {                
+                deferred.reject('order not found');
+            }
+        } 
+    })
+    return deferred.promise;
+}
+
 function apply_selected_offer(data) {
     logger.log();
     var deferred = Q.defer();
@@ -1137,7 +1340,6 @@ function massage_order(data){
                 order.comments = order.comments;
                 order.payment_options = order.payment_options;
                 if(order.offer_used) {
-                    console.log(order.offer_used);
                     order.order_value_without_offer = Math.round(order.order_actual_value_without_tax);
                     order.order_value_with_offer = Math.round(order.offer_used.order_value_without_tax);
                     order.tax_paid = order.offer_used.st+order.offer_used.vat;
@@ -1152,43 +1354,54 @@ function massage_order(data){
                     order.actual_amount_paid = Math.round(order.order_actual_value_with_tax);
                 }
                 //setup cashback info
-                if(!order.offer_used && data.outlet.twyst_meta.cashback_info
-                    && data.outlet.twyst_meta.cashback_info.base_cashback) {
-                    console.log('cashback setup');
-                    var cod_cashback = 0, inapp_cashback = 0, order_amount_ratio = 1;
-
-                    if(data.outlet.twyst_meta.cashback_info.order_amount_slab.length) {
-                        order_amount_ratio = _.find(data.outlet.twyst_meta.cashback_info.order_amount_slab, function(slab){
-                            if(order.order_actual_value_without_tax >= slab.start &&
-                                order.order_actual_value_without_tax <= slab.end) {
-                                return slab.ratio;
-                            }
-                        });    
-                    }
-                    
-                    var inapp_ratio = data.outlet.twyst_meta.cashback_info.in_app_ratio;
-                    var cod_ratio = data.outlet.twyst_meta.cashback_info.cod_ratio;
-                    var base_cashback = data.outlet.twyst_meta.cashback_info.base_cashback;
-                    
-                    var order_amount_cashback = order.order_actual_value_without_tax*base_cashback * order_amount_ratio /100;
-                    cod_cashback = order.order_ctual_value_without_tax*base_cashback * cod_ratio /100;
-                    inapp_cashback = order.order_actual_value_without_tax*base_cashback * inapp_ratio /100;
-                    cod_cashback = _.max([base_cashback, order_amount_cashback, cod_cashback], function(cashback){ return cashback; });
-                    inapp_cashback = _.max([base_cashback, order_amount_cashback, inapp_cashback], function(cashback){ return cashback; });
-                    order.cod_cashback = Math.round(cod_cashback);
-                    order.inapp_cashback = Math.round(inapp_cashback);
-                    order.cod_cashback_percenatage = _.max([base_cashback*cod_ratio, base_cashback*order_amount_ratio], function(cashback){ return cashback; });
-                    order.inapp_cashback_percenatage = _.max([base_cashback*inapp_ratio, base_cashback*order_amount_ratio], function(cashback){ return cashback; });
-                    order.cod_cashback_percenatage = order.cod_cashback_percenatage.toFixed(2);
-                    order.inapp_cashback_percenatage = order.inapp_cashback_percenatage.toFixed(2);
+                if(order.coupon_used) {
+                    console.log('here');
+                    console.log(order.cashback)
+                    console.log(order.cashback_percentage)
+                    order.cod_cashback = 0
+                    order.inapp_cashback = order.cashback;
+                    order.cod_cashback_percenatage = 0;
+                    order.inapp_cashback_percenatage = order.cashback_percentage;
                 }
                 else{
-                    console.log('cashback not setup');
-                    order.cod_cashback = 0;
-                    order.inapp_cashback = 0;   
-                    
-                }
+                    if(!order.offer_used && data.outlet.twyst_meta.cashback_info
+                    && data.outlet.twyst_meta.cashback_info.base_cashback) {
+                        console.log('cashback setup');
+                        var cod_cashback = 0, inapp_cashback = 0, order_amount_ratio = 1;
 
+                        if(data.outlet.twyst_meta.cashback_info.order_amount_slab.length) {
+                            order_amount_ratio = _.find(data.outlet.twyst_meta.cashback_info.order_amount_slab, function(slab){
+                                if(order.order_actual_value_without_tax >= slab.start &&
+                                    order.order_actual_value_without_tax <= slab.end) {
+                                    return slab.ratio;
+                                }
+                            });    
+                        }
+                        
+                        var inapp_ratio = data.outlet.twyst_meta.cashback_info.in_app_ratio;
+                        var cod_ratio = data.outlet.twyst_meta.cashback_info.cod_ratio;
+                        var base_cashback = data.outlet.twyst_meta.cashback_info.base_cashback;
+                        
+                        var order_amount_cashback = order.order_actual_value_without_tax*base_cashback * order_amount_ratio /100;
+                        cod_cashback = order.order_ctual_value_without_tax*base_cashback * cod_ratio /100;
+                        inapp_cashback = order.order_actual_value_without_tax*base_cashback * inapp_ratio /100;
+                        cod_cashback = _.max([base_cashback, order_amount_cashback, cod_cashback], function(cashback){ return cashback; });
+                        inapp_cashback = _.max([base_cashback, order_amount_cashback, inapp_cashback], function(cashback){ return cashback; });
+                        order.cod_cashback = Math.round(cod_cashback);
+                        order.inapp_cashback = Math.round(inapp_cashback);
+                        order.cod_cashback_percenatage = _.max([base_cashback*cod_ratio, base_cashback*order_amount_ratio], function(cashback){ return cashback; });
+                        order.inapp_cashback_percenatage = _.max([base_cashback*inapp_ratio, base_cashback*order_amount_ratio], function(cashback){ return cashback; });
+                        order.cod_cashback_percenatage = order.cod_cashback_percenatage.toFixed(2);
+                        order.inapp_cashback_percenatage = order.inapp_cashback_percenatage.toFixed(2);
+                    }
+                    else{
+                        console.log('cashback not setup');
+                        order.cod_cashback = 0;
+                        order.inapp_cashback = 0;   
+                        
+                    }    
+                }
+                
                 var order_json = order;
                 order = new Order(order); 
     
@@ -1727,8 +1940,9 @@ function send_sms(data) {
         }
     });
     var am_payload = {};
-    payload.from = 'TWYSTR';
-    var outlet_phone =  data.outlet.contact.phones.reg_mobile[0];
+    am_payload.from = 'TWYSTR';
+    console.log(data.outlet.contact.phones.reg_mobile[0]);
+    var outlet_phone =  data.outlet.contact.phones.reg_mobile[0].num;
     am_payload.message = payload.message  +order_number+placed_at+delivery_time+total_amount+collected_amount + ' Outlet number ' + outlet_phone;
     am_payload.phone = data.outlet.basics.account_mgr_phone;
     Transporter.send('sms', 'vf', am_payload);
@@ -2188,7 +2402,13 @@ function update_user_twyst_cash(order) {
           });
         } 
         else if(order.offer_used && order.order_status === 'PENDING'){
-            user.twyst_cash = user.twyst_cash-order.offer_cost;                            
+            user.twyst_cash = user.twyst_cash-order.offer_cost;
+            user.orders.push(order._id);
+            if(order.coupon_used) {
+                var coupon = {};
+                coupon._id = order.coupon_used;
+                user.coupons.push(coupon);
+            }
         }
         else if(order.order_status != 'PENDING'){
             if(order.payment_info.is_inapp) {

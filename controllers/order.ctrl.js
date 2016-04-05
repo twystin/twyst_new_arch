@@ -47,6 +47,30 @@ module.exports.apply_offer = function(req, res) {
 	}
 }
 
+module.exports.apply_coupon = function(req, res) {
+	logger.log();
+	var token = req.query.token || null;
+	var order = {};
+	order = _.extend(order, req.body);
+
+	if (!token) {
+		HttpHelper.error(res, null, "Not Authenticated");
+	}
+	else if(!order.order_number) {
+		HttpHelper.error(res, null, "could not process without order number");	
+	}
+	else if(!order.coupon_code){
+		HttpHelper.error(res, null, "could not process without coupon_code");	
+	}
+	else{
+		OrderHelper.apply_coupon(token, order).then(function(data) {
+			HttpHelper.success(res, data, data.message);
+		}, function(err) {
+			HttpHelper.error(res, err || null, err.message);
+		});	
+	}
+}
+
 module.exports.checkout = function(req, res) {
 	logger.log();
 	var token = req.query.token || null;
