@@ -134,6 +134,9 @@ module.exports = function(app) {
     app.put('/api/v4/banners/:banner_id', BannerCtrl.update);
     app.get('/api/v4/banners/:banner_id', BannerCtrl.get);
     app.delete('/api/v4/banners/:banner_id', BannerCtrl.delete);
+    app.get('/api/v4/banners/landing/page/:partner_name', function(req, res){
+        res.redirect('/home/' + req.params.partner_name+ '.html?');
+    });
 
   })();
 
@@ -155,6 +158,7 @@ module.exports = function(app) {
     app.post('/api/v4/order/verify', OrderCtrl.verify_order);
     app.post('/api/v4/order/apply/offer', OrderCtrl.apply_offer);
     app.post('/api/v4/order/apply/coupon', OrderCtrl.apply_coupon);
+    app.post('/api/v4/order/remove/coupon', OrderCtrl.remove_coupon);
     app.post('/api/v4/order/checkout', OrderCtrl.checkout);
     app.post('/api/v4/order/confirm', OrderCtrl.confirm_order);
 

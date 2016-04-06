@@ -615,7 +615,10 @@ function reject_order(data) {
                         notif.time = time;
                         notif.order_id = data.order.order_id; 
                         send_notification_to_user(current_order.user.push_ids[current_order.user.push_ids.length-1].push_id, notif);
-
+                        var index = _.findIndex(user.orders, function(order_obj) { return order_obj.order_id.toString()===order._id; });
+                        if(index!==-1) {
+                            user.orders.splice(index, 1);
+                        }
                         if(current_order.offer_used) {
                             User.findOneAndUpdate({
                             _id: current_order.user._id

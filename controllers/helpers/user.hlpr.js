@@ -752,7 +752,10 @@ function update_user_twyst_cash(order) {
           });
         }
         user.twyst_cash = user.twyst_cash+order.offer_cost;
-
+        var index = _.findIndex(user.orders, function(order_obj) { return order_obj.order_id.toString()===order._id; });
+        if(index!==-1) {
+            user.orders.splice(index, 1);
+        }
         user.save(function(err, user){
             if(err || !user){
                 deferred.reject('Couldn\'t update user cashback');

@@ -147,9 +147,42 @@ module.exports.apply_coupon = function(token, order) {
     .then(function(data){
         return apply_selected_coupon(data);
     })
+    .then(function(data){
+        return update_coupon_count(data);
+    })
     .then(function(data) {
         var updated_data = {};
-        updated_data.cashback = data.cashback;
+        updated_data.cashback = Math.round(data.order.cashback);
+        deferred.resolve(updated_data);
+    })
+    .fail(function(err) {
+        console.log(err)
+      deferred.reject(err);
+    });
+    
+    return deferred.promise;
+}
+
+module.exports.remove_coupon = function(token, order) {
+    logger.log();
+    var deferred = Q.defer();
+    
+    var data = {};
+    data.outlet = order.outlet;
+    data.user_token = token;
+    data.coupon_code = order.coupon_code;
+    data.order_number = order.order_number;
+
+    get_user(data)
+    .then(function(data){
+        return remove_selected_coupon(data);
+    })
+    .then(function(data){
+        return update_coupon_count(data);
+    })
+    .then(function(data) {
+        var updated_data = {};
+        updated_data.cashback = Math.round(data.order.cashback);
         deferred.resolve(updated_data);
     })
     .fail(function(err) {
@@ -929,28 +962,46 @@ function check_coupon_applicability (data) {
     }).exec(function(err, coupon){
         if(err || !coupon){
             //no such coupon code exists
-            deferred.reject('Invalid coupon code');
+            deferred.reject({
+                err: err || true,
+                message: 'Invalid coupon code'
+            });
         }
         else{
             data.coupon = coupon;
             if (isExpired(data.coupon)) {
-                deferred.reject('Coupon has expired');
+                deferred.reject({
+                    err: err || true,
+                    message: 'Coupon has expired'
+                });                
             }
 
             if (isUsedTooMany(data.coupon)) {
-                deferred.reject('Coupon has been used too many times');
+                deferred.reject({
+                    err: err || true,
+                    message: 'Coupon has been used too many times'
+                });
             }
 
             if(!isApplicableAtOutlet(data)){
-                deferred.reject('Coupon is not applicable at this outlet');   
+                deferred.reject({
+                    err: err || true,
+                    message: 'Coupon is not applicable at this outlet'
+                });   
             }
 
             if(isOnFirstOrder(data)){
-                deferred.reject('Coupon is available only on first order');   
+                deferred.reject({
+                    err: err || true,
+                    message: 'Coupon is available only on first order'
+                }); 
             }
 
             if(isAlreadyUsed(data)){
-                deferred.reject('Coupon has already been used by you');   
+                deferred.reject({
+                    err: err || true,
+                    message: 'Coupon has already been used by you'
+                });   
             }
 
             deferred.resolve(data);
@@ -992,7 +1043,8 @@ function isApplicableAtOutlet(data) {
 function isOnFirstOrder(data) {
     console.log(data.coupon.only_on_first_order);
     console.log(data.user.orders);
-    if(data.coupon.only_on_first_order && data.user.orders && data.user.orders.length) {
+    if(data.coupon.only_on_first_order && 
+        data.user.orders && data.user.orders.length) {
         return true;
     }
     else{
@@ -1028,7 +1080,10 @@ function apply_selected_coupon(data) {
 
     Cache.hget(data.user._id, 'order_map', function(err, reply) {
         if(!reply) {
-            deferred.reject('no coupon available for user')
+            deferred.reject({
+                err: err || true,
+                message: 'no coupon available for user'
+            });
         }
         else{
             var order = JSON.parse(reply);
@@ -1052,12 +1107,18 @@ function apply_selected_coupon(data) {
                                }
                                else{
                                     console.log('order found coupon applied');
-                
-                                    deferred.resolve(order);
+                                    data.order = order;
+                                    deferred.resolve(data);
                                }
                                 
                             }); 
-                        }             
+                        }  
+                        else{
+                            deferred.reject({
+                                err: err || true,
+                                message: 'Minimum order amount to use this coupon code is ' + data.coupon.actions.reward.reward_meta.minimum_bill_value
+                            });
+                        }           
                     }
                     else{
                         if(order.offer_used.order_value_without_tax >= data.coupon.actions.reward.reward_meta.minimum_bill_value) {
@@ -1074,10 +1135,16 @@ function apply_selected_coupon(data) {
                                }
                                else{
                                     console.log('order found coupon applied');
-                
-                                    deferred.resolve(order);
+                                    data.order = order;
+                                    deferred.resolve(data);
                                }
                             });    
+                        }
+                        else{
+                            deferred.reject({
+                                err: err || true,
+                                message: 'Minimum order amount to use this coupon code is ' + data.coupon.actions.reward.reward_meta.minimum_bill_value
+                            });
                         }   
                     }
                 }
@@ -1087,6 +1154,84 @@ function apply_selected_coupon(data) {
             }
         } 
     })
+    return deferred.promise;
+}
+
+function remove_selected_coupon(data) {
+    logger.log();
+    var deferred = Q.defer();
+
+    Cache.hget(data.user._id, 'order_map', function(err, reply) {
+        if(!reply) {
+            deferred.reject('no coupon available for user')
+        }
+        else{
+            var order = JSON.parse(reply);
+            console.log(data.order_number);
+            console.log(order.order_number)
+            if(data.order_number.toString() === order.order_number.toString()) {
+                if(order.coupon_used) {
+                    order.coupon_used = null;
+                    order.cashback = 0;
+                    order.cashback_percentage = 0;
+                    
+                    Cache.hset(data.user._id, "order_map", JSON.stringify(order), function(err) {
+                        if(err) {
+                            logger.log(err);
+                        }
+                        else{
+                            data.order = order;
+                            deferred.resolve(data);
+                        }
+                    });
+                }
+                else{
+                    deferred.reject({
+                        err: err || true,
+                        message: 'no coupon has been applied'
+                    });    
+                }
+            }
+            else {                
+                deferred.reject({
+                    err: err || true,
+                    message: 'order not found'
+                });
+            }
+        } 
+    })
+    return deferred.promise;
+}
+
+function update_coupon_count(data) {
+    logger.log();
+    var deferred = Q.defer();
+
+    var update_query;
+    if(data.order.coupon_used){
+        update_query = {
+            $inc: {
+              times_used: 1
+            }
+        }    
+    }
+    else{
+        update_query = {
+            $inc: {
+              times_used: -1
+            }
+        }   
+    }
+
+    Coupon.findOneAndUpdate({
+        code: data.coupon_code
+    }, update_query, function(err, qr) {
+        if (err) {
+          deferred.reject(err);
+        } else {
+          deferred.resolve(data);
+        }
+    });
     return deferred.promise;
 }
 
@@ -1359,9 +1504,10 @@ function massage_order(data){
                     console.log(order.cashback)
                     console.log(order.cashback_percentage)
                     order.cod_cashback = 0
-                    order.inapp_cashback = order.cashback;
+                    order.inapp_cashback = Math.round(order.cashback);
                     order.cod_cashback_percenatage = 0;
                     order.inapp_cashback_percenatage = order.cashback_percentage;
+                    order.payment_options = _.without(order.payment_options, 'cod');
                 }
                 else{
                     if(!order.offer_used && data.outlet.twyst_meta.cashback_info
@@ -1413,6 +1559,7 @@ function massage_order(data){
                     else{
                         order_json._id = saved_order._id;
                         data.order = order_json;
+                        data.mobikwik_cashback_percentage = 10; 
                         console.log('saved');
                         deferred.resolve(data);   
                     }
@@ -2382,7 +2529,6 @@ function update_outlet_rating(order){
                 else{
                     deferred.resolve(order);   
                 }
-                    
             })
 
         }
@@ -2402,13 +2548,7 @@ function update_user_twyst_cash(order) {
           });
         } 
         else if(order.offer_used && order.order_status === 'PENDING'){
-            user.twyst_cash = user.twyst_cash-order.offer_cost;
-            user.orders.push(order._id);
-            if(order.coupon_used) {
-                var coupon = {};
-                coupon._id = order.coupon_used;
-                user.coupons.push(coupon);
-            }
+            user.twyst_cash = user.twyst_cash-order.offer_cost;            
         }
         else if(order.order_status != 'PENDING'){
             if(order.payment_info.is_inapp) {
@@ -2417,6 +2557,15 @@ function update_user_twyst_cash(order) {
             else if(order.payment_info.payment_mode === 'COD'){
                 user.twyst_cash = user.twyst_cash+order.cod_cashback;        
             }    
+        }
+        var user_order_obj = {};
+        user_order_obj.order_id = order._id;
+        user_order_obj.outlet_id = order.outlet;
+        user.orders.push(user_order_obj);
+        if(order.coupon_used) {
+            var coupon = {};
+            coupon._id = order.coupon_used;
+            user.coupons.push(coupon);
         }
         user.save(function(err, user){
             if(err || !user){
