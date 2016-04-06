@@ -31,6 +31,7 @@ var Order = new Schema({
   },
   order_number: {type: String},
   offer_used: {type: Schema.Types.ObjectId, default: null},
+  coupon_used: {type: Schema.Types.ObjectId, Ref: 'Coupon', default: null},
   offer_cost: {type: Number, default: 0},
   order_date: {type: Date, default: Date.now},
   order_value_without_offer: {type: Number, default: 0},

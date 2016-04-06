@@ -230,6 +230,7 @@ function pick_outlet_fields(params) {
     if (params.outlet.photos && params.outlet.photos.background) {
       massaged_item.background = 'https://s3-us-west-2.amazonaws.com/retwyst-merchants/retwyst-outlets/' + params.outlet._id + '/' + params.outlet.photos.background;
     }
+    massaged_item.menu = params.outlet.menus[0];
     massaged_item.open_next = RecoHelper.opensAt(params.outlet.business_hours);
     params.outlet = massaged_item;
     deferred.resolve(params);
