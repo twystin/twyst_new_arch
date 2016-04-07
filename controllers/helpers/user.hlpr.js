@@ -324,9 +324,6 @@ module.exports.cancel_order = function(token, order) {
     .then(function(data) {
         return send_sms(data);
     })
-    //.then(function(data) {
-        //return /*(data);
-    //})
     .then(function(data) {
         return update_user_twyst_cash(data.order);
     })
@@ -488,10 +485,10 @@ function send_sms(data) {
     payload.message = '';
     var items, collected_amount;
     if(data.user.profile && data.user.profile.first_name) {
-        var name = 'Name: '+ data.user.profile.first_name;
+        var name = ' Name: '+ data.user.profile.first_name;
     }
     else{
-        var name = 'Name: '+ data.user.first_name;
+        var name = ' Name: '+ data.user.first_name;
     }
 
     var phone = ' Phone: '+ data.user.phone;
@@ -752,10 +749,20 @@ function update_user_twyst_cash(order) {
           });
         }
         user.twyst_cash = user.twyst_cash+order.offer_cost;
-        var index = _.findIndex(user.orders, function(order_obj) { return order_obj.order_id.toString()===order._id; });
-        if(index!==-1) {
-            user.orders.splice(index, 1);
+        var order_index = _.findIndex(user.orders, function(order_obj) { return order_obj.order_id.toString()===order._id.toString(); });
+        console.log('index value ' + index);
+        if(order_index!==-1) {
+            user.orders.splice(order_index, 1);
         }
+
+        if(order.coupon_used) {
+            var coupon_index = _.findIndex(user.coupons, function(coupon_obj) { return coupon_obj._id.toString()===coupon_used.toString(); });
+            console.log('index value ' + index);
+            if(coupon_index!==-1) {
+                user.orders.splice(coupon_index, 1);
+            }    
+        }
+        
         user.save(function(err, user){
             if(err || !user){
                 deferred.reject('Couldn\'t update user cashback');
