@@ -36,18 +36,26 @@ module.exports.validate_request = function(data) {
     }
 
     if (!phone || !/^[0-9]{10}$/.test(phone)) {
-        deferred.reject('Phone number missing or invalid');
+        deferred.reject({
+            message: 'Phone number missing or invalid'
+        });
     }
 
     if (!date) {
-        deferred.reject('Checkin-in cannot be done without date');
+        deferred.reject({
+            message: 'Checkin-in cannot be done without date'
+        });
     }
 
     if (!data.outlet) {
-        deferred.reject('Provide the outlet info to checkin the user');
+        deferred.reject({
+            message: 'Provide the outlet info to checkin the user'
+        });
     }
     if (_.get(data, 'outlet.outlet_meta.status') !== 'active') {
-        deferred.reject('Trying to checkin at an outlet that is not active right now')
+        deferred.reject({
+            message: 'Trying to checkin at an outlet that is not active right now'
+        })
     }
 
     User.findOne({
@@ -55,7 +63,10 @@ module.exports.validate_request = function(data) {
     }).exec(function(err, user) {
         if (err) {
             logger.error(err);
-            deferred.reject('The customer in not on Twyst');
+            deferred.reject({
+   
+                message: 'The customer in not on Twyst'
+            });
         } 
         else if(!user){ // create new user and checkin 
             AccountHelper.create_user_account(phone).then(function(data) {                
@@ -64,7 +75,10 @@ module.exports.validate_request = function(data) {
             
             }, function(err) {
                 console.log(err)
-                deferred.reject('could not create user')
+                deferred.reject({
+       
+                    message: 'could not create user'
+                })
             })
         }
         else{
@@ -80,7 +94,9 @@ function check_outlet(data) {
   logger.log();
   var deferred = Q.defer();
   if (!_.get(data, 'event_data.event_outlet')) {
-    deferred.reject('Checkin requires an outlet to be passed');
+    deferred.reject({
+        message: 'Checkin requires an outlet to be passed'
+    });
   } else {
     deferred.resolve(data);
   }
@@ -114,7 +130,9 @@ module.exports.already_checked_in = function(data) {
                 event_outlet: ObjectId(outlet_id)
             });
             if (same_outlet.length !== 0) {
-                deferred.reject('Already checked in here');
+                deferred.reject({
+                    message: 'Already checked in here'
+                });
             }
 
             var too_soon = _.find(events, function(event) {
@@ -122,7 +140,9 @@ module.exports.already_checked_in = function(data) {
             });
 
             if (too_soon) {
-                deferred.reject('Checked in at another outlet less than 5 minutes ago!');
+                deferred.reject({
+                    message: 'Checked in at another outlet less than 5 minutes ago!'
+                });
             } else {
                 deferred.resolve(data);
             }
@@ -213,16 +233,20 @@ module.exports.check_and_create_coupon = function(data) {
                 }
                 //console.log(passed_data.outlet)
                 if(passed_data.outlet.contact.location.locality_1) {
-                    passed_data.checkin_message = 'Check-in successful at '+ passed_data.outlet.basics.name +', '  + passed_data.outlet.contact.location.locality_1.toString()+' on '+ formatDate(new Date(event_date)) +". Reward unlocked! Your voucher will be available soon.";                
+                    //passed_data.checkin_message = 'Check-in successful at '+ passed_data.outlet.basics.name +', '  + passed_data.outlet.contact.location.locality_1.toString()+' on '+ formatDate(new Date(event_date)) +". Reward unlocked! Your voucher will be available soon.";                
+                    passed_data.checkin_message = 'Check-in successful at '+ passed_data.outlet.basics.name +', '  + passed_data.outlet.contact.location.locality_1.toString()+' on '+ formatDate(new Date(event_date)) +". Reward unlocked! Your voucher code is " + passed_data.new_coupon.code;
                     
                 }
                 else{
-                    passed_data.checkin_message = 'Check-in successful at '+ passed_data.outlet.basics.name +', '  + passed_data.outlet.contact.location.locality_2.toString()+' on '+ formatDate(new Date(event_date)) +". Reward unlocked! Your voucher will be available soon.";                                    
+                    passed_data.checkin_message = 'Check-in successful at '+ passed_data.outlet.basics.name +', '  + passed_data.outlet.contact.location.locality_2.toString()+' on '+ formatDate(new Date(event_date)) +". Reward unlocked! Your voucher code is " + passed_data.new_coupon.code;                                 
                 }
                 
                 deferred.resolve(passed_data);
             }, function(err) {
-                deferred.reject('Could not create coupon' + err);
+                deferred.reject({
+       
+                    message: 'Could not create coupon' + err
+                });
             })
         } else if (!isNaN(matching_offer)) {
             console.log('locked_offer');
@@ -237,7 +261,10 @@ module.exports.check_and_create_coupon = function(data) {
             passed_data.checkins_to_go = matching_offer;
             deferred.resolve(passed_data);
         } else {
-            deferred.reject('no matching offer for user');
+            deferred.reject({
+   
+                message: 'no matching offer for user'
+            });
         }        
     })
     return deferred.promise;
@@ -350,7 +377,10 @@ function create_coupon(offer, user, outlet, event_type, event_date) {
     }).exec(function(err, user) {
         if (err || !user) {
             console.log('user save err', err);
-            deferred.reject('Could not update user');
+            deferred.reject({
+   
+                message: 'Could not update user'
+            });
         } else {
             user.coupons.push(coupon);
             user.save(function(err) {

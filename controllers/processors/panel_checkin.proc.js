@@ -3,6 +3,7 @@ var _ = require('lodash');
 var Q = require('q');
 var CheckinHelper = require('../helpers/checkin.hlpr.js');
 var NotifHelper = require('../helpers/notif.hlpr.js');
+var Transporter = require('../../transports/transporter.js');
 
 module.exports.check = function(data) {
     logger.log();
@@ -28,8 +29,11 @@ module.exports.process = function(data) {
         .then(function(data) {
             return CheckinHelper.update_checkin_counts(data);
         })
+        //.then(function(data) {
+            //return NotifHelper.send_notification(data, data.checkin_message, 'Checkin Successful');
+        //})
         .then(function(data) {
-            return NotifHelper.send_notification(data, data.checkin_message, 'Checkin Successful');
+            return send_sms(data);
         })
         .then(function() {
             data.event_data.event_type = 'checkin';
@@ -39,6 +43,20 @@ module.exports.process = function(data) {
         .fail(function(err) {
             deferred.reject(err);
         })
+    return deferred.promise;
+}
+
+function send_sms(data) {
+    logger.log();
+    var deferred = Q.defer();
+
+    var payload  = {}
+    payload.from = 'TWYSTR';
+    payload.message = data.checkin_message;
+    payload.phone = data.user.phone;
+    console.log(payload);
+    Transporter.send('sms', 'vf', payload);
+    deferred.resolve(data);
     return deferred.promise;
 }
 

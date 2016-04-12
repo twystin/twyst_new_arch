@@ -1559,7 +1559,7 @@ function massage_order(data){
                     else{
                         order_json._id = saved_order._id;
                         data.order = order_json;
-                        data.mobikwik_cashback_percentage = 10; 
+                        data.order.mobikwik_cashback = 'Get extra 10% cashback in mobikwik wallet'; 
                         console.log('saved');
                         deferred.resolve(data);   
                     }
@@ -2089,7 +2089,7 @@ function send_sms(data) {
     var am_payload = {};
     am_payload.from = 'TWYSTR';
     console.log(data.outlet.contact.phones.reg_mobile[0]);
-    var outlet_phone =  data.outlet.contact.phones.reg_mobile[0].num;
+    var outlet_phone =  data.outlet.contact.phones.mobile[0].num;
     am_payload.message = payload.message  +order_number+placed_at+delivery_time+total_amount+collected_amount + ' Outlet number ' + outlet_phone;
     am_payload.phone = data.outlet.basics.account_mgr_phone;
     Transporter.send('sms', 'vf', am_payload);
@@ -2234,6 +2234,21 @@ function send_notification_to_all(data) {
     return deferred.promise;       
 }
 
+function send_order_close_notification(order) {
+    logger.log();
+    var deferred = Q.defer();
+
+    send_notification(['console', order.outlet_detail.basics.account_mgr_email.replace('.', '').replace('@', '')], {
+        message: 'Order has been closed by user',
+        order_id: order._id,
+        type: 'order_closed'
+    });
+    
+    deferred.resolve(order); 
+    return deferred.promise;       
+}
+
+
 module.exports.update_order = function(token, order) {
     logger.log();
     var deferred = Q.defer();
@@ -2280,6 +2295,9 @@ module.exports.update_order = function(token, order) {
                 return save_order_feedback_event(data);
             })
             .then(function(data) {
+                return send_order_close_notification(data);
+            })
+            .then(function(data) {
                 deferred.resolve(data);
             })
             .fail(function(err) {
@@ -2304,7 +2322,12 @@ module.exports.update_order = function(token, order) {
                         current_action.action_type = 'DELIVERED';
                         current_action.action_by = data.data._id;
                         current_action.message = 'Your order has been delivered.';
-                        saved_order.actions.push(current_action);  
+                        saved_order.actions.push(current_action);
+                        send_notification(['console', saved_order.outlet.basics.account_mgr_email.replace('.', '').replace('@', '')], {
+                            message: 'Order has been delivered to user',
+                            order_id: data.order_id,
+                            type: 'delivered'
+                        });  
                     }
                     else{
                         saved_order.order_status = 'NOT_DELIVERED';
@@ -2312,7 +2335,7 @@ module.exports.update_order = function(token, order) {
                         send_notification(['console', saved_order.outlet.basics.account_mgr_email.replace('.', '').replace('@', '')], {
                             message: 'Hey user said, order is not delivered please get back to user',
                             order_id: data.order_id,
-                            type: 'NOT_DELIVERED'
+                            type: 'not_delivered'
                         });
                         var payload = {};
                         payload.from = 'TWYSTR';
@@ -2527,6 +2550,7 @@ function update_outlet_rating(order){
                   });
                 }
                 else{
+                    order.outlet_detail = outlet;
                     deferred.resolve(order);   
                 }
             })
