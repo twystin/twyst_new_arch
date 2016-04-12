@@ -26,7 +26,7 @@ module.exports.create = function(req, res) {
 module.exports.get = function(req, res) {
 	logger.log();
 	var token = req.query.token || null,
-		banner = req.params.banner;
+		banner = req.params.banner_id;
 
 	if(!token) {
 		HttpHelper.error(res, null, "Not Authenticated");
@@ -41,6 +41,23 @@ module.exports.get = function(req, res) {
 	
 }
 
+module.exports.get_outlet_banner = function(req, res) {
+	logger.log();
+	var token = req.query.token || null,
+		banner = req.params.banner_id;
+
+	if(!token) {
+		HttpHelper.error(res, null, "Not Authenticated");
+	}
+	else{
+		BannerHelper.get_outlet_banner(req, banner).then(function(data) {
+			HttpHelper.success(res, data.data, data.message);
+		}, function(err) {
+			HttpHelper.error(res, err.err, err.message);
+		})	
+	}
+	
+}
 module.exports.update = function(req, res) {
 	logger.log();
 	var token = req.query.token || null,

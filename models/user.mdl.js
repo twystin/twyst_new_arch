@@ -135,8 +135,14 @@ var User = new Schema({
     ref: 'Outlet'
   }],
   orders: [{
-    type: Schema.ObjectId,
-    ref: 'Order'
+    order_id: {
+      type: Schema.ObjectId,
+      ref: 'Order'  
+    },
+    outlet_id:{
+      type: Schema.ObjectId,
+      ref: 'Outlet'    
+    }  
   }],
   coupons: [{
     _id: Schema.ObjectId,

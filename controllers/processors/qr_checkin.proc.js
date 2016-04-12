@@ -85,7 +85,7 @@ function validate_qr(data) {
     }
     passed_data.qr = qr;
     passed_data.outlet = qr.outlet_id; // SO THAT THE OUTLET IS SAVED IN THE EVENT TABLE
-    deferred.resolve(passed_data  );
+    deferred.resolve(passed_data);
   });
 
   return deferred.promise;
