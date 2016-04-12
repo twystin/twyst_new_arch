@@ -347,6 +347,16 @@ var OutletSchema = new Schema({
       //enum: ['active', 'archived', 'draft'],
       default: 'draft'
     },
+    services: {
+      ordering: {
+        type: Boolean, 
+        default: true
+      },
+      loyalty: {
+        type: Boolean, 
+        default: false
+      }
+    },
     links: [{
       type: Schema.ObjectId,
       ref: 'Outlet'

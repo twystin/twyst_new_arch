@@ -366,8 +366,8 @@ function create_new(res, passed_data) {
             HttpHelper.success(res, data, "Processed the event successfully.");
         })
         .fail(function(err) {
-            console.log(err)
-            HttpHelper.error(res, err || false, "Error processing the event");
+            console.log(err);
+            HttpHelper.error(res, err || false, err.message || "Error processing the event");
         });
 }
 
