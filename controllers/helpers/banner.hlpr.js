@@ -76,7 +76,7 @@ module.exports.get_banner = function(token, bannerId) {
 module.exports.get_outlet_banner = function(req, bannerId) {
     logger.log();
     var deferred = Q.defer();
-    console.log(req.query);
+
     Banner.findById(bannerId)
         .exec(function(err, banner) {
             if (err || !banner) {
@@ -85,7 +85,6 @@ module.exports.get_outlet_banner = function(req, bannerId) {
                     message: 'Unable to load banner details'
                 })
             } else {
-                console.log(banner.outlets);
                 Outlet.find({_id: {$in: banner.outlets}}).exec(function(err, outlets) {
                     if (err || !outlets) {
                         deferred.reject({
@@ -160,7 +159,6 @@ module.exports.update_banner = function(token, updated_banner) {
                     message: 'Failed to update banner'
                 });
             } else {
-                console.log(updated_banner)
                 banner = _.extend(banner, updated_banner);
                 banner.save(function(err) {
                     if (err) {
@@ -248,9 +246,7 @@ function get_outlets(params, outlets) {
         var cached_outlets = JSON.parse(reply);
         _.each(outlets, function(outlet){
             if (cached_outlets[outlet._id]) {
-            console.log('here');
-            offer_outlets.push(cached_outlets[outlet._id]);
-           
+            offer_outlets.push(cached_outlets[outlet._id]);           
           }
         })
         deferred.resolve({
@@ -265,8 +261,8 @@ function get_outlets(params, outlets) {
 
 function get_user(params) {
   logger.log();
-  console.log(params.query.token);
   var deferred = Q.defer();
+
   if (params.query.token) {
     AuthHelper.get_user(params.query.token).then(function(data) {
       params.user = data.data;
@@ -294,10 +290,9 @@ function get_user(params) {
 
 function set_open_closed(params) {
   logger.log();
-
   var deferred = Q.defer();
+
   params.outlets = _.compact(params.outlets);
-  console.log(params.outlets)
   if (params.query.date && params.query.time) {
     params.outlets = _.mapObject(params.outlets, function(val, key) {
       val.recco = val.recco || {};
@@ -314,7 +309,7 @@ function set_open_closed(params) {
 function map_valid_delivery_zone(params) {
   logger.log();
   var deferred = Q.defer();
-
+  
   if (params.query.lat && params.query.long) {
     params.outlets = _.map(params.outlets, function(val) {    
       if(val.attributes.delivery.delivery_zone && val.attributes.delivery.delivery_zone.length) {        
@@ -339,11 +334,13 @@ function map_valid_delivery_zone(params) {
             return val; 
           }
           else{
-            val.delivery_zone = val.attributes.delivery.delivery_zone[0];
+            val.valid_zone = val.attributes.delivery.delivery_zone[0];
+            return val;
           }  
         }
         else{
-          val.delivery_zone = val.attributes.delivery.delivery_zone[0];
+          val.valid_zone = val.attributes.delivery.delivery_zone[0];
+          return val;
         }
       }
       else{
@@ -353,9 +350,14 @@ function map_valid_delivery_zone(params) {
     deferred.resolve(params);  
   }
   else{
-    deferred.reject('please pass lat,long to get results');
+    params.outlets = _.map(params.outlets, function(val) {  
+        if(val.attributes.delivery.delivery_zone && val.attributes.delivery.delivery_zone.length) {
+            val.valid_zone = val.attributes.delivery.delivery_zone[0];
+        }
+        return val;
+    })    
+    deferred.resolve(params);
   }
-  
   return deferred.promise;  
 }
 
@@ -371,7 +373,6 @@ function set_delivery_experience(params) {
     else{
       val.recco.delivery_experience = null;    
     }
-    
     return val;
   });
   
@@ -382,6 +383,7 @@ function set_delivery_experience(params) {
 function set_cashback(params) {
     logger.log();
     var deferred = Q.defer();
+    
     params.outlets = _.compact(params.outlets);  
     params.outlets = _.map(params.outlets, function(val) {
     
@@ -417,7 +419,7 @@ function set_cashback(params) {
 function calculate_relevance(params) {
   logger.log();
   var deferred = Q.defer();
-  params.outlets = _.compact(params.outlets);
+  
   params.outlets = _.map(params.outlets, function(val) {
     var relevance = 10000;
     val.recco = val.recco || {};
@@ -434,16 +436,15 @@ function calculate_relevance(params) {
 }
 
 function sort_by_relevance(params) {
-  logger.log();
+    logger.log();
+    var deferred = Q.defer();
 
-  var deferred = Q.defer();
-  
-  params.outlets = _.sortBy(params.outlets, function(item) {
-    return -item.recco.relevance;
-  });
+    params.outlets = _.sortBy(params.outlets, function(item) {
+        return -item.recco.relevance;
+    });
 
-  deferred.resolve(params);
-  return deferred.promise;
+    deferred.resolve(params);
+    return deferred.promise;
 }
 
 function pick_outlet_fields(params) {
@@ -455,7 +456,7 @@ function pick_outlet_fields(params) {
   if (user) {
     user = user.toString();
   }
-  params.outlets = _.compact(params.outlets);
+
   Cache.hget(user, 'favourite_map', function(err, reply) {
     if (reply) {
       fmap = JSON.parse(reply);

@@ -234,11 +234,11 @@ module.exports.check_and_create_coupon = function(data) {
                 //console.log(passed_data.outlet)
                 if(passed_data.outlet.contact.location.locality_1) {
                     //passed_data.checkin_message = 'Check-in successful at '+ passed_data.outlet.basics.name +', '  + passed_data.outlet.contact.location.locality_1.toString()+' on '+ formatDate(new Date(event_date)) +". Reward unlocked! Your voucher will be available soon.";                
-                    passed_data.checkin_message = 'Check-in successful at '+ passed_data.outlet.basics.name +', '  + passed_data.outlet.contact.location.locality_1.toString()+' on '+ formatDate(new Date(event_date)) +". Reward unlocked! Your voucher code is " + passed_data.new_coupon.code;
+                    passed_data.checkin_message = 'Check-in successful at '+ passed_data.outlet.basics.name +', '  + passed_data.outlet.contact.location.locality_1.toString()+' on '+ formatDate(new Date(event_date)) +". Reward unlocked! Your voucher code is " + passed_data.new_coupon.code + ".";
                     
                 }
                 else{
-                    passed_data.checkin_message = 'Check-in successful at '+ passed_data.outlet.basics.name +', '  + passed_data.outlet.contact.location.locality_2.toString()+' on '+ formatDate(new Date(event_date)) +". Reward unlocked! Your voucher code is " + passed_data.new_coupon.code;                                 
+                    passed_data.checkin_message = 'Check-in successful at '+ passed_data.outlet.basics.name +', '  + passed_data.outlet.contact.location.locality_2.toString()+' on '+ formatDate(new Date(event_date)) +". Reward unlocked! Your voucher code is " + passed_data.new_coupon.code + ".";                                 
                 }
                 
                 deferred.resolve(passed_data);

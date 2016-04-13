@@ -1755,7 +1755,7 @@ module.exports.get_order = function(token, order_id) {
 
     AuthHelper.get_user(token).then(function(data) {
       
-        Order.findOne({ _id: order_id}).populate('outlet').exec(function(err, order) {
+        Order.findOne({ _id: order_id}).populate('outlet user').exec(function(err, order) {
             if (err || !order) {
               deferred.reject({
                 err: err || true,
