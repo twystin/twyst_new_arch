@@ -17,6 +17,7 @@ var Q = require('q');
 var ObjectId = mongoose.Types.ObjectId;
 var Cache = require('../common/cache.hlpr');
 var logger = require('tracer').colorConsole();
+var Transporter = require('../transports/transporter.js');
 
 module.exports.new = function(req, res) {
   var token = req.query.token || null;
@@ -823,33 +824,47 @@ module.exports.redeem_user_coupon = function(req, res) {
             },
             update,
             function(err, user) {
-              if (err) {
+              if (err || !user) {
                 HttpHelper.error(res, null, 'Error redeeming the coupon');
               } else {
                 var redeemed_coupon = _.findWhere(user.coupons, {
                   code: code
-                });
-                
-                autoCheckinUser(u, outlet_id).then(function(data) {
-                  var redeem_message = 'Your voucher at '+ data.outlet.basics.name+ ' for '+ 
-                  redeemed_coupon.header + ', '+ redeemed_coupon.line1+', '+ redeemed_coupon.line2
-                  +' has been redeemed by merchant.'
-                  NotifHelper.send_notification(data, redeem_message, 'Coupon Redeemed').then(function(){
+                });                
+
+                autoCheckinUser(u, outlet_id).then(function(data) {                  
+                  //NotifHelper.send_notification(data, redeem_message, 'Coupon Redeemed').then(function(){
                   
-                    HttpHelper.success(res, redeemed_coupon || null, "Coupon redeemed successfully");                  
-                  }, function(err) {
-                    deferred.reject(err);
-                  });  
-                }, function(err) {
-                  var redeem_message = 'Your voucher at '+ data.outlet.basics.name+ ' for '+ 
-                  redeemed_coupon.header + ', '+ redeemed_coupon.line1+', '+ redeemed_coupon.line2
-                  +' has been redeemed by merchant.'
-                  NotifHelper.send_notification(data, redeem_message, 'Coupon Redeemed').then(function(){
+                    //HttpHelper.success(res, redeemed_coupon || null, "Coupon redeemed successfully");                  
+                  //}, function(err) {
+                    //deferred.reject(err);
+                  //});
+                    var redeem_message = 'Your voucher at '+ data.outlet.basics.name+ ' for '+ 
+                        redeemed_coupon.header + ', '+ redeemed_coupon.line1+', '+ redeemed_coupon.line2
+                        +' has been redeemed by merchant.';
+                    var payload  = {}
+                    payload.from = 'TWYSTR';
+                    payload.message = redeem_message;
+                    payload.phone = user.phone;
+                    console.log(payload);
+                    Transporter.send('sms', 'vf', payload);
+                    HttpHelper.success(res, redeemed_coupon || null, "Coupon redeemed successfully");                    
+                }, function(err) {//
+                  //var redeem_message = 'Your voucher at '+ data.outlet.basics.name+ ' for '+ 
+                  //redeemed_coupon.header + ', '+ redeemed_coupon.line1+', '+ redeemed_coupon.line2
+                  //+' has been redeemed by merchant.'
+                  //NotifHelper.send_notification(data, redeem_message, 'Coupon Redeemed').then(function(){
                   
+                    //HttpHelper.success(res, redeemed_coupon || null, "Coupon redeemed successfully");                  
+                  //}, function(err) {
+                     
+                    var payload  = {}
+                    payload.from = 'TWYSTR';
+                    payload.message = "testing";
+                    payload.phone = user.phone;
+                    console.log(payload);
+                    Transporter.send('sms', 'vf', payload);
                     HttpHelper.success(res, redeemed_coupon || null, "Coupon redeemed successfully");                  
-                  }, function(err) {
-                    deferred.reject(err);
-                  }); 
+                  //}); 
                 }); 
                 
                 
