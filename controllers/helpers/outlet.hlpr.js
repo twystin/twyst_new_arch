@@ -472,7 +472,17 @@ module.exports.update_order = function(token, order) {
               message: err.message ? err.message : 'Something went wrong'
             });
           })
-        } else{
+        } else if(order.update_type === 'deliver') {
+          deliver_order(data).then(function(data){
+            deferred.resolve(data);
+          }, function(err) {
+            deferred.reject({
+              err: err.err || true,
+              message: err.message ? err.message : 'Something went wrong'
+            });
+          })
+        }
+        else{
           console.log('unknown update');
           deferred.reject({
             err: err.err || true,
@@ -564,6 +574,68 @@ function accept_order(data) {
                 deferred.resolve({
                     data: current_order,
                     message: 'This order can not be accepted'
+                });                
+            }
+
+        }
+        
+    });
+  
+  return deferred.promise;      
+}
+
+function deliver_order(data) {
+    logger.log();
+    var deferred = Q.defer();
+    Order.findOne({_id: data.order.order_id}).populate('user').exec(function(err, current_order) {
+        if (err || !current_order){
+            console.log(err);
+        } 
+        else {
+            if(current_order.order_status === 'NOT_DELIVERED')  {
+                current_order.order_status = 'DELIVERED';
+                var current_action = {};
+                current_action.action_type = 'DELIVERED';
+                current_action.action_by = data.data._id;
+                current_action.message = 'order has been delivered.';
+
+                current_order.actions.push(current_action);
+                console.log(current_order.actions);
+                current_order.save(function(err, updated_order){
+                    if(err || !updated_order){
+                        console.log(err)
+                        deferred.reject({
+                            err: err || true,
+                            message: 'Couldn\'t update this order'
+                        });   
+                    }
+                    else{
+                        send_notification(['console', data.order.am_email.replace('.', '').replace('@', '')], {
+                            message: 'Order has been delivered.',
+                            order_id: data.order.order_id,
+                            type: 'delivered'
+                        });                        
+                        var date = new Date();
+                        var time = date.getTime();
+                        var notif = {};
+                        notif.header = 'Order DELIVERED';
+                        notif.message = 'Your order has been delivered';
+                        notif.state = 'DELIVERED';
+                        notif.time = time;
+                        notif.order_id = data.order.order_id; 
+                        send_notification_to_user(current_order.user.push_ids[current_order.user.push_ids.length-1].push_id, notif);  
+                        deferred.resolve({
+                            data: updated_order,
+                            message: 'order delivered successfully'
+                        }); 
+                            
+                    } 
+                })    
+            }
+            else {
+                deferred.resolve({
+                    data: current_order,
+                    message: 'This order can not be updated'
                 });                
             }
 
@@ -690,7 +762,7 @@ function reject_order(data) {
 function dispatch_order(data) {
     logger.log();
     var deferred = Q.defer();
-    console.log(data);
+
     Order.findOne({ _id: data.order._id}).populate('user').exec(function(err, order) {
         if (err || !order) {
           deferred.reject({

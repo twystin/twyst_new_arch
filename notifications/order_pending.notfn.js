@@ -19,6 +19,12 @@ module.exports.notify = function(what, when, who, campaign) {
   	message: notify_text
   };
 
+  Transporter.send('faye', 'faye', {
+    message: notify_text,
+    order_id: what.order_number,
+    type: 'not_accepted'
+  });
+
   if (when) {
     Transporter.schedule("sms", "vf", when, payload).then(function(data) {
       deferred.resolve(data);
