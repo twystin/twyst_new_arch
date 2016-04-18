@@ -19,10 +19,14 @@ module.exports.notify = function(what, when, who, campaign) {
   	message: notify_text
   };
 
-  Transporter.send('faye', 'faye', {
-    message: notify_text,
-    order_id: what.order_number,
+  var faye_payload = {
+    message: notify_text
+    order_id: what.order_id,
     type: 'not_accepted'
+  }
+  Transporter.send('faye', 'faye', {
+    path: 'console',
+    message: faye_payload
   });
 
   if (when) {
