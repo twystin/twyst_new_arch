@@ -20,7 +20,7 @@ module.exports.notify = function(what, when, who, campaign) {
   };
 
   var faye_payload = {
-    message: notify_text
+    message: notify_text,
     order_id: what.order_id,
     type: 'not_accepted'
   }
