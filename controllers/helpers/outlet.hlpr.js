@@ -547,7 +547,7 @@ function accept_order(data) {
                         });   
                     }
                     else{
-                        send_notification(['console'], {
+                        send_notification(['console', data.order.am_email.replace('.', '').replace('@', '')], {
                             message: 'Order accepted by merchant',
                             order_id: data.order.order_id,
                             type: 'accept'
@@ -622,7 +622,7 @@ function deliver_order(data) {
                         });   
                     }
                     else{
-                        send_notification(['console'], {
+                        send_notification(['console', data.order.am_email.replace('.', '').replace('@', '')], {
                             message: 'Order has been delivered.',
                             order_id: data.order.order_id,
                             type: 'delivered'
@@ -684,7 +684,7 @@ function abandon_order(data) {
                         });   
                     }
                     else{
-                        send_notification(['console'], {
+                        send_notification(['console', data.order.am_email.replace('.', '').replace('@', '')], {
                             message: 'Order has been abandoned.',
                             order_id: data.order.order_id,
                             type: 'abandoned'
@@ -747,7 +747,7 @@ function reject_order(data) {
                         });   
                     }
                     else{
-                        send_notification(['console'], {
+                        send_notification(['console', data.order.am_email.replace('.', '').replace('@', '')], {
                             message: 'Order has been rejected by merchant.',
                             order_id: data.order.order_id,
                             type: 'reject'
@@ -872,7 +872,7 @@ function dispatch_order(data) {
                     });   
                 }
                 else{
-                    send_notification(['console'], {
+                    send_notification(['console', data.order.am_email.replace('.', '').replace('@', '')], {
                       message: 'Order dispatched by merchant',
                       order_id: data.order.order_id,
                       type: 'dispatch'
