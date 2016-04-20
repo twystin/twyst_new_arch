@@ -8,14 +8,14 @@ var _ = require('lodash');
 module.exports.create = function(req, res) {
 	logger.log();
 	var token = req.query.token || null;
-	var new_offer = {};
-	new_offer = _.extend(new_offer, req.body);
+	var new_coupon = {};
+	new_coupon = _.extend(new_coupon, req.body);
 
 	if(!token) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
 	else{
-		CashbackCouponHelper.create_cashback_coupon(token, new_offer).then(function(data) {
+		CashbackCouponHelper.create_cashback_coupon(token, new_coupon).then(function(data) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err, err.message);
@@ -26,13 +26,13 @@ module.exports.create = function(req, res) {
 module.exports.get = function(req, res) {
 	logger.log();
 	var token = req.query.token || null,
-		offer_id = req.params.offer_id;
+		coupon_id = req.params.coupon_id;
 
 	if(!token) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
 	else{
-		CashbackCouponHelper.get_cashback_coupon(token, offer_id).then(function(data) {
+		CashbackCouponHelper.get_cashback_coupon(token, coupon_id).then(function(data) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err, err.message);
@@ -44,9 +44,9 @@ module.exports.get = function(req, res) {
 module.exports.update = function(req, res) {
 	logger.log();
 	var token = req.query.token || null,
-		offer_id = req.params.offer_id;
-	var updated_offer = {};
-	updated_offer = _.extend(updated_offer, req.body);
+		coupon_id = req.params.coupon_id;
+	var updated_coupon = {};
+	updated_coupon = _.extend(updated_coupon, req.body);
 
 	if(!token) {
 		HttpHelper.error(res, null, 'Not Authenticated');
@@ -66,14 +66,13 @@ module.exports.update = function(req, res) {
 module.exports.delete = function(req, res) {
     logger.log();
     var token = req.query.token || null,
-    offer_id = req.params.offer_id,
-    order = req.body.order;
+    coupon_id = req.params.coupon_id;
 
     if(!token) {
         HttpHelper.error(res, null, "Not Authenticated");
     }
     else{
-    	CashbackCouponHelper.delete_cashback_coupon(token, offer_id).then(function(data) {
+    	CashbackCouponHelper.delete_cashback_coupon(token, coupon_id).then(function(data) {
 	        HttpHelper.success(res, data.data, data.message);
 	    }, function(err) {
 	        HttpHelper.error(res, err.err || true, err.message);
@@ -95,7 +94,23 @@ module.exports.all = function(req, res) {
 		}, function(err) {
 			HttpHelper.error(res, err.err || null, err.message);
 		});	
+	}	
+}
+
+module.exports.get_outlet_coupon = function(req, res) {
+	logger.log();
+	var token = req.query.token || null,
+		coupon = req.params.coupon_id;
+
+	if(!token) {
+		HttpHelper.error(res, null, "Not Authenticated");
+	}
+	else{
+		CashbackCouponHelper.get_outlet_coupon(req, coupon).then(function(data) {
+			HttpHelper.success(res, data.data, data.message);
+		}, function(err) {
+			HttpHelper.error(res, err.err, err.message);
+		})	
 	}
 	
-
 }
