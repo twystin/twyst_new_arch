@@ -3,25 +3,13 @@
 
 var Agenda = require('agenda');
 var _ = require('lodash');
-var Server = require('./app_server');
 var logger = require('tracer').colorConsole();
 var mongoose = require('mongoose');
 var order_pending_job = {name: 'order_pending', every: '1 minutes'};
 var order_auto_reject_job = {name: 'order_auto_reject', every: '1 minutes'};
 var assumed_delivered_job = {name: 'assumed_delivered', every: '1 minutes'};
 var order_delivered_job = {name: 'order_delivered', every: '1 minutes'};
-  var faye = require('faye');
-  var Bayeux = module.exports;
 
-  var bayeux = Bayeux.bayeux = new faye.NodeAdapter({
-    mount:    '/faye',
-    timeout:  100
-  });
-  bayeux.on('handshake', function(clientId) {
-    console.log( 'new client ' + clientId);
-  })
-
-  bayeux.attach(Server.server);
 mongoose.connect('mongodb://localhost/retwyst');
 
 	// {name: 'test', schedule: 'in 1 minute'}

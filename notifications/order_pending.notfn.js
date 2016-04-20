@@ -20,13 +20,20 @@ module.exports.notify = function(what, when, who, campaign) {
   };
 
   var faye_payload = {
-    message: notify_text,
-    order_id: what.order_id,
-    type: 'not_accepted'
+    message: {
+      message: notify_text,
+      order_id: what.order_id,
+      type: 'not_accepted'
+    },
+    path: 'console'
   }
-  Transporter.send('faye', 'faye', {
-    path: 'console',
-    message: faye_payload
+
+  var Bayeux = require('./app_server');
+  var send_notif = Bayeux.bayeux.getClient().publish('/'+faye_payload.path, faye_payload.message, {attempts: 7});
+  send_notif.then(function() {
+    console.log('notif deliverd to '+  faye_payload.path); 
+  }, function(error) {
+    console.log('error in sending notif to ' + faye_payload.path);
   });
 
   if (when) {
