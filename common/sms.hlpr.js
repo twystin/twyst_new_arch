@@ -17,9 +17,9 @@ var smsStore = require('../models/sms.mdl');
 */
 var saveMessageInSMSStore = function(message, to, from) {
 	var storeInstance = new smsStore({
-		receiver: to,
+		phone: to,
 		message: message,
-		sending_entity: from,
+		sender: from,
 	});
 	storeInstance.save(function(err, data){
 		if(err) {console.log(err);}

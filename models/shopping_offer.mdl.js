@@ -5,7 +5,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema,
   hours = require("./partials/hours.mdl")
 
-var CashbackOffer = new Schema({
+var ShoppingOffer = new Schema({
     partner_name: {
         type: String
     },
@@ -93,4 +93,4 @@ var CashbackOffer = new Schema({
 
 })
 
-module.exports = mongoose.model('CashbackOffer', CashbackOffer);
+module.exports = mongoose.model('ShoppingOffer', ShoppingOffer);

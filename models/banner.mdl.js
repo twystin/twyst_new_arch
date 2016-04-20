@@ -8,7 +8,7 @@ var hours = require("./partials/hours.mdl");
 var Outlet = mongoose.model('Outlet');
 
 var Banner = new Schema({
-	banner_type: {type: String}, //third_party_banner,food_banner,landing_page_banner,outlet_banner,
+	banner_type: {type: String}, //third_party_banner,food_banner,landing_page_banner,outlet_banner
 	banner_name: {type: String},
 	outlets: [{
         type: Schema.ObjectId,

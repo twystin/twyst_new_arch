@@ -6,9 +6,9 @@ var Schema = mongoose.Schema;
 var smsRecords = mongoose.createConnection('mongodb://localhost/retwyst_sms_store');
 
 var SentMessage = new Schema({
-	receiver: {type: String},
+	phone: {type: String},
 	message: {type: String},
-	sending_entity: {type: String},
+	sender: {type: String},
 	sent_at: {type: Date, default: Date.now}
 });
 

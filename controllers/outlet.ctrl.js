@@ -856,10 +856,10 @@ module.exports.redeem_user_coupon = function(req, res) {
                   
                     //HttpHelper.success(res, redeemed_coupon || null, "Coupon redeemed successfully");                  
                   //}, function(err) {
-                    
+                     
                     var payload  = {}
                     payload.from = 'TWYSTR';
-                    payload.message = 'Your voucher for '+ redeemed_coupon.header + ', '+ redeemed_coupon.line1+', '+ redeemed_coupon.line2+' has been redeemed by merchant.';;
+                    payload.message = "Your voucher for " + redeemed_coupon.header + ", " + redeemed_coupon.line1 + ", "+ redeemed_coupon.line2 + " has been redeemed by merchant.";
                     payload.phone = user.phone;
                     console.log(payload);
                     Transporter.send('sms', 'vf', payload);

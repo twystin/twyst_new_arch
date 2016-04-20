@@ -1755,7 +1755,7 @@ module.exports.get_order = function(token, order_id) {
 
     AuthHelper.get_user(token).then(function(data) {
       
-        Order.findOne({ _id: order_id}).populate('outlet').exec(function(err, order) {
+        Order.findOne({ _id: order_id}).populate('outlet user').exec(function(err, order) {
             if (err || !order) {
               deferred.reject({
                 err: err || true,
@@ -1795,10 +1795,10 @@ module.exports.get_orders = function(token) {
                 }
             });
         } else if (data.data.role >= 2 && data.data.role < 6) {
-            Order.find({
-                outlet: {
-                    $in: data.data.outlets
-                }
+            Order.find({}, {
+                //outlet: {
+                //    $in: data.data.outlets
+                //}
             }).populate('outlet user').exec(function(err, orders) {
                 if (err || !orders) {
                     deferred.reject({
@@ -1958,7 +1958,7 @@ function process_orders(orders, deferred, check) {
         updated_order.actions = order.actions;
         updated_order.estimeted_delivery_time = order.estimeted_delivery_time;
         updated_order.payment_info = order.payment_info;
-
+        updated_order.notified_am = order.notified_am;
         return updated_order;
     });
     if(check === 'all') {
@@ -2325,7 +2325,7 @@ module.exports.update_order = function(token, order) {
                         saved_order.actions.push(current_action);
                         send_notification(['console', saved_order.outlet.basics.account_mgr_email.replace('.', '').replace('@', '')], {
                             message: 'Order has been delivered to user',
-                            order_id: data.order_id,
+                            order_id: order.order_id,
                             type: 'delivered'
                         });  
                     }
@@ -2334,7 +2334,7 @@ module.exports.update_order = function(token, order) {
                         //if is delivered is false then notify AM 
                         send_notification(['console', saved_order.outlet.basics.account_mgr_email.replace('.', '').replace('@', '')], {
                             message: 'Hey user said, order is not delivered please get back to user',
-                            order_id: data.order_id,
+                            order_id: order.order_id,
                             type: 'not_delivered'
                         });
                         var payload = {};

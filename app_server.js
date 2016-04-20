@@ -9,6 +9,7 @@ var logger = require('tracer').colorConsole();
   var faye = require('faye');
   var http = require('http');
   var Bayeux = module.exports;
+  var Server = module.exports;
 
   var bayeux = Bayeux.bayeux = new faye.NodeAdapter({
     mount:    '/faye',
@@ -17,7 +18,7 @@ var logger = require('tracer').colorConsole();
   bayeux.on('handshake', function(clientId) {
     console.log( 'new client ' + clientId);
   })
-  var server = http.createServer(app);
+  var server = Server.server = http.createServer(app);
 
   bayeux.attach(server);
 
