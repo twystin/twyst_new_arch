@@ -116,13 +116,24 @@ module.exports = function(app) {
 
   })();
 
-  (function CashbackOfferRoutes() {
-    var CashbackOfferCtrl = require('../controllers/cashback_offer.ctrl');
-    app.post('/api/v4/cashback/offers', CashbackOfferCtrl.create);
-    app.get('/api/v4/cashback/offers', CashbackOfferCtrl.all);
-    app.put('/api/v4/cashback/offers/:offer_id', CashbackOfferCtrl.update);
-    app.get('/api/v4/cashback/offers/:offer_id', CashbackOfferCtrl.get);
-    app.delete('/api/v4/cashback/offers/:offer_id', CashbackOfferCtrl.delete);
+  (function ShoppingOfferRoutes() {
+    var ShoppingOfferCtrl = require('../controllers/shopping_offer.ctrl');
+    app.post('/api/v4/cashback/offers', ShoppingOfferCtrl.create);
+    app.get('/api/v4/cashback/offers', ShoppingOfferCtrl.all);
+    app.put('/api/v4/cashback/offers/:offer_id', ShoppingOfferCtrl.update);
+    app.get('/api/v4/cashback/offers/:offer_id', ShoppingOfferCtrl.get);
+    app.delete('/api/v4/cashback/offers/:offer_id', ShoppingOfferCtrl.delete);
+
+  })();
+
+  (function CashbackCouponRoutes() {
+    //var CashbackCouponCtrl = require('../controllers/cashback_coupon.ctrl');
+    //app.post('/api/v4/cashback/coupons', CashbackCouponCtrl.create);
+    //app.get('/api/v4/cashback/coupons', CashbackCouponCtrl.all);
+    //app.put('/api/v4/cashback/coupons/:coupon_id', CashbackCouponCtrl.update);
+    //a//pp.get('/api/v4/cashbacd
+    //  k/coupons/:coupon_id', CashbackCouponCtrl.get);
+    //app.delete('/api/v4/cashback/coupons/:coupon_id', CashbackCouponCtrl.delete);
 
   })();
 
