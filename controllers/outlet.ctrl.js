@@ -859,7 +859,7 @@ module.exports.redeem_user_coupon = function(req, res) {
                      
                     var payload  = {}
                     payload.from = 'TWYSTR';
-                    payload.message = "testing";
+                    payload.message = "Your voucher for " + redeemed_coupon.header + ", " + redeemed_coupon.line1 + ", "+ redeemed_coupon.line2 + " has been redeemed by merchant.";
                     payload.phone = user.phone;
                     console.log(payload);
                     Transporter.send('sms', 'vf', payload);

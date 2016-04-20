@@ -19,6 +19,23 @@ module.exports.notify = function(what, when, who, campaign) {
   	message: notify_text
   };
 
+  var faye_payload = {
+    message: {
+      message: notify_text,
+      order_id: what.order_id,
+      type: 'not_accepted'
+    },
+    path: 'console'
+  }
+
+  var Bayeux = require('./app_server');
+  var send_notif = Bayeux.bayeux.getClient().publish('/'+faye_payload.path, faye_payload.message, {attempts: 7});
+  send_notif.then(function() {
+    console.log('notif deliverd to '+  faye_payload.path); 
+  }, function(error) {
+    console.log('error in sending notif to ' + faye_payload.path);
+  });
+
   if (when) {
     Transporter.schedule("sms", "vf", when, payload).then(function(data) {
       deferred.resolve(data);

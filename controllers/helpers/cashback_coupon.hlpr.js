@@ -11,10 +11,10 @@ var Outlet = mongoose.model('Outlet');
 var logger = require('tracer').colorConsole();
 var AuthHelper = require('../../common/auth.hlpr');
 var moment = require('moment');
-var CashbackOffer = mongoose.model('CashbackOffer');
+var Coupon = mongoose.model('Coupon');
 var User = mongoose.model('User');
 
-module.exports.create_cashback_offer = function(token, new_offer) {
+module.exports.create_cashback_coupon = function(token, new_offer) {
     logger.log();
     var deferred = Q.defer();
 
@@ -24,7 +24,7 @@ module.exports.create_cashback_offer = function(token, new_offer) {
     offer._id = new ObjectId();
 
     AuthHelper.get_user(token).then(function(data) {
-        offer = new CashbackOffer(offer);
+        offer = new Coupon(offer);
 
         offer.save(function(err, offer) {
             if (err) {
@@ -50,13 +50,13 @@ module.exports.create_cashback_offer = function(token, new_offer) {
     return deferred.promise;
 }
 
-module.exports.get_cashback_offer = function(token, offerId) {
+module.exports.get_cashback_coupon = function(token, offerId) {
     logger.log();
     var deferred = Q.defer();
 
-    CashbackOffer.findById(offerId)
-        .exec(function(err, cashback_offers) {
-            if (err || !cashback_offers) {
+    Coupon.findById(offerId)
+        .exec(function(err, cashback_coupon) {
+            if (err || !cashback_coupon) {
                 deferred.reject({
                     err: err,
                     message: 'Unable to load offer details'
@@ -64,7 +64,7 @@ module.exports.get_cashback_offer = function(token, offerId) {
             } else {
                
                 deferred.resolve({
-                    data: cashback_offers,
+                    data: cashback_coupon,
                     message: 'Offer found'
                 });
             }
@@ -73,21 +73,20 @@ module.exports.get_cashback_offer = function(token, offerId) {
 }
 
 
-module.exports.update_cashback_offer = function(token, updated_offer) {
+module.exports.update_cashback_coupon = function(token, updated_offer) {
     logger.log();
     var deferred = Q.defer();
 
-    CashbackOffer.findById(updated_offer._id)
-        .exec(function(err, cashback_offer) {
-            if (err || !cashback_offer) {
+    Coupon.findById(updated_offer._id)
+        .exec(function(err, cashback_coupon) {
+            if (err || !cashback_coupon) {
                 deferred.reject({
                     err: err || true,
                     message: 'Failed to update offer'
                 });
             } else {
-                console.log(updated_offer)
-                cashback_offer = _.extend(cashback_offer, updated_offer);
-                cashback_offer.save(function(err) {
+                cashback_coupon = _.extend(cashback_coupon, updated_offer);
+                cashback_coupon.save(function(err) {
                     if (err) {
                         console.log(err)
                         deferred.reject({
@@ -96,7 +95,7 @@ module.exports.update_cashback_offer = function(token, updated_offer) {
                         });
                     } else {
                         deferred.resolve({
-                            data: cashback_offer,
+                            data: cashback_coupon,
                             message: "Offer updated successfully"
                         });
                     }
@@ -106,23 +105,23 @@ module.exports.update_cashback_offer = function(token, updated_offer) {
     return deferred.promise;
 }
 
-module.exports.delete_cashback_offer = function(token, offerId) {
+module.exports.delete_cashback_coupon = function(token, offerId) {
     logger.log();
     var deferred = Q.defer();
 
-    CashbackOffer.findOneAndRemove({
+    Coupon.findOneAndRemove({
             _id: offerId
         })
         .exec(function(err) {
             if (err) {
                 deferred.reject({
                     data: err || true,
-                    message: 'Unable to delete the cashback offers right now'
+                    message: 'Unable to delete the shopping offers right now'
                 });
             } else {
                 deferred.resolve({
                     data: {},
-                    message: 'Deleted cashback offers successfully'
+                    message: 'Deleted shopping offers successfully'
                 });
             }
         });
@@ -130,22 +129,22 @@ module.exports.delete_cashback_offer = function(token, offerId) {
 }
 
 
-module.exports.get_all_cashback_offers = function(token) {
+module.exports.get_all_cashback_coupons = function(token) {
     logger.log();
     var deferred = Q.defer();
 
     AuthHelper.get_user(token).then(function(data) {
         var user = data.data;
         
-        CashbackOffer.find({}).exec(function(err, cashback_offers) {
-            if (err || !cashback_offers) {
+        Coupon.find({}).exec(function(err, cashback_coupons) {
+            if (err || !cashback_coupons) {
                 deferred.reject({
                     err: err || true,
                     message: 'Failed to load offers'
                 });
             } 
             else{
-                _.each(cashback_offers, function(offer){
+                _.each(cashback_coupons, function(offer){
                     if(offer.source === 'Amazon') {
                         offer.logo = 'https://s3-us-west-2.amazonaws.com/retwyst-shopping-partner/Amazon/amazon.png';       
                     }
@@ -154,11 +153,11 @@ module.exports.get_all_cashback_offers = function(token) {
                     }
                     else if(offer.source === 'Ebay') {
                         offer.logo = 'https://s3-us-west-2.amazonaws.com/retwyst-shopping-partner/Ebay/ebay.png';       
-                    }
-                    
+                    }                    
                 }) 
+                
                 deferred.resolve({
-                    data: cashback_offers,
+                    data: cashback_coupons,
                     message: 'Offer loaded successfully'
                 });   
             }

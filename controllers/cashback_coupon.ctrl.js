@@ -2,7 +2,7 @@
 /*jslint node: true */
 var logger = require('tracer').colorConsole();
 var HttpHelper = require('../common/http.hlpr');
-var CashbackOfferHelper = require('./helpers/cashback_offer.hlpr');
+var CashbackCouponHelper = require('./helpers/cashback_coupon.hlpr');
 var _ = require('lodash');
 
 module.exports.create = function(req, res) {
@@ -15,7 +15,7 @@ module.exports.create = function(req, res) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
 	else{
-		CashbackOfferHelper.create_cashback_offer(token, new_offer).then(function(data) {
+		CashbackCouponHelper.create_cashback_coupon(token, new_offer).then(function(data) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err, err.message);
@@ -32,7 +32,7 @@ module.exports.get = function(req, res) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
 	else{
-		CashbackOfferHelper.get_cashback_offer(token, offer_id).then(function(data) {
+		CashbackCouponHelper.get_cashback_coupon(token, offer_id).then(function(data) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err, err.message);
@@ -52,7 +52,7 @@ module.exports.update = function(req, res) {
 		HttpHelper.error(res, null, 'Not Authenticated');
 	}
 	else{
-		CashbackOfferHelper.update_cashback_offer(token, updated_offer)
+		CashbackCouponHelper.update_cashback_coupon(token, updated_offer)
 		.then(function(data) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
@@ -73,7 +73,7 @@ module.exports.delete = function(req, res) {
         HttpHelper.error(res, null, "Not Authenticated");
     }
     else{
-    	CashbackOfferHelper.delete_cashback_offer(token, offer_id).then(function(data) {
+    	CashbackCouponHelper.delete_cashback_coupon(token, offer_id).then(function(data) {
 	        HttpHelper.success(res, data.data, data.message);
 	    }, function(err) {
 	        HttpHelper.error(res, err.err || true, err.message);
@@ -90,7 +90,7 @@ module.exports.all = function(req, res) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
 	else{
-		CashbackOfferHelper.get_all_cashback_offers(token).then(function(data) {
+		CashbackCouponHelper.get_all_cashback_coupons(token).then(function(data) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err || null, err.message);
