@@ -10,6 +10,8 @@ var order_auto_reject_job = {name: 'order_auto_reject', every: '1 minutes'};
 var assumed_delivered_job = {name: 'assumed_delivered', every: '1 minutes'};
 var order_delivered_job = {name: 'order_delivered', every: '1 minutes'};
 
+mongoose.connect('mongodb://localhost/retwyst');
+
 	// {name: 'test', schedule: 'in 1 minute'}
 	//{name: 'unredeemed', schedule: 'in 1 minute'},
 	//{name: 'reactivate', schedule: 'in 1 minute'},
@@ -31,7 +33,6 @@ var order_delivered_job = {name: 'order_delivered', every: '1 minutes'};
 
 (function() {
 	logger.info('Starting the job server');
-	mongoose.connect('mongodb://localhost/retwyst');
 	var agenda = new Agenda({db: { address: 'localhost:27017/twyst_agenda'}});
 
 	var job = null;

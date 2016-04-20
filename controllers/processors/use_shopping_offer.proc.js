@@ -3,7 +3,7 @@ var _ = require('lodash');
 var Q = require('q');
 var mongoose = require('mongoose');
 var RecoHelper = require('../helpers/reco.hlpr.js');
-var CashbackOffer = mongoose.model('CashbackOffer');
+var ShoppingOffer = mongoose.model('ShoppingOffer');
 var User = mongoose.model('User');
 var Transporter = require('../../transports/transporter.js');
 var Utils = require('../../common/datetime.hlpr.js');
@@ -36,7 +36,7 @@ module.exports.process = function(data) {
     var available_twyst_cash =  _.get(passed_data, 'user.twyst_cash');
 
     if(user.validation && user.validation.email){
-        CashbackOffer.findOne({'offers._id': offer_id }, function(err, cashback_partner){
+        ShoppingOffer.findOne({'offers._id': offer_id }, function(err, cashback_partner){
             if(err || !cashback_partner) {
                 console.log( 'error'+ err);
                 deferred.reject({
@@ -128,7 +128,7 @@ function update_offer_count(partner_id, offer, user_id, twyst_cash) {
         }
     }
 
-    CashbackOffer.update({
+    ShoppingOffer.update({
         _id: partner_id,
         'offers._id': offer._id
         },

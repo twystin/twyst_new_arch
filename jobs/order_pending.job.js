@@ -42,6 +42,7 @@ function process_order(order) {
   var what = {
     outlet: order.outlet.basics,
     order_number: order.order_number,
+    order_id: order._id
   };
   var user = order.outlet.basics.account_mgr_phone;
   notification.notify(what, null, user, null).then(function(data) {
