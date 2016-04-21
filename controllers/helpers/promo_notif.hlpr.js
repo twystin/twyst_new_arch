@@ -3,37 +3,40 @@
 
 var Cache = require('../../common/cache.hlpr');
 var Q = require('q');
-var _ = require('lodash');
+var _ = require('underscore');
 var async = require('async');
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Types.ObjectId;
 var Outlet = mongoose.model('Outlet');
 var logger = require('tracer').colorConsole();
 var AuthHelper = require('../../common/auth.hlpr');
+var RecoHelper = require('./reco.hlpr.js');
 var moment = require('moment');
-var Coupon = mongoose.model('Coupon');
+var PromoNotification = mongoose.model('PromoNotification');
 var User = mongoose.model('User');
+var OutletCtrl = require('../outlet.ctrl');
+var geolib = require('geolib');
 
-module.exports.create_cashback_coupon = function(token, new_coupon) {
+module.exports.create_promo_notif = function(token, new_promo_notif) {
     logger.log();
     var deferred = Q.defer();
 
-    var coupon = {};
+    var promo_notif = {};
     
     AuthHelper.get_user(token).then(function(data) {
-        coupon = new Coupon(new_coupon);
+        promo_notif = new promo_notif(new_promo_notif);
 
-        coupon.save(function(err, coupon) {
+        promo_notif.save(function(err, promo_notif) {
             if (err) {
                 console.log(err);
                 deferred.reject({
                     err: err || false,
-                    message: 'Couldn\'t create coupon'
+                    message: 'Couldn\'t create promo_notif'
                 });
             } else {
                 deferred.resolve({
-                    data: coupon,
-                    message: 'Coupon created successfully'
+                    data: promo_notif,
+                    message: 'promo_notif created successfully'
                 });
             }
         });
@@ -47,22 +50,22 @@ module.exports.create_cashback_coupon = function(token, new_coupon) {
     return deferred.promise;
 }
 
-module.exports.get_cashback_coupon = function(token, couponId) {
+module.exports.get_promo_notif = function(token, promo_notifId) {
     logger.log();
     var deferred = Q.defer();
 
-    Coupon.findById(couponId)
-        .exec(function(err, cashback_coupon) {
-            if (err || !cashback_coupon) {
+    PromoNotification.findById(promo_notifId)
+        .exec(function(err, promo_notif) {
+            if (err || !promo_notif) {
                 deferred.reject({
                     err: err,
-                    message: 'Unable to load Coupon details'
+                    message: 'Unable to load promo_notif details'
                 })
             } else {
                
                 deferred.resolve({
-                    data: cashback_coupon,
-                    message: 'Coupon found'
+                    data: promo_notif,
+                    message: 'promo_notif found'
                 });
             }
         })
@@ -70,30 +73,30 @@ module.exports.get_cashback_coupon = function(token, couponId) {
 }
 
 
-module.exports.update_cashback_coupon = function(token, updated_coupon) {
+module.exports.update_promo_notif = function(token, updated_promo_notif) {
     logger.log();
     var deferred = Q.defer();
 
-    Coupon.findById(updated_coupon._id)
-        .exec(function(err, cashback_coupon) {
-            if (err || !cashback_coupon) {
+    PromoNotification.findById(updated_promo_notif._id)
+        .exec(function(err, promo_notif) {
+            if (err || !promo_notif) {
                 deferred.reject({
                     err: err || true,
-                    message: 'Failed to update coupon'
+                    message: 'Failed to update promo_notif'
                 });
             } else {
-                cashback_coupon = _.extend(cashback_coupon, updated_coupon);
-                cashback_coupon.save(function(err) {
+                promo_notif = _.extend(promo_notif, updated_promo_notif);
+                promo_notif.save(function(err) {
                     if (err) {
                         console.log(err)
                         deferred.reject({
                             err: err || true,
-                            message: 'Failed to update coupon'
+                            message: 'Failed to update promo_notif'
                         });
                     } else {
                         deferred.resolve({
-                            data: cashback_coupon,
-                            message: "Coupon updated successfully"
+                            data: promo_notif,
+                            message: "promo_notif updated successfully"
                         });
                     }
                 });
@@ -102,23 +105,23 @@ module.exports.update_cashback_coupon = function(token, updated_coupon) {
     return deferred.promise;
 }
 
-module.exports.delete_cashback_coupon = function(token, couponId) {
+module.exports.delete_promo_notif = function(token, promo_notifId) {
     logger.log();
     var deferred = Q.defer();
 
-    Coupon.findOneAndRemove({
-            _id: couponId
+    PromoNotification.findOneAndRemove({
+            _id: promo_notifId
         })
         .exec(function(err) {
             if (err) {
                 deferred.reject({
                     data: err || true,
-                    message: 'Unable to delete the coupon right now'
+                    message: 'Unable to delete the promo_notif right now'
                 });
             } else {
                 deferred.resolve({
                     data: {},
-                    message: 'Deleted coupon successfully'
+                    message: 'Deleted promo_notif successfully'
                 });
             }
         });
@@ -126,22 +129,22 @@ module.exports.delete_cashback_coupon = function(token, couponId) {
 }
 
 
-module.exports.get_all_cashback_coupons = function(token) {
+module.exports.get_all_promo_notifs = function(token) {
     logger.log();
     var deferred = Q.defer();
 
     AuthHelper.get_user(token).then(function(data) {
         var user = data.data;
         
-        Coupon.find({}).exec(function(err, cashback_coupons) {
-            if (err || !cashback_coupons) {
+        PromoNotification.find({}).exec(function(err, promo_notifs) {
+            if (err || !promo_notifs) {
                 deferred.reject({
                     err: err || true,
                     message: 'Failed to load offers'
                 });
             } 
             else{
-                _.each(cashback_coupons, function(offer){
+                _.each(promo_notifs, function(offer){
                     if(offer.source === 'Amazon') {
                         offer.logo = 'https://s3-us-west-2.amazonaws.com/retwyst-shopping-partner/Amazon/amazon.png';       
                     }
@@ -154,7 +157,7 @@ module.exports.get_all_cashback_coupons = function(token) {
                 }) 
                 
                 deferred.resolve({
-                    data: cashback_coupons,
+                    data: promo_notifs,
                     message: 'Offer loaded successfully'
                 });   
             }
@@ -168,23 +171,23 @@ module.exports.get_all_cashback_coupons = function(token) {
     return deferred.promise;
 }
 
-module.exports.get_outlet_coupon = function(req, couponId) {
+module.exports.get_outlet_promo_notif = function(req, promo_notifId) {
     logger.log();
     var deferred = Q.defer();
 
-    Coupon.findById(couponId)
-        .exec(function(err, coupon) {
-            if (err || !coupon) {
+    PromoNotification.findById(promo_notifId)
+        .exec(function(err, promo_notif) {
+            if (err || !promo_notif) {
                 deferred.reject({
                     err: err,
-                    message: 'Unable to load coupon details'
+                    message: 'Unable to load promo_notif details'
                 })
             } else {
-                Outlet.find({_id: {$in: coupon.outlets}}).exec(function(err, outlets) {
+                Outlet.find({_id: {$in: promo_notif.outlets}}).exec(function(err, outlets) {
                     if (err || !outlets) {
                         deferred.reject({
                             err: err,
-                            message: 'Unable to load coupon details'
+                            message: 'Unable to load promo_notif details'
                         })
                     } else {
                         var offer_outlets = [];
@@ -225,13 +228,13 @@ module.exports.get_outlet_coupon = function(req, couponId) {
                             data.twyst_cash = twyst_cash;
                             deferred.resolve({
                                 data: data,
-                                message: 'coupon found'
+                                message: 'promo_notif found'
                             });
                         })
                         .fail(function(err) {
                             deferred.reject({
                                 err: err,
-                                message: 'error in getting coupon detail'
+                                message: 'error in getting promo_notif detail'
                             }); 
                         });                                                                
                     }

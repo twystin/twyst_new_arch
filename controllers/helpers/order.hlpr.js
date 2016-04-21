@@ -1148,6 +1148,12 @@ function apply_selected_coupon(data) {
                         }   
                     }
                 }
+                else{
+                    deferred.reject({
+                        err: err || true,
+                        message: 'Invalid Coupon Code'
+                    });      
+                }
             }
             else {                
                 deferred.reject('order not found');

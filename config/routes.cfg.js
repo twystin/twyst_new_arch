@@ -126,13 +126,14 @@ module.exports = function(app) {
 
   })();
 
-  (function CashbackCouponRoutes() {
-    var CashbackCouponCtrl = require('../controllers/cashback_coupon.ctrl');
-    app.post('/api/v4/cashback/coupons', CashbackCouponCtrl.create);
-    app.get('/api/v4/cashback/coupons', CashbackCouponCtrl.all);
-    app.put('/api/v4/cashback/coupons/:coupon_id', CashbackCouponCtrl.update);
-    app.get('/api/v4/cashback/coupons/:coupon_id', CashbackCouponCtrl.get);
-    app.delete('/api/v4/cashback/coupons/:coupon_id', CashbackCouponCtrl.delete);
+  (function CouponRoutes() {
+    var CouponCtrl = require('../controllers/coupon.ctrl');
+    app.post('/api/v4/coupons', CouponCtrl.create);
+    app.get('/api/v4/coupons', CouponCtrl.all);
+    app.put('/api/v4/coupons/:coupon_id', CouponCtrl.update);
+    app.get('/api/v4/coupons/:coupon_id', CouponCtrl.get);
+    app.delete('/api/v4/coupons/:coupon_id', CouponCtrl.delete);
+    
 
   })();
 
@@ -145,6 +146,20 @@ module.exports = function(app) {
     app.get('/api/v4/banners/:banner_id', BannerCtrl.get);
     app.delete('/api/v4/banners/:banner_id', BannerCtrl.delete);
     app.get('/api/v4/banners/landing/page/:partner_name', function(req, res){
+        res.redirect('/home/' + req.params.partner_name+ '.html?');
+    });
+
+  })();
+
+  (function PromoNotifRoutes() {
+    var PromoNotifCtrl = require('../controllers/promo_notif.ctrl');
+    app.post('/api/v4/promo_notif', PromoNotifCtrl.create);
+    app.get('/api/v4/promo_notif', PromoNotifCtrl.all);
+    app.get('/api/v4/promo_notif/outlet/:promo_notif_id', PromoNotifCtrl.get_outlet_promo_notif);
+    app.put('/api/v4/promo_notif/:promo_notif_id', PromoNotifCtrl.update);
+    app.get('/api/v4/promo_notif/:promo_notif_id', PromoNotifCtrl.get);
+    app.delete('/api/v4/promo_notif/:promo_notif_id', PromoNotifCtrl.delete);
+    app.get('/api/v4/promo_notif/landing/page/:partner_name', function(req, res){
         res.redirect('/home/' + req.params.partner_name+ '.html?');
     });
 

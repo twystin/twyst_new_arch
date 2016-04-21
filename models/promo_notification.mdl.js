@@ -7,14 +7,14 @@ require('./outlet.mdl');
 var hours = require("./partials/hours.mdl");
 var Outlet = mongoose.model('Outlet');
 
-var Banner = new Schema({
-	banner_type: {type: String}, //third_party,single_outlet,landing_page,multi_outlets
-	banner_name: {type: String},
+var PromoNotification = new Schema({
+	notification_type: {type: String}, //third_party,single_outlet,multi_outlets,landing_page
+	notification_name: {type: String},
 	outlets: [{
         type: Schema.ObjectId,
         ref: 'Outlet'
     }],
-	banner_image: {type: String, default: ''},
+	notification_image: {type: String, default: ''},
 	coupon_code: String,
 	end_date: Date,
 	header: {
@@ -25,4 +25,4 @@ var Banner = new Schema({
 	}
 });
 
-module.exports = mongoose.model('Banner', Banner);
+module.exports = mongoose.model('PromoNotification', PromoNotification);

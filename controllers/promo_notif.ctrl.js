@@ -2,20 +2,20 @@
 /*jslint node: true */
 var logger = require('tracer').colorConsole();
 var HttpHelper = require('../common/http.hlpr');
-var CashbackCouponHelper = require('./helpers/cashback_coupon.hlpr');
+var PromoNotifHelper = require('./helpers/promo_notif.hlpr');
 var _ = require('lodash');
 
 module.exports.create = function(req, res) {
 	logger.log();
 	var token = req.query.token || null;
-	var new_coupon = {};
-	new_coupon = _.extend(new_coupon, req.body);
+	var new_notif = {};
+	new_notif = _.extend(new_notif, req.body);
 
 	if(!token) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
 	else{
-		CashbackCouponHelper.create_cashback_coupon(token, new_coupon).then(function(data) {
+		PromoNotifHelper.create_promo_notif(token, new_notif).then(function(data) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err, err.message);
@@ -26,13 +26,13 @@ module.exports.create = function(req, res) {
 module.exports.get = function(req, res) {
 	logger.log();
 	var token = req.query.token || null,
-		coupon_id = req.params.coupon_id;
+		promo_notif_id = req.params.promo_notif_id;
 
 	if(!token) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
 	else{
-		CashbackCouponHelper.get_cashback_coupon(token, coupon_id).then(function(data) {
+		PromoNotifHelper.get_promo_notif(token, promo_notif_id).then(function(data) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err, err.message);
@@ -44,15 +44,15 @@ module.exports.get = function(req, res) {
 module.exports.update = function(req, res) {
 	logger.log();
 	var token = req.query.token || null,
-		coupon_id = req.params.coupon_id;
-	var updated_coupon = {};
-	updated_coupon = _.extend(updated_coupon, req.body);
+		promo_notif_id = req.params.promo_notif_id;
+	var updated_promo_notif = {};
+	updated_promo_notif = _.extend(updated_promo_notif, req.body);
 
 	if(!token) {
 		HttpHelper.error(res, null, 'Not Authenticated');
 	}
 	else{
-		CashbackCouponHelper.update_cashback_coupon(token, updated_offer)
+		PromoNotifHelper.update_promo_notif(token, updated_offer)
 		.then(function(data) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
@@ -66,13 +66,13 @@ module.exports.update = function(req, res) {
 module.exports.delete = function(req, res) {
     logger.log();
     var token = req.query.token || null,
-    coupon_id = req.params.coupon_id;
+    promo_notif_id = req.params.promo_notif_id;
 
     if(!token) {
         HttpHelper.error(res, null, "Not Authenticated");
     }
     else{
-    	CashbackCouponHelper.delete_cashback_coupon(token, coupon_id).then(function(data) {
+    	PromoNotifHelper.delete_promo_notif(token, promo_notif_id).then(function(data) {
 	        HttpHelper.success(res, data.data, data.message);
 	    }, function(err) {
 	        HttpHelper.error(res, err.err || true, err.message);
@@ -89,7 +89,7 @@ module.exports.all = function(req, res) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
 	else{
-		CashbackCouponHelper.get_all_cashback_coupons(token).then(function(data) {
+		PromoNotifHelper.get_all_promo_notifs(token).then(function(data) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err || null, err.message);
@@ -97,16 +97,16 @@ module.exports.all = function(req, res) {
 	}	
 }
 
-module.exports.get_outlet_coupon = function(req, res) {
+module.exports.get_outlet_promo_notif = function(req, res) {
 	logger.log();
 	var token = req.query.token || null,
-		coupon = req.params.coupon_id;
+		coupon = req.params.promo_notif_id;
 
 	if(!token) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
 	else{
-		CashbackCouponHelper.get_outlet_coupon(req, coupon).then(function(data) {
+		PromoNotifHelper.get_outlet_promo_notif(req, coupon).then(function(data) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err, err.message);
