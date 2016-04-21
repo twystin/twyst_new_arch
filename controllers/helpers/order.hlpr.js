@@ -1161,9 +1161,9 @@ function apply_selected_coupon(data) {
                             });    
                         }
                         else if(!data.coupon.actions.reward.reward_meta.minimum_bill_value)   {
-                            var cashback = (order.order_actual_value_without_tax * data.coupon.actions.reward.reward_meta.percent)/100;
+                            var cashback = (order.offer_used.order_value_without_tax * data.coupon.actions.reward.reward_meta.percent)/100;
                             if(cashback > data.coupon.actions.reward.reward_meta.max) {
-                                cashback = data.coupon.actions.reward.reward_meta.max;     
+                                cashback = data.coupon.actions.reward.reward_meta.max;    
                             }
                             order.coupon_used = data.coupon._id;
                             order.cashback = cashback;
@@ -1177,7 +1177,6 @@ function apply_selected_coupon(data) {
                                     data.order = order;
                                     deferred.resolve(data);
                                }
-                                
                             });    
                         }
                         else{
