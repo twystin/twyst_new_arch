@@ -1093,7 +1093,7 @@ function apply_selected_coupon(data) {
                 
                 if(data.coupon.actions.reward.reward_meta.reward_type === 'percentageoff') {
                     if(!order.offer_used){
-                        if(order.order_actual_value_without_tax >= data.coupon.actions.reward.reward_meta.minimum_bill_value) {
+                        if(data.coupon.actions.reward.reward_meta.minimum_bill_value && order.order_actual_value_without_tax >= data.coupon.actions.reward.reward_meta.minimum_bill_value) {
                             var cashback = (order.order_actual_value_without_tax * data.coupon.actions.reward.reward_meta.percent)/100;
                             if(cashback > data.coupon.actions.reward.reward_meta.max) {
                                 cashback = data.coupon.actions.reward.reward_meta.max;     
@@ -1121,7 +1121,7 @@ function apply_selected_coupon(data) {
                         }           
                     }
                     else{
-                        if(order.offer_used.order_value_without_tax >= data.coupon.actions.reward.reward_meta.minimum_bill_value) {
+                        if(data.coupon.actions.reward.reward_meta.minimum_bill_value && order.offer_used.order_value_without_tax >= data.coupon.actions.reward.reward_meta.minimum_bill_value) {
                             var cashback = (order.offer_used.order_value_without_tax * data.coupon.actions.reward.reward_meta.percent)/100;
                             if(cashback > data.coupon.actions.reward.reward_meta.max) {
                                 cashback = data.coupon.actions.reward.reward_meta.max;    
