@@ -9,18 +9,20 @@ module.exports.create = function(req, res) {
 	logger.log();
 	var token = req.query.token || null;
 	var new_coupon = {};
+	console.log("coupon request", req.body);	
 	new_coupon = _.extend(new_coupon, req.body);
-
+	console.log("new coupon",new_coupon);
 	if(!token) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
 	else{
 		CashbackCouponHelper.create_cashback_coupon(token, new_coupon).then(function(data) {
+			console.log(data);
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err, err.message);
 		})
-	}	
+	}
 }
 
 module.exports.get = function(req, res) {
@@ -36,9 +38,9 @@ module.exports.get = function(req, res) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err, err.message);
-		})	
+		})
 	}
-	
+
 }
 
 module.exports.update = function(req, res) {
@@ -57,10 +59,10 @@ module.exports.update = function(req, res) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err || true, err.message);
-		})	
+		})
 	}
 
-	
+
 }
 
 module.exports.delete = function(req, res) {
@@ -76,9 +78,9 @@ module.exports.delete = function(req, res) {
 	        HttpHelper.success(res, data.data, data.message);
 	    }, function(err) {
 	        HttpHelper.error(res, err.err || true, err.message);
-	    });	
+	    });
     }
-    
+
 }
 
 module.exports.all = function(req, res) {
@@ -93,8 +95,8 @@ module.exports.all = function(req, res) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err || null, err.message);
-		});	
-	}	
+		});
+	}
 }
 
 module.exports.get_outlet_coupon = function(req, res) {
@@ -110,7 +112,7 @@ module.exports.get_outlet_coupon = function(req, res) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err, err.message);
-		})	
+		})
 	}
-	
+
 }
