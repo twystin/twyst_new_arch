@@ -114,3 +114,20 @@ module.exports.get_outlet_promo_notif = function(req, res) {
 	}
 	
 }
+
+module.exports.send_notif = function(req, res) {
+	logger.log();
+	var token = req.query.token || null;
+	var outlet = req.body.outlet;
+	if(!token) {
+		HttpHelper.error(res, null, "Not Authenticated");
+	}
+	else{
+		PromoNotifHelper.send_notif(req, outlet).then(function(data) {
+			HttpHelper.success(res, data.data, data.message);
+		}, function(err) {
+			HttpHelper.error(res, err.err, err.message);
+		})	
+	}
+	
+}

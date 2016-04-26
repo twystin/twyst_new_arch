@@ -13,9 +13,11 @@ var AuthHelper = require('../../common/auth.hlpr');
 var RecoHelper = require('./reco.hlpr.js');
 var moment = require('moment');
 var PromoNotification = mongoose.model('PromoNotification');
+var Notification = mongoose.model('Notification');
 var User = mongoose.model('User');
 var OutletCtrl = require('../outlet.ctrl');
 var geolib = require('geolib');
+var Transporter = require('../../transports/transporter');
 
 module.exports.create_promo_notif = function(token, new_promo_notif) {
     logger.log();
@@ -570,4 +572,77 @@ function paginate(params) {
   params.outlets = params.outlets.slice(start - 1, end);
   deferred.resolve(params);
   return deferred.promise;
+}
+
+module.exports.send_promo_notif = function(token, notif_obj) {
+    logger.log();
+    var deferred = Q.defer();
+
+    AuthHelper.get_user(token).then(function(data) {
+        if(notif_obj.outlet) {
+            //outlet specific save to promo_notif model
+        }
+        else{
+            User.find({
+              push_ids: {$exists: true}, 
+              $where: 'this.push_ids.length > 0'
+            }).exec(function(err, users) {
+                if (err || !users) {
+                    deferred.reject({
+                        err: err,
+                        message: 'Unable to send promo_notif'
+                    })
+                } else {
+                    _.each(users, function(user){
+                        
+                        var notif = {};
+                        notif.message  = notif_obj.message;
+                        notif.detail  = notif_obj.detail;
+                        notif.image = notif_obj.image;
+                        notif.icon  = 'promo';
+                        notif.expire  = new Date();
+                        notif.shown  = false;
+                        notif.link  = 'discover';
+                        notif.user  = meta.user;
+                        notif.status = 'sent';
+                        notif.notification_type = 'push';
+                        notif.created_at = new Date();
+                        notification = new Notification();
+                        notification.save(err, function(notif){
+                            if(err) {
+                                deferred.resolve('failed');
+                            }
+                            else{
+                                notification.gcm_id = user.push_ids[user.push_ids.length-1].push_id;
+                                if(user.phone === notif_obj.test_phone) {
+                                    send_notif(notification);
+                                }
+                                
+                                deferred.resolve('saved');
+                            }
+                        })
+                    })
+                }
+            })
+        }
+        
+    }, function(err) {
+        deferred.reject({
+            err: err || false,
+            message: 'Couldn\'t find the user'
+        });
+    });
+
+    return deferred.promise;
+}
+
+function send_notif (notif) {
+    var payload = {};   
+
+    payload.head = notif.header;
+    payload.body = notif.message;  
+    payload.gcms = notif.gcm_id;
+    payload.order_id = notif.order_id;
+
+    Transporter.send('push', 'gcm', payload);
 }
