@@ -163,6 +163,8 @@ module.exports = function(app) {
         res.redirect('/home/' + req.params.partner_name+ '.html?');
     });
 
+    app.post('/api/v4/promo_notif/send', PromoNotifCtrl.send_notif);
+
   })();
 
   (function MenuRoutes() {
