@@ -367,6 +367,11 @@ var OutletSchema = new Schema({
     }
   },
   twyst_meta: {
+    ranking: {
+      type: Number,
+      default: 0,
+      required: true
+    },
     twyst_commission: {
       is_fixed: {
         type: Boolean,
