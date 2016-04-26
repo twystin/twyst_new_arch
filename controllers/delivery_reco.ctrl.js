@@ -12,6 +12,7 @@ var _ = require('underscore');
 var Q = require('q');
 var logger = require('tracer').colorConsole();
 var geolib = require('geolib');
+var moment = require('moment');
 
 function get_outlets(params) {
   logger.log();
@@ -208,10 +209,13 @@ function calculate_relevance(params) {
   params.outlets = _.map(params.outlets, function(val) {
     var relevance = 10000;
     val.recco = val.recco || {};
-    relevance = relevance + val.cashback*100;
+    relevance = relevance + val.cashback*10;
     relevance = relevance - val.valid_zone.delivery_estimated_time;
     relevance = relevance - val.valid_zone.min_amt_for_delivery;
     relevance = relevance + val.recco.delivery_experience || 0;
+    if(val.twyst_meta.ranking) {
+      relevance = relevance  * val.twyst_meta.ranking;
+    }
     val.recco.relevance = relevance;
     return val;
   });
@@ -253,7 +257,7 @@ function pick_outlet_fields(params) {
         return false;        
       }
 
-      if(!item.menus.length || item.menus[0].status != 'active') {
+      if(!item.menus.length) { //|| item.menus[0].status != 'active'
         return false;        
       }
 
@@ -296,11 +300,15 @@ function pick_outlet_fields(params) {
       massaged_item.cashback = item.cashback;
      
       massaged_item.delivery_zones = item.delivery_zones;
+      var date = new Date();
+      var time = moment().hours()+5 +':'+moment().minutes()+30;
+      date = parseInt(date.getMonth())+1+ '-'+ date.getDate()+'-'+date.getFullYear();
       var offer_count = 0;
       for(var i=0; i<item.offers.length; i++) {
         if(item.offers[i] && item.offers[i].offer_type === 'offer' 
         && item.offers[i].actions.reward.applicability.delivery
-        && item.offers[i].offer_status === 'active' 
+        && item.offers[i].offer_status === 'active'
+        && !(RecoHelper.isClosed(date, time, item.offers[i].actions.reward.reward_hours)) 
         &&(new Date(item.offers[i].offer_end_date)) >= new Date()){
           offer_count = offer_count+1;
         }
