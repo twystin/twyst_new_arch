@@ -5,15 +5,19 @@ var mustBe = require('mustbe').routeHelpers();
 
 var mongoose = require('mongoose');
 var passport = require('passport');
+var path     = require('path');
+var rootPath = path.join(__dirname, "../../retwyst_web_apps");
 module.exports = function(app) {
 
   (function WepAppRoutes() {
     var MiscCtrl = require('../controllers/misc.ctrl');
-    app.get('', function(req, res) { res.redirect('/home'); });
-    app.get('/', function(req, res) { res.redirect('/home'); });
+    // app.get('', function(req, res) { res.redirect('/home'); });
+    app.get('', function(req, res) { res.sendFile(rootPath+'/home/index.html'); });
+    // app.get('/', function(req, res) { res.redirect('/home'); });
+    app.get('/', function(req, res) { res.sendFile(rootPath+'/home/index.html'); });
     app.get('/api/v4/earn/more', function(req, res) { res.contentType('text/html'); res.end("<ul><li>Upload your bill every time you visit or order from a Twyst outlet.</li><li>Invlite friends to join you on Twyst - get Twyst cash for each friends who joins.</li><li>Submit offers!</li><li>Suggest outlets you want on Twyst.</li><li>Favourite an outlet.</li><li>Like an offer</li></ul>"); });
-    app.get('/api/v4/faq', function(req, res) { 
-      res.redirect('/home/faq.html'); 
+    app.get('/api/v4/faq', function(req, res) {
+      res.redirect('/home/faq.html');
     });
     app.post('/api/v4/get_link', MiscCtrl.send_link);
     app.get('/api/v4/send/verification/email', MiscCtrl.send_verification_email);
@@ -31,8 +35,8 @@ module.exports = function(app) {
 
     app.get('/api/v4/authcode/:phone', AccountCtrl.create_authcode);
     app.post('/api/v4/authcode', AccountCtrl.verify_authcode_and_create_account);
-    app.get('/api/v4/accounts/logout', AccountCtrl.logout);    
-    app.get('/verify/email/:token', AccountCtrl.verify_email);    
+    app.get('/api/v4/accounts/logout', AccountCtrl.logout);
+    app.get('/verify/email/:token', AccountCtrl.verify_email);
   })();
 
   (function RecoRoutes() {
@@ -51,7 +55,7 @@ module.exports = function(app) {
     app.put('/api/v4/events/update/:event_id', EventCtrl.update_event);
     var NotifCtrl = require('../controllers/notif.ctrl');
     app.get('/api/v4/events/:event_id', NotifCtrl.get_notif);
-    
+
     app.post('/api/v4/events', EventCtrl.new);
 
     app.post('/api/v4/coupon/gift', EventCtrl.gift);
@@ -86,7 +90,7 @@ module.exports = function(app) {
     app.post('/api/v4/referral/join', EventCtrl.referral_join);
 
     app.post('/api/v4/comments/', EventCtrl.comments);
-    app.post('/api/v4/contact_us', EventCtrl.contact_us);    
+    app.post('/api/v4/contact_us', EventCtrl.contact_us);
   })();
 
   (function OutletRoutes() {
@@ -133,7 +137,7 @@ module.exports = function(app) {
     app.put('/api/v4/coupons/:coupon_id', CouponCtrl.update);
     app.get('/api/v4/coupons/:coupon_id', CouponCtrl.get);
     app.delete('/api/v4/coupons/:coupon_id', CouponCtrl.delete);
-    
+
 
   })();
 
@@ -173,12 +177,12 @@ module.exports = function(app) {
     app.get('/api/v4/menu', MenuCtrl.all);
     app.post('/api/v4/menus/clone', mustBe.authorized('outlet.update', MenuCtrl.clone));
     app.put('/api/v4/menus/:menu', mustBe.authorized('outlet.update', MenuCtrl.update));
-    app.get('/api/v4/menus/:menu', MenuCtrl.get);    
+    app.get('/api/v4/menus/:menu', MenuCtrl.get);
     app.delete('/api/v4/menus/:menu', mustBe.authorized('outlet.update', MenuCtrl.delete));
   })();
 
   (function OrderRoutes() {
-    var OrderCtrl = require('../controllers/order.ctrl');    
+    var OrderCtrl = require('../controllers/order.ctrl');
     app.get('/api/v4/orders', OrderCtrl.all);
     app.get('/api/v4/order/:order_id', OrderCtrl.get_order);
     app.put('/api/v4/order', OrderCtrl.update_order);
@@ -232,11 +236,11 @@ module.exports = function(app) {
     app.post('/api/v4/zaakpay/response', MobikwikPaymentCtrl.get_zaakpay_response);
     app.post('/api/v4/calculate/checksum', MobikwikPaymentCtrl.calculate_checksum);
     app.post('/api/v4/zaakpay/refund', MobikwikPaymentCtrl.initiate_refund);
-    
+
   })();
 
   (function Paytm_Payment_Routes(){
-    var PaytmPaymentCtrl = require('../controllers/paytm_payment.ctrl');    
+    var PaytmPaymentCtrl = require('../controllers/paytm_payment.ctrl');
     app.post('/api/v4/calculate/checksum', PaytmPaymentCtrl.calculate_checksum);
     app.post('/api/v4/paytm/response', PaytmPaymentCtrl.get_paytm_response);
   })();
@@ -244,7 +248,7 @@ module.exports = function(app) {
   (function Recharge_Routes(){
     var RechargeCtrl = require('../controllers/recharge.ctrl');
     app.post('/api/v4/mobikwik/recharge', RechargeCtrl.send_recharge_request);
-    
+
   })();
 
   (function LegacyRoutes() {
@@ -252,11 +256,11 @@ module.exports = function(app) {
         res.redirect('https://play.google.com/store/apps/details?id=com.twyst.app.android&hl=en');
     });
     app.get('/privacy_policy/', function(req, res){
-      res.redirect('../../privacy_policy.pdf');    
+      res.redirect('../../privacy_policy.pdf');
     });
 
     app.get('/terms_of_use/', function(req, res){
-      res.redirect('../../terms_of_use.pdf');    
+      res.redirect('../../terms_of_use.pdf');
     });
 
     var MiscCtrl = require('../controllers/misc.ctrl');
@@ -281,14 +285,12 @@ module.exports = function(app) {
     });
 
     app.post('/optout/:channel/', MiscCtrl.optout_user);
-        
+
     app.get('/:url(*)', function(req, res){
-      res.redirect('../../home/404.html')
+      res.redirect('../../#/404');
     })
-    
+
   })();
 
-  
+
 };
-
-
