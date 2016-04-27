@@ -1091,16 +1091,58 @@ function apply_selected_coupon(data) {
             console.log(order.order_number)
             if(data.order_number.toString() === order.order_number.toString()) {
                 
-                if(data.coupon.actions.reward.reward_meta.reward_type === 'percentageoff') {
+                if(data.coupon.actions.reward.reward_meta.reward_type === 'discount') {
+                    if(!order.offer_used){                        
+                        var cashback = (order.order_actual_value_without_tax * data.coupon.actions.reward.reward_meta.percent)/100;
+                        if(cashback > data.coupon.actions.reward.reward_meta.max) {
+                            cashback = data.coupon.actions.reward.reward_meta.max;     
+                        }
+                        order.coupon_used = data.coupon._id;
+                        order.cashback = cashback;
+                        order.cashback_percentage = data.coupon.actions.reward.reward_meta.percent;
+                        Cache.hset(data.user._id, "order_map", JSON.stringify(order), function(err) {
+                           if(err) {
+                             logger.log(err);
+                           }
+                           else{
+                                console.log('order found coupon applied');
+                                data.order = order;
+                                deferred.resolve(data);
+                           }
+                            
+                        });    
+                    }
+                    else{
+                        
+                        var cashback = (order.offer_used.order_value_without_tax * data.coupon.actions.reward.reward_meta.percent)/100;
+                        if(cashback > data.coupon.actions.reward.reward_meta.max) {
+                            cashback = data.coupon.actions.reward.reward_meta.max;    
+                        }
+                        order.coupon_used = data.coupon._id;
+                        order.cashback = cashback;
+                        order.cashback_percentage = data.coupon.actions.reward.reward_meta.percent;
+                        Cache.hset(data.user._id, "order_map", JSON.stringify(order), function(err) {
+                           if(err) {
+                             logger.log(err);
+                           }
+                           else{
+                                console.log('order found coupon applied');
+                                data.order = order;
+                                deferred.resolve(data);
+                           }
+                        });       
+                    }
+                }
+                if(data.coupon.actions.reward.reward_meta.reward_type === 'flatoff') {
                     if(!order.offer_used){
-                        if(data.coupon.actions.reward.reward_meta.minimum_bill_value && order.order_actual_value_without_tax >= data.coupon.actions.reward.reward_meta.minimum_bill_value) {
-                            var cashback = (order.order_actual_value_without_tax * data.coupon.actions.reward.reward_meta.percent)/100;
+                        if(data.coupon.actions.reward.reward_meta.spend && order.order_actual_value_without_tax >= data.coupon.actions.reward.reward_meta.spend) {
+                            var cashback = order.order_actual_value_without_tax - data.coupon.actions.reward.reward_meta.off;
                             if(cashback > data.coupon.actions.reward.reward_meta.max) {
                                 cashback = data.coupon.actions.reward.reward_meta.max;     
                             }
                             order.coupon_used = data.coupon._id;
                             order.cashback = cashback;
-                            order.cashback_percentage = data.coupon.actions.reward.reward_meta.percent;
+                            
                             Cache.hset(data.user._id, "order_map", JSON.stringify(order), function(err) {
                                if(err) {
                                  logger.log(err);
@@ -1113,14 +1155,22 @@ function apply_selected_coupon(data) {
                                 
                             }); 
                         }
-                        else if(!data.coupon.actions.reward.reward_meta.minimum_bill_value)   {
-                            var cashback = (order.order_actual_value_without_tax * data.coupon.actions.reward.reward_meta.percent)/100;
+                        else{
+                            deferred.reject({
+                                err: err || true,
+                                message: 'Minimum order amount to use this coupon code is ' + data.coupon.actions.reward.reward_meta.spend
+                            });
+                        }          
+                    }
+                    else{
+                        if(data.coupon.actions.reward.reward_meta.spend && order.order_actual_value_without_tax >= data.coupon.actions.reward.reward_meta.spend) {
+                            var cashback = order.offer_used.order_value_without_tax - data.coupon.actions.reward.reward_meta.off;
                             if(cashback > data.coupon.actions.reward.reward_meta.max) {
                                 cashback = data.coupon.actions.reward.reward_meta.max;     
                             }
                             order.coupon_used = data.coupon._id;
                             order.cashback = cashback;
-                            order.cashback_percentage = data.coupon.actions.reward.reward_meta.percent;
+                            
                             Cache.hset(data.user._id, "order_map", JSON.stringify(order), function(err) {
                                if(err) {
                                  logger.log(err);
@@ -1131,58 +1181,13 @@ function apply_selected_coupon(data) {
                                     deferred.resolve(data);
                                }
                                 
-                            });    
+                            }); 
+                         
                         }
                         else{
                             deferred.reject({
                                 err: err || true,
-                                message: 'Minimum order amount to use this coupon code is ' + data.coupon.actions.reward.reward_meta.minimum_bill_value
-                            });
-                        }           
-                    }
-                    else{
-                        if(data.coupon.actions.reward.reward_meta.minimum_bill_value && order.offer_used.order_value_without_tax >= data.coupon.actions.reward.reward_meta.minimum_bill_value) {
-                            var cashback = (order.offer_used.order_value_without_tax * data.coupon.actions.reward.reward_meta.percent)/100;
-                            if(cashback > data.coupon.actions.reward.reward_meta.max) {
-                                cashback = data.coupon.actions.reward.reward_meta.max;    
-                            }
-                            order.coupon_used = data.coupon._id;
-                            order.cashback = cashback;
-                            order.cashback_percentage = data.coupon.actions.reward.reward_meta.percent;
-                            Cache.hset(data.user._id, "order_map", JSON.stringify(order), function(err) {
-                               if(err) {
-                                 logger.log(err);
-                               }
-                               else{
-                                    console.log('order found coupon applied');
-                                    data.order = order;
-                                    deferred.resolve(data);
-                               }
-                            });    
-                        }
-                        else if(!data.coupon.actions.reward.reward_meta.minimum_bill_value)   {
-                            var cashback = (order.offer_used.order_value_without_tax * data.coupon.actions.reward.reward_meta.percent)/100;
-                            if(cashback > data.coupon.actions.reward.reward_meta.max) {
-                                cashback = data.coupon.actions.reward.reward_meta.max;    
-                            }
-                            order.coupon_used = data.coupon._id;
-                            order.cashback = cashback;
-                            order.cashback_percentage = data.coupon.actions.reward.reward_meta.percent;
-                            Cache.hset(data.user._id, "order_map", JSON.stringify(order), function(err) {
-                               if(err) {
-                                 logger.log(err);
-                               }
-                               else{
-                                    console.log('order found coupon applied');
-                                    data.order = order;
-                                    deferred.resolve(data);
-                               }
-                            });    
-                        }
-                        else{
-                            deferred.reject({
-                                err: err || true,
-                                message: 'Minimum order amount to use this coupon code is ' + data.coupon.actions.reward.reward_meta.minimum_bill_value
+                                message: 'Minimum order amount to use this coupon code is ' + data.coupon.actions.reward.reward_meta.spend
                             });
                         }   
                     }
