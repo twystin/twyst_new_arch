@@ -1133,14 +1133,14 @@ function apply_selected_coupon(data) {
                         });       
                     }
                 }
-                if(data.coupon.actions.reward.reward_meta.reward_type === 'flatoff') {
+                else if(data.coupon.actions.reward.reward_meta.reward_type === 'flatoff') {
                     if(!order.offer_used){
                         if(data.coupon.actions.reward.reward_meta.spend && order.order_actual_value_without_tax >= data.coupon.actions.reward.reward_meta.spend) {
                             var cashback = data.coupon.actions.reward.reward_meta.off;
                             
                             order.coupon_used = data.coupon._id;
                             order.cashback = cashback;
-                            
+                            order.cashback_percentage = 0;
                             Cache.hset(data.user._id, "order_map", JSON.stringify(order), function(err) {
                                if(err) {
                                  logger.log(err);
@@ -1166,7 +1166,7 @@ function apply_selected_coupon(data) {
                             
                             order.coupon_used = data.coupon._id;
                             order.cashback = cashback;
-                            
+                            order.cashback_percentage = 0;
                             Cache.hset(data.user._id, "order_map", JSON.stringify(order), function(err) {
                                if(err) {
                                  logger.log(err);
