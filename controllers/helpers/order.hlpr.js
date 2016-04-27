@@ -1136,10 +1136,8 @@ function apply_selected_coupon(data) {
                 if(data.coupon.actions.reward.reward_meta.reward_type === 'flatoff') {
                     if(!order.offer_used){
                         if(data.coupon.actions.reward.reward_meta.spend && order.order_actual_value_without_tax >= data.coupon.actions.reward.reward_meta.spend) {
-                            var cashback = order.order_actual_value_without_tax - data.coupon.actions.reward.reward_meta.off;
-                            if(cashback > data.coupon.actions.reward.reward_meta.max) {
-                                cashback = data.coupon.actions.reward.reward_meta.max;     
-                            }
+                            var cashback = data.coupon.actions.reward.reward_meta.off;
+                            
                             order.coupon_used = data.coupon._id;
                             order.cashback = cashback;
                             
@@ -1163,11 +1161,9 @@ function apply_selected_coupon(data) {
                         }          
                     }
                     else{
-                        if(data.coupon.actions.reward.reward_meta.spend && order.order_actual_value_without_tax >= data.coupon.actions.reward.reward_meta.spend) {
-                            var cashback = order.offer_used.order_value_without_tax - data.coupon.actions.reward.reward_meta.off;
-                            if(cashback > data.coupon.actions.reward.reward_meta.max) {
-                                cashback = data.coupon.actions.reward.reward_meta.max;     
-                            }
+                        if(data.coupon.actions.reward.reward_meta.spend && order.offer_used.order_value_without_tax >= data.coupon.actions.reward.reward_meta.spend) {
+                            var cashback = data.coupon.actions.reward.reward_meta.off;
+                            
                             order.coupon_used = data.coupon._id;
                             order.cashback = cashback;
                             
