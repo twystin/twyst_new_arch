@@ -10,7 +10,6 @@ module.exports.create = function(req, res) {
 	var token = req.query.token || null;
 	var new_notif = {};
 	new_notif = _.extend(new_notif, req.body);
-
 	if(!token) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
@@ -20,7 +19,7 @@ module.exports.create = function(req, res) {
 		}, function(err) {
 			HttpHelper.error(res, err.err, err.message);
 		})
-	}	
+	}
 }
 
 module.exports.get = function(req, res) {
@@ -36,9 +35,9 @@ module.exports.get = function(req, res) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err, err.message);
-		})	
+		})
 	}
-	
+
 }
 
 module.exports.update = function(req, res) {
@@ -57,10 +56,10 @@ module.exports.update = function(req, res) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err || true, err.message);
-		})	
+		})
 	}
 
-	
+
 }
 
 module.exports.delete = function(req, res) {
@@ -76,9 +75,9 @@ module.exports.delete = function(req, res) {
 	        HttpHelper.success(res, data.data, data.message);
 	    }, function(err) {
 	        HttpHelper.error(res, err.err || true, err.message);
-	    });	
+	    });
     }
-    
+
 }
 
 module.exports.all = function(req, res) {
@@ -93,8 +92,8 @@ module.exports.all = function(req, res) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err || null, err.message);
-		});	
-	}	
+		});
+	}
 }
 
 module.exports.get_outlet_promo_notif = function(req, res) {
@@ -110,24 +109,24 @@ module.exports.get_outlet_promo_notif = function(req, res) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err, err.message);
-		})	
+		})
 	}
-	
+
 }
 
 module.exports.send_notif = function(req, res) {
 	logger.log();
 	var token = req.query.token || null;
-	var outlet = req.body.outlet;
+	var notif_object = req.body;
 	if(!token) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
 	else{
-		PromoNotifHelper.send_notif(req, outlet).then(function(data) {
+		PromoNotifHelper.send_promo_notif(token, notif_object).then(function(data) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
 			HttpHelper.error(res, err.err, err.message);
-		})	
+		})
 	}
-	
+
 }
