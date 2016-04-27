@@ -18,6 +18,14 @@ module.exports.send = function(payload) {
   var message = new gcm.Message();
   message.addData('message', payload.body);
   message.addData('title', payload.head);
+  if(payload.image) {
+    message.addData('image', payload.image);  
+  }
+  if(payload.promo_obj) {
+    var data = JSON.stringify(payload.promo_obj);
+    message.addData('promo_obj', data);   
+  }
+  
   if(payload.state) {
     message.addData('state', payload.state);
     message.addData('time', payload.time);  
@@ -32,8 +40,20 @@ module.exports.send = function(payload) {
   registrationIds = registrationIds.concat(payload.gcms);
 
   logger.log(message);
-  sender.send(message, registrationIds, 4, function(result) {
-    deferred.resolve(result);
+  
+  sender.send(message, registrationIds, 4, function(err, response) {
+    if(err) {
+      logger.log('in error');
+      logger.log(err);
+    }
+    else{
+      logger.log('in success');
+      logger.log(response.success);
+      logger.log(response.failure);
+      logger.log(response.canonical_ids);
+      
+    }
+    deferred.resolve(response);
   });
 
 
