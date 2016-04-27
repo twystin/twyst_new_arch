@@ -58,6 +58,19 @@ module.exports.uploadImage = function(req, res) {
     			HttpHelper.error(res, err.err || null, err.message);
     		});
     }
+    else if (req.body.image_class === 'promo') {
+    	var img_obj = {};
+    	img_obj.id = req.body.id || new ObjectId();
+    	img_obj.image = req.body.image;
+    	img_obj.image_type = req.body.image_type;
+
+    	ImageHelper.uploadPromoImage(img_obj)
+    		.then(function(data) {
+    			HttpHelper.success(res, data.data, data.message);
+    		}, function(err) {
+    			HttpHelper.error(res, err.err || null, err.message);
+    		});
+    }
 	else {
 		HttpHelper.error(res, new Error("Invalid request object"), "Invalid request object");
 	}
