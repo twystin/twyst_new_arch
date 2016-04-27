@@ -233,3 +233,68 @@ var getContentType = function(img_buf) {
 		return '';
 	}
 }
+
+module.exports.uploadPromoImage = function(image_obj) {
+	logger.log();
+	var deferred = Q.defer();
+	var content_type = getContentType(image_obj.image);
+	var buff = new Buffer(image_obj.image.replace(/^data:image\/\w+;base64,/, ""),'base64');
+	
+	if(!content_type) {
+		deferred.reject({err: new Error("Invalid image type"), message: 'Image upload failed'});
+	} 
+	else if (image_obj.image_type=='push_notif') {
+		uploadNotifImage(image_obj);
+	} 
+	else if (image_obj.image_type=='banner') {
+		uploadBannerImage(image_obj);
+	} 
+	else {
+		deferred.reject({
+			err: new Error("Invalid request object"),
+			message: "Invalid request object"
+		});
+	}
+
+	function uploadNotifImage() {
+		
+		var img_obj = {
+			Bucket: 'retwyst-app',
+			ACL: 'public-read',
+			ContentType: content_type,
+			Key: 'push_notifications/'+ image_obj.id,
+			Body: buff
+		};
+		AWSHelper.uploadImage(img_obj)
+			.then(function(res) {
+				deferred.resolve({data: {id: image_obj.id, key: image_obj.image_type}, message: "Image uploaded successfully"});
+			}, function(err) {
+				deferred.reject({err: err, message: 'Image upload failed'});
+		});
+		
+	};
+
+	function uploadBannerImage() {
+		
+		var img_obj = {
+			Bucket: 'retwyst-app',
+			ACL: 'public-read',
+			ContentType: content_type,
+			Key: 'banners/'+ image_obj.id,
+			Body: buff
+		};
+		AWSHelper.uploadImage(img_obj)
+			.then(function(res) {
+				deferred.resolve({data: {id: image_obj.id, key: image_obj.image_type}, message: "Image uploaded successfully"});
+			}, function(err) {
+				deferred.reject({err: err, message: 'Image upload failed'});
+		});
+		
+	};
+
+	function uploadOtherImage(image_obj) {
+		deferred.reject({err: new Error("Other image uploads currently restricted"), message: "Other image uploads currently restricted"});
+	}
+
+	return deferred.promise;
+};
