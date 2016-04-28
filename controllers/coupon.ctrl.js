@@ -9,7 +9,7 @@ module.exports.create = function(req, res) {
 	logger.log();
 	var token = req.query.token || null;
 	var new_coupon = {};
-	console.log("coupon request", req.body);	
+	console.log("coupon request", req.body);
 	new_coupon = _.extend(new_coupon, req.body);
 	console.log("new coupon",new_coupon);
 	if(!token) {
@@ -49,12 +49,11 @@ module.exports.update = function(req, res) {
 		coupon_id = req.params.coupon_id;
 	var updated_coupon = {};
 	updated_coupon = _.extend(updated_coupon, req.body);
-
 	if(!token) {
 		HttpHelper.error(res, null, 'Not Authenticated');
 	}
 	else{
-		CashbackCouponHelper.update_cashback_coupon(token, updated_offer)
+		CashbackCouponHelper.update_cashback_coupon(token, updated_coupon)
 		.then(function(data) {
 			HttpHelper.success(res, data.data, data.message);
 		}, function(err) {
