@@ -63,7 +63,7 @@ module.exports.get_banner = function(token, bannerId) {
                     message: 'Unable to load banner details'
                 })
             } else {
-                banner.banner_image = "https://s3-us-west-2.amazonaws.com/retwyst-app/banners/" + banner._id;
+                banner.banner_image = "https://s3-us-west-2.amazonaws.com/retwyst-app/banners/" + banner._id+"/banner";
                 deferred.resolve({
                     data: banner,
                     message: 'banner found'
@@ -219,7 +219,7 @@ module.exports.get_all_banners = function(token) {
             } 
             else{
                 _.each(banners, function(banner) {
-                    banner.banner_image = "https://s3-us-west-2.amazonaws.com/retwyst-app/banners/" + banner._id;
+                    banner.banner_image = "https://s3-us-west-2.amazonaws.com/retwyst-app/banners/" + banner._id+'/banner';
                 })
                 deferred.resolve({
                     data: banners,

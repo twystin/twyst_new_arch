@@ -262,7 +262,7 @@ module.exports.uploadPromoImage = function(image_obj) {
 			Bucket: 'retwyst-app',
 			ACL: 'public-read',
 			ContentType: content_type,
-			Key: 'push_notifications/'+ image_obj.id,
+			Key: 'push_notifications/'+ image_obj.id + '/' + image_obj.image_type,
 			Body: buff
 		};
 		AWSHelper.uploadImage(img_obj)
@@ -280,7 +280,7 @@ module.exports.uploadPromoImage = function(image_obj) {
 			Bucket: 'retwyst-app',
 			ACL: 'public-read',
 			ContentType: content_type,
-			Key: 'banners/'+ image_obj.id,
+			Key: 'banners/'+ image_obj.id + '/' + image_obj.image_type,
 			Body: buff
 		};
 		AWSHelper.uploadImage(img_obj)

@@ -6,6 +6,10 @@ var Schema = mongoose.Schema,
   hours = require("./partials/hours.mdl")
 
 var Coupon = new Schema({
+    created_date: {
+        type: Date,
+        default: Date.now
+    },
     code: {
         type: String,
         required: true
