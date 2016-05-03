@@ -10,6 +10,11 @@ var Coupon = new Schema({
         type: String,
         required: true
     },
+    all_outlets: {
+        type: Boolean,
+        default: true,
+        required: true
+    },
     outlets: [{
         type: Schema.ObjectId,
         ref: 'Outlet'
