@@ -9,9 +9,7 @@ module.exports.create = function(req, res) {
 	logger.log();
 	var token = req.query.token || null;
 	var new_coupon = {};
-	console.log("coupon request", req.body);
 	new_coupon = _.extend(new_coupon, req.body);
-	console.log("new coupon",new_coupon);
 	if(!token) {
 		HttpHelper.error(res, null, "Not Authenticated");
 	}
