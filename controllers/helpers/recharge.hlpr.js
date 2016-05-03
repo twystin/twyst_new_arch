@@ -10,8 +10,8 @@ var request = require('request');
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
 var Event = mongoose.model('Event');
-var uid = 'rc@twyst.in';
-var pass= 'twy5t!@Adm1n[]';
+var uid = 'admin@twyst.in';
+var pass= 'twy5t.1n';
 var keygen = require('keygenerator');
 var parseString = require('xml2js').parseString;
 
