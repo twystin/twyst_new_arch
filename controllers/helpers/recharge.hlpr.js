@@ -87,7 +87,8 @@ module.exports.process_recharge_req = function(token, recharge_req) {
                                 });
                                 console.log(body);
                                 console.log(recharge_res);
-                                if(recharge_res.recharge.status[0] === 'SUCCESS') {
+                                if(recharge_res.recharge.status[0] === 'SUCCESS' ||
+                                    recharge_res.recharge.status[0] === 'SUCCESSPENDING') {
                                     
                                     var availabe_twyst_cash = user.twyst_cash - required_twyst_cash;
                                     User.findOneAndUpdate({
