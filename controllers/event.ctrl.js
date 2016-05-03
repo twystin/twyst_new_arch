@@ -271,7 +271,7 @@ module.exports.contact_us = function(req, res) {
                     }
                 },
                 Subject: { /* required */
-                  Data: 'Contact Us Submittion', /* required */
+                  Data: 'Contact Us Submission', /* required */
                   
                 }
             },

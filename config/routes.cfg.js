@@ -137,8 +137,6 @@ module.exports = function(app) {
     app.put('/api/v4/coupons/:coupon_id', CouponCtrl.update);
     app.get('/api/v4/coupons/:coupon_id', CouponCtrl.get);
     app.delete('/api/v4/coupons/:coupon_id', CouponCtrl.delete);
-
-
   })();
 
   (function BannerRoutes() {
@@ -199,6 +197,11 @@ module.exports = function(app) {
     var ImageCtrl = require('../controllers/image.ctrl');
     app.post('/api/v4/images', ImageCtrl.uploadImage);
     app.post('/api/v4/images/clone', ImageCtrl.cloneImage);
+  })();
+
+  (function BulkSMSRoutes() {
+    var BulkSMSCtrl = require('../controllers/bulk_sms.ctrl');
+    app.post('/api/v4/bulk_sms', BulkSMSCtrl.send);
   })();
 
   (function UserRoutes() {
