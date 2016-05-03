@@ -1605,7 +1605,7 @@ function massage_order(data){
                     else{
                         order_json._id = saved_order._id;
                         data.order = order_json;
-                        data.order.mobikwik_cashback = 'Get extra 10% cashback in mobikwik wallet'; 
+                        data.order.mobikwik_cashback = ''; //Get extra 10% cashback in mobikwik wallet
                         console.log('saved');
                         deferred.resolve(data);   
                     }

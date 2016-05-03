@@ -214,7 +214,10 @@ function calculate_relevance(params) {
     relevance = relevance - val.valid_zone.min_amt_for_delivery;
     relevance = relevance + val.recco.delivery_experience || 0;
     if(val.twyst_meta.ranking) {
-      relevance = relevance  * val.twyst_meta.ranking;
+      relevance = relevance  - val.twyst_meta.ranking * 100;
+    }
+    else{
+      relevance = relevance - 35*100; 
     }
     val.recco.relevance = relevance;
     return val;
@@ -257,7 +260,7 @@ function pick_outlet_fields(params) {
         return false;        
       }
 
-      if(!item.menus.length) { //|| item.menus[0].status != 'active'
+      if(!item.menus.length || item.menus[0].status != 'active') {
         return false;        
       }
 

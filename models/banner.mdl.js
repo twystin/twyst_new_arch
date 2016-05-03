@@ -16,7 +16,7 @@ var Banner = new Schema({
     }],
 	banner_image: {type: String, default: ''},
 	coupon_code: String,
-	end_date: Date,
+	expiry_date: Date,
 	header: {
 	  type: String
 	},
