@@ -102,9 +102,10 @@ module.exports.process_refund = function(order) {
 		console.log('prcessing refund for wallet');
 		var mid = 'MBK2136';
 	    var orderId = order.order_number;
-		var amount = order.amount;
+		var amount;
 		if(order.refund_type === 'partial_refund') {
 			console.log('prcessing partial refund');
+			amount = order.partial_amount;
 			var message = "'"+mid+"''"+orderId+"''"+amount+"'";
 			calculate_checksum(message, 'wallet').then(function(data){
 					    
@@ -116,6 +117,7 @@ module.exports.process_refund = function(order) {
 	 	}
 	 	else if(order.refund_type === 'full_refund'){
 	 		console.log('prcessing full refund');
+	 		amount = order.actual_amount_paid;
 	 		var message = "'"+mid+"''"+orderId+"''"+amount+"'";
 			calculate_checksum(message, 'wallet').then(function(data){
 				 
