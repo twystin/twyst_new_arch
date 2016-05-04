@@ -10,8 +10,8 @@ var request = require('request');
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
 var Event = mongoose.model('Event');
-var uid = 'rc@twyst.in';
-var pass= 'twy5t!@Adm1n[]';
+var uid = 'admin@twyst.in';
+var pass= 'twy5t.1n';
 var keygen = require('keygenerator');
 var parseString = require('xml2js').parseString;
 
@@ -87,7 +87,8 @@ module.exports.process_recharge_req = function(token, recharge_req) {
                                 });
                                 console.log(body);
                                 console.log(recharge_res);
-                                if(recharge_res.recharge.status[0] === 'SUCCESS') {
+                                if(recharge_res.recharge.status[0] === 'SUCCESS' ||
+                                    recharge_res.recharge.status[0] === 'SUCCESSPENDING') {
                                     
                                     var availabe_twyst_cash = user.twyst_cash - required_twyst_cash;
                                     User.findOneAndUpdate({

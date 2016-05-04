@@ -56,16 +56,16 @@ module.exports.get_banner = function(token, bannerId) {
     var deferred = Q.defer();
 
     Banner.findById(bannerId)
-        .exec(function(err, banners) {
-            if (err || !banners) {
+        .exec(function(err, banner) {
+            if (err || !banner) {
                 deferred.reject({
                     err: err,
                     message: 'Unable to load banner details'
                 })
             } else {
-               
+                banner.banner_image = "https://s3-us-west-2.amazonaws.com/retwyst-app/banners/" + banner._id+"/banner";
                 deferred.resolve({
-                    data: banners,
+                    data: banner,
                     message: 'banner found'
                 });
             }
@@ -210,7 +210,7 @@ module.exports.get_all_banners = function(token) {
     AuthHelper.get_user(token).then(function(data) {
         var user = data.data;
         
-        Banner.find({}).exec(function(err, banners) {
+        Banner.find({expiry_date: {$gte: new Date()}}).exec(function(err, banners) {
             if (err || !banners) {
                 deferred.reject({
                     err: err || true,
@@ -218,7 +218,9 @@ module.exports.get_all_banners = function(token) {
                 });
             } 
             else{
-                
+                _.each(banners, function(banner) {
+                    banner.banner_image = "https://s3-us-west-2.amazonaws.com/retwyst-app/banners/" + banner._id+'/banner';
+                })
                 deferred.resolve({
                     data: banners,
                     message: 'Banners loaded successfully'
