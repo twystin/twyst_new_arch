@@ -2036,10 +2036,16 @@ function update_payment_mode(data) {
         data.payment_mode = 'Zaakpay';
     };
 
-    if(data.card_id != 'NA' && data.payment_mode !== 'COD') {
+    if(data.card_id !== 'NA' && data.payment_mode !== 'COD' && data.payment_mode !== 'wallet') {
         card_id = data.card_id;
         data.payment_method = data.payment_mode;
         data.payment_mode = 'Zaakpay';
+    }
+
+    if(data.payment_mode === 'wallet') {
+        card_id = data.card_id;
+        data.payment_method = data.payment_mode;
+        data.payment_mode = 'wallet';
     }
 
     Order.findOne({
