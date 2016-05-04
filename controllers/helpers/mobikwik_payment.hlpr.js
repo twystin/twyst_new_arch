@@ -4,7 +4,7 @@ var crypto = require("crypto");
 var Q = require('q');
 var logger = require('tracer').colorConsole();
 var zaakpay_refund_url = 'https://api.zaakpay.com/updatetransaction';
-var mobikwik_refund_url = 'https://mobikwik.com/mobikwik/walletrefund';
+var mobikwik_refund_url = 'https://www.mobikwik.com/walletrefund?';
 var request = require('request');
 var rest = require('restler');
 
@@ -65,11 +65,8 @@ module.exports.process_refund = function(order) {
 			        checksum: data
 
 			    }
-			    update_url = zaakpay_refund_url;
-			    console.log(update_url);
-			    console.log(form);
-			    request.post({url: update_url, form: form},function(err, httpResponse, body){
-			        console.log('should not execute')
+		
+			    request.post({url: zaakpay_refund_url, form: form},function(err, httpResponse, body){
 			        console.log(body);
 			        deferred.resolve(order);    
 			    });
@@ -86,11 +83,8 @@ module.exports.process_refund = function(order) {
 			        updateReason: order.updateReason,
 			        checksum: data
 			    }
-			    update_url = zaakpay_refund_url;
-			    console.log(update_url);
-			    console.log(form);
-			    request.post({url: update_url, form: form},function(err, httpResponse, body){
-			        console.log('should not execute')
+		
+			    request.post({url: zaakpay_refund_url, form: form},function(err, httpResponse, body){			        
 			        console.log(body);
 			        deferred.resolve(order);    
 			    });
@@ -103,8 +97,6 @@ module.exports.process_refund = function(order) {
                 message: 'unkwnown updateDesired for zaakpay'
             });
 		}
-		
-	    update_url = zaakpay_refund_url;
 	}
 	else if(order.refund_mode === 'wallet') {
 		console.log('prcessing refund for wallet');
@@ -115,10 +107,8 @@ module.exports.process_refund = function(order) {
 			console.log('prcessing partial refund');
 			var message = "'"+mid+"''"+orderId+"''"+amount+"'";
 			calculate_checksum(message, 'wallet').then(function(data){
-			    update_url = mobikwik_refund_url;
 					    
-			    request.get("https://www.mobikwik.com/walletrefund?mid="+mid+"&txid="+orderId+"&amount="+amount+"&ispartial=yes&checksum="+data, function(err, res, body){
-
+			    request.get(mobikwik_refund_url + "mid="+mid+"&txid="+orderId+"&amount="+amount+"&ispartial=yes&checksum="+data, function(err, res, body){
 			    	console.log(body);
 			    	deferred.resolve(order);
 			    })			
@@ -128,10 +118,8 @@ module.exports.process_refund = function(order) {
 	 		console.log('prcessing full refund');
 	 		var message = "'"+mid+"''"+orderId+"''"+amount+"'";
 			calculate_checksum(message, 'wallet').then(function(data){
-				
-			    update_url = mobikwik_refund_url;
-			    
-			    request.get("https://www.mobikwik.com/walletrefund?mid="+mid+"&txid="+orderId+"&amount="+amount+"&checksum="+data, function(err, res, body){
+				 
+			    request.get(mobikwik_refund_url + "mid="+mid+"&txid="+orderId+"&amount="+amount+"&checksum="+data, function(err, res, body){
 			    	console.log(body);
 			    	deferred.resolve(order);
 			    })
@@ -153,6 +141,5 @@ module.exports.process_refund = function(order) {
             message: 'unkwnown refund mode'
         });
 	}
-	return deferred.promise;
-	
+	return deferred.promise;	
 };
