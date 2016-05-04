@@ -53,10 +53,6 @@ var Coupon = new Schema({
           default: Date.now
         }
     },
-    created_date: {
-        type: Date,
-        default: Date.now
-    },
     actions: {
         reward: {
             _id: {
