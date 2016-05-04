@@ -424,23 +424,34 @@ function initiate_refund(data){
             data.order.refund_mode = 'Zaakpay';
             data.order.updateDesired = 14;
             data.order.updateReason = 'user has cancelled order';
+
+            MobikwikPaymentHelper.process_refund(data.order).then(function (recieved_data) {
+                deferred.resolve(data);
+            }, function(err) {
+                deferred.reject({
+                  err: err || true,
+                  message: "could not proces refund right now"
+                });
+            });
         }
         else if(data.order.payment_info.payment_mode === 'wallet') {
             data.order.refund_mode = 'wallet';
             data.order.refund_type = 'full_refund';
+
+            MobikwikPaymentHelper.process_refund(data.order).then(function (recieved_data) {
+                deferred.resolve(data);
+            }, function(err) {
+                deferred.reject({
+                  err: err || true,
+                  message: "could not proces refund right now"
+                });
+            });
         }
         else{
             console.log('unknown payment mode');
             deferred.resolve(data);
         }
-        MobikwikPaymentHelper.process_refund(data.order).then(function (data) {
-            deferred.resolve(data);
-        }, function(err) {
-            deferred.reject({
-              err: err || true,
-              message: "could not proces refund right now"
-            });
-        });
+        
     }
     else{
         console.log('cod payment no refund');
@@ -453,8 +464,7 @@ function send_notification_to_all(data) {
     logger.log();
     var deferred = Q.defer();
 
-    send_notification(['console', data.order.outlet.basics.account_mgr_email.replace('.', '').replace('@', ''),
-        data.order.outlet._id], {
+    send_notification(['console', data.order.outlet._id], {
         message: 'User has cancelled an order',
         order_id: data.order._id,
         type: 'cancelled'
@@ -750,14 +760,14 @@ function update_user_twyst_cash(order) {
         }
         user.twyst_cash = user.twyst_cash+order.offer_cost;
         var order_index = _.findIndex(user.orders, function(order_obj) { return order_obj.order_id.toString()===order._id.toString(); });
-        console.log('index value ' + index);
+        
         if(order_index!==-1) {
             user.orders.splice(order_index, 1);
         }
 
         if(order.coupon_used) {
             var coupon_index = _.findIndex(user.coupons, function(coupon_obj) { return coupon_obj._id.toString()===coupon_used.toString(); });
-            console.log('index value ' + index);
+            
             if(coupon_index!==-1) {
                 user.orders.splice(coupon_index, 1);
             }    
