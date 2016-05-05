@@ -1564,7 +1564,7 @@ function massage_order(data){
                         if(data.outlet.twyst_meta.cashback_info.order_amount_slab.length) {
                             order_amount_ratio = _.find(data.outlet.twyst_meta.cashback_info.order_amount_slab, function(slab){
                                 if(order.order_actual_value_without_tax >= slab.start &&
-                                    order.order_actual_value_without_tax <= slab.end) {
+                                    order.order_actual_value_without_tax <= slab.end || !slab.end) {
                                     console.log(slab.ratio);
                                     return slab.ratio;
                                 }
