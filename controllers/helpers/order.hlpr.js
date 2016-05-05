@@ -1569,13 +1569,13 @@ function massage_order(data){
                                 }
                             });    
                         }
-                        
+                        console.log(order_amount_ratio);
                         var inapp_ratio = data.outlet.twyst_meta.cashback_info.in_app_ratio;
                         var cod_ratio = data.outlet.twyst_meta.cashback_info.cod_ratio;
                         var base_cashback = data.outlet.twyst_meta.cashback_info.base_cashback;
                         
                         var order_amount_cashback = order.order_actual_value_without_tax*base_cashback * order_amount_ratio /100;
-                        cod_cashback = order.order_ctual_value_without_tax*base_cashback * cod_ratio /100;
+                        cod_cashback = order.order_actual_value_without_tax*base_cashback * cod_ratio /100;
                         inapp_cashback = order.order_actual_value_without_tax*base_cashback * inapp_ratio /100;
                         cod_cashback = _.max([base_cashback, order_amount_cashback, cod_cashback], function(cashback){ return cashback; });
                         inapp_cashback = _.max([base_cashback, order_amount_cashback, inapp_cashback], function(cashback){ return cashback; });
