@@ -1565,6 +1565,7 @@ function massage_order(data){
                             order_amount_ratio = _.find(data.outlet.twyst_meta.cashback_info.order_amount_slab, function(slab){
                                 if(order.order_actual_value_without_tax >= slab.start &&
                                     order.order_actual_value_without_tax <= slab.end) {
+                                    console.log(slab.ratio);
                                     return slab.ratio;
                                 }
                             });    
@@ -1574,15 +1575,15 @@ function massage_order(data){
                         var cod_ratio = data.outlet.twyst_meta.cashback_info.cod_ratio;
                         var base_cashback = data.outlet.twyst_meta.cashback_info.base_cashback;
                         
-                        var order_amount_cashback = order.order_actual_value_without_tax*base_cashback * order_amount_ratio /100;
+                        var order_amount_cashback = order.order_actual_value_without_tax*base_cashback * order_amount_ratio.ratio /100;
                         cod_cashback = order.order_actual_value_without_tax*base_cashback * cod_ratio /100;
                         inapp_cashback = order.order_actual_value_without_tax*base_cashback * inapp_ratio /100;
                         cod_cashback = _.max([base_cashback, order_amount_cashback, cod_cashback], function(cashback){ return cashback; });
                         inapp_cashback = _.max([base_cashback, order_amount_cashback, inapp_cashback], function(cashback){ return cashback; });
                         order.cod_cashback = Math.round(cod_cashback);
                         order.inapp_cashback = Math.round(inapp_cashback);
-                        order.cod_cashback_percenatage = _.max([base_cashback*cod_ratio, base_cashback*order_amount_ratio], function(cashback){ return cashback; });
-                        order.inapp_cashback_percenatage = _.max([base_cashback*inapp_ratio, base_cashback*order_amount_ratio], function(cashback){ return cashback; });
+                        order.cod_cashback_percenatage = _.max([base_cashback*cod_ratio, base_cashback*order_amount_ratio.ratio], function(cashback){ return cashback; });
+                        order.inapp_cashback_percenatage = _.max([base_cashback*inapp_ratio, base_cashback*order_amount_ratio.ratio], function(cashback){ return cashback; });
                         order.cod_cashback_percenatage = order.cod_cashback_percenatage.toFixed(2);
                         order.inapp_cashback_percenatage = order.inapp_cashback_percenatage.toFixed(2);
                     }
