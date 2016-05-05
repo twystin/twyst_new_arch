@@ -213,8 +213,11 @@ function calculate_relevance(params) {
     //relevance = relevance - val.valid_zone.delivery_estimated_time;
     //relevance = relevance - val.valid_zone.min_amt_for_delivery;
     //relevance = relevance + val.recco.delivery_experience || 0;
-    if(val.twyst_meta.ranking) {
+    if(val.twyst_meta.ranking !== 0) {
       relevance = relevance  - val.twyst_meta.ranking * 100;
+    }
+    else{
+      relevance = relevance  - 36 * 100;  
     }
     
     val.recco.relevance = relevance;
