@@ -221,6 +221,11 @@ module.exports.get_all_banners = function(token) {
                 _.each(banners, function(banner) {
                     banner.banner_image = "https://s3-us-west-2.amazonaws.com/retwyst-app/banners/" + banner._id+'/banner';
                 })
+
+                banners = _.sortBy(banners, function(item) {
+                    return -item.created_date;
+                });
+
                 deferred.resolve({
                     data: banners,
                     message: 'Banners loaded successfully'

@@ -402,6 +402,7 @@ function update_order_status(data) {
                 })
             }
             else{
+                console.log('order is not in pending state');
                 deferred.reject({
                     err: err || true,
                     message: 'Couldn\'t cancel this order'

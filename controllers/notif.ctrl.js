@@ -61,6 +61,9 @@ function get_user_events(passed_data) {
     if (err) {
       deferred.reject(err);
     } else {
+        events = _.sortBy(events, function(item) {
+          return -item.created_at;
+        });
       deferred.resolve(events)
     }
   })
