@@ -12,7 +12,7 @@ module.exports.send = function(req, res) {
     BulkSMSHelper.sendMessage(token, req.body)
       .then(function(data) {
           HttpHelper.success(res, data.data, data.message);
-        }, function(err) {
+        }).catch(function(err) {
           HttpHelper.error(res, err.err, err.message);
       });
   }
