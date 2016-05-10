@@ -1,6 +1,5 @@
 var Q = require('q');
 var AuthHelper = require('../../common/auth.hlpr');
-var _ = require('lodash');
 var transporter = require('../../transports/transporter');
 var User = require('../../models/user.mdl');
 
@@ -12,11 +11,10 @@ var checkBlacklisted = function(number) {
       deferred.reject({
         err: err
       });
-    } else if(Object.keys(user).length > 0 || user.length > 0) {
-      if(
-        _.get(user.blacklisted, 'is_blacklisted', false) ||
-        _.get(user, 'messaging_preferences.block_all.sms.promo', false) ||
-        _.get(user, 'messaging_preferences.block_all.sms.trans', false)
+    } else if (
+        user.blacklisted.is_blacklisted === true ||
+        user.messaging_preferences.block_all.sms.promo === true ||
+        user.messaging_preferences.block_all.sms.trans === true
       ) {
         deferred.reject({
           send: false
@@ -26,7 +24,6 @@ var checkBlacklisted = function(number) {
           send: true,
         });
       }
-    }
   });
   return deferred.promise;
 };
@@ -36,7 +33,6 @@ module.exports.sendMessage = function(token, messageObj) {
     var deferred = Q.defer();
     var successNumbers = [];
     var failNumbers = [];
-    console.log(messageObj);
 
     var payload = {
       from: messageObj.header || null,
