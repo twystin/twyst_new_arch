@@ -35,7 +35,6 @@ module.exports.verify_order = function(token, order) {
     data.outlet = order.outlet;
     data.coords = order.coords;
     data.user_token = token;
-    console.log(data.items);
 
     basic_checks(data)
     .then(function(data){
@@ -139,7 +138,7 @@ module.exports.apply_coupon = function(token, order) {
     data.user_token = token;
     data.coupon_code = order.coupon_code;
     data.order_number = order.order_number;
-
+    console.log(data.coupon_code);
     get_user(data)
     .then(function(data){
         return check_coupon_applicability(data);
@@ -990,10 +989,17 @@ function check_coupon_applicability (data) {
                 });   
             }
 
-            if(isOnFirstOrder(data)){
+            if(!isApplicableOnCurrentOrderNumber(data)){
                 deferred.reject({
                     err: err || true,
-                    message: 'Coupon is available only on first order'
+                    message: 'Coupon is not applicable on current order'
+                }); 
+            }
+
+             if(isOnlyOnFirstOrder(data)) {
+                deferred.reject({
+                    err: err || true,
+                    message: 'Coupon is applicable only on first order'
                 }); 
             }
 
@@ -1040,9 +1046,7 @@ function isApplicableAtOutlet(data) {
     }
 }
 
-function isOnFirstOrder(data) {
-    console.log(data.coupon.only_on_first_order);
-    console.log(data.user.orders);
+function isOnlyOnFirstOrder(data) {
     if(data.coupon.only_on_first_order && 
         data.user.orders && data.user.orders.length) {
         return true;
@@ -1050,6 +1054,49 @@ function isOnFirstOrder(data) {
     else{
         return false;
     }
+}
+
+function isApplicableOnCurrentOrderNumber(data) {
+    var current_order_count = 0, count , match, event_start, event_end;
+    if(data.user.orders && data.user.orders.length) {
+        current_order_count = data.user.orders.length+1;
+    }
+
+    count = _.get(data.coupon, 'rule.event_count');
+    match = _.get(data.coupon, 'rule.event_match');
+    event_start = _.get(data.coupon, 'rule.event_start');
+    event_end = _.get(data.coupon, 'rule.event_end');
+    console.log(current_order_count);
+    console.log(data.coupon.rule);
+    
+    if (match === 'on every') {
+        if (current_order_count % count === 0 && current_order_count >= event_start && current_order_count <= event_end) {
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    else if (match === 'on only') {
+        if (current_order_count === count) {
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    else if (match === 'after') {
+        if (current_order_count >= event_start && current_order_count <= event_end) {
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    else{
+        return true;
+    }
+
 }
 
 function isAlreadyUsed(data) {
@@ -1087,8 +1134,7 @@ function apply_selected_coupon(data) {
         }
         else{
             var order = JSON.parse(reply);
-            console.log(data.order_number);
-            console.log(order.order_number)
+            
             if(data.order_number.toString() === order.order_number.toString()) {
                 
                 if(data.coupon.actions.reward.reward_meta.reward_type === 'discount') {
@@ -1213,8 +1259,7 @@ function remove_selected_coupon(data) {
         }
         else{
             var order = JSON.parse(reply);
-            console.log(data.order_number);
-            console.log(order.order_number)
+
             if(data.order_number.toString() === order.order_number.toString()) {
                 if(order.coupon_used) {
                     order.coupon_used = null;
@@ -1606,7 +1651,7 @@ function massage_order(data){
                     else{
                         order_json._id = saved_order._id;
                         data.order = order_json;
-                        data.order.mobikwik_cashback = ''; //Get extra 10% cashback in mobikwik wallet
+                        data.order.mobikwik_cashback = 'Get extra 10% cashback in mobikwik wallet'; 
                         console.log('saved');
                         deferred.resolve(data);   
                     }
