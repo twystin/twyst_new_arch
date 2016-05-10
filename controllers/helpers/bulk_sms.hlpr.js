@@ -1,13 +1,13 @@
 var Q = require('q');
 var AuthHelper = require('../../common/auth.hlpr');
-var _ = require('lodash')
+var _ = require('lodash');
 var transporter = require('../../transports/transporter');
 var User = require('../../models/user.mdl');
 
-var checkBlacklist = function(number) {
+var checkBlacklisted = function(number) {
   var deferred = Q.defer();
   User.findOne({phone: number}, function(err, user){
-    if(err) {
+    if(err || !user) {
       console.log(err);
       deferred.reject({
         err: err
@@ -33,43 +33,41 @@ var checkBlacklist = function(number) {
 
 
 module.exports.sendMessage = function(token, messageObj) {
-var deferred = Q.defer();
-var successNumbers = [];
-var failNumbers = [];
-console.log(messageObj);
+    var deferred = Q.defer();
+    var successNumbers = [];
+    var failNumbers = [];
+    console.log(messageObj);
 
-var payload = {
-  from: messageObj.header || null,
-  message:messageObj.body || null,
-  phone: messageObj.phone_number || null
-};
-
-checkBlacklist(messageObj.phone_number).then(function(data) {
-  AuthHelper.get_user(token)
-    .then(function(data) {
-        transporter.send('sms', 'vf', payload)
-          .then(function(res) {
-            deferred.resolve({
-              data: messageObj.phone_number,
-              message: "Messages sent"
-            });
-          },function(err) {
-            console.log(err);
-            deferred.reject({
-              err: err || false,
-              data: messageObj.phone_number,
-              message: "Message Couldn't be sent."
-            });
+    var payload = {
+      from: messageObj.header || null,
+      message:messageObj.body || null,
+      phone: messageObj.phone_number || null
+    };
+    AuthHelper.get_user(token).then(function(data) {
+        checkBlacklisted(messageObj.phone_number).then(function(data) {
+            transporter.send('sms', 'vf', payload)
+              .then(function(res) {
+                deferred.resolve({
+                  data: messageObj.phone_number,
+                  message: "Messages sent"
+                });
+              },function(err) {
+                console.log(err);
+                deferred.reject({
+                  err: err || false,
+                  data: messageObj.phone_number,
+                  message: "Message Couldn't be sent."
+                });
+              });
+        }, function(err) {
+          deferred.reject({
+            err: err || false,
+            message: "User not found"
           });
-    }, function(err) {
-      deferred.reject({
-        err: err || false,
-        message: "User not found"
-      });
+        });
+    }), (function(err){
+      deferred.reject(err);
     });
-}).catch(function(err){
-  deferred.reject(err);
-});
 
-  return deferred.promise;
+    return deferred.promise;
 };
