@@ -9,12 +9,11 @@ module.exports.send = function(req, res) {
     HttpHelper.error(res, null, "Not Authenticated");
   }
   else{
-    BulkSMSHelper.sendMessage(token, req.body)
-      .then(function(data) {
-          HttpHelper.success(res, data.data, data.message);
-        }).catch(function(err) {
+    BulkSMSHelper.sendMessage(token, req.body).then(function(data) {
+        HttpHelper.success(res, data.data, data.message);
+    },  function(err) {
           HttpHelper.error(res, err.err, err.message);
-      });
+    });
   }
 
 };
