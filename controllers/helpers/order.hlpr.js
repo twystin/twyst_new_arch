@@ -996,13 +996,6 @@ function check_coupon_applicability (data) {
                 }); 
             }
 
-             if(isOnlyOnFirstOrder(data)) {
-                deferred.reject({
-                    err: err || true,
-                    message: 'Coupon is applicable only on first order'
-                }); 
-            }
-
             if(isAlreadyUsed(data)){
                 deferred.reject({
                     err: err || true,
@@ -1046,15 +1039,6 @@ function isApplicableAtOutlet(data) {
     }
 }
 
-function isOnlyOnFirstOrder(data) {
-    if(data.coupon.only_on_first_order && 
-        data.user.orders && data.user.orders.length) {
-        return true;
-    }
-    else{
-        return false;
-    }
-}
 
 function isApplicableOnCurrentOrderNumber(data) {
     var current_order_count = 0, count , match, event_start, event_end;
@@ -1092,6 +1076,10 @@ function isApplicableOnCurrentOrderNumber(data) {
         else{
             return false;
         }
+    }
+    else if(data.coupon.only_on_first_order && 
+        data.user.orders && data.user.orders.length) {
+        return false;
     }
     else{
         return true;
