@@ -29,6 +29,10 @@ var Coupon = new Schema({
         event_end: Number,
         event_match: String
     },
+    only_on_first_order: {
+        type: Boolean,
+        default: false
+    },
     max_use_limit: {
         type: Number,
         required: true
