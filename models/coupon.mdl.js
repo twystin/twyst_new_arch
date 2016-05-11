@@ -23,9 +23,11 @@ var Coupon = new Schema({
         type: Schema.ObjectId,
         ref: 'Outlet'
     }],
-    only_on_first_order: {
-        type: Boolean,
-        default: false
+    rule: {
+        event_count: Number,
+        event_start: Number,
+        event_end: Number,
+        event_match: String
     },
     max_use_limit: {
         type: Number,
