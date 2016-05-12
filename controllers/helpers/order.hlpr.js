@@ -2417,6 +2417,11 @@ module.exports.update_order = function(token, order) {
                     }
                     else{
                         saved_order.order_status = 'NOT_DELIVERED';
+                        var current_action = {};
+                        current_action.action_type = 'NOT_DELIVERED';
+                        current_action.action_by = data.data._id;
+                        current_action.message = 'User said his order has not been delivered.';
+                        saved_order.actions.push(current_action);
                         //if is delivered is false then notify AM 
                         send_notification(['console', saved_order.outlet.basics.account_mgr_email.replace('.', '').replace('@', '')], {
                             message: 'Hey user said, order is not delivered please get back to user',
