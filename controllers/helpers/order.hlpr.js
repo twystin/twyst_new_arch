@@ -2673,10 +2673,14 @@ function update_user_twyst_cash(order) {
                 user.twyst_cash = user.twyst_cash+order.cod_cashback;        
             }    
         }
-        var user_order_obj = {};
-        user_order_obj.order_id = order._id;
-        user_order_obj.outlet_id = order.outlet;
-        user.orders.push(user_order_obj);
+        
+        if(order.order_status === 'PENDING') {
+            var user_order_obj = {};
+            user_order_obj.order_id = order._id;
+            user_order_obj.outlet_id = order.outlet;
+            user.orders.push(user_order_obj);    
+        }
+        
         if(order.coupon_used) {
             var coupon = {};
             coupon._id = order.coupon_used;
