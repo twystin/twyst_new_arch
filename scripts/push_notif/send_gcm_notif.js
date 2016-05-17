@@ -11,12 +11,11 @@ var _ = require('underscore');
 mongoose.connect('mongodb://54.189.82.86:27017/retwyst');
 
 var meta = {};
-meta.head = "Earn and Redeem";
-meta.body = "Keep Ordering the Mouth Watering Delicacies, Earning Cashback and Redeeming it for Mobile Recharge and Online Shopping.";
-//meta.image = "https://s3-us-west-2.amazonaws.com/retwyst-app/Transacted.jpg";
+meta.head = "Eat and Redeem";
+meta.body = "Earn up to 30% Cashback on Every Order and Redeem it to Shop Online. Get Extra 10 % Cashback when you pay through Mobikwik.Order Now !";
+meta.image = "https://s3-us-west-2.amazonaws.com/retwyst-app/Notification_150516_12PM.jpg";
 
-
-User.find({ push_ids: {$exists: true},
+User.find({push_ids: {$exists: true},
   $where: 'this.push_ids.length > 0'
 }).exec(function(err, users) {
     if (err || !users) {
@@ -37,30 +36,29 @@ User.find({ push_ids: {$exists: true},
                 notif.notification_type = 'push';
                 notif.created_at = new Date();
                 var notifs = new Notification(notif);
-                
+
                 notifs.save(function(err, notif){
                     if(err) {
-                        console.log("notification save failed");    
+                        console.log("notification save failed");
                     }
                     else{
                         console.log("notification save successful");
                         meta.gcms = user.push_ids[user.push_ids.length-1].push_id;
-            
+
                         transporter.send('push', 'gcm', meta).then(function(data) {
-                            
+
                             if(data.success) {
                                 console.log(user.phone);
                             }
-                            
-                            
+
+
                          }, function(err) {
                             console.log(err);
                         });
-                        
+
                     }
                 });
             //}
         });
     }
 });
-

@@ -5,6 +5,7 @@ var Cache = require('../common/cache.hlpr');
 var mongoose = require('mongoose');
 var Event = mongoose.model('Event');
 var Outlet = mongoose.model('Outlet');
+var Optout = require('../models/optout.mdl');
 var LocationHandler = require('./locations.cfg.js');
 var TwystCashHandler = require('./twyst_cash.cfg.js');
 
@@ -28,7 +29,7 @@ function populateOutlets() {
       });
     }
   });
-}
+};
 
 function populateOutletsLocations() {
   Outlet.find({}).lean().exec(function(err, outlets) {
@@ -53,7 +54,7 @@ function populateOutletsLocations() {
       });
     }
   });
-}
+};
 
 function populateLocations() {
   Cache.hset('locations', 'location_map', JSON.stringify(LocationHandler.locations), function(err) {
@@ -61,7 +62,7 @@ function populateLocations() {
       logger.info('Populated cache with locations');
     }
   });
-}
+};
 
 function populateTwystCash() {
   Cache.hset('twyst_cash', 'twyst_cash_grid', JSON.stringify(TwystCashHandler.twyst_cash_grid), function(err) {
@@ -69,7 +70,7 @@ function populateTwystCash() {
       logger.info('Populated cache with twyst_cash');
     }
   });
-}
+};
 
 function populateCheckinMap() {
   Event.aggregate({
@@ -96,7 +97,21 @@ function populateCheckinMap() {
           Cache.hset(user_id, 'checkin_map', JSON.stringify(user_map[user_id]));
       });
   });
-}
+};
+
+function populateOptouts() {
+  Optout.find({}).exec(function(err, optouts) {
+    if (err || optouts.length === 0) {
+      logger.error("Error populating cache");
+    } else {
+      Cache.set('optout_users', JSON.stringify(optouts), function(err){
+        if(!err){
+          logger.info("Opt-out user list loaded.");
+        }
+      });
+    }
+  });
+};
 
 module.exports.populate = function() {
   logger.info('Trying to populate the cache');
@@ -104,5 +119,6 @@ module.exports.populate = function() {
   populateLocations();
   populateTwystCash();
   populateOutletsLocations();
+  populateOptouts();
   // populateCheckinMap();
 };
