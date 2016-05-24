@@ -11,10 +11,10 @@ var _ = require('underscore');
 mongoose.connect('mongodb://54.189.82.86:27017/retwyst');
 
 var meta = {};
-meta.head = "Red Hot Rs 150 Cashback";
-meta.body = "Use Code FLAT150 and Earn  Rs 150 Cashback on your 1st order (Min Rs 300) Get Extra 10% Cashback when you Pay by Mobikwik Wallet Order Now !";
-meta.image = "https://s3-us-west-2.amazonaws.com/retwyst-app/22.jpg";
-
+meta.head = "Get Rs 150 Cashback";
+meta.body = "Use Code FLAT150 to get Rs 150 cashback on your first order (Min Rs 300) Get Extra 10% Mobikwik Cashback";
+meta.image = "https://s3-us-west-2.amazonaws.com/retwyst-app/push_notifications/57443a0dd1df2240122efb4c/push_notif";
+// 7838565321
 User.find({push_ids: {$exists: true},
   $where: 'this.push_ids.length > 0'
 }).exec(function(err, users) {
@@ -40,8 +40,7 @@ User.find({push_ids: {$exists: true},
                 notifs.save(function(err, notif){
                     if(err) {
                         console.log("notification save failed");
-                    }
-                    else{
+                    } else{
                         console.log("notification save successful");
                         meta.gcms = user.push_ids[user.push_ids.length-1].push_id;
 
@@ -50,8 +49,6 @@ User.find({push_ids: {$exists: true},
                             if(data.success) {
                                 console.log(user.phone);
                             }
-
-
                          }, function(err) {
                             console.log(err);
                         });
