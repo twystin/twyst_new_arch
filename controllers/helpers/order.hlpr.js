@@ -2000,7 +2000,8 @@ function process_orders(orders, deferred, check) {
         updated_order.address = order.outlet.contact.location.address;
         updated_order.locality_1 = order.outlet.contact.location.locality_1[0];
         updated_order.locality_2 = order.outlet.contact.location.locality_2[0];
-        updated_order.phone = order.outlet.contact.phones.mobile[0] && order.outlet.contact.phones.mobile[0].num;  
+        updated_order.phone = order.outlet.contact.phones.mobile[0] && order.outlet.contact.phones.mobile[0].num;
+        updated_order.phones = order.outlet.contact.phones.mobile;   
         updated_order.lat = order.outlet.contact.location.coords.latitude || null;
         updated_order.long = order.outlet.contact.location.coords.longitude || null;
         updated_order.delivery_zone = order.outlet.attributes.delivery.delivery_zone;
