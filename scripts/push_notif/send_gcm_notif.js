@@ -11,9 +11,9 @@ var _ = require('underscore');
 mongoose.connect('mongodb://54.189.82.86:27017/retwyst');
 
 var meta = {};
-meta.head = "Eat and Redeem";
-meta.body = "Earn up to 30% Cashback on Every Order and Redeem it to Shop Online. Get Extra 10 % Cashback when you pay through Mobikwik.Order Now !";
-meta.image = "https://s3-us-west-2.amazonaws.com/retwyst-app/Notification_150516_12PM.jpg";
+meta.head = "Red Hot Rs 150 Cashback";
+meta.body = "Use Code FLAT150 and Earn  Rs 150 Cashback on your 1st order (Min Rs 300) Get Extra 10% Cashback when you Pay by Mobikwik Wallet Order Now !";
+meta.image = "https://s3-us-west-2.amazonaws.com/retwyst-app/22.jpg";
 
 User.find({push_ids: {$exists: true},
   $where: 'this.push_ids.length > 0'
@@ -22,7 +22,7 @@ User.find({push_ids: {$exists: true},
         console.log('in err');
     } else {
         _.each(users, function(user){
-            //if(user.orders.length > 0) {
+            if(user.orders.length === 0) {
                 var notif = {};
                 notif.message  = meta.head;
                 notif.detail  = meta.body;
@@ -58,7 +58,7 @@ User.find({push_ids: {$exists: true},
 
                     }
                 });
-            //}
+            }
         });
     }
 });

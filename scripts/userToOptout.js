@@ -33,14 +33,14 @@ var formatObject = function(user){
   temp.phone = user.phone;
   if(user.blacklisted === true) {
     temp.blacklisted.is_blacklisted = true;
-    temp.blacklisted.reason = user.blacklisted.reason;
+    temp.blacklisted.reason = user.blacklisted.reason || "";
   } else if(typeof user.blacklisted.is_blacklisted !== undefined && user.blacklisted.is_blacklisted){
     temp.blacklisted.is_blacklisted = true;
     temp.blacklisted.when = user.blacklisted.when;
-    temp.blacklisted.reason = user.blacklisted.reason;
+    temp.blacklisted.reason = user.blacklisted.reason || "";
   } else if(typeof user.blacklisted.is_blacklisted === "undefined" || user.blacklisted.is_blacklisted === null) {
     temp.blacklisted.is_blacklisted = false;
-    temp.blacklisted.reason = '';
+    temp.blacklisted.reason = "";
   }
   if(typeof user.messaging_preferences.block_all.sms.promo !== "undefined" || user.messaging_preferences.block_all.sms.promo !== null) {
     temp.messaging_preferences.block_all.sms.promo = user.messaging_preferences.block_all.sms.promo;
@@ -64,6 +64,7 @@ var formatObject = function(user){
 }
 var usersArr = User.find({
   $or:[
+        {"blacklisted":true},
         {"blacklisted.is_blacklisted": true},
         {"messaging_preferences.block_all.sms.promo": true},
         {"messaging_preferences.block_all.sms.trans": true},

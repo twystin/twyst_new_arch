@@ -204,6 +204,11 @@ module.exports = function(app) {
     app.post('/api/v4/bulk_sms', BulkSMSCtrl.send);
   })();
 
+  (function NotificationRoutes() {
+    var NotificationCtrl = require('../controllers/notif_sender.ctrl');
+    app.post('/api/v4/notification', NotificationCtrl.send);
+  })();
+
   (function UserRoutes() {
     var UserCtrl = require('../controllers/user.ctrl');
     app.get('/api/v4/profile', UserCtrl.get_profile);
