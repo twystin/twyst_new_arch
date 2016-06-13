@@ -110,7 +110,7 @@ module.exports.sendNotification = function(token, notif) {
                                    message: "Notification couldn't be sent"
                                  });
                               });
-                              console.l og(notif);
+                              console.log(notif);
                               deferred.resolve({
                                 err: err || false,
                                 message: "Notification sent and saved"
