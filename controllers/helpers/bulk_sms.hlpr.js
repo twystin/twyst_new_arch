@@ -1,33 +1,41 @@
 var Q = require('q');
 var AuthHelper = require('../../common/auth.hlpr');
+var Cache = require('../../common/cache.hlpr');
 var transporter = require('../../transports/transporter');
 var User = require('../../models/user.mdl');
 
 var checkBlacklisted = function(number) {
   var deferred = Q.defer();
-  User.findOne({phone: number}, function(err, user){
-    if(err || !user) {
-      console.log(err);
-      deferred.reject({
-        err: err
+
+  Cache.get('optout_users', function(err, users) {
+    if (err || !users) {
+      console.log();
+      deferred.reject('Could not get users who\'ve opted out');
+    } else {
+      var users = JSON.parse(users);
+      users.forEach(function(user){
+        if(user.phone === number) {
+          if(user.blacklisted.is_blacklisted) {
+            deferred.reject({
+              send: false,
+              reason: "This user is blacklisted."
+            });
+          } else if(user.messaging_preferences.block_all.sms.promo) {
+            deferred.reject({
+              send: true,
+              reason: "This user has opted out smses."
+            });
+          }
+        }
       });
-    } else if (
-        user.blacklisted.is_blacklisted === true ||
-        user.messaging_preferences.block_all.sms.promo === true ||
-        user.messaging_preferences.block_all.sms.trans === true
-      ) {
-        deferred.reject({
-          send: false
-        });
-      } else {
-        deferred.resolve({
-          send: true,
-        });
-      }
+      deferred.resolve({
+        send: true
+      });
+    }
   });
+
   return deferred.promise;
 };
-
 
 module.exports.sendMessage = function(token, messageObj) {
     var deferred = Q.defer();
@@ -39,6 +47,7 @@ module.exports.sendMessage = function(token, messageObj) {
       message:messageObj.body || null,
       phone: messageObj.phone_number || null
     };
+    console.log("message: ", payload.message);
     AuthHelper.get_user(token).then(function(data) {
         checkBlacklisted(messageObj.phone_number).then(function(data) {
             transporter.send('sms', 'vf', payload)

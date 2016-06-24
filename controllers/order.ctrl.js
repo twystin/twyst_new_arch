@@ -114,11 +114,12 @@ module.exports.checkout = function(req, res) {
 		HttpHelper.error(res, null, "could not process without address");	
 	}
 	else{
-		OrderHelper.checkout(token, order).then(function(data) {
-			HttpHelper.success(res, data, data.message);
-		}, function(err) {
-			HttpHelper.error(res, err.err || null, err.message);
-		});	
+		HttpHelper.error(res, err.err || null, "Sorry w//e are not accepting order at this time.");
+		//OrderHelper.checkout(token, order).then(function(data) {
+			//HttpHelper.success(res, data, data.message);
+		//}, function(err) {
+			//HttpHelper.error(res, err.err || null, err.message);
+		//});	
 	}
 	
 }

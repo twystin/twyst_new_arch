@@ -49,14 +49,14 @@ module.exports.get_all_outlets = function(token) {
             message: 'Couldn\'t get outlet list'
           });
         } else {
-          
+
           var outlet_ids = _.map(data.data.outlets, function(outlet_id) {
             return outlet_id.toString();
           })
           var outlets = _.filter(JSON.parse(reply), function(outlet) {
             return outlet_ids.indexOf(outlet._id.toString()) !== -1;
           });
-          
+
           deferred.resolve({
             data: outlets,
             message: 'Got your outlets'
@@ -72,7 +72,7 @@ module.exports.get_all_outlets = function(token) {
           });
         } else {
           var outlets = _.map(JSON.parse(reply), function(obj) {
-            return obj; 
+            return obj;
           });;
           deferred.resolve({
             data: outlets,
@@ -180,7 +180,7 @@ module.exports.create_outlet = function(token, created_outlet) {
   AuthHelper.get_user(token).then(function(data) {
     outlet = new Outlet(created_outlet);
     outlet.basics.is_paying = data.data.is_paying;
-    
+
     outlet.save(function(err, o) {
       if (err || !o) {
         deferred.reject({
@@ -198,7 +198,7 @@ module.exports.create_outlet = function(token, created_outlet) {
                   if(err) {
                     logger.error("Error setting updated list of outlets", err);
                   }
-                });  
+                });
           } else {
             var outlets = JSON.parse(reply);
             outlets[outlet._id.toString()] = outlet;
@@ -220,7 +220,7 @@ module.exports.create_outlet = function(token, created_outlet) {
             });
           } else {
             user.outlets.push(outlet._id);
-            
+
             user.save(function(err, u) {
               if (err || !u) {
                 deferred.reject({
@@ -398,9 +398,9 @@ module.exports.get_orders = function(token, outlet_id) {
           err: err || true,
           message: 'Couldn\'t get the orders'
         });
-      } else {  
+      } else {
         orders = _.map(orders, function(order){
-          
+
           var updated_user = {};
           if(order.user.email) {
             updated_user.email = order.user.email;
@@ -416,7 +416,7 @@ module.exports.get_orders = function(token, outlet_id) {
           updated_user.middle_name = order.user.middle_name;
           updated_user.last_name = order.user.last_name;
           updated_user.phone = order.user.phone;
-          updated_user._id = order.user._id; 
+          updated_user._id = order.user._id;
           order.user = updated_user;
           return order;
         });
@@ -503,20 +503,20 @@ module.exports.update_order = function(token, order) {
         }
       }
       else{
-  
+
         deferred.reject({
           err: true,
           message: 'You are not authorized to update this order'
         });
       }
-          
+
     }, function(err) {
       deferred.reject({
         err: err || true,
         message: 'Couldn\'t find the user'
       });
     });
-    
+
     return deferred.promise;
 
 };
@@ -527,7 +527,7 @@ function accept_order(data) {
     Order.findOne({_id: data.order.order_id}).populate('user').exec(function(err, current_order) {
         if (err || !current_order){
             console.log(err);
-        } 
+        }
         else {
             if(current_order.order_status === 'PENDING')  {
                 current_order.order_status = 'ACCEPTED';
@@ -544,14 +544,14 @@ function accept_order(data) {
                         deferred.reject({
                             err: err || true,
                             message: 'Couldn\'t update this order'
-                        });   
+                        });
                     }
                     else{
                         send_notification(['console', data.order.am_email.replace('.', '').replace('@', '')], {
                             message: 'Order accepted by merchant',
                             order_id: data.order.order_id,
                             type: 'accept'
-                        });                        
+                        });
                         var date = new Date();
                         var time = date.getTime();
                         var notif = {};
@@ -559,41 +559,41 @@ function accept_order(data) {
                         notif.message = 'Your order has been accepted by merchant';
                         notif.state = 'ACCEPTED';
                         notif.time = time;
-                        notif.order_id = data.order.order_id; 
-                        send_notification_to_user(current_order.user.push_ids[current_order.user.push_ids.length-1].push_id, notif);  
+                        notif.order_id = data.order.order_id;
+                        send_notification_to_user(current_order.user.push_ids[current_order.user.push_ids.length-1].push_id, notif);
                         deferred.resolve({
                             data: updated_order,
                             message: 'order accepted successfully'
-                        }); 
-                            
-                    } 
-                })    
+                        });
+
+                    }
+                })
             }
             else if(current_order.order_status === 'ACCEPTED'){
                 deferred.resolve({
                     data: current_order,
                     message: 'This order has been accepted already'
                 });
-                    
+
             }
             else if(current_order.order_status === 'CANCELLED'){
                 deferred.resolve({
                     data: current_order,
                     message: 'This order has been cancelled by user'
-                });                
+                });
             }
             else {
                 deferred.resolve({
                     data: current_order,
                     message: 'This order can not be accepted'
-                });                
+                });
             }
 
         }
-        
+
     });
-  
-  return deferred.promise;      
+
+  return deferred.promise;
 }
 
 function deliver_order(data) {
@@ -602,7 +602,7 @@ function deliver_order(data) {
     Order.findOne({_id: data.order.order_id}).populate('user').exec(function(err, current_order) {
         if (err || !current_order){
             console.log(err);
-        } 
+        }
         else {
             if(current_order.order_status === 'NOT_DELIVERED')  {
                 current_order.order_status = 'DELIVERED';
@@ -619,14 +619,14 @@ function deliver_order(data) {
                         deferred.reject({
                             err: err || true,
                             message: 'Couldn\'t update this order'
-                        });   
+                        });
                     }
                     else{
                         send_notification(['console', data.order.am_email.replace('.', '').replace('@', '')], {
                             message: 'Order has been delivered.',
                             order_id: data.order.order_id,
                             type: 'delivered'
-                        });                        
+                        });
                         var date = new Date();
                         var time = date.getTime();
                         var notif = {};
@@ -634,28 +634,28 @@ function deliver_order(data) {
                         notif.message = 'Your order has been delivered';
                         notif.state = 'DELIVERED';
                         notif.time = time;
-                        notif.order_id = data.order.order_id; 
-                        send_notification_to_user(current_order.user.push_ids[current_order.user.push_ids.length-1].push_id, notif);  
+                        notif.order_id = data.order.order_id;
+                        send_notification_to_user(current_order.user.push_ids[current_order.user.push_ids.length-1].push_id, notif);
                         deferred.resolve({
                             data: updated_order,
                             message: 'order delivered successfully'
-                        }); 
-                            
-                    } 
-                })    
+                        });
+
+                    }
+                })
             }
             else {
                 deferred.resolve({
                     data: current_order,
                     message: 'This order can not be updated'
-                });                
+                });
             }
 
         }
-        
+
     });
-  
-  return deferred.promise;      
+
+  return deferred.promise;
 }
 
 function abandon_order(data) {
@@ -664,7 +664,7 @@ function abandon_order(data) {
     Order.findOne({_id: data.order.order_id}).populate('user').exec(function(err, current_order) {
         if (err || !current_order){
             console.log(err);
-        } 
+        }
         else {
             if(current_order.order_status === 'NOT_DELIVERED')  {
                 current_order.order_status = 'ABANDONED';
@@ -681,14 +681,14 @@ function abandon_order(data) {
                         deferred.reject({
                             err: err || true,
                             message: 'Couldn\'t update this order'
-                        });   
+                        });
                     }
                     else{
                         send_notification(['console', data.order.am_email.replace('.', '').replace('@', '')], {
                             message: 'Order has been abandoned.',
                             order_id: data.order.order_id,
                             type: 'abandoned'
-                        });                        
+                        });
                         var date = new Date();
                         var time = date.getTime();
                         var notif = {};
@@ -696,28 +696,28 @@ function abandon_order(data) {
                         notif.message = 'Your order has been abandoned';
                         notif.state = 'ABANDONED';
                         notif.time = time;
-                        notif.order_id = data.order.order_id; 
-                        send_notification_to_user(current_order.user.push_ids[current_order.user.push_ids.length-1].push_id, notif);  
+                        notif.order_id = data.order.order_id;
+                        send_notification_to_user(current_order.user.push_ids[current_order.user.push_ids.length-1].push_id, notif);
                         deferred.resolve({
                             data: updated_order,
                             message: 'order abandoned by user'
-                        }); 
-                            
-                    } 
-                })    
+                        });
+
+                    }
+                })
             }
             else {
                 deferred.resolve({
                     data: current_order,
                     message: 'This order can not be updated'
-                });                
+                });
             }
 
         }
-        
+
     });
-  
-  return deferred.promise;      
+
+  return deferred.promise;
 }
 
 function reject_order(data) {
@@ -727,7 +727,7 @@ function reject_order(data) {
     Order.findOne({_id: data.order.order_id}).populate('user').exec(function(err, current_order) {
         if (err || !current_order){
             console.log(err);
-        } 
+        }
         else {
             if(current_order.order_status === 'PENDING')  {
                 current_order.order_status = 'REJECTED';
@@ -738,20 +738,53 @@ function reject_order(data) {
 
                 current_order.actions.push(current_action);
                 console.log(current_order.actions);
+
+                User.findOne({_id: current_order.user}, function(err, user) {
+                    if (err || !user) {
+                      deferred.reject({
+                        err: err || true,
+                        message: 'Couldn\'t find this order'
+                      });
+                    }
+                    var order_index = _.findIndex(user.orders, function(order_obj) { return order_obj.order_id.toString()===order._id.toString(); });
+
+                    if(order_index!==-1) {
+                        user.orders.splice(order_index, 1);
+                    }
+
+                    if(order.coupon_used) {
+                        var coupon_index = _.findIndex(user.coupons, function(coupon_obj) { return coupon_obj._id.toString()===coupon_used.toString(); });
+
+                        if(coupon_index!==-1) {
+                            user.orders.splice(coupon_index, 1);
+                        }
+                    }
+
+                    user.save(function(err, user){
+                        if(err || !user){
+                            deferred.reject('Couldn\'t update user cashback');
+                        }
+                        else{
+                            deferred.resolve(order);
+                        }
+                    });
+                });
+
+
                 current_order.save(function(err, updated_order){
                     if(err || !updated_order){
                         console.log(err)
                         deferred.reject({
                             err: err || true,
                             message: 'Couldn\'t update this order'
-                        });   
+                        });
                     }
                     else{
                         send_notification(['console', data.order.am_email.replace('.', '').replace('@', '')], {
                             message: 'Order has been rejected by merchant.',
                             order_id: data.order.order_id,
                             type: 'reject'
-                        });                        
+                        });
                         var date = new Date();
                         var time = date.getTime();
                         var notif = {};
@@ -759,7 +792,7 @@ function reject_order(data) {
                         notif.message = 'Your order has been rejected by merchant';
                         notif.state = 'REJECTED';
                         notif.time = time;
-                        notif.order_id = data.order.order_id; 
+                        notif.order_id = data.order.order_id;
                         send_notification_to_user(current_order.user.push_ids[current_order.user.push_ids.length-1].push_id, notif);
 
                         if(current_order.offer_used) {
@@ -771,17 +804,17 @@ function reject_order(data) {
                                     deferred.reject({
                                         err: err || true,
                                         message: 'Couldn\'t update this order'
-                                    });     
+                                    });
                                 }
                                 else{
                                     var event = {};
                                     event.event_meta = {};
                                     event.event_meta.order_number = current_order.order_number;
-                                    event.event_meta.twyst_cash = current_order.offer_cost;                        
+                                    event.event_meta.twyst_cash = current_order.offer_cost;
                                     event.event_meta.offer = current_order.offer_used;
                                     event.event_user = current_order.user._id;
                                     event.event_type = 'reject_order';
-                                    
+
                                     event.event_outlet = current_order.outlet;
                                     event.event_date = new Date();
                                     var created_event = new Event(event);
@@ -790,15 +823,15 @@ function reject_order(data) {
                                             deferred.reject({
                                                 err: err || true,
                                                 message: 'Couldn\'t update this order'
-                                            }); 
+                                            });
                                         } else {
                                             deferred.resolve({
                                                 data: updated_order,
                                                 message: 'order rejected successfully'
-                                            }); 
+                                            });
                                         }
                                     });
-                                      
+
 
                                 }
                             })
@@ -807,10 +840,10 @@ function reject_order(data) {
                             deferred.resolve({
                                 data: updated_order,
                                 message: 'order rejected successfully'
-                            });    
+                            });
                         }
-                    } 
-                })    
+                    }
+                })
             }
             else if(current_order.order_status === 'REJECTED'){
                 deferred.resolve({
@@ -824,13 +857,13 @@ function reject_order(data) {
                     data: current_order,
                     message: 'This order has been cancelled by user'
                 });
-                   
+
             }
-               
+
         }
-        
-    });       
-    return deferred.promise;  
+
+    });
+    return deferred.promise;
 }
 
 function dispatch_order(data) {
@@ -853,7 +886,7 @@ function dispatch_order(data) {
                 notif.state = 'DISPATCHED';
                 notif.time = time;
                 notif.order_id = data.order.order_id;
-                
+
                 send_notification_to_user(order.user.push_ids[order.user.push_ids.length-1].push_id, notif);
             }
 
@@ -869,32 +902,32 @@ function dispatch_order(data) {
                     deferred.reject({
                         err: err || true,
                         message: 'Couldn\'t update this order'
-                    });   
+                    });
                 }
                 else{
                     send_notification(['console', data.order.am_email.replace('.', '').replace('@', '')], {
                       message: 'Order dispatched by merchant',
                       order_id: data.order.order_id,
                       type: 'dispatch'
-                    });            
+                    });
 
                     deferred.resolve({
                       data: updated_order,
                       message: 'order dispatched successfully'
-                    });   
-                } 
-            })               
+                    });
+                }
+            })
         }
     });
 
-    return deferred.promise;      
+    return deferred.promise;
 }
 
 function send_notification(paths, payload) {
   logger.log();
   _.each(paths, function(path) {
     Transporter.send('faye', 'faye', {
-      path: path, 
+      path: path,
       message: payload
     });
   })
@@ -902,17 +935,17 @@ function send_notification(paths, payload) {
 
 function send_notification_to_user (gcm_id, notif) {
 
-  var payload = {};   
+  var payload = {};
 
   payload.head = notif.header;
-  payload.body = notif.message;  
+  payload.body = notif.message;
   payload.state = notif.state;
   payload.time = notif.time;
   payload.gcms = gcm_id;
   payload.order_id = notif.order_id;
 
   Transporter.send('push', 'gcm', payload);
-    
+
 }
 
 function send_order_reject_sms(user, order_id) {
@@ -922,5 +955,5 @@ function send_order_reject_sms(user, order_id) {
     payload.phone = user.phone;
     payload.message = 'You order order_number('+order_id+')' +'has been rejected by merchant.'
     Transporter.send('sms', 'vf', payload);
-    
+
 }
